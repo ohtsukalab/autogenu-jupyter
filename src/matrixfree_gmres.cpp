@@ -1,49 +1,32 @@
-#include <Eigen3/Core>
 #include <iostream>
+#include <eigen3/Eigen/Core>
+#include "matrixfree_gmres.h"
 
 
-class matrixfree_gmres {
-private:
-    void (*Func)(), (*DhFunc)();
-    int dim, kmax;
-    double r_tol;
-    Eigen::MatrixXd h, v;
-    Eigen::VectorXd errvec;
-public:
-    matrixfree_gmres(const void (*F)(), const void (*DhF)(), const int dimf, const int k_max, const double rtol){
-        (*Func)() = F;
-        (*DhFunc)() = DhF;
-        dim = dimf;
-        kmax = k_max;
-        r_tol = rtol;
-        h.resize(kmax+1,kmax+1);
-        v.resize(kmax+1,dim);
-        errvec.resize(kmax+1);
-    };
-    ~matrixfree_gmres();
-    void fdgmres(Eigen::VectorXd &b, Eigen::MatrixXd &x, Eigen::VectorXd &err);
-};
+void matrixfree_gmres::matrixfree_gmres(const int dimx, const int k_max)
+{
+    n = dimx;
+    kmax = k_max;
+    h.resize(kmax+1,kmax+1);
+    v.resize(kmax+1,n);
+    errvec.resize(kmax+1);
+}
 
-
-// s: solution
-// x: current s x
-// dhfunc: function for newton
-// eta: convergence radius
-// rho: error vector
-void matrixfree_gmres::fdgmres(Eigen::VectorXd &s, const Eigen::MatrixXd &x)
+void matrixfree_gmres::fdgmres(Eigen::VectorXd& s, const Eigen::MatrixXd& x)
 {
     int i, j, k;
     double beta, rho, nu, w1, w2;
-    Eigen::VectorXd r(dim), cvec(kmax+1), svec(kmax+1), gvec(kmax+1);
+    Eigen::VectorXd r(n), cvec(kmax+1), svec(kmax+1), gvec(kmax+1);
 
     s = 0;
     Func(x, r);
     v.col(0) = r / r.norm();
     rho = r.norm();
     beta = rho;
+
     for(k=0; k<kmax; k++){
         // Modified Gram-Schmidt
-        DhFunc(x, v.col(k+1));
+        DhFunc(x, v.col(k+1), v.col(k+1));
         for(j=0; j<k; j++){
             h(j,k) = v.col(k+1) * v.col(j);
             v.col(k+1) = v.col(k+1) - h(j,k) * v.col(j);
@@ -85,4 +68,3 @@ void matrixfree_gmres::fdgmres(Eigen::VectorXd &s, const Eigen::MatrixXd &x)
     }
     s = v * cvec;
 }
-

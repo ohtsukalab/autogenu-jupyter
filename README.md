@@ -1,7 +1,5 @@
 Continuation/GMRES method in C++
 
-# はじめに
-本プロジェクトはC/GMRES法をより使いやすく読み易くするためにC++で書き換えようというプロジェクトです．C/GMRES法以外にもNewton-GMRES法，Multipleshootingといったソルバーに対応したいと考えています．
+# INTRODUCTION
+This project provides the implementation of the continuation/GMRES(C/GMRES) method, a fase computation algorithm of NMPC proposed by T. Ohtsuka, in C++.
 
-# 環境
-C++の線形代数ライブラリEigen3が必要になるのでなんらかの方法でインストールしてください．
