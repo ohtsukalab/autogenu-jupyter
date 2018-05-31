@@ -1,5 +1,13 @@
-#include <eigen3/Eigen/Core>
+/*
+ *   This suppoerts a solver for matrixfree gmres method
+ *   This program is witten with reference to "C. T. Kelly, Iterative methods for linear and nonlinear"
+ */
 
+#ifndef NEWTON_GMRES_H
+#define NEWTON_GMRES_H
+
+#include <eigen3/Eigen/Core>
+#include "matrixfree_gmres.h"
 
 class newton_gmres : public matrixfree_gmres {
 private:
@@ -18,3 +26,6 @@ public:
     virtual void hxfunc(const double t, const Eigen::VectorXd& x, const Eigen::VectorXd& u, const Eigen::VectorXd& lmd, Eigen::VectorXd& lmd1) = 0;
     virtual void hufunc(const double t, const Eigen::VectorXd& x, const Eigen::VectorXd& u, const Eigen::VectorXd& lmd, Eigen::VectorXd& hu1) = 0;
 };
+
+
+#endif

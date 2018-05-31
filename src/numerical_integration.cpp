@@ -1,8 +1,6 @@
 #include <eigen3/Eigen/Core>
 
 
-
-
 class numerical_integration{
 private:
     int dimx;

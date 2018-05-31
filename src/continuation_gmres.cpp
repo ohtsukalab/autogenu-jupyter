@@ -1,6 +1,6 @@
-#include <iostream>
 #include <eigen3/Eigen/Core>
-
+#include "matrixfree_gmres"
+#include "continuation_gmres.h"
 
 class continuation_gmres : public matrixfree_gmres{
 private:

@@ -1,4 +1,5 @@
 #include <eigen3/Eigen/Core>
+#include "matrixfree_gmres"
 #include "newton_gmres.h"
 
 

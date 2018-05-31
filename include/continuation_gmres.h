@@ -1,3 +1,6 @@
+#include <eigen3/Eigen/Core>
+#include "matrixfree_gmres"
+
 class continuation_gmres : public matrixfree_gmres{
 private:
     int dimx, dimu, dv, dimeq, i_max;
