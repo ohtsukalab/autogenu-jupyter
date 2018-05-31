@@ -12,21 +12,21 @@ void matrixfree_gmres::matrixfree_gmres(const int dimx, const int k_max)
     errvec.resize(kmax+1);
 }
 
-void matrixfree_gmres::fdgmres(Eigen::VectorXd& s, const Eigen::MatrixXd& x)
+void matrixfree_gmres::fdgmres(const double t, const Eigen::VectorXd& x0, const Eigen::MatrixXd& x, Eigen::VectorXd& s)
 {
     int i, j, k;
     double beta, rho, nu, w1, w2;
     Eigen::VectorXd r(n), cvec(kmax+1), svec(kmax+1), gvec(kmax+1);
 
     s = 0;
-    Func(x, r);
+    Func(t, x0, x, r);
     v.col(0) = r / r.norm();
     rho = r.norm();
     beta = rho;
 
     for(k=0; k<kmax; k++){
         // Modified Gram-Schmidt
-        DhFunc(x, v.col(k+1), v.col(k+1));
+        DhFunc(t, x0, v.col(k+1), v.col(k+1));
         for(j=0; j<k; j++){
             h(j,k) = v.col(k+1) * v.col(j);
             v.col(k+1) = v.col(k+1) - h(j,k) * v.col(j);
