@@ -1,5 +1,13 @@
+/*
+ *   This suppoerts a solver for continuation/GMRES(C/GMRES) method for nonlinear model predictive control
+ *   This program is witten with reference to "T. Ohtsuka, "
+ */
+
+#ifndef CONTINUATION_GMRES_H
+#define CONTINUATION_GMRES_H
+
 #include <eigen3/Eigen/Core>
-#include "matrixfree_gmres"
+#include "matrixfree_gmres.h"
 
 class continuation_gmres : public matrixfree_gmres{
 private:
@@ -18,3 +26,5 @@ public:
     virtual void hxfunc(const double t, const Eigen::VectorXd& x, const Eigen::VectorXd& u, const Eigen::VectorXd& lmd, Eigen::VectorXd& lmd1) = 0;
     virtual void hufunc(const double t, const Eigen::VectorXd& x, const Eigen::VectorXd& u, const Eigen::VectorXd& lmd, Eigen::VectorXd& hu1) = 0;
 };
+
+#endif

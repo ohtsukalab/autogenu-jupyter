@@ -1,5 +1,5 @@
 /*
- *   This suppoerts a solver for matrixfree gmres method
+ *   This suppoerts a solver for Newton's method for nonlinear model predictive control
  *   This program is witten with reference to "C. T. Kelly, Iterative methods for linear and nonlinear"
  */
 
