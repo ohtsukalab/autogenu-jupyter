@@ -18,7 +18,8 @@ private:
 public:
     continuation_gmres(const int dim_x, const int dim_u, const int division_num, const double h_dir, const double rho, const int k_max, const double T_f, const double alpha, const double zeta) : matrixfree_gmres(dim_u * (division_num-1), k_max);
     ~continuation_gmres();
-    void c_gmres(const double t, const Eigen::VectorXd& x, Eigen::VectorXd& s);
+    void init(const double t, )
+    void solver(const double t, const Eigen::VectorXd& x, Eigen::VectorXd& s);
     void Hufunc(const double t, const Eigen::VectorXd& x0, const Eigen::VectorXd& u, Eigen::VectorXd& hu);
     void Func(const double t, const Eigen::VectorXd& x0, const Eigen::VectorXd& u, Eigen::VectorXd& s);
     void DhFunc(const double t, const Eigen::VectorXd& x0, const Eigen::VectorXd& u, const Eigen::VectorXd& v, Eigen::VectorXd& s);

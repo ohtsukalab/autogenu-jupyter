@@ -2,14 +2,15 @@
 #include "newton_gmres.h"
 
 
-newton_gmres::newton_gmres(const int dim_x, const int dim_u, const int division_num, const double h_dir, const int newtonitr_max, const double rho, const int k_max, const double T) : matrixfree_gmres(dim_u * (division_num-1), k_max)
+newton_gmres::newton_gmres(const nmpc_model m, const int division_num, const double h_dir, const int newtonitr_max, const double rho, const int k_max, const double T)
 {
-    dimx = dim_x;
-    dimu = dim_u;
+    dimx = m.dimx;
+    dimu = m.dimu;
     dv = division_num;
     hdir = h_dir;
     dimeq = dimu * (dv-1);
     dtau = T / division_num;
+    model = m;
 
     u.resize(dimeq);
     u1.resize(dimeq);    
@@ -28,13 +29,12 @@ newton_gmres::newton_gmres(const int dim_x, const int dim_u, const int division_
 }
 
 
-void newton_gmers::nsolgm(const double t, const Eigen::VectorXd& x, Eigen::VectorXd& s)
+void newton_gmers::solver(const double t, const Eigen::VectorXd& x, Eigen::VectorXd& s)
 {
-    double t;
     for(i=0; i<i_max; i++){
         fdgmres(t, x0, du, u);
         u += du;
-        if(errvec.norm() < rho)
+        if(err.norm() < rho)
             break;
     }
     s = u.segment(i*dimu, dimu);
@@ -49,15 +49,15 @@ void newton_gmres::Hufunc(const double t, const Eigen::VectorXd& x0, const Eigen
     x.col(0) = x0;
 
     for(i=0, tau=t; i<dv; i++){
-        statefunc(tau, x.col(i), u.segment(i*dimu, dimu), tmp);
+        model.statefunc(tau, x.col(i), u.segment(i*dimu, dimu), tmp);
         x.col(i+1) = x.col(i) + dtau * x.col(i+1);
         tau += dtau;
     }
-    phix(tau, x, lmd.col(dv));
+    model.phix(tau, x, lmd.col(dv));
     for(; i>0; i--){
-        hxfunc(tau, x.col(i), u.segment(i*dimu, dimu), lmd.col(i+1), tmp);
+        model.hxfunc(tau, x.col(i), u.segment(i*dimu, dimu), lmd.col(i+1), tmp);
         lmd.col(i) = lmd.col(i+1) + dtau * tmp;
-        hufunc(taut, x.col(i), u.segment(i*dimu, dimu), lmd.col(i+1), hu.segment(i*dimu, dimu));
+        model.hufunc(taut, x.col(i), u.segment(i*dimu, dimu), lmd.col(i+1), hu.segment(i*dimu, dimu));
     }
 }
 

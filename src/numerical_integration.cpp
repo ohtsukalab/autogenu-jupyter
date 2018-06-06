@@ -1,20 +1,15 @@
 #include <eigen3/Eigen/Core>
+#include "numerical_integration.h"
 
 
-class numerical_integration{
-private:
-    int dimx;
-public:
-    numerial_integration((dim_x){
-        dimx = dimx;
-        Eigen::VectorXd a(dim_x), k1(dim_x), k2(dim_x), k3(dim_x), k2(dim_x);
-    };
-    void euler(void (*func()), const double t, const Eigen::VectorXd& x1, const Eigen::VectorXd& x2, const double tau, Eigen::VectorXd &y);
-    void euler(void (*func()), const double t, const Eigen::VectorXd& x1, const Eigen::VectorXd& x2, const Eigen::VectorXd& x3, const double tau, Eigen::VectorXd &y);
-    void runge_kutta(void (*func()), const double t, const Eigen::VectorXd& x1, const Eigen::VectorXd& x2, const double tau, Eigen::VectorXd &y);
-    void adams(void (*func()), const double t, const Eigen::VectorXd& x1, const Eigen::VectorXd& x2, const double tau, Eigen::VectorXd &y);
-};
-
+/* Euler method for numerical integration
+ * func: function of the dynamics, f(t, x1, x2)
+ * t: time
+ * x1:
+ * x2:
+ * tau: integration length
+ * y: integrated solution
+ */
 void numerical_integration::euler(void (*func()), const double t, const Eigen::VectorXd& x1, const Eigen::VectorXd& x2, const double tau, Eigen::VectorXd &y);
 {
     func(t, x1, x2, a);
@@ -43,8 +38,32 @@ void numerical_integration::runge_kutta(void (*func()), const double t, const Ei
     y = (k1 + 2*k2 + 2*k3 + k4)/6;
 }
 
+
 void numerical_integration::adams(void (*func()), const double t, const Eigen::VectorXd& x1, const Eigen::VectorXd& x2, const double tau, Eigen::VectorXd &y)
 {
+    int i;
+    double tstep;
+
+    tstep = tau / 4;
+
+    // Adams-Bashforth Predictor
+    func(t, x1, x2, k1);
+    y1 = y + tstep * k1;
+    func(t+tstep, y1, x2, k2);
+    y2 = y1 + tstep * (3/2 * k2 - 1/2 * k1);
+    func(t+2*tstep, y2, x2, k3);
+    y3 = y2 + tstep * (23/12 * k3 - 4/3 * k2 + 5/12 * k1);
+    func(t+3*tstep, y3, x2, k4);
+    y4 = y3 + tstep * (55/24 * k4 - 59/24 * k3 + 37/24 * k2 - 3/8 * k1);
+    func(t+4*tstep, y4, x2, k5);
+    y5 = y4 + tstep * (1901/720 * k5 - 1387/360 * k4 + 109/30 * k3 - 637/360 * k2 + 251/720 * k1);
+
+    // Adams-Moulton Corrector
+    func(t+4*tstep, y5, x2, k5);
+    y4 = y5 + tstep * k5;
+    func(t+3*tstep, y4, x2, k4);
+
+
     
 }
 

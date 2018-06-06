@@ -1,6 +1,6 @@
 /*
  *   This suppoerts a solver for matrixfree gmres method
- *   This program is witten with reference to "C. T. Kelly, Iterative methods for linear and nonlinear"
+ *   This program is witten with reference to "C. T. Kelly, Iterative methods for linear and nonlinear equations, Frontiers in Apllied Mathematics, SIAM (1995)".
  */
 
 #ifndef MATRIXFREE_GMRES_H
@@ -25,11 +25,12 @@ private:
 
     int n, kmax;
     Eigen::MatrixXd h, v;
-    Eigen::VectorXd errvec;
+    Eigen::VectorXd err;
 public:
-    matrixfree_gmres(const int dimx, const int k_max);
+    matrixfree_gmres(const int dim, const int k_max);
     ~matrixfree_gmres();
     void fdgmres(const double t, const Eigen::VectorXd& x0, const Eigen::MatrixXd& , Eigen::VectorXd& s);
+    void fdgmres(const double t, const Eigen::VectorXd& x0, const Eigen::MatrixXd& x, Eigen::VectorXd& s, const int dim, const int kmax, void (*func()), void void (*dhfunc()));
     virtual void Func(const double t, const Eigen::VectorXd& x0, const Eigen::VectorXd& u, Eigen::VectorXd& s) = 0;
     virtual void DhFunc(const double t, const Eigen::VectorXd& x0, const Eigen::VectorXd& u, const Eigen::VectorXd& v, Eigen::VectorXd& s) = 0;
 };
