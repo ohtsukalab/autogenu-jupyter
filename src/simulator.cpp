@@ -37,7 +37,9 @@ void simulator::simulation(nmpc_solver solver, const Eigen::VectorXd& x0, const 
         start = std::chrono::system_clock::now();
         solver.solvenmpc(t, x, u);
         end = std::chrono::system_clock::now();
-        step_time = std::chrono::duration_cast<std::chrono::seconds>(end-start).count();
+        step_time = std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count();
+        step_time = step_time * 0.001;
+        std::cout << "step time = " << step_time << std::endl;
         total_time += step_time;
         savedata(x_data, u_data, t, x, u);
 
@@ -49,11 +51,10 @@ void simulator::simulation(nmpc_solver solver, const Eigen::VectorXd& x0, const 
     std::cout << "CPU time: " << total_time << " [sec]" << std::endl;
     
     c_data << file_name << "\n";
-    c_data << "simulation time: " << tsim << " [sec]\n";
+    c_data << "simulation time: " << sim_time << " [sec]\n";
     c_data << "CPU time (total): " << total_time << " [sec]\n";
-    c_data << "sampling time: " << ht << " [sec]\n";
+    c_data << "sampling time: " << sample_ht << " [sec]\n";
     c_data << "CPU time (1step): " << total_time/isim << " [sec]\n";
-
 
     x_data.close();
     u_data.close();
