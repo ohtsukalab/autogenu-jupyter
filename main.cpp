@@ -5,14 +5,16 @@
 
 int main()
 {
-    nmpc_solver solver(solverid::newton_gmres_single, 1.0, 50, 5, 1.0e-06, 5);
+    // set solver and parameters
+    nmpc_solver solver(solverid::newton_gmres_single, 0.5, 50, 1.0e-01, 1.0e-04, 5);
     simulator sim;
 
     // initial state
-    Eigen::VectorXd x0(4);
-    x0 << 0.0, 0.0, 0.0, 0.0;
+    Eigen::VectorXd x0(2);
+    x0 << 2.0, 0.0;
 
-    sim.simulation(solver, x0, 1, 0.001, "example_");
+    // run simulation
+    sim.simulation(solver, x0, 10, 0.01, "example_");
 
     return 0;
 }

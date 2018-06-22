@@ -43,10 +43,12 @@ void matrixfree_gmres::fdgmres(const double t, const Eigen::VectorXd& x, const E
         s(i) = 0.0;
     }
     Func(t, x, u, r);
+
     rho = r.norm();
     g(0) = rho;
     err(0) = rho;
-    v.col(0) = r / rho;
+    v.col(0) = - r / rho;
+
 
     for(k=0; k<kmax; k++){
         // Modified Gram-Schmidt
@@ -55,11 +57,16 @@ void matrixfree_gmres::fdgmres(const double t, const Eigen::VectorXd& x, const E
             h(j,k) = v.col(k+1).dot(v.col(j));
             v.col(k+1) -= h(j,k) * v.col(j);
         }
+
         h(k+1,k) = v.col(k+1).norm();
-        if(h(k+1,k) != 0)
+        if(h(k+1,k) != 0){
             v.col(k+1) = v.col(k+1) / h(k+1,k);
-        else
-            std::cout << "arnordi process breaks down" << std::endl;
+        }
+        else {
+            std::cout << "The modified Gram-Schmidt breakdown" << std::endl;
+            break;
+        }
+
 
         // Givens Rotation for the Lieast Squares Problem ||beta * e_1  - H_k * y^k||
         for(j=0; j<k; j++)

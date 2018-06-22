@@ -1,8 +1,6 @@
 #include "simulator.hpp"
 
 
-
-
 void simulator::savedata(std::ofstream& x_data, std::ofstream& u_data, const double t, const Eigen::VectorXd& x, const Eigen::VectorXd& u)
 {
     int i;
@@ -39,7 +37,6 @@ void simulator::simulation(nmpc_solver solver, const Eigen::VectorXd& x0, const 
         end = std::chrono::system_clock::now();
         step_time = std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count();
         step_time = step_time * 0.001;
-        std::cout << "step time = " << step_time << std::endl;
         total_time += step_time;
         savedata(x_data, u_data, t, x, u);
 

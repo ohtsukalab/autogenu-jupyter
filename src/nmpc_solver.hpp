@@ -17,7 +17,7 @@ private:
     solverid solveridx;
 
 public:
-    nmpc_solver(const solverid s, const double length_horizon, const int dvision_num, const int itr_max, const double h_diff, const int k_max);
+    nmpc_solver(const solverid s, const double length_horizon, const int dvision_num, const double conv_radius, const double h_diff, const int k_max);
     solverid getsolver();
 };
 
