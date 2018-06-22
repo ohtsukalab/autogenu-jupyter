@@ -6,7 +6,7 @@
 int main()
 {
     // set solver and parameters
-    nmpc_solver solver(solverid::newton_gmres_single, 0.5, 50, 1.0e-01, 1.0e-04, 5);
+    nmpc_solver solver(solverid::newton_gmres_single, 0.5, 10, 1.0e-01, 1.0e-04, 5);
     simulator sim;
 
     // initial state
