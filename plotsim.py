@@ -36,10 +36,10 @@ def plotsim(argv):
 
 
     ############################ plot data ############################
-    scale = 2.25 ## adjust figsize
+    scale = 1.5 ## adjust figsize
 
     sns.set()
-    sns.set_style("whitegrid")
+    sns.set_style("ticks")
     sns.set_palette("deep") 
     sns.set_context("paper")
     sns.mpl.pyplot.figure(figsize=(plotnox*3*scale,plotnoy*scale*1.1)) #graph size
@@ -47,6 +47,12 @@ def plotsim(argv):
     sns.mpl.pyplot.subplots_adjust(wspace= 0, hspace= 0.5) #space between graphs
     sns.mpl.pyplot.rcParams['lines.linewidth'] = 1.2 #linewidth
     sns.mpl.pyplot.rc('mathtext', **{'rm':'serif', 'it':'serif:itelic', 'bf':'serif:bold', 'fontset':'cm'})
+    sns.mpl.pyplot.rcParams['axes.linewidth'] = 0.5
+    sns.mpl.pyplot.rcParams['xtick.direction'] = 'in'
+    sns.mpl.pyplot.rcParams['ytick.direction'] = 'in'
+    sns.mpl.pyplot.rcParams['pdf.fonttype'] = 42
+    sns.mpl.pyplot.rcParams['ps.fonttype'] = 42
+
 
     for i in range(dimx):
         sns.mpl.pyplot.subplot(plotnoy, plotnox, i+1)
@@ -65,7 +71,7 @@ def plotsim(argv):
             sns.mpl.pyplot.xlim(0,tsim)
 
     else:
-        sns.mpl.pyplot.subplot(plotnoy, plotnox, i+dimx+1)
+        sns.mpl.pyplot.subplot(plotnoy, plotnox, dimx+1)
         sns.mpl.pyplot.plot(ts, us)
         sns.mpl.pyplot.xlabel(r'${\rm Time}$ $[s]$')
         sns.mpl.pyplot.ylabel(r'$u$')
