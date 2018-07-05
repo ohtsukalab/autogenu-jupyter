@@ -11,7 +11,7 @@
 #include "numerical_integrator.hpp"
 #include "nmpc_model.hpp"
 
-class newton_gmres : public matrixfree_gmres{
+class newton_gmres : virtual public matrixfree_gmres{
 private:
 /* --------------------------------------------------
  * n        the dimension of the nonlinear equation

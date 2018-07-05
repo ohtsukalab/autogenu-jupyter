@@ -1,7 +1,7 @@
 #include "newton_gmres.hpp"
 
 
-newton_gmres::newton_gmres(const double length_horizon, const int division_num, const double conv_radius, const double h_diff, const int k_max) : matrixfree_gmres(division_num, k_max)
+newton_gmres::newton_gmres(const double length_horizon, const int division_num, const double conv_radius, const double h_diff, const int k_max) : matrixfree_gmres(k_max)
 {
     tf = length_horizon;
     dv = division_num;
@@ -14,7 +14,6 @@ newton_gmres::newton_gmres(const double length_horizon, const int division_num, 
     rho = conv_radius;
 
     initgmres(dimeq);
-
     xtau.resize(dimx, dv+1);
     lmd.resize(dimx, dv+1);
     tmp.resize(dimx);
@@ -27,8 +26,8 @@ newton_gmres::newton_gmres(const double length_horizon, const int division_num, 
 
     for(int i=0; i<dimeq; i++)
         u(i) = 0.0;
-
 }
+
 
 void newton_gmres::solvenmpc(const double t, const Eigen::VectorXd& x, Eigen::Ref<Eigen::VectorXd> s)
 {
@@ -47,6 +46,7 @@ void newton_gmres::solvenmpc(const double t, const Eigen::VectorXd& x, Eigen::Re
     }
     s = u.segment(0, dimu);
 }
+
 
 void newton_gmres::linesearch(const double t, const Eigen::VectorXd& x, Eigen::Ref<Eigen::VectorXd> u, const Eigen::VectorXd& du)
 {
@@ -92,7 +92,6 @@ void newton_gmres::linesearch(const double t, const Eigen::VectorXd& x, Eigen::R
             alpha2 = alower + r*(aupper-alower);
         }
     }
-
     u = u + 0.5 * (aupper + alower) * du;
 }
 
@@ -116,6 +115,7 @@ double newton_gmres::costsearch(const double t, const Eigen::VectorXd& x, const 
     return cost;
 }
 
+
 double newton_gmres::dcostsearch(const double t, const Eigen::VectorXd& x, const Eigen::VectorXd& u, const Eigen::VectorXd& du, const double alpha)
 {
     int i;
@@ -129,7 +129,6 @@ double newton_gmres::dcostsearch(const double t, const Eigen::VectorXd& x, const
     hu = htau * hu;
     return hu.dot(du);
 }
-
 
 
 void newton_gmres::Func(const double t, const Eigen::VectorXd& x, const Eigen::VectorXd& u, Eigen::Ref<Eigen::VectorXd> hu)

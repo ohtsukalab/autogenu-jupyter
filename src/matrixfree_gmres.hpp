@@ -29,10 +29,13 @@ private:
     Eigen::MatrixXd h, v;
     Eigen::VectorXd err, r, c, s, g, y;
 public:
-    matrixfree_gmres(const int division_num, const int k_max);
+    matrixfree_gmres(const int k_max);
+    matrixfree_gmres();
     void initgmres(const int dim);
     void givappj(const int j, Eigen::Ref<Eigen::VectorXd> v);
-    void fdgmres(const double t, const Eigen::VectorXd& x, const Eigen::VectorXd& u, Eigen::Ref<Eigen::VectorXd> u1);
+    void givappj(const int j, Eigen::Ref<Eigen::VectorXd> c, Eigen::Ref<Eigen::VectorXd> s, Eigen::Ref<Eigen::VectorXd> v);
+    void fdgmres(const double t, const Eigen::VectorXd& x, const Eigen::VectorXd& u, Eigen::Ref<Eigen::VectorXd> du);
+    double geterr();
     virtual void Func(const double t, const Eigen::VectorXd& x, const Eigen::VectorXd& u, Eigen::Ref<Eigen::VectorXd> hu) = 0;
     virtual void DhFunc(const double t, const Eigen::VectorXd& x, const Eigen::VectorXd& u, const Eigen::VectorXd& du, Eigen::Ref<Eigen::VectorXd> dhu) = 0;
 };

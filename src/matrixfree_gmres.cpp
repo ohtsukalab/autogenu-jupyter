@@ -1,7 +1,7 @@
 #include "matrixfree_gmres.hpp"
 
 
-matrixfree_gmres::matrixfree_gmres(const int division_num, const int k_max)
+matrixfree_gmres::matrixfree_gmres(const int k_max)
 {
     kmax = k_max;
 }
@@ -13,10 +13,13 @@ void matrixfree_gmres::initgmres(const int dim)
     v.resize(n, kmax+1);
     err.resize(kmax+1);
     r.resize(n);
-    c.resize(kmax);
-    s.resize(kmax);
-    y.resize(kmax);
+    c.resize(kmax+1);
+    s.resize(kmax+1);
+    y.resize(kmax+1);
     g.resize(kmax+1);
+
+    for(int i=0; i<kmax+1; i++)
+        err(i) = 0;
 }
 
 
@@ -31,13 +34,28 @@ void matrixfree_gmres::givappj(const int j, Eigen::Ref<Eigen::VectorXd> v)
     v(j+1) = tmp2;
 }
 
+void matrixfree_gmres::givappj(const int j, Eigen::Ref<Eigen::VectorXd> c, Eigen::Ref<Eigen::VectorXd> s, Eigen::Ref<Eigen::VectorXd> v)
+{
+    double tmp1, tmp2;
 
-void matrixfree_gmres::fdgmres(const double t, const Eigen::VectorXd& x, const Eigen::VectorXd& u, Eigen::Ref<Eigen::VectorXd> u1)
+    tmp1 = c(j) * v(j) - s(j) * v(j+1);
+    tmp2 = s(j) * v(j) + c(j) * v(j+1);
+
+    v(j) = tmp1;
+    v(j+1) = tmp2;
+}
+
+double matrixfree_gmres::geterr()
+{
+    return err.norm();
+}
+
+void matrixfree_gmres::fdgmres(const double t, const Eigen::VectorXd& x, const Eigen::VectorXd& u, Eigen::Ref<Eigen::VectorXd> du)
 {
     int i, j, k;
     double rho, nu;
     
-    for(i=0; i<kmax; i++){
+    for(i=0; i<kmax+1; i++){
         g(i) = 0.0;
         c(i) = 0.0;
         s(i) = 0.0;
@@ -47,8 +65,7 @@ void matrixfree_gmres::fdgmres(const double t, const Eigen::VectorXd& x, const E
     rho = r.norm();
     g(0) = rho;
     err(0) = rho;
-    v.col(0) = - r / rho;
-
+    v.col(0) = r / rho;
 
     for(k=0; k<kmax; k++){
         // Modified Gram-Schmidt
@@ -83,23 +100,25 @@ void matrixfree_gmres::fdgmres(const double t, const Eigen::VectorXd& x, const E
         else
             std::cout << "error : h(k,k) = h(k+1,k) = 0" << std::endl;
 
+//        std::cout << "\n g(k+1) = " << g(k+1) << std::endl;
         rho = std::fabs(g(k+1));
+//        std::cout << "rho = " << rho << std::endl;
         err(k+1) = rho;
     }
 
     // solve H_k * y^k = g
-    for(i=kmax-1; i>=0; i--) {
+    for(i=k-1; i>=0; i--){
         nu = g(i);
-        for(j=i+1; j<kmax; j++){
-            nu -= h(i,j) * y(j);
+        for(j=i+1; j<k; j++){
+            nu -= h(i,j) * c(j);
         }
-        y(i) = nu / h(i,i);
+        c(i) = nu / h(i,i);
     }
-
     for(i=0; i<n; i++){
-        u1(i) = 0;
-        for(j=0; j<kmax; j++){
-            u1(i) += v(i,j) * y(j);
+        nu=0;
+        for(j=0; j<k; j++){
+            nu += v(i,j) * c(j);
         }
+        du(i) += nu;
     }
 }

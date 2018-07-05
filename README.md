@@ -1,6 +1,7 @@
 Numerical solvers for nonlinear model predictive control(NMPC)
 # Introduction
 This project provides numerical solvers for nonlinear model predictive control(NMPC). This project supports
+- Continuation/GMRES method (C/GMRES)
 - Newton GMRES method (single-shoooting)
 
 
@@ -13,4 +14,5 @@ This project provides numerical solvers for nonlinear model predictive control(N
 Firstly, write system's equation in nmpc_model.cpp and parameters in nmpc_model.hpp. In main.cpp, you have to select which solver to use, set parameters for solvers and declare solver(). After that, you set initial state x0 and implement simulation with setting simulation time, sampling time, and file name of simulation data.
 
 # References
-1. C. T. Kelly, Iterative methods for linear and nonlinear equations, Frontiers in Apllied Mathematics, SIAM (1995)
+1. T. Ohtsuka A continuation/GMRES method for fast computation of nonlinear receding horizon control, Automatica, Vol. 40, No. 4, pp. 563-–574 (2004)
+2. C. T. Kelly, Iterative methods for linear and nonlinear equations, Frontiers in Apllied Mathematics, SIAM (1995)

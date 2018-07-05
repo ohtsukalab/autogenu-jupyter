@@ -44,7 +44,7 @@ def plotsim(argv):
     sns.set_context("paper")
     sns.mpl.pyplot.figure(figsize=(plotnox*3*scale,plotnoy*scale*1.1)) #graph size
 #    sns.mpl.pyplot.rcParams['font.size'] = scale*5/plotno #font size
-    sns.mpl.pyplot.subplots_adjust(wspace= 0, hspace= 0.5) #space between graphs
+    sns.mpl.pyplot.subplots_adjust(wspace= 0.25*scale, hspace= 0.25*scale) #space between graphs
     sns.mpl.pyplot.rcParams['lines.linewidth'] = 1.2 #linewidth
     sns.mpl.pyplot.rc('mathtext', **{'rm':'serif', 'it':'serif:itelic', 'bf':'serif:bold', 'fontset':'cm'})
     sns.mpl.pyplot.rcParams['axes.linewidth'] = 0.5

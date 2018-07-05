@@ -26,9 +26,8 @@ void numerical_integrator::euler_lmd(const double t, const Eigen::VectorXd& x, c
 void numerical_integrator::runge_kutta_gill(const double t, const Eigen::VectorXd& x, const Eigen::VectorXd& u, const double htau, Eigen::Ref<Eigen::VectorXd> x1)
 {
     model.statefunc(t, x, u, k1);
-    model.statefunc(t+0.5*htau, x+0.5*htau*k1, u, k2);
-    model.statefunc(t+0.5*htau, x+0.5*htau*( (std::sqrt(2)-1)*htau*k1+(2-std::sqrt(2))*k2 ), u, k3);
-    model.statefunc(t+htau, x+htau*0.5*(-std::sqrt(2)*k2+(2+std::sqrt(2))*k3), u, k4);
-
-    x1 = x + htau*(k1 +(2-std::sqrt(2))*k2+(2+std::sqrt(2))*k3+k4)/6;
+    model.statefunc(t+0.5*htau, x + 0.5*htau*k1, u, k2);
+    model.statefunc(t+0.5*htau, x + htau * 0.5 * (std::sqrt(2)-1) * k1 + htau * (1 - (1/std::sqrt(2))) * k2, u, k3);
+    model.statefunc(t+htau, x - htau * 0.5 * std::sqrt(2) * k2 + htau * (1 + (1/std::sqrt(2))) * k3, u, k4);
+    x1 = x + htau*( k1 + (2-std::sqrt(2))*k2 + (2+std::sqrt(2))*k3 + k4 )/6;
 }

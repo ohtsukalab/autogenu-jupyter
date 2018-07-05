@@ -7,9 +7,9 @@ set(CMAKE_CXX_FLAGS "-O3")
 
 include_directories(${CMAKE_SOURCE_DIR})
 include_directories(src)
-include_directories(examples/mass_spring)
+include_directories(examples/2linkmanip)
 
-add_subdirectory(examples/mass_spring)
+add_subdirectory(examples/2linkmanip)
 add_subdirectory(src)
 add_executable(a.out main.cpp)
 
