@@ -38,8 +38,6 @@ void continuation_gmres::solvenmpc(const double t, const double ht, const Eigen:
     fdgmres(t, x, u, du);
     u = u + ht * du;
 
-    std::cout << "err = " << geterr() << std::endl;
-
     s = u.segment(0, dimu);
 }
 

@@ -12,7 +12,7 @@ def plotsim(argv):
     us[np.isnan(us)] = 0
 
     ld = open(argv[1] + 'c' + '.dat')
-    lines = ld.readlines()[2]
+    lines = ld.readlines()[1]
     pattern = r'([0-9]+\.?[0-9]*)'
     lists = re.findall(pattern,lines)
     tsim = float(lists[0])
