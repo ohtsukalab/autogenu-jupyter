@@ -2,7 +2,7 @@ Numerical solvers for nonlinear model predictive control(NMPC)
 # Introduction
 This project provides numerical solvers for nonlinear model predictive control(NMPC). This project supports
 - Continuation/GMRES method (C/GMRES)
-- Newton GMRES method (single-shoooting)
+- Newton-GMRES method (This may not work well)
 
 
 # Requirement

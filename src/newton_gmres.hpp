@@ -28,9 +28,9 @@ private:
     double hdir, tau, htau, tf, rho;
 
 // parameters for line search
-    static constexpr double h = 0.01;
-    static constexpr double mu1 = 0.3;
-    static constexpr double mu2 = 0.7;
+    static constexpr double h = 0.001;
+    static constexpr double mu1 = 0.4;
+    static constexpr double mu2 = 0.6;
     static constexpr double d = 0.0001;
 
 // golden radius

@@ -7,7 +7,7 @@
 int main()
 {
     // set solver and parameters
-    newton_gmres solver(0.5, 10, 1.0e-01, 1.0e-04, 5);
+    newton_gmres solver(0.5, 25, 1.5, 1.0e-05, 10);
     simulator sim;
 
     // initial state

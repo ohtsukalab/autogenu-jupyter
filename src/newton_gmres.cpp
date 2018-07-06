@@ -44,7 +44,7 @@ void newton_gmres::solvenmpc(const double t, const Eigen::VectorXd& x, Eigen::Re
         linesearch(t, x, u, du);
         Func(t, x, u, hu);
         r = hu.norm();
-        std::cout << du << std::endl;
+        i++;
     }
     s = u.segment(0, dimu);
 }
@@ -94,7 +94,8 @@ void newton_gmres::linesearch(const double t, const Eigen::VectorXd& x, Eigen::R
             alpha2 = alower + r*(aupper-alower);
         }
     }
-    u = u + 0.5 * (aupper + alower) * du;
+
+    u += 0.5 * (aupper + alower) * du;
 }
 
 
@@ -128,7 +129,6 @@ double newton_gmres::dcostsearch(const double t, const Eigen::VectorXd& x, const
         model.Lufunc(tau, x, u1.segment(i*dimuc, dimuc), hu);
     }
 
-    hu = htau * hu;
     return hu.dot(du);
 }
 
@@ -147,18 +147,17 @@ void newton_gmres::Func(const double t, const Eigen::VectorXd& x, const Eigen::V
     for(i=dv-1; i>=0; i--, tau-=htau){
         model.hxfunc(tau, xtau.col(i), u.segment(i*dimuc, dimuc), lmd.col(i+1), tmp);
         lmd.col(i) = lmd.col(i+1) + htau * tmp;
-        model.hufunc(tau, xtau.col(i), u.segment(i*dimuc, dimuc), lmd.col(i+1), hu.segment(i*dimuc, dimuc));
+        model.hufunc(tau, xtau.col(i), u.segment(i*dimuc, dimuc), lmd.col(i+1), hu1.segment(i*dimuc, dimuc));
     }
-    hu *= -1;
+
+    hu = -hu1;
 }
 
 
 void newton_gmres::DhFunc(const double t, const Eigen::VectorXd& x, const Eigen::VectorXd& u, const Eigen::VectorXd& v, Eigen::Ref<Eigen::VectorXd> dhu)
 {
-    Func(t, x, u, hu);
-
     u1 = u + hdir * v;
-    Func(t, x, u1, hu1);
+    Func(t, x, u1, hu);
 
-    dhu = (hu1 - hu) / hdir;
+    dhu = (hu - hu1) / hdir;
 }
