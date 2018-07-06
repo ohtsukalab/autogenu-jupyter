@@ -21,7 +21,7 @@ private:
  * DhFunc() product of partially derivative of the nonlinear function and a vector
  * -------------------------------------------------- */
     Eigen::MatrixXd xtau, lmd;
-    Eigen::VectorXd u, u1, u2, du, hu, hu1, tmp;
+    Eigen::VectorXd u, u1, du, hu, hu1, tmp;
 
     nmpc_model model;
     int dimeq, dv, dimx, dimu, dimuc;

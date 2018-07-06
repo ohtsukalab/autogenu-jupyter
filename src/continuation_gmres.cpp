@@ -106,8 +106,6 @@ void continuation_gmres::init_cgmres(const double t, const Eigen::VectorXd& x0, 
         model.hufunc(t, x0, utmp, tmp, hu0);
         i++;
     }
-//    std::cout << "end init, err = " << hu0.norm() << std::endl;
-//    std::exit(1);
     for(i=0; i<dv; i++)
         u.segment(i*dimu, dimu) = utmp;
 }

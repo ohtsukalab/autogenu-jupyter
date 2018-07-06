@@ -19,13 +19,14 @@ newton_gmres::newton_gmres(const double length_horizon, const int division_num, 
     tmp.resize(dimx);
     u.resize(dimeq);
     u1.resize(dimeq);
-    u2.resize(dimeq);
     hu.resize(dimeq);
     hu1.resize(dimeq);
     du.resize(dimeq);
 
-    for(int i=0; i<dimeq; i++)
+    for(int i=0; i<dimeq; i++) {
+        du(i) = 0.0;
         u(i) = 0.0;
+    }
 }
 
 
@@ -43,6 +44,7 @@ void newton_gmres::solvenmpc(const double t, const Eigen::VectorXd& x, Eigen::Re
         linesearch(t, x, u, du);
         Func(t, x, u, hu);
         r = hu.norm();
+        std::cout << du << std::endl;
     }
     s = u.segment(0, dimu);
 }
@@ -68,7 +70,7 @@ void newton_gmres::linesearch(const double t, const Eigen::VectorXd& x, Eigen::R
         k++;
     }
 
-    if(k){
+    if(k) {
         alower = (k-1) * h;
         aupper = (k+1) * h;
     }
@@ -136,17 +138,18 @@ void newton_gmres::Func(const double t, const Eigen::VectorXd& x, const Eigen::V
     int i;
 
     xtau.col(0) = x;
-    for(i=0, tau=t; i<dv; i++, tau+=htau) {
+    for(i=0, tau=t; i<dv; i++, tau+=htau){
         model.statefunc(tau, xtau.col(i), u.segment(i*dimuc, dimuc), tmp);
         xtau.col(i+1) = xtau.col(i) + htau * tmp;
     }
-    model.phix(t, xtau.col(dv), lmd.col(dv));
+    model.phix(tau, xtau.col(dv), lmd.col(dv));
 
-    for(i=dv-1, tau=t+tf; i>=0; i--, tau-=htau) {
+    for(i=dv-1; i>=0; i--, tau-=htau){
         model.hxfunc(tau, xtau.col(i), u.segment(i*dimuc, dimuc), lmd.col(i+1), tmp);
         lmd.col(i) = lmd.col(i+1) + htau * tmp;
-        model.hufunc(t, xtau.col(i), u.segment(i*dimuc, dimuc), lmd.col(i+1), hu.segment(i*dimuc, dimuc));
+        model.hufunc(tau, xtau.col(i), u.segment(i*dimuc, dimuc), lmd.col(i+1), hu.segment(i*dimuc, dimuc));
     }
+    hu *= -1;
 }
 
 
