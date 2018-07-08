@@ -15,8 +15,8 @@ class simulator : virtual public numerical_integrator{
 private:
     double tsim, ht;
     nmpc_model model;
+    void savedata(std::ofstream& x_data, std::ofstream& u_data, std::ofstream& e_data, const double t, const Eigen::VectorXd& x, const Eigen::VectorXd& u, const double err);
 public:
-    void savedata(std::ofstream& x_data, std::ofstream& u_data, const double t, const Eigen::VectorXd& x, const Eigen::VectorXd& u);
     void simulation(continuation_gmres solver, const Eigen::VectorXd& x0, const double sim_time, const double sample_ht, const std::string file_name);
 };
 

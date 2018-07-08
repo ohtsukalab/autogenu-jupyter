@@ -27,6 +27,7 @@ continuation_gmres::continuation_gmres(const double T_f, const double alpha, con
     du.resize(dimeq);
     xs.resize(dimx);
     uinit.resize(dimuc);
+    huinit.resize(dimuc);
 
     for(int i=0; i<dimeq; i++){
         du(i) = 0.0;
@@ -41,8 +42,10 @@ void continuation_gmres::init(const double t, const Eigen::VectorXd& x0, const E
     init_cgmres initializer(itr_max, r_tol, hdir, kmax);
     initializer.solvenocp(t, x0, u0, uinit);
 
-    for(int i=0; i<dv; i++)
+    for(int i=0; i<dv; i++){
         u.segment(i*dimuc, dimuc) = uinit;    
+        hu.segment(i*dimuc, dimuc) = huinit;
+    }
 }
 
 void continuation_gmres::solvenmpc(const double t, const double ht, const Eigen::VectorXd& x, Eigen::Ref<Eigen::VectorXd> s)
@@ -96,7 +99,12 @@ void continuation_gmres::Func(const double t, const Eigen::VectorXd& x, const Ei
 void continuation_gmres::DhFunc(const double t, const Eigen::VectorXd& x, const Eigen::VectorXd& u, const Eigen::VectorXd& v, Eigen::Ref<Eigen::VectorXd> dhu)
 {
     u1 = u + hdir * v;
-    Hufunc(ts, xs, u1, hu2);   
+    Hufunc(ts, xs, u1, hu2);
     dhu = (hu2 - hu1) / hdir;
 }
 
+
+double continuation_gmres::geterr()
+{
+    return hu.norm();
+}

@@ -7,9 +7,12 @@ def plotsim(argv):
     ############################ load data ############################
     xs = np.genfromtxt(argv[1] + 'x' + '.dat')
     us = np.genfromtxt(argv[1] + 'u' + '.dat')
+    es = np.genfromtxt(argv[1] + 'e' + '.dat')
 
     xs[np.isnan(xs)] = 0
     us[np.isnan(us)] = 0
+    es[np.isnan(es)] = 0
+
 
     ld = open(argv[1] + 'c' + '.dat')
     lines = ld.readlines()[1]
@@ -30,7 +33,7 @@ def plotsim(argv):
     dt = tsim/ns
     ts = np.arange(0,tsim,dt)
 
-    plotno = dimx+dimu
+    plotno = dimx+dimu+1
     plotnox = int(np.floor(plotno/3))
     plotnoy = int(np.ceil(plotno/plotnox))
 
@@ -76,6 +79,18 @@ def plotsim(argv):
         sns.mpl.pyplot.xlabel(r'${\rm Time}$ $[s]$')
         sns.mpl.pyplot.ylabel(r'$u$')
         sns.mpl.pyplot.xlim(0,tsim)
+
+
+    F = np.zeros(ns)
+    for i in range(ns):
+        F[i] = np.sum(es[i])
+        F[i] = np.sqrt(F[i])
+
+    sns.mpl.pyplot.subplot(plotnoy, plotnox, dimx+dimu+1)
+    sns.mpl.pyplot.plot(ts,F)
+    sns.mpl.pyplot.xlabel(r'${\rm Time}$ $[s]$')
+    sns.mpl.pyplot.ylabel(r'$\| F \|$')
+    sns.mpl.pyplot.xlim(0,tsim)
 
 
     ############################ show or save data ############################
