@@ -33,20 +33,3 @@ void nmpc_model::hufunc(const double t, const Eigen::VectorXd& x, const Eigen::V
 	hu[0] = u[0] * r[0] + lmd[2] * (-d2 * d2 * m2 - J2) / ((0.2e1 * pow(cos(x[0]), 0.2e1) - 0.1e1) * l1 * l1 * m2 * m2 * d2 * d2 * pow(cos(x[0] + x[1]), 0.2e1) + 0.2e1 * cos(x[0]) * cos(x[0] + x[1]) * sin(x[0]) * sin(x[0] + x[1]) * d2 * d2 * l1 * l1 * m2 * m2 - pow(cos(x[0]), 0.2e1) * d2 * d2 * l1 * l1 * m2 * m2 + ((-d1 * d1 * m1 - J1) * d2 * d2 - J2 * l1 * l1) * m2 - J2 * (d1 * d1 * m1 + J1)) + lmd[3] * (l1 * m2 * cos(x[0]) * d2 * cos(x[0] + x[1]) + m2 * l1 * sin(x[0]) * d2 * sin(x[0] + x[1]) + d2 * d2 * m2 + J2) / ((0.2e1 * pow(cos(x[0]), 0.2e1) - 0.1e1) * l1 * l1 * m2 * m2 * d2 * d2 * pow(cos(x[0] + x[1]), 0.2e1) + 0.2e1 * cos(x[0]) * cos(x[0] + x[1]) * sin(x[0]) * sin(x[0] + x[1]) * d2 * d2 * l1 * l1 * m2 * m2 - pow(cos(x[0]), 0.2e1) * d2 * d2 * l1 * l1 * m2 * m2 + ((-d1 * d1 * m1 - J1) * d2 * d2 - J2 * l1 * l1) * m2 - J2 * (d1 * d1 * m1 + J1));
 	hu[1] = u[1] * r[1] + lmd[2] * (l1 * m2 * cos(x[0]) * d2 * cos(x[0] + x[1]) + m2 * l1 * sin(x[0]) * d2 * sin(x[0] + x[1]) + d2 * d2 * m2 + J2) / ((0.2e1 * pow(cos(x[0]), 0.2e1) - 0.1e1) * l1 * l1 * m2 * m2 * d2 * d2 * pow(cos(x[0] + x[1]), 0.2e1) + 0.2e1 * cos(x[0]) * cos(x[0] + x[1]) * sin(x[0]) * sin(x[0] + x[1]) * d2 * d2 * l1 * l1 * m2 * m2 - pow(cos(x[0]), 0.2e1) * d2 * d2 * l1 * l1 * m2 * m2 + ((-d1 * d1 * m1 - J1) * d2 * d2 - J2 * l1 * l1) * m2 - J2 * (d1 * d1 * m1 + J1)) + lmd[3] * (-0.2e1 * l1 * m2 * cos(x[0]) * d2 * cos(x[0] + x[1]) - 0.2e1 * m2 * l1 * sin(x[0]) * d2 * sin(x[0] + x[1]) + (-d2 * d2 - l1 * l1) * m2 - J2 - d1 * d1 * m1 - J1) / ((0.2e1 * pow(cos(x[0]), 0.2e1) - 0.1e1) * l1 * l1 * m2 * m2 * d2 * d2 * pow(cos(x[0] + x[1]), 0.2e1) + 0.2e1 * cos(x[0]) * cos(x[0] + x[1]) * sin(x[0]) * sin(x[0] + x[1]) * d2 * d2 * l1 * l1 * m2 * m2 - pow(cos(x[0]), 0.2e1) * d2 * d2 * l1 * l1 * m2 * m2 + ((-d1 * d1 * m1 - J1) * d2 * d2 - J2 * l1 * l1) * m2 - J2 * (d1 * d1 * m1 + J1));
 }
-
-
-double nmpc_model::stagecost(const double t, const Eigen::VectorXd& x, const Eigen::VectorXd& u)
-{
-	return 0.5 * (q[0] * (x[0] - xf[0]) * (x[0] - xf[0]) + q[1] * (x[1] - xf[1]) * (x[1] - xf[1]) + q[2] * (x[2] - xf[2]) * (x[2] - xf[2]) + q[3] * (x[3] - xf[3]) * (x[3] - xf[3]) + r[0] * u[0] * u[0] + r[1] * u[1] * u[1]);
-}
-
-double nmpc_model::terminalcost(const double t, const Eigen::VectorXd& x)
-{
-	return 0.5 * (sf[0] * (x[0] - xf[0]) * (x[0] - xf[0]) + sf[1] * (x[1] - xf[1]) * (x[1] - xf[1]) + sf[2] * (x[2] - xf[2]) * (x[2] - xf[2]) + sf[3] * (x[3] - xf[3]) * (x[3] - xf[3]));
-}
-
-void nmpc_model::Lufunc(const double t, const Eigen::VectorXd& x, const Eigen::VectorXd& u, Eigen::Ref<Eigen::VectorXd> Ju)
-{
-	Ju[0] = r[0] * u[0];
-	Ju[1] = r[1] * u[1];
-}

@@ -4,7 +4,7 @@ project(nmpc_solver CXX)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_FLAGS "-O3")
 
-set(MODEL_DIR ${CMAKE_SOURCE_DIR}/examples/mass_spring)
+set(MODEL_DIR ${CMAKE_SOURCE_DIR}/examples/2linkmanip)
 
 include_directories(${CMAKE_SOURCE_DIR})
 include_directories(src)

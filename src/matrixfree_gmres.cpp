@@ -45,10 +45,6 @@ void matrixfree_gmres::givappj(const int j, Eigen::Ref<Eigen::VectorXd> c, Eigen
     v(j+1) = tmp2;
 }
 
-double matrixfree_gmres::geterr()
-{
-    return err.norm();
-}
 
 void matrixfree_gmres::fdgmres(const double t, const Eigen::VectorXd& x, const Eigen::VectorXd& u, Eigen::Ref<Eigen::VectorXd> du)
 {
@@ -100,9 +96,7 @@ void matrixfree_gmres::fdgmres(const double t, const Eigen::VectorXd& x, const E
         else
             std::cout << "error : h(k,k) = h(k+1,k) = 0" << std::endl;
 
-//        std::cout << "\n g(k+1) = " << g(k+1) << std::endl;
         rho = std::fabs(g(k+1));
-//        std::cout << "rho = " << rho << std::endl;
         err(k+1) = rho;
     }
 
@@ -122,3 +116,4 @@ void matrixfree_gmres::fdgmres(const double t, const Eigen::VectorXd& x, const E
         du(i) += nu;
     }
 }
+

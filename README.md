@@ -1,9 +1,5 @@
-Numerical solvers for nonlinear model predictive control(NMPC)
 # Introduction
-This project provides numerical solvers for nonlinear model predictive control(NMPC). This project supports
-- Continuation/GMRES method (C/GMRES)
-- Newton-GMRES method (This may not work well)
-
+This project provides Continuation/GMRES method (C/GMRES), a fast computation algorithm of NMPC, proposed by T. Ohtsuka. 
 
 # Requirement
 - C++11

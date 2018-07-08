@@ -1,5 +1,4 @@
 #include "nmpc_model.hpp"
-#include "newton_gmres.hpp"
 #include "continuation_gmres.hpp"
 #include "simulator.hpp"
 
@@ -17,7 +16,7 @@ int main()
     Eigen::VectorXd u0(2);
     u0 << 1.0, 1.0;
 
-    solver.init_cgmres(0, x0, u0, 1.0e-06, 50);
+    solver.init(0, x0, u0, 1.0e-06, 50);
     sim.simulation(solver, x0, 10, 0.001, "example");
 
     return 0;
