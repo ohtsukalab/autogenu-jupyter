@@ -36,7 +36,7 @@ void init_cgmres::solvenocp(const double t, const Eigen::VectorXd& x0, const Eig
 
 void init_cgmres::Hufunc(const double t, const Eigen::VectorXd& x, const Eigen::VectorXd& u, Eigen::Ref<Eigen::VectorXd> hu)
 {
-    model.phix(t, x, lmd);
+    model.phixfunc(t, x, lmd);
     model.hufunc(t, x, u, lmd, hu);
 }
 

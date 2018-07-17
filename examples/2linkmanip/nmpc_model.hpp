@@ -40,8 +40,8 @@ public:
 		dimu = dim_u;
 		dimc = dim_c;
 	}
-	void phix(const double t, const Eigen::VectorXd& x, Eigen::Ref<Eigen::VectorXd> lmd);
 	void statefunc(const double t, const Eigen::VectorXd& x, const Eigen::VectorXd& u, Eigen::Ref<Eigen::VectorXd> f);
+	void phixfunc(const double t, const Eigen::VectorXd& x, Eigen::Ref<Eigen::VectorXd> lmd);
     void hxfunc(const double t, const Eigen::VectorXd& x, const Eigen::VectorXd& u, const Eigen::VectorXd& lmd, Eigen::Ref<Eigen::VectorXd> hx);
 	void hufunc(const double t, const Eigen::VectorXd& x, const Eigen::VectorXd& u, const Eigen::VectorXd& lmd, Eigen::Ref<Eigen::VectorXd> hu);
 };

@@ -70,7 +70,7 @@ void continuation_gmres::Hufunc(const double t, const Eigen::VectorXd& x, const 
         model.statefunc(tau, xtau.col(i), u.segment(i*dimuc, dimu), tmp);
         xtau.col(i+1) = xtau.col(i) + htau * tmp;
     }
-    model.phix(tau, xtau.col(dv), lmd.col(dv));
+    model.phixfunc(tau, xtau.col(dv), lmd.col(dv));
 
     for(i=dv-1; i>=0; i--, tau-=htau){
         model.hxfunc(tau, xtau.col(i), u.segment(i*dimuc, dimuc), lmd.col(i+1), tmp);
