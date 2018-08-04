@@ -10,7 +10,7 @@ int main()
     simulator sim;
 
     // initial state
-    Eigen::VectorXd x0(4), u(2);
+    Eigen::VectorXd x0(4);
     x0 << 0.0, 0.0, 0.0, 0.0;
 
     Eigen::VectorXd u0(2);

@@ -4,7 +4,7 @@ project(nmpc_solver CXX)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_FLAGS "-O3")
 
-set(MODEL_DIR ${CMAKE_SOURCE_DIR}/examples/acrobot)
+set(MODEL_DIR ${CMAKE_SOURCE_DIR}/examples/2linkmarm)
 
 include_directories(${CMAKE_SOURCE_DIR})
 include_directories(src)
