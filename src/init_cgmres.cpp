@@ -23,6 +23,7 @@ void init_cgmres::solvenocp(const double t, const Eigen::VectorXd& x0, const Eig
 {
     int i;
     
+    i=0;
     u = u0;
     Hufunc(t, x0, u, hu1);
     while(hu1.norm() < r && i > imax){
