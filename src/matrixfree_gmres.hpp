@@ -13,9 +13,9 @@
 
 class MatrixFreeGMRES {
 private:
-    int dim_equation_, dim_krylov_;
+    int dim_equation_, max_dim_krylov_;
     Eigen::MatrixXd hessenberg_mat_, basis_mat_;
-    Eigen::VectorXd current_error_vec_, givens_c_vec_, givens_s_vec_, g_vec_, y_vec_;
+    Eigen::VectorXd current_error_vec_, givens_c_vec_, givens_s_vec_, g_vec_;
 
     void givensRotation(Eigen::Ref<Eigen::VectorXd> column_vec, const int i_column);
     virtual void nonlinearEquation(const double time_param, const Eigen::VectorXd& state_vec, const Eigen::VectorXd& current_solution_vec, Eigen::Ref<Eigen::VectorXd> equation_error_vec) = 0;
