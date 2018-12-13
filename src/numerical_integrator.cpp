@@ -1,33 +1,38 @@
 #include "numerical_integrator.hpp"
 
 
-numerical_integrator::numerical_integrator()
+NumericalIntegrator::NumericalIntegrator()
 {
-    tmp.resize(model.dimx);
-    k1.resize(model.dimx);
-    k2.resize(model.dimx);
-    k3.resize(model.dimx);
-    k4.resize(model.dimx);
+    // allocate vectors
+    dx_vec_.resize(model_.dimState());
+    k1_vec_.resize(model_.dimState());
+    k2_vec_.resize(model_.dimState());
+    k3_vec_.resize(model_.dimState());
+    k4_vec_.resize(model_.dimState());
 }
 
-void numerical_integrator::euler_state(const double t, const Eigen::VectorXd& x, const Eigen::VectorXd& u, const double htau, Eigen::Ref<Eigen::VectorXd> x1)
+
+// Euler method for the state vector
+void NumericalIntegrator::eulerState(const double current_time, const Eigen::VectorXd& current_state_vec, const Eigen::VectorXd& control_input_vec, const double integration_length, Eigen::Ref<Eigen::VectorXd> next_state_vec)
 {
-    model.statefunc(t, x, u, tmp);
-    x1 = x + tmp * htau;
+    model_.stateFunc(current_time, current_state_vec, control_input_vec, dx_vec_);
+    next_state_vec = current_state_vec + integration_length * dx_vec_;
 }
 
-void numerical_integrator::euler_lmd(const double t, const Eigen::VectorXd& x, const Eigen::VectorXd& u, const Eigen::VectorXd& lmd, const double htau, Eigen::Ref<Eigen::VectorXd> lmd1)
+
+// Euler method for the lambda vector, the Lagrange multiplier of the state equation
+void NumericalIntegrator::eulerLambda(const double current_time, const Eigen::VectorXd& current_state_vec, const Eigen::VectorXd& control_input_vec, const Eigen::VectorXd& next_lambda_vec, const double integration_length, Eigen::Ref<Eigen::VectorXd> current_lambda_vec)
 {
-    model.hxfunc(t, x, u, lmd, tmp);
-    lmd1 = lmd + tmp * htau;
+    model_.hxFunc(current_time, current_state_vec, control_input_vec, next_lambda_vec, dx_vec_);
+    current_lambda_vec = next_lambda_vec + integration_length * dx_vec_;
 }
 
 // The four-step Runge-Kutta-Gill method
-void numerical_integrator::runge_kutta_gill(const double t, const Eigen::VectorXd& x, const Eigen::VectorXd& u, const double htau, Eigen::Ref<Eigen::VectorXd> x1)
+void NumericalIntegrator::rungeKuttaGill(const double current_time, const Eigen::VectorXd& current_state_vec, const Eigen::VectorXd& control_input_vec, const double integration_length, Eigen::Ref<Eigen::VectorXd> next_state_vec)
 {
-    model.statefunc(t, x, u, k1);
-    model.statefunc(t+0.5*htau, x + 0.5*htau*k1, u, k2);
-    model.statefunc(t+0.5*htau, x + htau * 0.5 * (std::sqrt(2)-1) * k1 + htau * (1 - (1/std::sqrt(2))) * k2, u, k3);
-    model.statefunc(t+htau, x - htau * 0.5 * std::sqrt(2) * k2 + htau * (1 + (1/std::sqrt(2))) * k3, u, k4);
-    x1 = x + htau*( k1 + (2-std::sqrt(2))*k2 + (2+std::sqrt(2))*k3 + k4 )/6;
+    model_.stateFunc(current_time, current_state_vec, control_input_vec, k1_vec_);
+    model_.stateFunc(current_time+0.5*integration_length, current_state_vec+0.5*integration_length*k1_vec_, control_input_vec, k2_vec_);
+    model_.stateFunc(current_time+0.5*integration_length, current_state_vec+integration_length*0.5*(std::sqrt(2)-1)*k1_vec_+integration_length*(1-(1/std::sqrt(2)))*k2_vec_, control_input_vec, k3_vec_);
+    model_.stateFunc(current_time+integration_length, current_state_vec-integration_length*0.5*std::sqrt(2)*k2_vec_+integration_length*(1+(1/std::sqrt(2)))*k3_vec_, control_input_vec, k4_vec_);
+    next_state_vec = current_state_vec + integration_length*(k1_vec_+(2-std::sqrt(2))*k2_vec_+(2+std::sqrt(2))*k3_vec_+k4_vec_)/6;
 }

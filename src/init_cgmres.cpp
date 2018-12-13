@@ -1,59 +1,73 @@
 #include "init_cgmres.hpp"
 
 
-init_cgmres::init_cgmres(const int itr_max, const double r_tol, const double h_dir, const int k_max) : matrixfree_gmres(k_max)
+InitCGMRES::InitCGMRES(const NMPCModel model, const double difference_increment, const int dim_krylov) : MatrixFreeGMRES(model.dimControlInput()+model.dimConstraints(), dim_krylov)
 {
-    lmd.resize(model.dimx);
-    u1.resize(model.dimu+model.dimc);
-    hu1.resize(model.dimu+model.dimc);
-    hu2.resize(model.dimu+model.dimc);
-    du.resize(model.dimu+model.dimc);
+    // set parameters
+    model_ = model;
+    difference_increment_ = difference_increment;
+    dim_solution_ = model_.dimControlInput()+model_.dimConstraints();
 
-    hdir = h_dir;
-    r = r_tol;
-    imax = itr_max;
-    initgmres(model.dimu+model.dimc);
+    // allocate vectors
+    solution_update_vec_.resize(dim_solution_);
+    incremented_solution_vec_.resize(dim_solution_);
+    lambda_vec_.resize(model_.dimState());
+    error_vec_.resize(dim_solution_);
+    error_vec_1_.resize(dim_solution_);
+    error_vec_2_.resize(dim_solution_);
 
-    for(int i=0; i<(model.dimu+model.dimc); i++)
-        du(i) = 0.0;
+    // initialize solution of the forward-difference GMRES
+    for(int i=0; i<dim_solution_; i++){
+        solution_update_vec_(i) = 0.0;
+        error_vec_(i) = 0.0;
+    }
 }
 
 
-void init_cgmres::solvenocp(const double t, const Eigen::VectorXd& x0, const Eigen::VectorXd& u0, Eigen::Ref<Eigen::VectorXd> u)
+void InitCGMRES::solve0stepNOCP(const double initial_time, const Eigen::VectorXd& initial_state_vec, const Eigen::VectorXd& initial_guess_vec, const double convergence_radius, const int max_iteration, Eigen::Ref<Eigen::VectorXd> solution_vec)
 {
-    int i;
-    
-    i=0;
-    u = u0;
-    Hufunc(t, x0, u, hu1);
-    while(hu1.norm() < r && i > imax){
-        fdgmres(t, x0, u, du);
-        u += du;
-        Hufunc(t, x0, u, hu1);
+    int i=0;
+    solution_vec = initial_guess_vec;
+    computeOptimalityErrors(initial_time, initial_state_vec, solution_vec, error_vec_);
+    while(error_vec_.squaredNorm() > convergence_radius && i < max_iteration){
+        std::cout << "error[" << i << "] = " << error_vec_.squaredNorm() << std::endl;
+        forwardDifferenceGMRES(initial_time, initial_state_vec, solution_vec, solution_update_vec_);
+        solution_vec += solution_update_vec_;
+        computeOptimalityErrors(initial_time, initial_state_vec, solution_vec, error_vec_);
         i++;
     }
 }
 
 
-void init_cgmres::Hufunc(const double t, const Eigen::VectorXd& x, const Eigen::VectorXd& u, Eigen::Ref<Eigen::VectorXd> hu)
+Eigen::VectorXd InitCGMRES::getOptimalityErrorVec(const double initial_time, const Eigen::VectorXd& initial_state_vec, const Eigen::VectorXd& current_solution_vec)
 {
-    model.phixfunc(t, x, lmd);
-    model.hufunc(t, x, u, lmd, hu);
+    Eigen::VectorXd error_vec(dim_solution_);
+
+    computeOptimalityErrors(initial_time, initial_state_vec, current_solution_vec, error_vec);
+
+    return error_vec;
 }
 
 
-void init_cgmres::Func(const double t, const Eigen::VectorXd& x, const Eigen::VectorXd& u, Eigen::Ref<Eigen::VectorXd> b)
+void InitCGMRES::computeOptimalityErrors(const double time_param, const Eigen::VectorXd& state_vec, const Eigen::VectorXd& current_solution_vec, Eigen::Ref<Eigen::VectorXd> optimality_vec)
 {
-    Hufunc(t, x, u, hu1);
-    b = - hu1;
+    model_.phixFunc(time_param, state_vec, lambda_vec_);
+    model_.huFunc(time_param, state_vec, current_solution_vec, lambda_vec_, optimality_vec);
 }
 
 
-void init_cgmres::DhFunc(const double t, const Eigen::VectorXd& x, const Eigen::VectorXd& u, const Eigen::VectorXd& v, Eigen::Ref<Eigen::VectorXd> dhu)
+void InitCGMRES::nonlinearEquation(const double time_param, const Eigen::VectorXd& state_vec, const Eigen::VectorXd& current_solution_vec, Eigen::Ref<Eigen::VectorXd> equation_error_vec) 
 {
-    Hufunc(t, x, u, hu1);
-    u1 = u + hdir * v;
-    Hufunc(t, x, u1, hu2);
+    computeOptimalityErrors(time_param, state_vec, current_solution_vec, error_vec_);
+    equation_error_vec = - error_vec_;
+}
 
-    dhu = (hu2 - hu1) / hdir;
+
+void InitCGMRES::forwardDifferenceEquation(const double time_param, const Eigen::VectorXd& state_vec, const Eigen::VectorXd& current_solution_vec, const Eigen::VectorXd& direction_vec, Eigen::Ref<Eigen::VectorXd> forward_difference_error_vec)
+{
+    computeOptimalityErrors(time_param, state_vec, current_solution_vec, error_vec_1_);
+    incremented_solution_vec_ = current_solution_vec + difference_increment_ * direction_vec;
+    computeOptimalityErrors(time_param, state_vec, incremented_solution_vec_, error_vec_2_);
+
+    forward_difference_error_vec = (error_vec_2_ - error_vec_1_) / difference_increment_;
 }

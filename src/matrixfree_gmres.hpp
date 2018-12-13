@@ -1,41 +1,29 @@
 /*
- *   This supportes the newton_gmres method, a numerical solver for nonlienar optimization problem.
+ *   This supportes the forward-difference GMRES method, a numerical solver for nonlienar programming problem.
  *   This program is witten with reference to "C. T. Kelly, Iterative Methods for Linear and Nonlinear Equations, Frontiers in Apllied Mathematics, SIAM (1995)"
  */
 
 #ifndef MATRIXFREE_GMRES_H
 #define MATRIXFREE_GMRES_H
 
-#include "nmpc_model.hpp"
 #include <iostream>
 #include <eigen3/Eigen/Core>
+#include "nmpc_model.hpp"
 
 
-class matrixfree_gmres {
+class MatrixFreeGMRES {
 private:
-/* --------------------------------------------------
- * n        the dimension of the nonlinear equation
- * kmax     the maximum iteration numebr of the gmres
- * rho      the convergence radius
- * h        Hessian matrix
- * v        Hessian matrix
- * err   vector composed of the erros in gmres
- * Func()   nonlinear function
- * DhFunc() product of partially derivative of the nonlinear function and a vector
- * -------------------------------------------------- */
+    int dim_equation_, dim_krylov_;
+    Eigen::MatrixXd hessenberg_mat_, basis_mat_;
+    Eigen::VectorXd current_error_vec_, givens_c_vec_, givens_s_vec_, g_vec_, y_vec_;
 
-    int n, kmax;
-    nmpc_model model;
-    Eigen::MatrixXd h, v;
-    Eigen::VectorXd err, r, c, s, g, y;
-    void givappj(const int j, Eigen::Ref<Eigen::VectorXd> v);
-    void givappj(const int j, Eigen::Ref<Eigen::VectorXd> c, Eigen::Ref<Eigen::VectorXd> s, Eigen::Ref<Eigen::VectorXd> v);
+    void givensRotation(Eigen::Ref<Eigen::VectorXd> column_vec, const int i_column);
+    virtual void nonlinearEquation(const double time_param, const Eigen::VectorXd& state_vec, const Eigen::VectorXd& current_solution_vec, Eigen::Ref<Eigen::VectorXd> equation_error_vec) = 0;
+    virtual void forwardDifferenceEquation(const double time_param, const Eigen::VectorXd& state_vec, const Eigen::VectorXd& current_solution_vec, const Eigen::VectorXd& direction_vec, Eigen::Ref<Eigen::VectorXd> forward_difference_error_vec) = 0;
 public:
-    matrixfree_gmres(const int k_max);
-    void initgmres(const int dim);
-    void fdgmres(const double t, const Eigen::VectorXd& x, const Eigen::VectorXd& u, Eigen::Ref<Eigen::VectorXd> du);
-    virtual void Func(const double t, const Eigen::VectorXd& x, const Eigen::VectorXd& u, Eigen::Ref<Eigen::VectorXd> hu) = 0;
-    virtual void DhFunc(const double t, const Eigen::VectorXd& x, const Eigen::VectorXd& u, const Eigen::VectorXd& du, Eigen::Ref<Eigen::VectorXd> dhu) = 0;
+    MatrixFreeGMRES(const int dim_equation, const int dim_krylov);
+    void resetParameters(const int dim_equation, const int dim_krylov);
+    void forwardDifferenceGMRES(const double time_param, const Eigen::VectorXd& state_vec, const Eigen::VectorXd& current_solution_vec, Eigen::Ref<Eigen::VectorXd> solution_update_vec);
 };
 
 #endif

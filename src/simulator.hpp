@@ -11,13 +11,14 @@
 #include "continuation_gmres.hpp"
 
 
-class simulator : virtual public numerical_integrator{
+class Simulator : virtual public NumericalIntegrator{
 private:
-    double tsim, ht;
-    nmpc_model model;
-    void savedata(std::ofstream& x_data, std::ofstream& u_data, std::ofstream& e_data, const double t, const Eigen::VectorXd& x, const Eigen::VectorXd& u, const double err);
+    NMPCModel model_;
+    void saveData(std::ofstream& state_data, std::ofstream& control_input_data, std::ofstream& error_data, const double time_param, const Eigen::VectorXd& state_vec, const Eigen::VectorXd& control_input_vec, const double optimality_error);
 public:
-    void simulation(continuation_gmres solver, const Eigen::VectorXd& x0, const double sim_time, const double sample_ht, const std::string file_name);
+    Simulator(const NMPCModel model);
+    void simulation(ContinuationGMRES cgmres_solver, const Eigen::VectorXd& initial_state_vec, const double start_time, const double end_time, const double sampling_period, const std::string savefile_name);
 };
+
 
 #endif

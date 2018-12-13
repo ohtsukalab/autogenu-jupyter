@@ -6,19 +6,21 @@
 #include <eigen3/Eigen/Core>
 
 
-class init_cgmres : public matrixfree_gmres{
+class InitCGMRES : public MatrixFreeGMRES{
 private:
-    nmpc_model model;
-    int imax;
-    double r, hdir;
-    Eigen::VectorXd lmd, u1, hu1, hu2, du;
+    NMPCModel model_;
+    int dim_solution_;
+    double difference_increment_;
+    Eigen::VectorXd solution_update_vec_, incremented_solution_vec_, lambda_vec_, error_vec_, error_vec_1_, error_vec_2_;
+
+    void computeOptimalityErrors(const double time_param, const Eigen::VectorXd& state_vec, const Eigen::VectorXd& current_solution_vec, Eigen::Ref<Eigen::VectorXd> optimality_vec);
+    void nonlinearEquation(const double time_param, const Eigen::VectorXd& state_vec, const Eigen::VectorXd& current_solution_vec, Eigen::Ref<Eigen::VectorXd> equation_error_vec) override;
+    void forwardDifferenceEquation(const double time_param, const Eigen::VectorXd& state_vec, const Eigen::VectorXd& current_solution_vec, const Eigen::VectorXd& direction_vec, Eigen::Ref<Eigen::VectorXd> forward_difference_error_vec) override;
 
 public:
-    init_cgmres(const int itr_max, const double r_tol, const double h_dir, const int k_max);
-    void solvenocp(const double t, const Eigen::VectorXd& x0, const Eigen::VectorXd& u0, Eigen::Ref<Eigen::VectorXd> u);
-    void Hufunc(const double t, const Eigen::VectorXd& x, const Eigen::VectorXd& u, Eigen::Ref<Eigen::VectorXd> hu);
-    void Func(const double t, const Eigen::VectorXd& x, const Eigen::VectorXd& u, Eigen::Ref<Eigen::VectorXd> b);
-    void DhFunc(const double t, const Eigen::VectorXd& x, const Eigen::VectorXd& u, const Eigen::VectorXd& v, Eigen::Ref<Eigen::VectorXd> dhu);
+    InitCGMRES(const NMPCModel model, const double difference_increment, const int dim_krylov);
+    void solve0stepNOCP(const double initial_time, const Eigen::VectorXd& initial_state_vec, const Eigen::VectorXd& initial_guess_vec, const double convergence_radius, const int max_iteration, Eigen::Ref<Eigen::VectorXd> solution_vec);
+    Eigen::VectorXd getOptimalityErrorVec(const double initial_time, const Eigen::VectorXd& initial_state_vec, const Eigen::VectorXd& current_solution_vec);
 };
 
 #endif

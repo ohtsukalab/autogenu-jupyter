@@ -1,8 +1,3 @@
-/*
- *   This suppoerts a solver for continuation/GMRES(C/GMRES) method for nonlinear model predictive control
- *   This program is witten with reference to "T. Ohtsuka, "
- */
-
 #ifndef CONTINUATION_GMRES_H
 #define CONTINUATION_GMRES_H
 
@@ -13,21 +8,23 @@
 #include "nmpc_model.hpp"
 
 
-class continuation_gmres : virtual public matrixfree_gmres{
+class ContinuationGMRES : virtual public MatrixFreeGMRES{
 private:
-    nmpc_model model;
-    int dimx, dimu, dimuc, dv, dimeq, kmax;
-    double hdir, tf_len, a, z, ts;
-    Eigen::MatrixXd xtau, lmd;
-    Eigen::VectorXd u, u1, hu, hu1, hu2, du, xs, tmp, uinit, huinit;
+    NMPCModel model_;
+    int dim_state_, dim_control_input_, dim_constraints_, dim_1step_solution_, dim_solution_, horizon_division_num_, dim_krylov_;
+    double initial_time_, horizon_max_length_, alpha_, zeta_, difference_increment_, incremented_time_;
+    Eigen::MatrixXd state_mat_, lambda_mat_;
+    Eigen::VectorXd dx_vec_, incremented_state_vec_, solution_vec_, incremented_solution_vec_, optimality_vec_, optimality_vec_1_, optimality_vec_2_, solution_update_vec_;
+
+    void computeOptimalityError(const double time_param, const Eigen::VectorXd& state_vec, const Eigen::VectorXd& current_solution_vec, Eigen::Ref<Eigen::VectorXd> optimality_vec);
+    void nonlinearEquation(const double time_param, const Eigen::VectorXd& state_vec, const Eigen::VectorXd& current_solution_vec, Eigen::Ref<Eigen::VectorXd> equation_error_vec) override;
+    void forwardDifferenceEquation(const double time_param, const Eigen::VectorXd& state_vec, const Eigen::VectorXd& current_solution_vec, const Eigen::VectorXd& direction_vec, Eigen::Ref<Eigen::VectorXd> forward_difference_error_vec) override;
+
 public:
-    continuation_gmres(const double T_f, const double alpha, const int division_num, const int k_max, const double h_dir, const double zeta);
-    void init(const double t, const Eigen::VectorXd& x0, const Eigen::VectorXd& u0, const double r_tol, const int itr_max);
-    void solvenmpc(const double t, const double ht, const Eigen::VectorXd& x, Eigen::Ref<Eigen::VectorXd> s);
-    void Hufunc(const double t, const Eigen::VectorXd& x, const Eigen::VectorXd& u, Eigen::Ref<Eigen::VectorXd> hu);
-    void Func(const double t, const Eigen::VectorXd& x, const Eigen::VectorXd& u, Eigen::Ref<Eigen::VectorXd> b);
-    void DhFunc(const double t, const Eigen::VectorXd& x, const Eigen::VectorXd& u, const Eigen::VectorXd& v, Eigen::Ref<Eigen::VectorXd> dhu);
-    double geterr();
+    ContinuationGMRES(const NMPCModel model, const double horizon_max_length, const double alpha, const int horizon_division_num, const double difference_increment, const double zeta, const int dim_krylov);
+    void initSolution(const double initial_time, const Eigen::VectorXd& initial_state_vec, const Eigen::VectorXd& initial_guess_input_vec, const double convergence_radius, const int max_iteration);
+    void controlUpdate(const double current_time, const double sampling_period, const Eigen::VectorXd& current_state_vec, Eigen::Ref<Eigen::VectorXd> optimal_control_input_vec);
+    double getError(const double current_time, const Eigen::VectorXd& current_state_vec);
 };
 
 #endif
