@@ -6,18 +6,19 @@
 int main()
 {
     // set solver and parameters
-    continuation_gmres solver(0.5, 1.0, 50, 5, 1.0e-05, 1000);
-    simulator sim;
+    NMPCModel nmpc_model;
+    ContinuationGMRES cgmres_solver(nmpc_model, 0.5, 1.0, 50, 1.0e-06, 1000, 5);
+    Simulator cgmres_simulator(nmpc_model);
 
-    // initial state
-    Eigen::VectorXd x0(4);
-    x0 << 0.0, 0.0, 0.0, 0.0;
+    Eigen::VectorXd initial_state(4);
+    initial_state << 0.0, 0.0, 0.0, 0.0;
 
-    Eigen::VectorXd u0(1);
-    u0 << 0.01;
+    // initial guess of the control input
+    Eigen::VectorXd initial_guess_control_input(1);
+    initial_guess_control_input << 0.0;
 
-    solver.init(0, x0, u0, 1.0e-06, 50);
-    sim.simulation(solver, x0, 10, 0.001, "example");
+    cgmres_solver.initSolution(0, initial_state, initial_guess_control_input, 1.0e-06, 50);
+    cgmres_simulator.simulation(cgmres_solver, initial_state, 0, 10, 0.001, "example");
 
     return 0;
 }

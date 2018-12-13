@@ -5,48 +5,48 @@ import re
 
 def plotsim(argv):
     ############################ load data ############################
-    state = np.genfromtxt(argv[1] + '_state' + '.dat')
-    control_input = np.genfromtxt(argv[1] + '_control_input' + '.dat')
-    error = np.genfromtxt(argv[1] + '_error' + '.dat')
+    state_data = np.genfromtxt(argv[1] + '_state' + '.dat')
+    control_input_data = np.genfromtxt(argv[1] + '_control_input' + '.dat')
+    error_data = np.genfromtxt(argv[1] + '_error' + '.dat')
+    simulation_conditions = open(argv[1] + '_conditions' + '.dat')
 
-    state[np.isnan(xs)] = 0
-    control_input[np.isnan(us)] = 0
-    error[np.isnan(es)] = 0
-
-
-    ld = open(argv[1] + '_conditions' + '.dat')
-    lines = ld.readlines()[1]
+    lines = simulation_conditions.readlines()[1]
     pattern = r'([0-9]+\.?[0-9]*)'
     lists = re.findall(pattern,lines)
-    tsim = float(lists[0])
-    ld.close()
+    simulation_time = float(lists[0])
+    simulation_conditions.close()
+
+    # replace NaN with 0 in simulation data
+    state_data[np.isnan(state_data)] = 0
+    control_input_data[np.isnan(control_input_data)] = 0
+    error_data[np.isnan(error_data)] = 0
 
     # set dimensions
-    dimx = state.shape[1]
-    ns = state.shape[0]
-    if control_input.shape[0] == control_input.size:
-        dimu = 1
+    dim_state = state_data.shape[1]
+    num_time_steps = state_data.shape[0]
+    if control_input_data.shape[0] == control_input_data.size:
+        dim_control_input = 1
     else:
-        dimu = control_input.shape[1]
+        dim_control_input = control_input_data.shape[1]
 
-    # set step times
-    dt = tsim/ns
-    ts = np.arange(0, tsim,dt)
+    # set time sequence
+    time_step = simulation_time/num_time_steps
+    time_sequence = np.arange(0, simulation_time, time_step)
 
-    plotno = dimx+dimu+1
-    plotnox = int(np.floor(plotno/3))
-    plotnoy = int(np.ceil(plotno/plotnox))
+    # set the layout of the graphs 
+    num_plot_variables = dim_state+dim_control_input+1
+    num_plot_x = int(np.floor(num_plot_variables/3))
+    num_plot_y = int(np.ceil(num_plot_variables/num_plot_x))
 
 
     ############################ plot data ############################
     scale = 1.5 ## adjust figsize
-
     sns.set()
     sns.set_style("ticks")
     sns.set_palette("deep") 
     sns.set_context("paper")
-    sns.mpl.pyplot.figure(figsize=(plotnox*3*scale,plotnoy*scale*1.2)) #graph size
-    sns.mpl.pyplot.rcParams['font.size'] = scale*10/plotno #font size
+    sns.mpl.pyplot.figure(figsize=(num_plot_x*3*scale, num_plot_y*scale*1.2)) #graph size
+    sns.mpl.pyplot.rcParams['font.size'] = scale*10/num_plot_variables #font size
     sns.mpl.pyplot.subplots_adjust(wspace= 0.3*scale, hspace= 0.5*scale) #space between graphs
     sns.mpl.pyplot.rcParams['lines.linewidth'] = 1.2 #linewidth
     sns.mpl.pyplot.rc('mathtext', **{'rm':'serif', 'it':'serif:itelic', 'bf':'serif:bold', 'fontset':'cm'})
@@ -56,41 +56,32 @@ def plotsim(argv):
     sns.mpl.pyplot.rcParams['pdf.fonttype'] = 42
     sns.mpl.pyplot.rcParams['ps.fonttype'] = 42
 
-
-    for i in range(dimx):
-        sns.mpl.pyplot.subplot(plotnoy, plotnox, i+1)
-        sns.mpl.pyplot.plot(ts, xs[:,i])
+    for i in range(dim_state):
+        sns.mpl.pyplot.subplot(num_plot_y, num_plot_x, i+1)
+        sns.mpl.pyplot.plot(time_sequence, state_data[:,i])
         sns.mpl.pyplot.xlabel(r'${\rm Time}$ $[s]$')
         sns.mpl.pyplot.ylabel(r'$x_{}$'.format(i+1))
-        sns.mpl.pyplot.xlim(0,tsim)
+        sns.mpl.pyplot.xlim(0, simulation_time)
 
-
-    if dimu > 1:
-        for i in range(dimu):
-            sns.mpl.pyplot.subplot(plotnoy, plotnox, i+dimx+1)
-            sns.mpl.pyplot.plot(ts, us[:,i])
+    if dim_control_input > 1:
+        for i in range(dim_control_input):
+            sns.mpl.pyplot.subplot(num_plot_y, num_plot_x, i+dim_state+1)
+            sns.mpl.pyplot.plot(time_sequence, control_input_data[:,i])
             sns.mpl.pyplot.xlabel(r'${\rm Time}$ $[s]$')
             sns.mpl.pyplot.ylabel(r'$u_{}$'.format(i+1))
-            sns.mpl.pyplot.xlim(0,tsim)
-
+            sns.mpl.pyplot.xlim(0, simulation_time)
     else:
-        sns.mpl.pyplot.subplot(plotnoy, plotnox, dimx+1)
-        sns.mpl.pyplot.plot(ts, us)
+        sns.mpl.pyplot.subplot(num_plot_y, num_plot_x, dim_state+1)
+        sns.mpl.pyplot.plot(time_sequence, control_input_data)
         sns.mpl.pyplot.xlabel(r'${\rm Time}$ $[s]$')
         sns.mpl.pyplot.ylabel(r'$u$')
-        sns.mpl.pyplot.xlim(0,tsim)
+        sns.mpl.pyplot.xlim(0, simulation_time)
 
-
-    F = np.zeros(ns)
-    for i in range(ns):
-        F[i] = np.sum(es[i])
-        F[i] = np.sqrt(F[i])
-
-    sns.mpl.pyplot.subplot(plotnoy, plotnox, dimx+dimu+1)
-    sns.mpl.pyplot.plot(ts,F)
+    sns.mpl.pyplot.subplot(num_plot_y, num_plot_x, dim_state+dim_control_input+1)
+    sns.mpl.pyplot.plot(time_sequence, error_data)
     sns.mpl.pyplot.xlabel(r'${\rm Time}$ $[s]$')
     sns.mpl.pyplot.ylabel(r'$\| F \|$')
-    sns.mpl.pyplot.xlim(0,tsim)
+    sns.mpl.pyplot.xlim(0, simulation_time)
 
 
     ############################ show or save data ############################
@@ -103,7 +94,6 @@ def plotsim(argv):
             print('Input file name')
             ans = input('>> ')
             sns.mpl.pyplot.savefig(ans+'.pdf', bbox_inches="tight", pad_inches=0.1)
-    
     elif(len(argv) == 4):
         sns.mpl.pyplot.savefig(argv[3]+'.pdf', bbox_inches="tight", pad_inches=0.1)
 
