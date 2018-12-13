@@ -10,7 +10,7 @@ private:
     NMPCModel model_;
     Eigen::VectorXd dx_vec_, k1_vec_, k2_vec_, k3_vec_, k4_vec_;
 public:
-    NumericalIntegrator();
+    NumericalIntegrator(const NMPCModel model);
 
     // Euler method for the state vector
     void eulerState(const double current_time, const Eigen::VectorXd& current_state_vec, const Eigen::VectorXd& control_input_vec, const double integration_length, Eigen::Ref<Eigen::VectorXd> next_state_vec);

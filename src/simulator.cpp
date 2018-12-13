@@ -16,7 +16,7 @@ void Simulator::saveData(std::ofstream& state_data, std::ofstream& control_input
     error_data << optimality_error << "\n";
 }
 
-Simulator::Simulator(const NMPCModel model)
+Simulator::Simulator(const NMPCModel model) : NumericalIntegrator(model)
 {
     model_ = model;
 }

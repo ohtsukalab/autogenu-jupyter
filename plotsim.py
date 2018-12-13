@@ -5,33 +5,33 @@ import re
 
 def plotsim(argv):
     ############################ load data ############################
-    xs = np.genfromtxt(argv[1] + 'x' + '.dat')
-    us = np.genfromtxt(argv[1] + 'u' + '.dat')
-    es = np.genfromtxt(argv[1] + 'e' + '.dat')
+    state = np.genfromtxt(argv[1] + '_state' + '.dat')
+    control_input = np.genfromtxt(argv[1] + '_control_input' + '.dat')
+    error = np.genfromtxt(argv[1] + '_error' + '.dat')
 
-    xs[np.isnan(xs)] = 0
-    us[np.isnan(us)] = 0
-    es[np.isnan(es)] = 0
+    state[np.isnan(xs)] = 0
+    control_input[np.isnan(us)] = 0
+    error[np.isnan(es)] = 0
 
 
-    ld = open(argv[1] + 'c' + '.dat')
+    ld = open(argv[1] + '_conditions' + '.dat')
     lines = ld.readlines()[1]
     pattern = r'([0-9]+\.?[0-9]*)'
     lists = re.findall(pattern,lines)
     tsim = float(lists[0])
-
     ld.close()
 
-    dimx = xs.shape[1]
-    if us.shape[0] == us.size:
+    # set dimensions
+    dimx = state.shape[1]
+    ns = state.shape[0]
+    if control_input.shape[0] == control_input.size:
         dimu = 1
     else:
-        dimu = us.shape[1]
+        dimu = control_input.shape[1]
 
-    ns = xs.shape[0]
-
+    # set step times
     dt = tsim/ns
-    ts = np.arange(0,tsim,dt)
+    ts = np.arange(0, tsim,dt)
 
     plotno = dimx+dimu+1
     plotnox = int(np.floor(plotno/3))

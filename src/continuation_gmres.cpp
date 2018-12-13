@@ -2,7 +2,7 @@
 
 
 
-ContinuationGMRES::ContinuationGMRES(const NMPCModel model, const double horizon_max_length, const double alpha, const int horizon_division_num, const double difference_increment, const double zeta, const int dim_krylov) : MatrixFreeGMRES((model.dimControlInput()+model.dimConstraints())*horizon_division_num, dim_krylov)
+ContinuationGMRES::ContinuationGMRES(const NMPCModel model, const double horizon_max_length, const double alpha, const int horizon_division_num, const double difference_increment, const double zeta, const int dim_krylov) : MatrixFreeGMRES((model.dimControlInput()+model.dimConstraints())*horizon_division_num, dim_krylov), NumericalIntegrator(model)
 {
     // set dimensions and parameters
     model_ = model;
@@ -55,8 +55,12 @@ void ContinuationGMRES::initSolution(const double initial_time, const Eigen::Vec
 
 void ContinuationGMRES::controlUpdate(const double current_time, const double sampling_period, const Eigen::VectorXd& current_state_vec, Eigen::Ref<Eigen::VectorXd> optimal_control_input_vec)
 {
+    // predict the incremented state
+    incremented_time_ = current_time + difference_increment_;
+    rungeKuttaGill(current_time, current_state_vec, solution_vec_.segment(0, dim_control_input_), difference_increment_, incremented_state_vec_);
+
     forwardDifferenceGMRES(current_time, current_state_vec, solution_vec_, solution_update_vec_);
-    solution_vec_ = solution_vec_ + sampling_period * solution_update_vec_;
+    solution_vec_ += sampling_period * solution_update_vec_;
     optimal_control_input_vec = solution_vec_.segment(0, dim_control_input_);
 }
 
@@ -99,24 +103,18 @@ void ContinuationGMRES::computeOptimalityError(const double time_param, const Ei
 
 void ContinuationGMRES::nonlinearEquation(const double time_param, const Eigen::VectorXd& state_vec, const Eigen::VectorXd& current_solution_vec, Eigen::Ref<Eigen::VectorXd> equation_error_vec)
 {
-    // predict the incremented state
-    incremented_time_ = time_param + difference_increment_;
-    model_.stateFunc(time_param, state_vec, current_solution_vec.segment(0, dim_control_input_), dx_vec_);
-    incremented_state_vec_ = state_vec + difference_increment_ * dx_vec_;
+    computeOptimalityError(time_param, state_vec, current_solution_vec, optimality_vec_);
+    computeOptimalityError(incremented_time_, incremented_state_vec_, current_solution_vec, optimality_vec_1_);
+    incremented_solution_vec_ = current_solution_vec + difference_increment_ * solution_update_vec_;
+    computeOptimalityError(incremented_time_, incremented_state_vec_, incremented_solution_vec_, optimality_vec_2_);
 
-    computeOptimalityError(time_param, state_vec, solution_vec_, optimality_vec_);
-    computeOptimalityError(incremented_time_, state_vec, solution_vec_, optimality_vec_1_);
-    equation_error_vec = - zeta_ * optimality_vec_ - (optimality_vec_1_ - optimality_vec_) / difference_increment_;
-
-    incremented_solution_vec_ = solution_vec_ + difference_increment_ * solution_update_vec_;
-    computeOptimalityError(incremented_time_, incremented_state_vec_, incremented_solution_vec_, optimality_vec_1_);
-    equation_error_vec -= (optimality_vec_1_ - optimality_vec_2_) / difference_increment_;
+    equation_error_vec = -zeta_*optimality_vec_ - (optimality_vec_1_-optimality_vec_)/difference_increment_ - (optimality_vec_2_-optimality_vec_1_)/difference_increment_;
 }
 
 
 void ContinuationGMRES::forwardDifferenceEquation(const double time_param, const Eigen::VectorXd& state_vec, const Eigen::VectorXd& current_solution_vec, const Eigen::VectorXd& direction_vec, Eigen::Ref<Eigen::VectorXd> forward_difference_error_vec)
 {
-    incremented_solution_vec_ = current_solution_vec + difference_increment_ * direction_vec;
+    incremented_solution_vec_ = current_solution_vec + difference_increment_*direction_vec;
     computeOptimalityError(incremented_time_, incremented_state_vec_, incremented_solution_vec_, optimality_vec_2_);
     forward_difference_error_vec = (optimality_vec_2_ - optimality_vec_1_) / difference_increment_;
 }

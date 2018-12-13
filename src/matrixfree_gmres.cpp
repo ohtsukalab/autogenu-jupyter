@@ -36,6 +36,8 @@ void MatrixFreeGMRES::resetParameters(const int dim_equation, const int dim_kryl
 
 void MatrixFreeGMRES::forwardDifferenceGMRES(const double time_param, const Eigen::VectorXd& state_vec, const Eigen::VectorXd& current_solution_vec, Eigen::Ref<Eigen::VectorXd> solution_update_vec)
 {    
+    int modified_dim_krylov = 0;
+
     for(int i=0; i<=dim_krylov_; i++){
         givens_c_vec_(i) = 0.0;
         givens_s_vec_(i) = 0.0;
@@ -52,12 +54,13 @@ void MatrixFreeGMRES::forwardDifferenceGMRES(const double time_param, const Eige
             hessenberg_mat_(j,k) = basis_mat_.col(k+1).dot(basis_mat_.col(j));
             basis_mat_.col(k+1) -= hessenberg_mat_(j,k) * basis_mat_.col(j);
         }
-        hessenberg_mat_(k+1,k) = basis_mat_.col(k+1).squaredNorm();
+        hessenberg_mat_(k+1,k) = basis_mat_.col(k+1).norm();
         if(hessenberg_mat_(k+1,k) != 0){
             basis_mat_.col(k+1) = basis_mat_.col(k+1) / hessenberg_mat_(k+1,k);
         }
         else {
-            std::cout << "The modified Gram-Schmidt breakdown at " << k << std::endl;
+            std::cout << "The modified Gram-Schmidt breakdown at k=" << k << std::endl;
+            modified_dim_krylov = k;
             break;
         }
 
@@ -74,25 +77,43 @@ void MatrixFreeGMRES::forwardDifferenceGMRES(const double time_param, const Eige
             givensRotation(g_vec_, k);
         }
         else{
-            std::cout << "error!! : h(k,k) = h(k+1,k) = 0" << std::endl;
+            std::cout << "Lose orthogonality of basis of the Krylov!!" << std::endl;
         }
     }
 
-
-    // solve H * y = g : H is an upper hessenberg matrix 
-    for(int i=dim_krylov_-1; i>=0; i--){
-        double tmp=g_vec_(i);
-        for(int j=i+1; j<dim_krylov_; j++){
-            tmp -= hessenberg_mat_(i,j) * (j);
+    if(modified_dim_krylov > 0){
+        // solve H * y = g : H is an upper hessenberg matrix 
+        for(int i=modified_dim_krylov-1; i>=0; i--){
+            double tmp=g_vec_(i);
+            for(int j=i+1; j<modified_dim_krylov; j++){
+                tmp -= hessenberg_mat_(i,j) * givens_c_vec_(j);
+            }
+            y_vec_(i) = tmp / hessenberg_mat_(i,i);
         }
-        y_vec_(i) = tmp / hessenberg_mat_(i,i);
+        for(int i=0; i<dim_equation_; i++){
+            double tmp=0;
+            for(int j=0; j<modified_dim_krylov; j++){
+                tmp += basis_mat_(i,j) * y_vec_(j);
+            }
+            solution_update_vec(i) += tmp;
+        }
     }
-    for(int i=0; i<dim_equation_; i++){
-        double tmp=0;
-        for(int j=0; j<dim_krylov_; j++){
-            tmp += basis_mat_(i,j) * y_vec_(j);
+    else {
+        // solve H * y = g : H is an upper hessenberg matrix 
+        for(int i=dim_krylov_-1; i>=0; i--){
+            double tmp=g_vec_(i);
+            for(int j=i+1; j<dim_krylov_; j++){
+                tmp -= hessenberg_mat_(i,j) * givens_c_vec_(j);
+            }
+            y_vec_(i) = tmp / hessenberg_mat_(i,i);
         }
-        solution_update_vec(i) += tmp;
+        for(int i=0; i<dim_equation_; i++){
+            double tmp=0;
+            for(int j=0; j<dim_krylov_; j++){
+                tmp += basis_mat_(i,j) * y_vec_(j);
+            }
+            solution_update_vec(i) += tmp;
+        }
     }
 }
 

@@ -30,7 +30,6 @@ void InitCGMRES::solve0stepNOCP(const double initial_time, const Eigen::VectorXd
     solution_vec = initial_guess_vec;
     computeOptimalityErrors(initial_time, initial_state_vec, solution_vec, error_vec_);
     while(error_vec_.squaredNorm() > convergence_radius && i < max_iteration){
-        std::cout << "error[" << i << "] = " << error_vec_.squaredNorm() << std::endl;
         forwardDifferenceGMRES(initial_time, initial_state_vec, solution_vec, solution_update_vec_);
         solution_vec += solution_update_vec_;
         computeOptimalityErrors(initial_time, initial_state_vec, solution_vec, error_vec_);
@@ -65,9 +64,8 @@ void InitCGMRES::nonlinearEquation(const double time_param, const Eigen::VectorX
 
 void InitCGMRES::forwardDifferenceEquation(const double time_param, const Eigen::VectorXd& state_vec, const Eigen::VectorXd& current_solution_vec, const Eigen::VectorXd& direction_vec, Eigen::Ref<Eigen::VectorXd> forward_difference_error_vec)
 {
-    computeOptimalityErrors(time_param, state_vec, current_solution_vec, error_vec_1_);
     incremented_solution_vec_ = current_solution_vec + difference_increment_ * direction_vec;
-    computeOptimalityErrors(time_param, state_vec, incremented_solution_vec_, error_vec_2_);
+    computeOptimalityErrors(time_param, state_vec, incremented_solution_vec_, error_vec_1_);
 
-    forward_difference_error_vec = (error_vec_2_ - error_vec_1_) / difference_increment_;
+    forward_difference_error_vec = (error_vec_1_ - error_vec_) / difference_increment_;
 }

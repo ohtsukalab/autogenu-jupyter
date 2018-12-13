@@ -1,8 +1,10 @@
 #include "numerical_integrator.hpp"
 
 
-NumericalIntegrator::NumericalIntegrator()
+NumericalIntegrator::NumericalIntegrator(const NMPCModel model)
 {
+    model_ = model;
+
     // allocate vectors
     dx_vec_.resize(model_.dimState());
     k1_vec_.resize(model_.dimState());

@@ -4,11 +4,12 @@
 
 #include <eigen3/Eigen/Core>
 #include "matrixfree_gmres.hpp"
-#include "init_cgmres.hpp"
 #include "nmpc_model.hpp"
+#include "numerical_integrator.hpp"
+#include "init_cgmres.hpp"
 
 
-class ContinuationGMRES : virtual public MatrixFreeGMRES{
+class ContinuationGMRES : virtual public MatrixFreeGMRES, public NumericalIntegrator{
 private:
     NMPCModel model_;
     int dim_state_, dim_control_input_, dim_constraints_, dim_1step_solution_, dim_solution_, horizon_division_num_, dim_krylov_;
