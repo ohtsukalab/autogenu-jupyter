@@ -44,7 +44,7 @@ void MatrixFreeGMRES::forwardDifferenceGMRES(const double time_param, const Eige
     g_vec_(0) = current_error_vec_.norm();
     basis_mat_.col(0) = current_error_vec_ / g_vec_(0);
 
-    // k : the dimension of the current Krylov subspace
+    // k : the dimension of the Krylov subspace at the current iteration
     int k;
     for(k=0; k<max_dim_krylov_; k++){
         forwardDifferenceEquation(time_param, state_vec, current_solution_vec, basis_mat_.col(k), basis_mat_.col(k+1));
@@ -97,7 +97,7 @@ void MatrixFreeGMRES::forwardDifferenceGMRES(const double time_param, const Eige
 }
 
 
-void MatrixFreeGMRES::givensRotation(Eigen::Ref<Eigen::VectorXd> column_vec, const int i_column)
+inline void MatrixFreeGMRES::givensRotation(Eigen::Ref<Eigen::VectorXd> column_vec, const int i_column)
 {
     double tmp1, tmp2;
 

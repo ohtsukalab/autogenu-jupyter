@@ -7,7 +7,7 @@ int main()
 {
     // set solver and parameters
     NMPCModel nmpc_model;
-    ContinuationGMRES cgmres_solver(nmpc_model, 0.5, 1.0, 50, 1.0e-06, 1000, 5);
+    ContinuationGMRES cgmres_solver(nmpc_model, 0.5, 1.0, 50, 1.0e-06, 1000, 10);
     Simulator cgmres_simulator(nmpc_model);
 
     Eigen::VectorXd initial_state(4);

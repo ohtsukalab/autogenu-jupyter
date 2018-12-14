@@ -1,6 +1,7 @@
 #include "init_cgmres.hpp"
 
 
+
 InitCGMRES::InitCGMRES(const NMPCModel model, const double difference_increment, const int dim_krylov) : MatrixFreeGMRES(model.dimControlInput()+model.dimConstraints(), dim_krylov)
 {
     // set parameters
@@ -48,7 +49,8 @@ Eigen::VectorXd InitCGMRES::getOptimalityErrorVec(const double initial_time, con
 }
 
 
-void InitCGMRES::computeOptimalityErrors(const double time_param, const Eigen::VectorXd& state_vec, const Eigen::VectorXd& current_solution_vec, Eigen::Ref<Eigen::VectorXd> optimality_vec)
+
+inline void InitCGMRES::computeOptimalityErrors(const double time_param, const Eigen::VectorXd& state_vec, const Eigen::VectorXd& current_solution_vec, Eigen::Ref<Eigen::VectorXd> optimality_vec)
 {
     model_.phixFunc(time_param, state_vec, lambda_vec_);
     model_.huFunc(time_param, state_vec, current_solution_vec, lambda_vec_, optimality_vec);

@@ -9,7 +9,7 @@
 #include "init_cgmres.hpp"
 
 
-class ContinuationGMRES : virtual public MatrixFreeGMRES, public NumericalIntegrator{
+class ContinuationGMRES final : virtual public MatrixFreeGMRES{
 private:
     NMPCModel model_;
     int dim_state_, dim_control_input_, dim_constraints_, dim_1step_solution_, dim_solution_, horizon_division_num_, dim_krylov_;
@@ -17,7 +17,7 @@ private:
     Eigen::MatrixXd state_mat_, lambda_mat_;
     Eigen::VectorXd dx_vec_, incremented_state_vec_, solution_vec_, incremented_solution_vec_, optimality_vec_, optimality_vec_1_, optimality_vec_2_, solution_update_vec_;
 
-    void computeOptimalityError(const double time_param, const Eigen::VectorXd& state_vec, const Eigen::VectorXd& current_solution_vec, Eigen::Ref<Eigen::VectorXd> optimality_vec);
+    inline void computeOptimalityError(const double time_param, const Eigen::VectorXd& state_vec, const Eigen::VectorXd& current_solution_vec, Eigen::Ref<Eigen::VectorXd> optimality_vec);
     void nonlinearEquation(const double time_param, const Eigen::VectorXd& state_vec, const Eigen::VectorXd& current_solution_vec, Eigen::Ref<Eigen::VectorXd> equation_error_vec) override;
     void forwardDifferenceEquation(const double time_param, const Eigen::VectorXd& state_vec, const Eigen::VectorXd& current_solution_vec, const Eigen::VectorXd& direction_vec, Eigen::Ref<Eigen::VectorXd> forward_difference_error_vec) override;
 

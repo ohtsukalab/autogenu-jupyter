@@ -6,14 +6,14 @@
 #include <eigen3/Eigen/Core>
 
 
-class InitCGMRES : public MatrixFreeGMRES{
+class InitCGMRES final : public MatrixFreeGMRES{
 private:
     NMPCModel model_;
     int dim_solution_;
     double difference_increment_;
     Eigen::VectorXd solution_update_vec_, incremented_solution_vec_, lambda_vec_, error_vec_, error_vec_1_, error_vec_2_;
 
-    void computeOptimalityErrors(const double time_param, const Eigen::VectorXd& state_vec, const Eigen::VectorXd& current_solution_vec, Eigen::Ref<Eigen::VectorXd> optimality_vec);
+    inline void computeOptimalityErrors(const double time_param, const Eigen::VectorXd& state_vec, const Eigen::VectorXd& current_solution_vec, Eigen::Ref<Eigen::VectorXd> optimality_vec);
     void nonlinearEquation(const double time_param, const Eigen::VectorXd& state_vec, const Eigen::VectorXd& current_solution_vec, Eigen::Ref<Eigen::VectorXd> equation_error_vec) override;
     void forwardDifferenceEquation(const double time_param, const Eigen::VectorXd& state_vec, const Eigen::VectorXd& current_solution_vec, const Eigen::VectorXd& direction_vec, Eigen::Ref<Eigen::VectorXd> forward_difference_error_vec) override;
 

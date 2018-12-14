@@ -5,9 +5,9 @@ import re
 
 def plotsim(argv):
     ############################ load data ############################
-    state_data = np.genfromtxt(argv[1] + '_state' + '.dat')
-    control_input_data = np.genfromtxt(argv[1] + '_control_input' + '.dat')
-    error_data = np.genfromtxt(argv[1] + '_error' + '.dat')
+    time_series_state = np.genfromtxt(argv[1] + '_state' + '.dat')
+    time_series_control_input = np.genfromtxt(argv[1] + '_control_input' + '.dat')
+    time_series_error = np.genfromtxt(argv[1] + '_error' + '.dat')
     simulation_conditions = open(argv[1] + '_conditions' + '.dat')
 
     lines = simulation_conditions.readlines()[1]
@@ -17,17 +17,17 @@ def plotsim(argv):
     simulation_conditions.close()
 
     # replace NaN with 0 in simulation data
-    state_data[np.isnan(state_data)] = 0
-    control_input_data[np.isnan(control_input_data)] = 0
-    error_data[np.isnan(error_data)] = 0
+    time_series_state[np.isnan(time_series_state)] = 0
+    time_series_control_input[np.isnan(time_series_control_input)] = 0
+    time_series_error[np.isnan(time_series_error)] = 0
 
     # set dimensions
-    dim_state = state_data.shape[1]
-    num_time_steps = state_data.shape[0]
-    if control_input_data.shape[0] == control_input_data.size:
+    dim_state = time_series_state.shape[1]
+    num_time_steps = time_series_state.shape[0]
+    if time_series_control_input.shape[0] == time_series_control_input.size:
         dim_control_input = 1
     else:
-        dim_control_input = control_input_data.shape[1]
+        dim_control_input = time_series_control_input.shape[1]
 
     # set time sequence
     time_step = simulation_time/num_time_steps
@@ -35,7 +35,7 @@ def plotsim(argv):
 
     # set the layout of the graphs 
     num_plot_variables = dim_state+dim_control_input+1
-    num_plot_x = int(np.floor(num_plot_variables/3))
+    num_plot_x = int(np.floor(num_plot_variables/np.sqrt(num_plot_variables)))
     num_plot_y = int(np.ceil(num_plot_variables/num_plot_x))
 
 
@@ -58,7 +58,7 @@ def plotsim(argv):
 
     for i in range(dim_state):
         sns.mpl.pyplot.subplot(num_plot_y, num_plot_x, i+1)
-        sns.mpl.pyplot.plot(time_sequence, state_data[:,i])
+        sns.mpl.pyplot.plot(time_sequence, time_series_state[:,i])
         sns.mpl.pyplot.xlabel(r'${\rm Time}$ $[s]$')
         sns.mpl.pyplot.ylabel(r'$x_{}$'.format(i+1))
         sns.mpl.pyplot.xlim(0, simulation_time)
@@ -66,19 +66,19 @@ def plotsim(argv):
     if dim_control_input > 1:
         for i in range(dim_control_input):
             sns.mpl.pyplot.subplot(num_plot_y, num_plot_x, i+dim_state+1)
-            sns.mpl.pyplot.plot(time_sequence, control_input_data[:,i])
+            sns.mpl.pyplot.plot(time_sequence, time_series_control_input[:,i])
             sns.mpl.pyplot.xlabel(r'${\rm Time}$ $[s]$')
             sns.mpl.pyplot.ylabel(r'$u_{}$'.format(i+1))
             sns.mpl.pyplot.xlim(0, simulation_time)
     else:
         sns.mpl.pyplot.subplot(num_plot_y, num_plot_x, dim_state+1)
-        sns.mpl.pyplot.plot(time_sequence, control_input_data)
+        sns.mpl.pyplot.plot(time_sequence, time_series_control_input)
         sns.mpl.pyplot.xlabel(r'${\rm Time}$ $[s]$')
         sns.mpl.pyplot.ylabel(r'$u$')
         sns.mpl.pyplot.xlim(0, simulation_time)
 
     sns.mpl.pyplot.subplot(num_plot_y, num_plot_x, dim_state+dim_control_input+1)
-    sns.mpl.pyplot.plot(time_sequence, error_data)
+    sns.mpl.pyplot.plot(time_sequence, time_series_error)
     sns.mpl.pyplot.xlabel(r'${\rm Time}$ $[s]$')
     sns.mpl.pyplot.ylabel(r'$\| F \|$')
     sns.mpl.pyplot.xlim(0, simulation_time)

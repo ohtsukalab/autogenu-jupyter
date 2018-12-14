@@ -27,9 +27,9 @@ private:
 	static constexpr double g = 9.80665;
 
 	/* parameters in cost the function */
-	double q[dim_state_] = {1, 1, 0.0001, 0.0001};
-	double r[dim_control_input_] = {0.01};
-	double sf[dim_state_] = {1, 1, 0.0001, 0.0001};
+	double q[dim_state_] = {1, 1, 0.001, 0.001};
+	double r[dim_control_input_] = {0.001};
+	double sf[dim_state_] = {1, 1, 0.001, 0.001};
 	double xf[dim_state_] = {M_PI, 0.0, 0.0, 0.0};
 
 

@@ -1,6 +1,7 @@
 #include "simulator.hpp"
 
 
+
 void Simulator::saveData(std::ofstream& state_data, std::ofstream& control_input_data, std::ofstream& error_data, const double time_param, const Eigen::VectorXd& state_vec, const Eigen::VectorXd& control_input_vec, const double optimality_error)
 {
     for(int i=0; i<model_.dimState(); i++){
@@ -15,6 +16,7 @@ void Simulator::saveData(std::ofstream& state_data, std::ofstream& control_input
 
     error_data << optimality_error << "\n";
 }
+
 
 Simulator::Simulator(const NMPCModel model) : NumericalIntegrator(model)
 {
@@ -32,7 +34,7 @@ void Simulator::simulation(ContinuationGMRES cgmres_solver, const Eigen::VectorX
     std::ofstream error_data(savefile_name + "_error.dat");
     std::ofstream conditions_data(savefile_name + "_conditions.dat");
 
-    double total_time = 0.0;
+    double total_time = 0;
     current_state_vec=initial_state_vec;
     std::cout << "Start simulation" << std::endl;
     for(double current_time=start_time; current_time<end_time; current_time+= sampling_period){
@@ -46,22 +48,21 @@ void Simulator::simulation(ContinuationGMRES cgmres_solver, const Eigen::VectorX
         end_clock = std::chrono::system_clock::now();
 
         // compute the computational time of the control update by the C/GMRES method
-        double step_time = std::chrono::duration_cast<std::chrono::milliseconds>(end_clock -start_clock).count();
-        step_time = step_time * 0.001;
+        double step_time = std::chrono::duration_cast<std::chrono::microseconds>(end_clock-start_clock).count();
+        step_time *= 1e-06;
         total_time += step_time;
 
         current_state_vec = next_state_vec;
     }
-
     std::cout << "End simulation" << std::endl;
     std::cout << "CPU time: " << total_time << " [sec]" << std::endl;
     
+    // save simulation conditions
     conditions_data << savefile_name << "\n";
     conditions_data << "simulation time: " << end_time-start_time << " [sec]\n";
     conditions_data << "CPU time (total): " << total_time << " [sec]\n";
     conditions_data << "sampling time: " << sampling_period << " [sec]\n";
     conditions_data << "CPU time (1step): " << total_time/((int)( (end_time-start_time)/(sampling_period))) << " [sec]\n";
-
 
     state_data.close();
     control_input_data.close();

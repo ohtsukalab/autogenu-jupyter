@@ -11,7 +11,7 @@
 #include "continuation_gmres.hpp"
 
 
-class Simulator : virtual public NumericalIntegrator{
+class Simulator final : virtual public NumericalIntegrator{
 private:
     NMPCModel model_;
     void saveData(std::ofstream& state_data, std::ofstream& control_input_data, std::ofstream& error_data, const double time_param, const Eigen::VectorXd& state_vec, const Eigen::VectorXd& control_input_vec, const double optimality_error);
