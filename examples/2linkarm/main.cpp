@@ -1,5 +1,6 @@
 #include "nmpc_model.hpp"
 #include "continuation_gmres.hpp"
+#include "multiple_shooting_cgmres.hpp"
 #include "simulator.hpp"
 
 

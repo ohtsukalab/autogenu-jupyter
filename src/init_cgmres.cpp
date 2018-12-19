@@ -49,7 +49,6 @@ Eigen::VectorXd InitCGMRES::getOptimalityErrorVec(const double initial_time, con
 }
 
 
-
 inline void InitCGMRES::computeOptimalityErrors(const double time_param, const Eigen::VectorXd& state_vec, const Eigen::VectorXd& current_solution_vec, Eigen::Ref<Eigen::VectorXd> optimality_vec)
 {
     model_.phixFunc(time_param, state_vec, lambda_vec_);

@@ -47,7 +47,9 @@ void ContinuationGMRES::initSolution(const double initial_time, const Eigen::Vec
     initial_time_ = initial_time;
     initializer.solve0stepNOCP(initial_time, initial_state_vec, initial_guess_input_vec, convergence_radius, max_iteration, initial_solution_vec);
     for(int i=0; i<horizon_division_num_; i++){
+        // intialize the solution_vec_
         solution_vec_.segment(i*dim_1step_solution_, dim_1step_solution_) = initial_solution_vec;    
+        // intialize the optimality_vec_
         optimality_vec_.segment(i*dim_1step_solution_, dim_1step_solution_) = initializer.getOptimalityErrorVec(initial_time, initial_state_vec, initial_solution_vec);
     }
 }
@@ -79,16 +81,16 @@ double ContinuationGMRES::getError(const double current_time, const Eigen::Vecto
 
 void ContinuationGMRES::computeOptimalityError(const double time_param, const Eigen::VectorXd& state_vec, const Eigen::VectorXd& current_solution_vec, Eigen::Ref<Eigen::VectorXd> optimality_vec)
 {
-    double horizon_length, tau, delta_tau;
     Eigen::VectorXd dx_vec(dim_state_);
 
     // set the horizon
-    horizon_length = horizon_max_length_ * (1.0 - std::exp(- alpha_ * (time_param - initial_time_)));
-    delta_tau = horizon_length / horizon_division_num_;
+    double horizon_length = horizon_max_length_ * (1.0 - std::exp(- alpha_ * (time_param - initial_time_)));
+    double delta_tau = horizon_length / horizon_division_num_;
 
     // compute the state trajectory over the horizon on the basis of the control_input_vec and the current_state_vec
     state_mat_.col(0) = state_vec;
-    for(int i=0, tau=time_param; i<horizon_division_num_; i++, tau+=delta_tau){
+    double tau=time_param;
+    for(int i=0; i<horizon_division_num_; i++, tau+=delta_tau){
         model_.stateFunc(tau, state_mat_.col(i), current_solution_vec.segment(i*dim_1step_solution_, dim_control_input_), dx_vec);
         state_mat_.col(i+1) = state_mat_.col(i) + delta_tau * dx_vec;
     }
@@ -110,7 +112,7 @@ void ContinuationGMRES::nonlinearEquation(const double time_param, const Eigen::
     incremented_solution_vec_ = current_solution_vec + difference_increment_ * solution_update_vec_;
     computeOptimalityError(incremented_time_, incremented_state_vec_, incremented_solution_vec_, optimality_vec_2_);
 
-    equation_error_vec = -zeta_*optimality_vec_ - (optimality_vec_1_-optimality_vec_)/difference_increment_ - (optimality_vec_2_-optimality_vec_1_)/difference_increment_;
+    equation_error_vec = - (zeta_ - 1/difference_increment_) *optimality_vec_ - optimality_vec_2_/difference_increment_;
 }
 
 

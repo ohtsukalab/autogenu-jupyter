@@ -9,6 +9,7 @@
 #include "nmpc_model.hpp"
 #include "numerical_integrator.hpp"
 #include "continuation_gmres.hpp"
+#include "multiple_shooting_cgmres.hpp"
 
 
 class Simulator final : virtual public NumericalIntegrator{
@@ -18,6 +19,7 @@ private:
 public:
     Simulator(const NMPCModel model);
     void simulation(ContinuationGMRES cgmres_solver, const Eigen::VectorXd& initial_state_vec, const double start_time, const double end_time, const double sampling_period, const std::string savefile_name);
+    void simulation(MultipleShootingCGMRES cgmres_solver, const Eigen::VectorXd& initial_state_vec, const double start_time, const double end_time, const double sampling_period, const std::string savefile_name);
 };
 
 
