@@ -68,12 +68,12 @@ class TwoLinkAnimation:
         self.__y_max = 2.5
 
         # set for drawing animation
-        self.__fstep = 1
-        self.__total_frames = (int)(self.__time_series_state.shape[0]/self.__fstep)
+        self.__skip_frames = 1
+        self.__total_frames = (int)(self.__time_series_state.shape[0]/self.__skip_frames)
 
 
     def __updateAnimation(self, i):
-        frame = self.__fstep * i
+        frame = self.__skip_frames * i
         self.__x1 = np.sin(self.__time_series_state[frame,0])
         self.__y1 = - np.cos(self.__time_series_state[frame,0])
         self.__x2 = self.__x1 + np.sin(self.__time_series_state[frame,0]+self.__time_series_state[frame,1])
@@ -84,9 +84,9 @@ class TwoLinkAnimation:
         return self.__link1, self.__link2, self.__time_text
 
 
-    def setFstep(self, fstep):
-        self.__fstep = fstep
-        self.__total_frames = (int)(self.__time_series_state.shape[0]/fstep)
+    def setskip_frames(self, skip_frames):
+        self.__skip_frames = skip_frames
+        self.__total_frames = (int)(self.__time_series_state.shape[0]/skip_frames)
 
 
     def generateAnimation(self, argv):
@@ -110,15 +110,15 @@ class TwoLinkAnimation:
             if(argv[2] == 'save' or argv[2] == 'SAVE'):
                 print('Input save file name')
                 ans = input('>> ')
-                anime.save(ans+'.mp4', writer='ffmpeg', fps = int(1/(self.__simulation_conditions.getSamplingPeriod()*self.__fstep)))
+                anime.save(ans+'.mp4', writer='ffmpeg', fps = int(1/(self.__simulation_conditions.getSamplingPeriod()*self.__skip_frames)))
         elif(len(argv) == 4):
-            anime.save(argv[3]+'.mp4', writer='ffmpeg', fps = int(1/(self.__simulation_conditions.getSamplingPeriod()*self.__fstep)))
+            anime.save(argv[3]+'.mp4', writer='ffmpeg', fps = int(1/(self.__simulation_conditions.getSamplingPeriod()*self.__skip_frames)))
 
 
 
 if __name__ == "__main__":
     animation = TwoLinkAnimation(sys.argv)
-    animation.setFstep(2)
+    animation.setskip_frames(1)
     animation.generateAnimation(sys.argv)
 
 

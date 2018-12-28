@@ -55,14 +55,14 @@ void Simulator::simulation(ContinuationGMRES cgmres_solver, const Eigen::VectorX
         current_state_vec = next_state_vec;
     }
     std::cout << "End simulation" << std::endl;
-    std::cout << "CPU time: " << total_time << " [sec]" << std::endl;
+    std::cout << "Total CPU time for control update: " << total_time << " [sec]" << std::endl;
     
     // save simulation conditions
-    conditions_data << savefile_name << "\n";
+    conditions_data << "simulation name: " << savefile_name << "\n";
     conditions_data << "simulation time: " << end_time-start_time << " [sec]\n";
-    conditions_data << "CPU time (total): " << total_time << " [sec]\n";
+    conditions_data << "CPU time for control update (total): " << total_time << " [sec]\n";
     conditions_data << "sampling time: " << sampling_period << " [sec]\n";
-    conditions_data << "CPU time (1step): " << total_time/((int)( (end_time-start_time)/(sampling_period))) << " [sec]\n";
+    conditions_data << "CPU time for control update (1step): " << total_time/((int)( (end_time-start_time)/(sampling_period))) << " [sec]\n";
 
     state_data.close();
     control_input_data.close();
@@ -103,14 +103,14 @@ void Simulator::simulation(MultipleShootingCGMRES cgmres_solver, const Eigen::Ve
         current_state_vec = next_state_vec;
     }
     std::cout << "End simulation" << std::endl;
-    std::cout << "CPU time: " << total_time << " [sec]" << std::endl;
-    
+    std::cout << "Total CPU time for control update: " << total_time << " [sec]" << std::endl;
+
     // save simulation conditions
-    conditions_data << savefile_name << "\n";
+    conditions_data << "simulation name" << savefile_name << "\n";
     conditions_data << "simulation time: " << end_time-start_time << " [sec]\n";
-    conditions_data << "CPU time (total): " << total_time << " [sec]\n";
+    conditions_data << "CPU time for control update (total): " << total_time << " [sec]\n";
     conditions_data << "sampling time: " << sampling_period << " [sec]\n";
-    conditions_data << "CPU time (1step): " << total_time/((int)( (end_time-start_time)/(sampling_period))) << " [sec]\n";
+    conditions_data << "CPU time for control update (1step): " << total_time/((int)( (end_time-start_time)/(sampling_period))) << " [sec]\n";
 
     state_data.close();
     control_input_data.close();

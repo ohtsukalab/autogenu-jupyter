@@ -40,14 +40,14 @@ void MatrixFreeGMRES::forwardDifferenceGMRES(const double time_param, const Eige
         g_vec_(i) = 0.0;
     }
 
-    nonlinearEquation(time_param, state_vec, current_solution_vec, current_error_vec_);
+    bFunc(time_param, state_vec, current_solution_vec, current_error_vec_);
     g_vec_(0) = current_error_vec_.norm();
     basis_mat_.col(0) = current_error_vec_ / g_vec_(0);
 
     // k : the dimension of the Krylov subspace at the current iteration
     int k;
     for(k=0; k<max_dim_krylov_; k++){
-        forwardDifferenceEquation(time_param, state_vec, current_solution_vec, basis_mat_.col(k), basis_mat_.col(k+1));
+        axFunc(time_param, state_vec, current_solution_vec, basis_mat_.col(k), basis_mat_.col(k+1));
         for(int j=0; j<=k; j++){
             hessenberg_mat_(j,k) = basis_mat_.col(k+1).dot(basis_mat_.col(j));
             basis_mat_.col(k+1) -= hessenberg_mat_(j,k) * basis_mat_.col(j);

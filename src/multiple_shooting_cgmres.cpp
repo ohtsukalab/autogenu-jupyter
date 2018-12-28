@@ -85,14 +85,16 @@ void MultipleShootingCGMRES::controlUpdate(const double current_time, const doub
     incremented_state_vec_ = current_state_vec + difference_increment_*dx_vec_;
 
     forwardDifferenceGMRES(current_time, current_state_vec, control_input_and_constraints_seq_, control_input_and_constraints_update_seq_);
-    control_input_and_constraints_seq_ += sampling_period * control_input_and_constraints_update_seq_;
 
-    // update state_mat_ and lamdba_mat
-    computeStateAndLambda(incremented_time_, incremented_state_vec_, control_input_and_constraints_seq_, (1-difference_increment_*zeta_)*state_error_mat_, (1-difference_increment_*zeta_)*lambda_error_mat_, incremented_state_mat_, incremented_lambda_mat_);
+    // update state_mat_ and lamdba_mat_
+    computeStateAndLambda(incremented_time_, incremented_state_vec_, control_input_and_constraints_seq_+difference_increment_*control_input_and_constraints_update_seq_, (1-difference_increment_*zeta_)*state_error_mat_, (1-difference_increment_*zeta_)*lambda_error_mat_, incremented_state_mat_, incremented_lambda_mat_);
     state_update_mat_ = (incremented_state_mat_ - state_mat_)/difference_increment_;
     lambda_update_mat_ = (incremented_lambda_mat_ - lambda_mat_)/difference_increment_;
     state_mat_ += sampling_period * state_update_mat_;
     lambda_mat_ += sampling_period * lambda_update_mat_;
+
+    // update control_input_and_constraints_seq_
+    control_input_and_constraints_seq_ += sampling_period * control_input_and_constraints_update_seq_;
 
     optimal_control_input_vec = control_input_and_constraints_seq_.segment(0, dim_control_input_);
 }
@@ -109,12 +111,6 @@ double MultipleShootingCGMRES::getError(const double current_time, const Eigen::
     double squared_error = control_input_and_constraints_error_seq.squaredNorm();
     for(int i=0; i<horizon_division_num_; i++){
         squared_error += (state_error_mat.col(i).squaredNorm() + lambda_error_mat.col(i).squaredNorm());
-    }
-
-    std::cout << "control_error = " << control_input_and_constraints_error_seq.norm() << ", state_error = " << std::sqrt(squared_error - control_input_and_constraints_error_seq.squaredNorm()) << std::endl;
-
-    if(std::isnan(control_input_and_constraints_error_seq.norm()) || std::isnan(squared_error)){
-        std::exit(1);
     }
 
     return std::sqrt(squared_error);
@@ -185,41 +181,30 @@ inline void MultipleShootingCGMRES::computeStateAndLambda(const double time_para
 }
 
 
-void MultipleShootingCGMRES::nonlinearEquation(const double time_param, const Eigen::VectorXd& state_vec, const Eigen::VectorXd& current_solution_vec, Eigen::Ref<Eigen::VectorXd> equation_error_vec)
+void MultipleShootingCGMRES::bFunc(const double time_param, const Eigen::VectorXd& state_vec, const Eigen::VectorXd& current_solution_vec, Eigen::Ref<Eigen::VectorXd> equation_error_vec)
 {
-    // control_input_and_constraints_error_seq_ : F(U, X, x, t)
     computeOptimalityErrorforControlInputAndConstraints(time_param, state_vec, current_solution_vec, state_mat_, lambda_mat_, control_input_and_constraints_error_seq_);
-    // control_input_and_constraints_error_seq_1_: F(U, X, x+hdx, t+ht)
     computeOptimalityErrorforControlInputAndConstraints(incremented_time_, incremented_state_vec_, current_solution_vec, state_mat_, lambda_mat_, control_input_and_constraints_error_seq_1_);
 
-    // state_error_mat_, lambda_error_mat_ : G(U, X, x, t)
     computeOptimalityErrorforStateAndLambda(time_param, state_vec, current_solution_vec, state_mat_, lambda_mat_, state_error_mat_, lambda_error_mat_);
-    // state_error_mat_1_, lambda_error_mat_1_ : G(U, X, x+hdx, t+ht)
     computeOptimalityErrorforStateAndLambda(incremented_time_, incremented_state_vec_, current_solution_vec, state_mat_, lambda_mat_, state_error_mat_1_, lambda_error_mat_1_);
 
-    // incremented_state_mat_, incremented_lambda_mat_ : K(U, (1-hz)G(U, X, x, t), x+hdx, t+ht)
     computeStateAndLambda(incremented_time_, incremented_state_vec_, current_solution_vec, (1-difference_increment_*zeta_)*state_error_mat_, (1-difference_increment_*zeta_)*lambda_error_mat_, incremented_state_mat_, incremented_lambda_mat_);
-    // control_input_and_constraints_error_seq_3_ : F(U, K(U, (1-hz)G(U, X, x, t), x+hdx, t+ht), x+hdx, t+ht)
     computeOptimalityErrorforControlInputAndConstraints(incremented_time_, incremented_state_vec_, current_solution_vec, incremented_state_mat_, incremented_lambda_mat_, control_input_and_constraints_error_seq_3_);
 
     incremented_control_input_and_constraints_seq_ = current_solution_vec + difference_increment_ * control_input_and_constraints_update_seq_;
-    // incremented_state_mat_, incremented_lambda_mat_ : K(U+h\hat{U}, G(U, X, x+hdx, t+ht), x+hdx, t+ht)
     computeStateAndLambda(incremented_time_, incremented_state_vec_, incremented_control_input_and_constraints_seq_, state_error_mat_1_, lambda_error_mat_1_, incremented_state_mat_, incremented_lambda_mat_);
-    // F(U+h\hat{U}, K(U+h\hat{U}, G(U, X, x+hdx, t+ht), x+hdx, t+ht), x+hdx, t+ht)
     computeOptimalityErrorforControlInputAndConstraints(incremented_time_, incremented_state_vec_, incremented_control_input_and_constraints_seq_, incremented_state_mat_, incremented_lambda_mat_, control_input_and_constraints_error_seq_2_);
 
     equation_error_vec = - (zeta_ - 1/difference_increment_) * control_input_and_constraints_error_seq_ - control_input_and_constraints_error_seq_3_/difference_increment_ - (control_input_and_constraints_error_seq_2_ - control_input_and_constraints_error_seq_1_)/difference_increment_;
 }
 
 
-void MultipleShootingCGMRES::forwardDifferenceEquation(const double time_param, const Eigen::VectorXd& state_vec, const Eigen::VectorXd& current_solution_vec, const Eigen::VectorXd& direction_vec, Eigen::Ref<Eigen::VectorXd> forward_difference_error_vec)
+void MultipleShootingCGMRES::axFunc(const double time_param, const Eigen::VectorXd& state_vec, const Eigen::VectorXd& current_solution_vec, const Eigen::VectorXd& direction_vec, Eigen::Ref<Eigen::VectorXd> forward_difference_error_vec)
 {
     incremented_control_input_and_constraints_seq_ = current_solution_vec + difference_increment_ * direction_vec;
-    // incremented_state_mat_, incremented_lambda_mat_ : K(U+huk, G(U, X, x+hdx, t+ht), x+hdx, t+ht)
     computeStateAndLambda(incremented_time_, incremented_state_vec_, incremented_control_input_and_constraints_seq_, state_error_mat_1_, lambda_error_mat_1_, incremented_state_mat_, incremented_lambda_mat_);
-    // F(U+huk, K(U+huk, G(U, X, x+hdx, t+ht), x+hdx, t+ht), x+hdx, t+ht)
     computeOptimalityErrorforControlInputAndConstraints(incremented_time_, incremented_state_vec_, incremented_control_input_and_constraints_seq_, incremented_state_mat_, incremented_lambda_mat_, control_input_and_constraints_error_seq_2_);
 
-    // (F(U+huk, K(U+huk, G(U, X, x+hdx, t+ht), x+hdx, t+ht), x+hdx, t+ht) - F(U, x, x+hdx, t+ht))/h
     forward_difference_error_vec =(control_input_and_constraints_error_seq_2_ - control_input_and_constraints_error_seq_1_)/difference_increment_;
 }

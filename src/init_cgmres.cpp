@@ -56,14 +56,14 @@ inline void InitCGMRES::computeOptimalityErrors(const double time_param, const E
 }
 
 
-void InitCGMRES::nonlinearEquation(const double time_param, const Eigen::VectorXd& state_vec, const Eigen::VectorXd& current_solution_vec, Eigen::Ref<Eigen::VectorXd> equation_error_vec) 
+void InitCGMRES::bFunc(const double time_param, const Eigen::VectorXd& state_vec, const Eigen::VectorXd& current_solution_vec, Eigen::Ref<Eigen::VectorXd> equation_error_vec) 
 {
     computeOptimalityErrors(time_param, state_vec, current_solution_vec, error_vec_);
     equation_error_vec = - error_vec_;
 }
 
 
-void InitCGMRES::forwardDifferenceEquation(const double time_param, const Eigen::VectorXd& state_vec, const Eigen::VectorXd& current_solution_vec, const Eigen::VectorXd& direction_vec, Eigen::Ref<Eigen::VectorXd> forward_difference_error_vec)
+void InitCGMRES::axFunc(const double time_param, const Eigen::VectorXd& state_vec, const Eigen::VectorXd& current_solution_vec, const Eigen::VectorXd& direction_vec, Eigen::Ref<Eigen::VectorXd> forward_difference_error_vec)
 {
     incremented_solution_vec_ = current_solution_vec + difference_increment_ * direction_vec;
     computeOptimalityErrors(time_param, state_vec, incremented_solution_vec_, error_vec_1_);

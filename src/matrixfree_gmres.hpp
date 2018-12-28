@@ -18,8 +18,8 @@ private:
     Eigen::VectorXd current_error_vec_, givens_c_vec_, givens_s_vec_, g_vec_;
 
     inline void givensRotation(Eigen::Ref<Eigen::VectorXd> column_vec, const int i_column);
-    virtual void nonlinearEquation(const double time_param, const Eigen::VectorXd& state_vec, const Eigen::VectorXd& current_solution_vec, Eigen::Ref<Eigen::VectorXd> equation_error_vec) = 0;
-    virtual void forwardDifferenceEquation(const double time_param, const Eigen::VectorXd& state_vec, const Eigen::VectorXd& current_solution_vec, const Eigen::VectorXd& direction_vec, Eigen::Ref<Eigen::VectorXd> forward_difference_error_vec) = 0;
+    virtual void bFunc(const double time_param, const Eigen::VectorXd& state_vec, const Eigen::VectorXd& current_solution_vec, Eigen::Ref<Eigen::VectorXd> equation_error_vec) = 0;
+    virtual void axFunc(const double time_param, const Eigen::VectorXd& state_vec, const Eigen::VectorXd& current_solution_vec, const Eigen::VectorXd& direction_vec, Eigen::Ref<Eigen::VectorXd> forward_difference_error_vec) = 0;
 public:
     MatrixFreeGMRES(const int dim_equation, const int dim_krylov);
     void resetParameters(const int dim_equation, const int dim_krylov);
