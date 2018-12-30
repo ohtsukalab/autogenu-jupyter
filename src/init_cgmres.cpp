@@ -1,15 +1,14 @@
 #include "init_cgmres.hpp"
 
 
-
 InitCGMRES::InitCGMRES(const NMPCModel model, const double difference_increment, const int dim_krylov) : MatrixFreeGMRES(model.dimControlInput()+model.dimConstraints(), dim_krylov)
 {
-    // set parameters
+    // Set parameters.
     model_ = model;
     difference_increment_ = difference_increment;
     dim_solution_ = model_.dimControlInput()+model_.dimConstraints();
 
-    // allocate vectors
+    // Allocate vectors.
     solution_update_vec_.resize(dim_solution_);
     incremented_solution_vec_.resize(dim_solution_);
     lambda_vec_.resize(model_.dimState());
@@ -17,7 +16,7 @@ InitCGMRES::InitCGMRES(const NMPCModel model, const double difference_increment,
     error_vec_1_.resize(dim_solution_);
     error_vec_2_.resize(dim_solution_);
 
-    // initialize solution of the forward-difference GMRES
+    // Initialize solution of the forward-difference GMRES.
     for(int i=0; i<dim_solution_; i++){
         solution_update_vec_(i) = 0.0;
         error_vec_(i) = 0.0;

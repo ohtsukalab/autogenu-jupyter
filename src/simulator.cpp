@@ -1,7 +1,6 @@
 #include "simulator.hpp"
 
 
-
 void Simulator::saveData(std::ofstream& state_data, std::ofstream& control_input_data, std::ofstream& error_data, const double time_param, const Eigen::VectorXd& state_vec, const Eigen::VectorXd& control_input_vec, const double optimality_error)
 {
     for(int i=0; i<model_.dimState(); i++){
@@ -35,19 +34,20 @@ void Simulator::simulation(ContinuationGMRES cgmres_solver, const Eigen::VectorX
     std::ofstream conditions_data(savefile_name + "_conditions.dat");
 
     double total_time = 0;
-    current_state_vec=initial_state_vec;
+    current_state_vec = initial_state_vec;
     std::cout << "Start simulation" << std::endl;
     for(double current_time=start_time; current_time<end_time; current_time+= sampling_period){
         saveData(state_data, control_input_data, error_data, current_time, current_state_vec, control_input_vec, cgmres_solver.getError(current_time, current_state_vec));
 
-        // compute the next state vector by the 4th Runge-Kutta-Gill method
+        // Compute the next state vector using the 4th Runge-Kutta-Gill method.
         rungeKuttaGill(current_time, current_state_vec, control_input_vec, sampling_period, next_state_vec);
 
+        // Update the solution and measure computational time.
         start_clock = std::chrono::system_clock::now();
         cgmres_solver.controlUpdate(current_time, sampling_period, current_state_vec, control_input_vec);
         end_clock = std::chrono::system_clock::now();
 
-        // compute the computational time of the control update by the C/GMRES method
+        // Convert computational time to seconds.
         double step_time = std::chrono::duration_cast<std::chrono::microseconds>(end_clock-start_clock).count();
         step_time *= 1e-06;
         total_time += step_time;
@@ -57,7 +57,7 @@ void Simulator::simulation(ContinuationGMRES cgmres_solver, const Eigen::VectorX
     std::cout << "End simulation" << std::endl;
     std::cout << "Total CPU time for control update: " << total_time << " [sec]" << std::endl;
     
-    // save simulation conditions
+    // Save simulation conditions.
     conditions_data << "simulation name: " << savefile_name << "\n";
     conditions_data << "simulation time: " << end_time-start_time << " [sec]\n";
     conditions_data << "CPU time for control update (total): " << total_time << " [sec]\n";
@@ -83,19 +83,20 @@ void Simulator::simulation(MultipleShootingCGMRES cgmres_solver, const Eigen::Ve
     std::ofstream conditions_data(savefile_name + "_conditions.dat");
 
     double total_time = 0;
-    current_state_vec=initial_state_vec;
+    current_state_vec = initial_state_vec;
     std::cout << "Start simulation" << std::endl;
     for(double current_time=start_time; current_time<end_time; current_time+= sampling_period){
         saveData(state_data, control_input_data, error_data, current_time, current_state_vec, control_input_vec, cgmres_solver.getError(current_time, current_state_vec));
 
-        // compute the next state vector by the 4th Runge-Kutta-Gill method
+        // Compute the next state vector using the 4th Runge-Kutta-Gill method.
         rungeKuttaGill(current_time, current_state_vec, control_input_vec, sampling_period, next_state_vec);
 
+        // Update the solution and measure computational time.
         start_clock = std::chrono::system_clock::now();
         cgmres_solver.controlUpdate(current_time, sampling_period, current_state_vec, control_input_vec);
         end_clock = std::chrono::system_clock::now();
 
-        // compute the computational time of the control update by the C/GMRES method
+        // Convert computational time to seconds.
         double step_time = std::chrono::duration_cast<std::chrono::microseconds>(end_clock-start_clock).count();
         step_time *= 1e-06;
         total_time += step_time;
@@ -105,8 +106,8 @@ void Simulator::simulation(MultipleShootingCGMRES cgmres_solver, const Eigen::Ve
     std::cout << "End simulation" << std::endl;
     std::cout << "Total CPU time for control update: " << total_time << " [sec]" << std::endl;
 
-    // save simulation conditions
-    conditions_data << "simulation name" << savefile_name << "\n";
+    // Save simulation conditions.
+    conditions_data << "simulation name: " << savefile_name << "\n";
     conditions_data << "simulation time: " << end_time-start_time << " [sec]\n";
     conditions_data << "CPU time for control update (total): " << total_time << " [sec]\n";
     conditions_data << "sampling time: " << sampling_period << " [sec]\n";

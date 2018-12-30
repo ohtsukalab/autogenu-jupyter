@@ -6,10 +6,10 @@ MatrixFreeGMRES::MatrixFreeGMRES(const int dim_equation, const int k)
     dim_equation_ = dim_equation;
     max_dim_krylov_ = k;
 
-    // allocate matrices and vectors
+    // Allocate matrices and vectors for matrix-free GMRES.
     hessenberg_mat_.resize(max_dim_krylov_+1, max_dim_krylov_+1);
     basis_mat_.resize(dim_equation_, max_dim_krylov_+1);
-    current_error_vec_.resize(dim_equation_);
+    b_vec_.resize(dim_equation_);
     givens_c_vec_.resize(max_dim_krylov_+1);
     givens_s_vec_.resize(max_dim_krylov_+1);
     g_vec_.resize(max_dim_krylov_+1);
@@ -21,30 +21,32 @@ void MatrixFreeGMRES::resetParameters(const int dim_equation, const int k)
     dim_equation_ = dim_equation;
     max_dim_krylov_ = k;
 
-    // allocate matrices and vectors
+    // Reallocate matrices and vectors for matrix-free GMRES.
     hessenberg_mat_.resize(max_dim_krylov_+1, max_dim_krylov_+1);
     basis_mat_.resize(dim_equation_, max_dim_krylov_+1);
-    current_error_vec_.resize(dim_equation_);
+    b_vec_.resize(dim_equation_);
     givens_c_vec_.resize(max_dim_krylov_+1);
     givens_s_vec_.resize(max_dim_krylov_+1);
     g_vec_.resize(max_dim_krylov_+1);
 }
 
 
-
 void MatrixFreeGMRES::forwardDifferenceGMRES(const double time_param, const Eigen::VectorXd& state_vec, const Eigen::VectorXd& current_solution_vec, Eigen::Ref<Eigen::VectorXd> solution_update_vec)
 {
+    // Initialize vectors for QR factrization by Givens rotation.
     for(int i=0; i<=max_dim_krylov_; i++){
         givens_c_vec_(i) = 0.0;
         givens_s_vec_(i) = 0.0;
         g_vec_(i) = 0.0;
     }
 
-    bFunc(time_param, state_vec, current_solution_vec, current_error_vec_);
-    g_vec_(0) = current_error_vec_.norm();
-    basis_mat_.col(0) = current_error_vec_ / g_vec_(0);
+    // Generate the initial basis of the Krylov subspace.
+    bFunc(time_param, state_vec, current_solution_vec, b_vec_);
+    g_vec_(0) = b_vec_.norm();
+    basis_mat_.col(0) = b_vec_ / g_vec_(0);
 
-    // k : the dimension of the Krylov subspace at the current iteration
+
+    // k : the dimension of the Krylov subspace at the current iteration.
     int k;
     for(k=0; k<max_dim_krylov_; k++){
         axFunc(time_param, state_vec, current_solution_vec, basis_mat_.col(k), basis_mat_.col(k+1));
@@ -62,7 +64,7 @@ void MatrixFreeGMRES::forwardDifferenceGMRES(const double time_param, const Eige
             break;
         }
 
-        // Givens Rotation for the Lieast Squares Problem
+        // Givens Rotation for QR factrization of the least squares problem.
         for(int j=0; j<k; j++){
             givensRotation(hessenberg_mat_.col(k), j);
         }
@@ -79,7 +81,7 @@ void MatrixFreeGMRES::forwardDifferenceGMRES(const double time_param, const Eige
         }
     }
 
-    // solve H * y = g : H is an upper hessenberg matrix 
+    // Solve hessenberg_mat * y = g_vec and obtain y.
     for(int i=k-1; i>=0; i--){
         double tmp=g_vec_(i);
         for(int j=i+1; j<k; j++){
