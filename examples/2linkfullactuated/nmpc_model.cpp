@@ -21,18 +21,23 @@ void NMPCModel::stateFunc(const double t, const Eigen::VectorXd& x, const Eigen:
 // t    : time parameter
 // x    : state vector
 // phix : the value of dphi/dx(t, x)
-void NMPCModel::phixFunc(const double t, const Eigen::VectorXd& x, Eigen::Ref<Eigen::VectorXd> lmd)
+void NMPCModel::phixFunc(const double t, const Eigen::VectorXd& x, Eigen::Ref<Eigen::VectorXd> phix)
 {
-    lmd[0] = (x[0] - x_ref[0]) * q_terminal[0];
-    lmd[1] = (x[1] - x_ref[1]) * q_terminal[1];
-    lmd[2] = (x[2] - x_ref[2]) * q_terminal[2];
-    lmd[3] = (x[3] - x_ref[3]) * q_terminal[3];
+    phix[0] = (x[0] - x_ref[0]) * q_terminal[0];
+    phix[1] = (x[1] - x_ref[1]) * q_terminal[1];
+    phix[2] = (x[2] - x_ref[2]) * q_terminal[2];
+    phix[3] = (x[3] - x_ref[3]) * q_terminal[3];
 }
 
 
 // Partial derivative of the Hamiltonian with respect to state, dH/dx(t, x, u, lmd)
 // H(t, x, u, lmd) = L(t, x, u) + lmd * f(t, x, u)
 // L(t, x, u) = (q[0]*(x[0]-x_ref[0])^2 + q[1]*(x[1]-x_ref[1])^2 + q[2]*(x[2]-x_ref[2])^2 + q[3]*(x[3]-x_ref[3])^2 + r[0]*u[0]^2)/2
+// t   : time parameter
+// x   : state vector
+// u   : control input vector
+// lmd : the Lagrange multiplier for the state equation
+// hx  : the value of dH/dx(t, x, u, lmd)
 void NMPCModel::hxFunc(const double t, const Eigen::VectorXd& x, const Eigen::VectorXd& u, const Eigen::VectorXd& lmd, Eigen::Ref<Eigen::VectorXd> hx)
 {
     hx[0] = (g * lmd[3] * d2 * l1 * m2 * (d1 * m1 + l1 * m2) * cos(x[0] - x[1]) - cos(x[0] + 0.2e1 * x[1]) * d2 * d2 * g * l1 * m2 * m2 * lmd[3] - 0.2e1 * m2 * g * ((lmd[2] * d2 * d2 + lmd[3] * l1 * l1 / 0.2e1) * m2 + lmd[2] * J2 + lmd[3] * (d1 * d1 * m1 - d1 * l1 * m1 / 0.2e1 + J1)) * d2 * cos(x[0] + x[1]) - 0.2e1 * (d2 * d2 * l1 * (lmd[2] - lmd[3] / 0.2e1) * m2 * m2 + (d1 * d2 * d2 * m1 + J2 * l1) * (lmd[2] - lmd[3]) * m2 + J2 * d1 * m1 * (lmd[2] - lmd[3])) * g * cos(x[0]) + 0.4e1 * (x[0] - x_ref[0]) * q[0] * (d2 * m2 * l1 * cos(x[1]) + (d2 * d2 / 0.2e1 + l1 * l1 / 0.2e1) * m2 + d1 * d1 * m1 / 0.2e1 + J1 / 0.2e1 + J2 / 0.2e1) * (d2 * d2 * m2 + J2)) / (0.2e1 * d2 * m2 * l1 * cos(x[1]) + d1 * d1 * m1 + d2 * d2 * m2 + l1 * l1 * m2 + J1 + J2) / (d2 * d2 * m2 + J2) / 0.2e1;
@@ -45,6 +50,11 @@ void NMPCModel::hxFunc(const double t, const Eigen::VectorXd& x, const Eigen::Ve
 // Partial derivative of the Hamiltonian with respect to control input and constraints, dH/du(t, x, u, lmd)
 // H(t, x, u, lmd) = L(t, x, u) + lmd * f(t, x, u)
 // L(t, x, u) = (q[0]*(x[0]-x_ref[0])^2 + q[1]*(x[1]-x_ref[1])^2 + q[2]*(x[2]-x_ref[2])^2 + q[3]*(x[3]-x_ref[3])^2 + r[0]*u[0]^2)/2
+// t   : time parameter
+// x   : state vector
+// u   : control input vector
+// lmd : the Lagrange multiplier for the state equation
+// hu  : the value of dH/du(t, x, u, lmd)
 void NMPCModel::huFunc(const double t, const Eigen::VectorXd& x, const Eigen::VectorXd& u, const Eigen::VectorXd& lmd, Eigen::Ref<Eigen::VectorXd> hu)
 {
     hu[0] = (- d2 * l1 *  m2 *  (-2 * d2 * d2 * m2 * r[0] * u[0] - 2 * J2 * r[0] * u[0] + lmd[3]) * cos(x[1]) + ( r[0] *  u[0] * ( (d2 * d2) + l1 * l1) *  m2 +  (u[0] * (d1 * d1 * m1 + J1 + J2) * r[0]) +  lmd[2] -  lmd[3]) *  (d2 * d2 * m2 + J2)) /  (d2 * d2 * m2 + J2) / (0.2e1 *  d2 *  m2 * l1 * cos(x[1]) + ( (d2 * d2) + l1 * l1) *  m2 +  J2 +  (d1 * d1 * m1) +  J1);

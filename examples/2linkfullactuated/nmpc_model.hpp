@@ -43,7 +43,7 @@ public:
     void stateFunc(const double t, const Eigen::VectorXd& x, const Eigen::VectorXd& u, Eigen::Ref<Eigen::VectorXd> f);
 
     // Partial derivative of the terminal cost with respect to state.
-    void phixFunc(const double t, const Eigen::VectorXd& x, Eigen::Ref<Eigen::VectorXd> lmd);
+    void phixFunc(const double t, const Eigen::VectorXd& x, Eigen::Ref<Eigen::VectorXd> phix);
 
     // Partial derivative of the Hamiltonian with respect to state.
     void hxFunc(const double t, const Eigen::VectorXd& x, const Eigen::VectorXd& u, const Eigen::VectorXd& lmd, Eigen::Ref<Eigen::VectorXd> hx);
