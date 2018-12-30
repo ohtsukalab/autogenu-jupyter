@@ -11,8 +11,39 @@ This project provides Continuation/GMRES method (C/GMRES method), a fast algorit
 
 
 # Usage
-Write equations of nmpc in nmpc_model.cpp as follows:
+After setting the parameters of your model of NMPC in nmpc_model.hpp, writing equations in nmpc_model.cpp, and setting simulation conditions in main.cpp, build files as follows:
 
+```
+$ mkdir build
+$ cd build
+$ cmake ..
+$ make
+```
+
+
+After performing a numerical simulation, you can see graphs by
+
+```
+$ python3 plotsim.py example
+```
+
+and save graphs by
+
+```
+$ python3 plotsim.py example save example
+```
+
+You can also see an animation of 2link robot by
+
+```
+$ python3 2linkanimation.py example
+```
+
+and save its animation by
+
+```
+$ python3 2linkanimation.py example save example
+```
 
 
 
