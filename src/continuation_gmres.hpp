@@ -10,7 +10,6 @@
 #include <eigen3/Eigen/Core>
 #include "matrixfree_gmres.hpp"
 #include "nmpc_model.hpp"
-#include "numerical_integrator.hpp"
 #include "init_cgmres.hpp"
 
 

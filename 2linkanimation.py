@@ -84,7 +84,7 @@ class TwoLinkAnimation:
         return self.__link1, self.__link2, self.__time_text
 
 
-    def setskip_frames(self, skip_frames):
+    def setSkipFrames(self, skip_frames):
         self.__skip_frames = skip_frames
         self.__total_frames = (int)(self.__time_series_state.shape[0]/skip_frames)
 
@@ -118,7 +118,7 @@ class TwoLinkAnimation:
 
 if __name__ == "__main__":
     animation = TwoLinkAnimation(sys.argv)
-    animation.setskip_frames(1)
+    animation.setSkipFrames(1)
     animation.generateAnimation(sys.argv)
 
 

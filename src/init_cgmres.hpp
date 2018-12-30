@@ -6,8 +6,8 @@
 #define INIT_CGMRES_H
 
 
-#include "matrixfree_gmres.hpp"
 #include <eigen3/Eigen/Core>
+#include "matrixfree_gmres.hpp"
 
 
 // Computes the initial solution of the C/GMRES method using the Newton method.

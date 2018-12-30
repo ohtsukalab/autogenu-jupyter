@@ -25,25 +25,25 @@ After performing a numerical simulation, you can see graphs by
 
 ```
 $ python3 plotsim.py example
-```
+```,
 
-and save graphs by
+save graphs by
 
 ```
 $ python3 plotsim.py example save example
-```
+```,
 
-You can also see an animation of 2link robot by
+see an animation of 2link robot by
 
 ```
 $ python3 2linkanimation.py example
-```
+```,
 
 and save its animation by
 
 ```
 $ python3 2linkanimation.py example save example
-```
+```.
 
 
 

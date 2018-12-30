@@ -11,7 +11,7 @@
 #include <cmath>
 
 
-// 
+// This class stores parameters of NMPC and equations of NMPC.
 class NMPCModel{
 private:
     // Define parameters of your model here using "static constexpr".

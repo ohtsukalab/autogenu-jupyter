@@ -11,7 +11,7 @@
 #include <cmath>
 
 
-//
+// This class stores parameters of NMPC and equations of NMPC.
 class NMPCModel{
 private:
     // Define parameters of your model here using "static constexpr".
@@ -19,7 +19,6 @@ private:
     static constexpr int dim_control_input_ = 2;
     static constexpr int dim_constraints_ = 0;
 
-    // parametern in the model
     static constexpr double m1 = 0.2;
     static constexpr double m2 = 0.7;
     static constexpr double l1 = 0.3;

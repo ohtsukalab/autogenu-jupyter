@@ -93,13 +93,13 @@ class PlotSimulationData:
         sns.mpl.pyplot.rcParams['axes.linewidth'] = 0.5
 
 
-    def SetScales(self, figure_scale, font_scale, space_scale):
+    def setScales(self, figure_scale, font_scale, space_scale):
         self.__figure_scale = figure_scale
         self.__font_scale = font_scale
         self.__space_scale = space_scale
 
 
-    def DrawGraphs(self, argv):
+    def drawGraphs(self, argv):
         # set figure size
         sns.mpl.pyplot.figure(figsize=(2.5*self.__num_plot_x*self.__figure_scale, self.__num_plot_y*self.__figure_scale)) 
         # set font size
@@ -150,5 +150,5 @@ class PlotSimulationData:
 
 if __name__ == "__main__":
     plotsim = PlotSimulationData(sys.argv)
-    plotsim.SetScales(2, 2, 1.5)
-    plotsim.DrawGraphs(sys.argv)
+    plotsim.setScales(2, 2, 1.5)
+    plotsim.drawGraphs(sys.argv)
