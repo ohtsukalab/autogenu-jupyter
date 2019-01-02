@@ -1,0 +1,1 @@
+/usr/bin/c++   -O3   CMakeFiles/sim.dir/src/main.cpp.o  -o sim -rdynamic libsimulator.a libnmpcsolver.a libmodel.a 

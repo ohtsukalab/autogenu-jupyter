@@ -1,8 +1,25 @@
 #include "multiple_shooting_cgmres.hpp"
 
-
-MultipleShootingCGMRES::MultipleShootingCGMRES(const NMPCModel model, const double horizon_max_length, const double alpha, const int horizon_division_num, const double difference_increment, const double zeta, const int dim_krylov) : MatrixFreeGMRES((model.dimControlInput()+model.dimConstraints())*horizon_division_num, dim_krylov)
+void MultipleShootingCGMRES::setDummy(double dummy)
 {
+    double new_dummy = dummy;
+}
+
+void MultipleShootingCGMRES::setSolver(NMPCModel model, double horizon_max_length, double alpha, int horizon_division_num, double difference_increment, double zeta, int dim_krylov)
+{
+    /* Copied from matrix-free GMRES */
+        dim_equation_ = (model.dimControlInput()+model.dimConstraints())*horizon_division_num;
+        max_dim_krylov_ = dim_krylov;
+
+        // Allocate matrices and vectors for matrix-free GMRES.
+        hessenberg_mat_.resize(max_dim_krylov_+1, max_dim_krylov_+1);
+        basis_mat_.resize(dim_equation_, max_dim_krylov_+1);
+        b_vec_.resize(dim_equation_);
+        givens_c_vec_.resize(max_dim_krylov_+1);
+        givens_s_vec_.resize(max_dim_krylov_+1);
+        g_vec_.resize(max_dim_krylov_+1);
+
+
     // Set dimensions and parameters.
     model_ = model;
     dim_state_ = model_.dimState();
@@ -49,6 +66,60 @@ MultipleShootingCGMRES::MultipleShootingCGMRES(const NMPCModel model, const doub
     lambda_update_mat_ = Eigen::MatrixXd::Zero(dim_state_, horizon_division_num);
 }
 
+// MultipleShootingCGMRES::MultipleShootingCGMRES(
+    //     const NMPCModel model, 
+    //     const double horizon_max_length, 
+    //     const double alpha, 
+    //     const int horizon_division_num, 
+    //     const double difference_increment, 
+    //     const double zeta, const int dim_krylov) : 
+    //     MatrixFreeGMRES((model.dimControlInput()+model.dimConstraints())*horizon_division_num, dim_krylov)
+    // {
+    //     // Set dimensions and parameters.
+    //     model_ = model;
+    //     dim_state_ = model_.dimState();
+    //     dim_control_input_ = model_.dimControlInput();
+    //     dim_constraints_ = model_.dimConstraints();
+    //     dim_control_input_and_constraints_ = dim_control_input_ + dim_constraints_;
+    //     dim_state_and_lambda_ = 2*dim_state_;
+    //     dim_control_input_and_constraints_seq_ = horizon_division_num * dim_control_input_and_constraints_;
+    //     dim_state_and_lambda_seq_ = horizon_division_num * dim_state_and_lambda_;
+
+    //     // Set parameters for horizon and the C/GMRES.
+    //     horizon_max_length_ = horizon_max_length;
+    //     alpha_ = alpha;
+    //     horizon_division_num_ = horizon_division_num;
+    //     difference_increment_ = difference_increment;
+    //     zeta_ = zeta;
+    //     dim_krylov_ = dim_krylov;
+
+    //     // Allocate vectors and matrices.
+    //     dx_vec_.resize(dim_state_);
+    //     incremented_state_vec_.resize(dim_state_);
+    //     control_input_and_constraints_seq_.resize(dim_control_input_and_constraints_seq_);
+    //     incremented_control_input_and_constraints_seq_.resize(dim_control_input_and_constraints_seq_);
+    //     control_input_and_constraints_error_seq_.resize(dim_control_input_and_constraints_seq_);
+    //     control_input_and_constraints_error_seq_1_.resize(dim_control_input_and_constraints_seq_);
+    //     control_input_and_constraints_error_seq_2_.resize(dim_control_input_and_constraints_seq_);
+    //     control_input_and_constraints_error_seq_3_.resize(dim_control_input_and_constraints_seq_);
+    //     control_input_and_constraints_update_seq_.resize(dim_control_input_and_constraints_seq_);
+
+    //     state_mat_.resize(dim_state_, horizon_division_num);
+    //     lambda_mat_.resize(dim_state_, horizon_division_num);
+    //     incremented_state_mat_.resize(dim_state_, horizon_division_num);
+    //     incremented_lambda_mat_.resize(dim_state_, horizon_division_num);
+    //     state_error_mat_.resize(dim_state_, horizon_division_num);
+    //     state_error_mat_1_.resize(dim_state_, horizon_division_num);
+    //     lambda_error_mat_.resize(dim_state_, horizon_division_num);
+    //     lambda_error_mat_1_.resize(dim_state_, horizon_division_num);
+    //     state_update_mat_.resize(dim_state_, horizon_division_num);
+    //     lambda_update_mat_.resize(dim_state_, horizon_division_num);
+
+    //     // Initialize solution of the forward-difference GMRES.
+    //     control_input_and_constraints_update_seq_ = Eigen::VectorXd::Zero(dim_control_input_and_constraints_seq_);
+    //     state_update_mat_ = Eigen::MatrixXd::Zero(dim_state_, horizon_division_num);
+    //     lambda_update_mat_ = Eigen::MatrixXd::Zero(dim_state_, horizon_division_num);
+// }
 
 void MultipleShootingCGMRES::initSolution(const double initial_time, const Eigen::VectorXd& initial_state_vec, const Eigen::VectorXd& initial_guess_input_vec, const double convergence_radius, const int max_iteration)
 {
@@ -205,4 +276,82 @@ void MultipleShootingCGMRES::axFunc(const double time_param, const Eigen::Vector
     computeOptimalityErrorforControlInputAndConstraints(incremented_time_, incremented_state_vec_, incremented_control_input_and_constraints_seq_, incremented_state_mat_, incremented_lambda_mat_, control_input_and_constraints_error_seq_2_);
 
     forward_difference_error_vec =(control_input_and_constraints_error_seq_2_ - control_input_and_constraints_error_seq_1_)/difference_increment_;
+}
+
+inline void MultipleShootingCGMRES::givensRotation(Eigen::Ref<Eigen::VectorXd> column_vec, const int i_column)
+{
+    double tmp1, tmp2;
+
+    tmp1 = givens_c_vec_(i_column) * column_vec(i_column) - givens_s_vec_(i_column) * column_vec(i_column+1);
+    tmp2 = givens_s_vec_(i_column) * column_vec(i_column) + givens_c_vec_(i_column) * column_vec(i_column+1);
+
+    column_vec(i_column) = tmp1;
+    column_vec(i_column+1) = tmp2;
+}
+
+void MultipleShootingCGMRES::forwardDifferenceGMRES(const double time_param, const Eigen::VectorXd& state_vec, const Eigen::VectorXd& current_solution_vec, Eigen::Ref<Eigen::VectorXd> solution_update_vec)
+{
+    // Initialize vectors for QR factrization by Givens rotation.
+    for(int i=0; i<=max_dim_krylov_; i++){
+        givens_c_vec_(i) = 0.0;
+        givens_s_vec_(i) = 0.0;
+        g_vec_(i) = 0.0;
+    }
+
+    // Generate the initial basis of the Krylov subspace.
+    bFunc(time_param, state_vec, current_solution_vec, b_vec_);
+    g_vec_(0) = b_vec_.norm();
+    basis_mat_.col(0) = b_vec_ / g_vec_(0);
+
+
+    // k : the dimension of the Krylov subspace at the current iteration.
+    int k;
+    for(k=0; k<max_dim_krylov_; k++){
+        axFunc(time_param, state_vec, current_solution_vec, basis_mat_.col(k), basis_mat_.col(k+1));
+        for(int j=0; j<=k; j++){
+            hessenberg_mat_(j,k) = basis_mat_.col(k+1).dot(basis_mat_.col(j));
+            basis_mat_.col(k+1) -= hessenberg_mat_(j,k) * basis_mat_.col(j);
+        }
+        hessenberg_mat_(k+1,k) = basis_mat_.col(k+1).norm();
+
+        if(hessenberg_mat_(k+1,k) != 0){
+            basis_mat_.col(k+1) = basis_mat_.col(k+1) / hessenberg_mat_(k+1,k);
+        }
+        else {
+            std::cout << "The modified Gram-Schmidt breakdown at k=" << k << std::endl;
+            break;
+        }
+
+        // Givens Rotation for QR factrization of the least squares problem.
+        for(int j=0; j<k; j++){
+            givensRotation(hessenberg_mat_.col(k), j);
+        }
+        double nu = std::sqrt(hessenberg_mat_(k,k)*hessenberg_mat_(k,k) + hessenberg_mat_(k+1,k)*hessenberg_mat_(k+1,k));
+        if(nu != 0) {
+            givens_c_vec_(k) = hessenberg_mat_(k,k) / nu;
+            givens_s_vec_(k) = - hessenberg_mat_(k+1,k) / nu;
+            hessenberg_mat_(k,k) = givens_c_vec_(k) * hessenberg_mat_(k,k) - givens_s_vec_(k) * hessenberg_mat_(k+1,k);
+            hessenberg_mat_(k+1,k) = 0;
+            givensRotation(g_vec_,k);
+        }
+        else{
+            std::cout << "Lose orthogonality of the basis of the Krylov subspace!!" << std::endl;
+        }
+    }
+
+    // Solve hessenberg_mat * y = g_vec and obtain y.
+    for(int i=k-1; i>=0; i--){
+        double tmp=g_vec_(i);
+        for(int j=i+1; j<k; j++){
+            tmp -= hessenberg_mat_(i,j) * givens_c_vec_(j);
+        }
+        givens_c_vec_(i) = tmp / hessenberg_mat_(i,i);
+    }
+    for(int i=0; i<dim_equation_; i++){
+        double tmp=0;
+        for(int j=0; j<k; j++){
+            tmp += basis_mat_(i,j) * givens_c_vec_(j);
+        }
+        solution_update_vec(i) += tmp;
+    }
 }

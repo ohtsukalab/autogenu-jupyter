@@ -1,3 +1,26 @@
+# Build
+	mkdir -p ~/ros/src/mpc_meta/mayataka_cgmres/build && cd ~/ros/src/mpc_meta/mayataka_cgmres/build 
+	cmake .. 
+	make
+
+# Usage
+	cd ~/ros/src/mpc_meta/mayataka_cgmres && ./build/sim
+
+
+
+
+
+
+
+# Plotting with python
+	pip install numpy
+
+	sudo apt install -y python3-pip
+	pip3 install numpy seaborn
+
+	python3 plotsim.py example
+
+
 # Introduction
 This project provides Continuation/GMRES method (C/GMRES method), a fast algorithm of NMPC, and the multiple shooting based C/GMRES method.
 

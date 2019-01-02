@@ -1,0 +1,2 @@
+/usr/bin/ar qc libsimulator.a  CMakeFiles/simulator.dir/src/simulator.cpp.o CMakeFiles/simulator.dir/src/numerical_integrator.cpp.o
+/usr/bin/ranlib libsimulator.a
