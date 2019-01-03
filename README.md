@@ -14,7 +14,7 @@ This repository is still under development.
 
 # Install
 	mkdir -p ~/ros/src/mayataka_ros && ~/ros/src/mayataka_ros && git init
-	git remote add gh git@github.com:benjaminabruzzo/CGMRES.git && git fetch 
+	git remote add gh git@github.com:benjaminabruzzo/CGMRES.git && git fetch gh
 	git checkout ros-kinetic-devel
 	
 	cd ~/ros
