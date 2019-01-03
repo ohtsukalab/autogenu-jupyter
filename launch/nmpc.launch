@@ -1,0 +1,9 @@
+<launch>
+
+	<arg name="launcher" 		default="nmpc" />
+<!-- 	<node pkg="hast"	 type="killhast"			name="killhast_$(arg launcher)"			output="screen" required="true"/>
+	<node pkg="hast"	 type="shutdownListener"	name="shutdownListener_$(arg launcher)"	output="screen"	required="true"/>
+ -->
+	<node pkg="mayataka_ros"	type="mayataka_nmpc"	name="mayataka_nmpc_$(arg launcher)"	output="screen"	required="true"/>
+
+</launch>

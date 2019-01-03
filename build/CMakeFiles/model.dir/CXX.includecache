@@ -1,0 +1,18 @@
+#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+../include/nmpc_model.hpp
+eigen3/Eigen/Core
+-
+cmath
+-
+
+/home/benjamin/ros/src/mpc_meta/mayataka_cgmres/src/nmpc_model.cpp
+nmpc_model.hpp
+/home/benjamin/ros/src/mpc_meta/mayataka_cgmres/src/nmpc_model.hpp
+

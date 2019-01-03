@@ -1,5 +1,5 @@
 #include "simulator.hpp"
-
+#include <ros/ros.h>
 
 void Simulator::saveData(std::ofstream& state_data, std::ofstream& control_input_data, std::ofstream& error_data, const double time_param, const Eigen::VectorXd& state_vec, const Eigen::VectorXd& control_input_vec, const double optimality_error)
 {
@@ -17,10 +17,33 @@ void Simulator::saveData(std::ofstream& state_data, std::ofstream& control_input
 }
 
 
-Simulator::Simulator(const NMPCModel model) : NumericalIntegrator(model)
+void Simulator::initModel(NMPCModel model)
 {
     model_ = model;
+
+    k1_vec_.resize(model_.dimState());
+    k2_vec_.resize(model_.dimState());
+    k3_vec_.resize(model_.dimState());
+    k4_vec_.resize(model_.dimState());
+
 }
+
+void Simulator::euler(const double current_time, const Eigen::VectorXd& current_state_vec, const Eigen::VectorXd& control_input_vec, const double integration_length, Eigen::Ref<Eigen::VectorXd> next_state_vec)
+{
+    model_.stateFunc(current_time, current_state_vec, control_input_vec, dx_vec_);
+    next_state_vec = current_state_vec + integration_length * dx_vec_;
+}
+
+
+void Simulator::rungeKuttaGill(const double current_time, const Eigen::VectorXd& current_state_vec, const Eigen::VectorXd& control_input_vec, const double integration_length, Eigen::Ref<Eigen::VectorXd> next_state_vec)
+{
+    model_.stateFunc(current_time, current_state_vec, control_input_vec, k1_vec_);
+    model_.stateFunc(current_time+0.5*integration_length, current_state_vec+0.5*integration_length*k1_vec_, control_input_vec, k2_vec_);
+    model_.stateFunc(current_time+0.5*integration_length, current_state_vec+integration_length*0.5*(std::sqrt(2)-1)*k1_vec_+integration_length*(1-(1/std::sqrt(2)))*k2_vec_, control_input_vec, k3_vec_);
+    model_.stateFunc(current_time+integration_length, current_state_vec-integration_length*0.5*std::sqrt(2)*k2_vec_+integration_length*(1+(1/std::sqrt(2)))*k3_vec_, control_input_vec, k4_vec_);
+    next_state_vec = current_state_vec + integration_length*(k1_vec_+(2-std::sqrt(2))*k2_vec_+(2+std::sqrt(2))*k3_vec_+k4_vec_)/6;
+}
+
 
 
 void Simulator::simulation(ContinuationGMRES cgmres_solver, const Eigen::VectorXd& initial_state_vec, const double start_time, const double end_time, const double sampling_period, const std::string savefile_name)
@@ -74,6 +97,7 @@ void Simulator::simulation(ContinuationGMRES cgmres_solver, const Eigen::VectorX
 
 void Simulator::simulation(MultipleShootingCGMRES cgmres_solver, const Eigen::VectorXd& initial_state_vec, const double start_time, const double end_time, const double sampling_period, const std::string savefile_name)
 {
+
     Eigen::VectorXd current_state_vec(model_.dimState()), next_state_vec(model_.dimState()), control_input_vec(model_.dimControlInput());
     std::chrono::system_clock::time_point start_clock, end_clock;
 
@@ -86,7 +110,7 @@ void Simulator::simulation(MultipleShootingCGMRES cgmres_solver, const Eigen::Ve
     current_state_vec = initial_state_vec;
     std::cout << "Start simulation" << std::endl;
     for(double current_time=start_time; current_time<end_time; current_time+= sampling_period){
-        saveData(state_data, control_input_data, error_data, current_time, current_state_vec, control_input_vec, cgmres_solver.getError(current_time, current_state_vec));
+        // saveData(state_data, control_input_data, error_data, current_time, current_state_vec, control_input_vec, cgmres_solver.getError(current_time, current_state_vec));
 
         // Compute the next state vector using the 4th Runge-Kutta-Gill method.
         rungeKuttaGill(current_time, current_state_vec, control_input_vec, sampling_period, next_state_vec);
