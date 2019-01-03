@@ -1,2 +1,0 @@
-/usr/bin/ar qc libmodel.a  CMakeFiles/model.dir/src/nmpc_model.cpp.o
-/usr/bin/ranlib libmodel.a
