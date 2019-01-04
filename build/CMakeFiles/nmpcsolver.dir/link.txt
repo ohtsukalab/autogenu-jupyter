@@ -1,0 +1,2 @@
+/usr/bin/ar qc libnmpcsolver.a  CMakeFiles/nmpcsolver.dir/src/matrixfree_gmres.cpp.o CMakeFiles/nmpcsolver.dir/src/init_cgmres.cpp.o CMakeFiles/nmpcsolver.dir/src/continuation_gmres.cpp.o CMakeFiles/nmpcsolver.dir/src/multiple_shooting_cgmres.cpp.o
+/usr/bin/ranlib libnmpcsolver.a

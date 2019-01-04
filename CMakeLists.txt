@@ -1,19 +1,46 @@
-cmake_minimum_required(VERSION 3.1)
-project(nmpc_solver CXX)
+cmake_minimum_required(VERSION 2.8.3)
+project(mayataka_ros)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
-set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_CXX_FLAGS "-O3")
+find_package(catkin REQUIRED COMPONENTS cmake_modules
+	roscpp
+	rospy
+	std_msgs
+)
+find_package(Eigen3 REQUIRED)
 
-set(MODEL_DIR ${CMAKE_SOURCE_DIR}/examples/pendubot)
+catkin_package(
+	INCLUDE_DIRS include
+	DEPENDS EIGEN3
+)
 
-include_directories(${CMAKE_SOURCE_DIR})
-include_directories(src)
-include_directories(${MODEL_DIR})
+###########
+## Build ##
+###########
 
-add_subdirectory(${MODEL_DIR})
-add_subdirectory(src)
-add_executable(a.out ${MODEL_DIR}/main.cpp)
+include_directories(include)
+include_directories(
+  ${EIGEN3_INCLUDE_DIRS}
+  ${catkin_INCLUDE_DIRS}
+)
 
-target_link_libraries(a.out simulator)
-target_link_libraries(a.out nmpcsolver)
-target_link_libraries(a.out model)
+add_library(nmpcsolver 	STATIC 
+	src/matrixfree_gmres.cpp 
+	src/init_cgmres.cpp 
+	src/continuation_gmres.cpp 
+	src/multiple_shooting_cgmres.cpp
+	)
+add_library(simulator STATIC 
+	# src/numerical_integrator.cpp
+	src/simulator.cpp 
+	)
+
+# add_library(model STATIC src/ms_model.cpp)
+add_library(model STATIC src/tlfa_model.cpp)
+
+
+add_executable(mayataka_nmpc src/mayataka_nmpc.cpp)
+	target_link_libraries(mayataka_nmpc ${catkin_LIBRARIES})
+	target_link_libraries(mayataka_nmpc simulator)
+	target_link_libraries(mayataka_nmpc nmpcsolver)
+	target_link_libraries(mayataka_nmpc model)		
