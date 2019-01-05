@@ -1,2 +1,2 @@
-add_library(nmpcsolver STATIC matrixfree_gmres.cpp init_cgmres.cpp continuation_gmres.cpp multiple_shooting_cgmres.cpp)
+add_library(nmpcsolver STATIC matrixfree_gmres.cpp init_cgmres.cpp continuation_gmres.cpp multiple_shooting_cgmres.cpp control_input_saturation.cpp control_input_saturation_sequence.cpp init_cgmres_with_saturation.cpp multiple_shooting_with_saturation.cpp)
 add_library(simulator STATIC simulator.cpp numerical_integrator.cpp)

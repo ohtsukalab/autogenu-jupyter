@@ -17,7 +17,10 @@ public:
     void appendControlInputSaturation(const ControlInputSaturation control_input_saturation);
     void sortIndex();
     int dimSaturation() const;
-    int saturationIndex(const int num_saturation) const;
+    int index(const int num_saturation) const;
+    double max(const int num_saturation) const;
+    double min(const int num_saturation) const;
+    double weight(const int num_saturation) const;
 };
 
 

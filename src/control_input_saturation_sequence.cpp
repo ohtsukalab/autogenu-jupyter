@@ -35,7 +35,25 @@ int ControlInputSaturationSequence::dimSaturation() const
 }
 
 
-int ControlInputSaturationSequence::saturationIndex(const int num_saturation) const
+int ControlInputSaturationSequence::index(const int num_saturation) const
 {
     return control_input_saturation_seq_[num_saturation].index();
+}
+
+
+double ControlInputSaturationSequence::max(const int num_saturation) const
+{
+    return control_input_saturation_seq_[num_saturation].max();
+}
+
+
+double ControlInputSaturationSequence::min(const int num_saturation) const
+{
+    return control_input_saturation_seq_[num_saturation].min();
+}
+
+
+double ControlInputSaturationSequence::weight(const int num_saturation) const
+{
+    return control_input_saturation_seq_[num_saturation].weight();
 }

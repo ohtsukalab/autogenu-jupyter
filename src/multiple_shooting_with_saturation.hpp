@@ -10,8 +10,8 @@
 #include <eigen3/Eigen/Core>
 #include "matrixfree_gmres.hpp"
 #include "nmpc_model.hpp"
-#include "init_cgmres.hpp"
-#include "control_input_saturation.hpp"
+#include "init_cgmres_with_saturation.hpp"
+#include "control_input_saturation_sequence.hpp"
 
 
 // Solves the nonlinear optimal control problem using the mutiple shooting based C/GMRES method with condensing for saturation of the control input.
@@ -19,16 +19,24 @@
 class MultipleShootingWithSaturation final : virtual public MatrixFreeGMRES{
 private:
     NMPCModel model_;
-    int dim_state_, dim_control_input_, dim_constraints_, dim_control_input_and_constraints_, dim_state_and_lambda_, dim_control_input_and_constraints_seq_, dim_state_and_lambda_seq_, horizon_division_num_, dim_krylov_;
+    ControlInputSaturationSequence control_input_saturation_seq_;
+
+    int dim_state_, dim_control_input_, dim_constraints_, dim_control_input_and_constraints_, dim_state_and_lambda_, dim_control_input_and_constraints_seq_, dim_state_and_lambda_seq_, dim_saturation_, dim_saturation_seq_, horizon_division_num_, dim_krylov_;
 
     // initial_time_, horizon_max_length_, alpha_ : parameters of the length of the horizon
     // The horizon length at time t is given by horizon_max_length_*(1.0-std::exp(-alpha_*(time_param-initial_time_))).
     double initial_time_, horizon_max_length_, alpha_, zeta_, difference_increment_, incremented_time_;
-    Eigen::VectorXd dx_vec_, incremented_state_vec_, control_input_and_constraints_seq_, incremented_control_input_and_constraints_seq_, control_input_and_constraints_error_seq_, control_input_and_constraints_error_seq_1_, control_input_and_constraints_error_seq_2_, control_input_and_constraints_error_seq_3_,control_input_and_constraints_update_seq_;
-    Eigen::MatrixXd state_mat_, lambda_mat_, incremented_state_mat_, incremented_lambda_mat_, state_error_mat_, state_error_mat_1_, lambda_error_mat_, lambda_error_mat_1_, state_update_mat_, lambda_update_mat_;
 
+    Eigen::VectorXd dx_vec_, incremented_state_vec_, control_input_and_constraints_seq_, incremented_control_input_and_constraints_seq_, control_input_and_constraints_error_seq_, control_input_and_constraints_error_seq_1_, control_input_and_constraints_error_seq_2_, control_input_and_constraints_error_seq_3_, control_input_and_constraints_error_seq_4_, control_input_and_constraints_update_seq_;
+
+    Eigen::MatrixXd state_mat_, lambda_mat_, incremented_state_mat_, incremented_lambda_mat_, state_error_mat_, state_error_mat_1_, lambda_error_mat_, lambda_error_mat_1_, state_update_mat_, lambda_update_mat_, dummy_input_mat_, saturation_lagrange_multiplier_mat_, saturation_error_mat_, dummy_error_mat_, saturation_error_mat_1_, dummy_error_mat_1_;
+
+    // Add partial derivative of the saturation with respect to the control input
+    inline void addDerivativeSaturationWithControlInput(const Eigen::VectorXd& control_input_and_constraints_vec, const Eigen::VectorXd& saturation_lagrange_multiplier_vec, Eigen::Ref<Eigen::VectorXd> optimality_for_control_input_and_constraints_vec);
+
+    // Compute optimality error except for saturation on the control input
     // Computes the optimaliy error for control input and constraints under current solution.
-    inline void computeOptimalityErrorforControlInputAndConstraints(const double time_param, const Eigen::VectorXd& state_vec, const Eigen::VectorXd& control_input_and_constraints_seq, const Eigen::MatrixXd& state_mat, const Eigen::MatrixXd& lambda_mat, Eigen::Ref<Eigen::VectorXd> optimality_for_control_input_and_constraints);
+    inline void computeOptimalityErrorforControlInputAndConstraints(const double time_param, const Eigen::VectorXd& state_vec, const Eigen::VectorXd& control_input_and_constraints_seq, const Eigen::MatrixXd& state_mat, const Eigen::MatrixXd& lambda_mat, const Eigen::MatrixXd& saturation_lagrange_multiplier_seq, Eigen::Ref<Eigen::VectorXd> optimality_for_control_input_and_constraints);
 
     // Computes the optimaliy error for state and lambda under current solution.
     inline void computeOptimalityErrorforStateAndLambda(const double time_param, const Eigen::VectorXd& state_vec, const Eigen::VectorXd& control_input_and_constraints_seq, const Eigen::MatrixXd& state_mat, const Eigen::MatrixXd& lambda_mat, Eigen::Ref<Eigen::MatrixXd> optimality_for_state, Eigen::Ref<Eigen::MatrixXd> optimality_for_lambda);
@@ -36,6 +44,22 @@ private:
     // Computes the sequence of state and lambda under the error for state and lambda for condencing.
     inline void computeStateAndLambda(const double time_param, const Eigen::VectorXd& state_vec, const Eigen::VectorXd& control_input_and_constraints_seq, const Eigen::MatrixXd& optimality_for_state, const Eigen::MatrixXd& optimality_for_lambda, Eigen::Ref<Eigen::MatrixXd> state_mat, Eigen::Ref<Eigen::MatrixXd> lambda_mat);
 
+
+    // Functions for saturations
+    // Compute optimality error for saturation on the control input
+     inline void computeOptimalityErrorforSaturation(const Eigen::VectorXd& control_input_and_constraints_seq, const Eigen::MatrixXd& dummy_input_seq, const Eigen::MatrixXd& saturation_lagrange_multiplier_seq, Eigen::Ref<Eigen::MatrixXd> optimality_for_dummy, Eigen::Ref<Eigen::MatrixXd> optimality_for_saturation);
+
+    // Multiplies the derivative of saturation with respect to the control input and other constraints with a vector
+    inline void multiplySaturationDerivativeWithControlInput(const Eigen::VectorXd& control_input_and_constraints_seq, const Eigen::VectorXd& multiplied_control_input_and_constraints_vec, Eigen::Ref<Eigen::MatrixXd> optimality_for_dummy, Eigen::Ref<Eigen::MatrixXd> optimality_for_saturation);
+
+    // Multiply the derivative of saturation with respect to the variables about saturation
+    inline void multiplySaturationSelfDerivativeInverse(const Eigen::VectorXd& control_input_and_constraints_seq, const Eigen::MatrixXd& dummy_input_seq, const Eigen::MatrixXd& saturation_lagrange_multiplier_seq, const Eigen::MatrixXd& multiplied_dummy_mat, const Eigen::MatrixXd& multiplied_saturation_mat, Eigen::Ref<Eigen::MatrixXd> optimality_for_dummy, Eigen::Ref<Eigen::MatrixXd> optimality_for_saturation);
+
+    // Multiply the derivative of the optiamlity of control input and constraints with respect to the variables about saturation
+    inline void multiplyOptimalityDerivativeSaturation(const Eigen::VectorXd& control_input_and_constraints_seq, const Eigen::VectorXd& multiplied_vec, Eigen::Ref<Eigen::VectorXd> returned_vec);
+
+
+    // Generates basis of the Krylov subspace
     // Computes a vector correspongin to b in Ax=b
     void bFunc(const double time_param, const Eigen::VectorXd& state_vec, const Eigen::VectorXd& current_solution_vec, Eigen::Ref<Eigen::VectorXd> equation_error_vec) override;
 
@@ -43,9 +67,10 @@ private:
     void axFunc(const double time_param, const Eigen::VectorXd& state_vec, const Eigen::VectorXd& current_solution_vec, const Eigen::VectorXd& direction_vec, Eigen::Ref<Eigen::VectorXd> forward_difference_error_vec) override;
 
 
+
 public:
     // Sets parameters and allocates vectors and matrices.
-    MultipleShootingWithSaturation(const NMPCModel model, const double horizon_max_length, const double alpha, const int horizon_division_num, const double difference_increment, const double zeta, const int dim_krylov);
+    MultipleShootingWithSaturation(const NMPCModel model, const ControlInputSaturationSequence control_input_saturation_seq, const double horizon_max_length, const double alpha, const int horizon_division_num, const double difference_increment, const double zeta, const int dim_krylov);
 
     // Initializes the solution of the C/GMRES method.
     void initSolution(const double initial_time, const Eigen::VectorXd& initial_state_vec, const Eigen::VectorXd& initial_guess_input_vec, const double convergence_radius, const int max_iteration);
