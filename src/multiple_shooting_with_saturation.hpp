@@ -31,7 +31,7 @@ private:
 
     Eigen::MatrixXd state_mat_, lambda_mat_, incremented_state_mat_, incremented_lambda_mat_, state_error_mat_, state_error_mat_1_, lambda_error_mat_, lambda_error_mat_1_, state_update_mat_, lambda_update_mat_, dummy_input_mat_, saturation_lagrange_multiplier_mat_, saturation_error_mat_, dummy_error_mat_, saturation_error_mat_1_, dummy_error_mat_1_;
 
-    // Add partial derivative of the saturation with respect to the control input
+    // Adds partial derivative of the saturation with respect to the control input
     inline void addDerivativeSaturationWithControlInput(const Eigen::VectorXd& control_input_and_constraints_vec, const Eigen::VectorXd& saturation_lagrange_multiplier_vec, Eigen::Ref<Eigen::VectorXd> optimality_for_control_input_and_constraints_vec);
 
     // Compute optimality error except for saturation on the control input

@@ -63,23 +63,31 @@ MultipleShootingWithSaturation::MultipleShootingWithSaturation(const NMPCModel m
 
 void MultipleShootingWithSaturation::initSolution(const double initial_time, const Eigen::VectorXd& initial_state_vec, const Eigen::VectorXd& initial_guess_input_vec, const double convergence_radius, const int max_iteration)
 {
-    Eigen::VectorXd initial_control_input_and_constraints_vec(dim_control_input_and_constraints_), initial_control_input_and_constraints_error(dim_control_input_and_constraints_), initial_lambda_vec(dim_state_);
+    Eigen::VectorXd initial_solution_vec(dim_control_input_and_constraints_), initial_lambda_vec(dim_state_);
     InitCGMRESWithSaturation initializer(model_, control_input_saturation_seq_, difference_increment_, dim_krylov_);
     initial_time_ = initial_time;
 
     // Intialize the solution
-    initializer.solve0stepNOCP(initial_time, initial_state_vec, initial_guess_input_vec, convergence_radius, max_iteration, initial_control_input_and_constraints_vec);
+    initializer.solve0stepNOCP(initial_time, initial_state_vec, initial_guess_input_vec, convergence_radius, max_iteration, initial_solution_vec);
     model_.phixFunc(initial_time, initial_state_vec, initial_lambda_vec);
     for(int i=0; i<horizon_division_num_; i++){
-        control_input_and_constraints_seq_.segment(i*dim_control_input_and_constraints_, dim_control_input_and_constraints_) = initial_control_input_and_constraints_vec;
+        control_input_and_constraints_seq_.segment(i*dim_control_input_and_constraints_, dim_control_input_and_constraints_) = initial_solution_vec.segment(0, dim_control_input_and_constraints_);
+        dummy_input_mat_.col(i) = initial_solution_vec.segment(dim_control_input_and_constraints_, dim_saturation_);
+        saturation_lagrange_multiplier_mat_.col(i) = initial_solution_vec.segment(dim_control_input_and_constraints_+dim_saturation_, dim_saturation_);
         state_mat_.col(i) = initial_state_vec;
         lambda_mat_.col(i) = initial_lambda_vec;
     }
 
     // Intialize the optimality error.
-    initial_control_input_and_constraints_error = initializer.getOptimalityErrorVec(initial_time, initial_state_vec, initial_control_input_and_constraints_vec);
+    Eigen::VectorXd initial_control_input_and_constraints_error(dim_control_input_and_constraints_), initial_dummy_input_error(dim_saturation_), initial_saturation_error(dim_saturation_);
+    initial_control_input_and_constraints_error = initializer.getControlInputAndConstraintsError(initial_time, initial_state_vec, initial_solution_vec);
+    initial_dummy_input_error = initializer.getDummyInputError(initial_time, initial_state_vec, initial_solution_vec);
+    initial_saturation_error= initializer.getControlInputSaturationError(initial_time, initial_state_vec, initial_solution_vec);
+
     for(int i=0; i<horizon_division_num_; i++){
         control_input_and_constraints_error_seq_.segment(i*dim_control_input_and_constraints_, dim_control_input_and_constraints_) = initial_control_input_and_constraints_error;
+        dummy_error_mat_.col(i) = initial_dummy_input_error;
+        saturation_error_mat_.col(i) = initial_saturation_error;
     }
     state_error_mat_ = Eigen::MatrixXd::Zero(dim_state_, horizon_division_num_);
     lambda_error_mat_ = Eigen::MatrixXd::Zero(dim_state_, horizon_division_num_);
@@ -211,7 +219,7 @@ inline void MultipleShootingWithSaturation::computeOptimalityErrorforSaturation(
     }
     for(int i=0; i<horizon_division_num_; i++){
         for(int j=0; j<dim_saturation_; j++){
-            optimality_for_saturation(j,i) = (control_input_and_constraints_seq(control_input_saturation_seq_.index(j),i) - (control_input_saturation_seq_.min(j)+control_input_saturation_seq_.max(j))/2) * (control_input_and_constraints_seq(control_input_saturation_seq_.index(j),i) - (control_input_saturation_seq_.min(j)+control_input_saturation_seq_.max(j))/2) - (control_input_saturation_seq_.min(j)-control_input_saturation_seq_.max(j)) * (control_input_saturation_seq_.min(j)-control_input_saturation_seq_.max(j)) + dummy_input_seq(j,i) * dummy_input_seq(j,i);
+            optimality_for_saturation(j,i) = (control_input_and_constraints_seq(control_input_saturation_seq_.index(j),i) - (control_input_saturation_seq_.min(j)+control_input_saturation_seq_.max(j))/2) * (control_input_and_constraints_seq(control_input_saturation_seq_.index(j),i) - (control_input_saturation_seq_.min(j)+control_input_saturation_seq_.max(j))/2) - (control_input_saturation_seq_.max(j)-control_input_saturation_seq_.min(j)) * (control_input_saturation_seq_.max(j)-control_input_saturation_seq_.min(j))/4 + dummy_input_seq(j,i) * dummy_input_seq(j,i);
         }
     }
 }
