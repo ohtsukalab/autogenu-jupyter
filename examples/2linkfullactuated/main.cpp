@@ -1,6 +1,8 @@
 #include "nmpc_model.hpp"
 #include "continuation_gmres.hpp"
 #include "multiple_shooting_cgmres.hpp"
+#include "control_input_saturation_sequence.hpp"
+#include "multiple_shooting_with_saturation.hpp"
 #include "simulator.hpp"
 
 
@@ -10,11 +12,14 @@ int main()
     NMPCModel nmpc_model;
 
     // Define the solver of C/GMRES.
-    ContinuationGMRES cgmres_solver(nmpc_model, 0.5, 1.0, 50, 1.0e-06, 1000, 5);
+    // ContinuationGMRES cgmres_solver(nmpc_model, 0.5, 1.0, 50, 1.0e-06, 1000, 5);
+
+    ControlInputSaturationSequence control_input_saturation_seq;
+    control_input_saturation_seq.appendControlInputSaturation(1, 10, -10, 0.001);
+    MultipleShootingWithSaturation cgmres_solver(nmpc_model, control_input_saturation_seq, 0.5, 1.0, 50, 1.0e-06, 1000, 5);
 
     // Define the simulator.
     Simulator cgmres_simulator(nmpc_model);
-
 
 
     // Set the initial state.

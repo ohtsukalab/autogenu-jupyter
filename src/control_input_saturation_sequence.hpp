@@ -10,12 +10,8 @@ class ControlInputSaturationSequence{
 private:
     std::vector<ControlInputSaturation> control_input_saturation_seq_;
 
-    // Returns index 
-    int findSameIndex(const ControlInputSaturation control_input_saturation);
-
 public:
-    void appendControlInputSaturation(const ControlInputSaturation control_input_saturation);
-    void sortIndex();
+    void appendControlInputSaturation(const int index, const double max, const double min, const double dummy_weight);
     int dimSaturation() const;
     int index(const int num_saturation) const;
     double max(const int num_saturation) const;

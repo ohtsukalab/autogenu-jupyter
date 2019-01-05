@@ -1,31 +1,15 @@
 #include "control_input_saturation_sequence.hpp"
 
 
-int ControlInputSaturationSequence::findSameIndex(const ControlInputSaturation control_input_saturation)
-{
-    for(int i=0; i<control_input_saturation_seq_.size(); i++){
-        if(control_input_saturation == control_input_saturation_seq_[i]){
-            return i;
-        }
-    }
-    return control_input_saturation_seq_.size()+1;
-}
 
-
-void ControlInputSaturationSequence::appendControlInputSaturation(const ControlInputSaturation control_input_saturation)
+void ControlInputSaturationSequence::appendControlInputSaturation(const int index, const double max, const double min, const double dummy_weight)
 {
-    if(findSameIndex(control_input_saturation) <= control_input_saturation_seq_.size()){
-        control_input_saturation_seq_[findSameIndex(control_input_saturation)] = control_input_saturation;
+    if(index <= control_input_saturation_seq_.size()){
+        control_input_saturation_seq_[index] = ControlInputSaturation(index, max, min, dummy_weight);
     }
     else {
-        control_input_saturation_seq_.push_back(control_input_saturation);
+        control_input_saturation_seq_.push_back(ControlInputSaturation(index, max, min, dummy_weight));
     }
-}
-
-
-void ControlInputSaturationSequence::sortIndex()
-{
-    std::sort(control_input_saturation_seq_.begin(), control_input_saturation_seq_.end());
 }
 
 

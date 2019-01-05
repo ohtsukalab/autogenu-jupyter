@@ -14,6 +14,7 @@
 #include "numerical_integrator.hpp"
 #include "continuation_gmres.hpp"
 #include "multiple_shooting_cgmres.hpp"
+#include "multiple_shooting_with_saturation.hpp"
 
 
 // Simulates the C/GMRES method and multiple shooting based C/GMRES method.
@@ -29,6 +30,8 @@ public:
     // Serves a numerical simulation for the C/GMRES and the multiple shooting based C/GMRES.
     void simulation(ContinuationGMRES cgmres_solver, const Eigen::VectorXd& initial_state_vec, const double start_time, const double end_time, const double sampling_period, const std::string savefile_name);
     void simulation(MultipleShootingCGMRES cgmres_solver, const Eigen::VectorXd& initial_state_vec, const double start_time, const double end_time, const double sampling_period, const std::string savefile_name);
+    void simulation(MultipleShootingWithSaturation cgmres_solver, const Eigen::VectorXd& initial_state_vec, const double start_time, const double end_time, const double sampling_period, const std::string savefile_name);
+
 };
 
 

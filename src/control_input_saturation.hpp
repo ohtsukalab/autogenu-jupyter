@@ -27,20 +27,4 @@ public:
 };
 
 
-// operators for ControlInputSaturation
-bool operator<(const ControlInputSaturation& control_input_saturation_1, const ControlInputSaturation& control_input_saturation_2);
-
-bool operator>(const ControlInputSaturation& control_input_saturation_1, const ControlInputSaturation& control_input_saturation_2);
-
-bool operator<=(const ControlInputSaturation& control_input_saturation_1, const ControlInputSaturation& control_input_saturation_2);
-
-bool operator>=(const ControlInputSaturation& control_input_saturation_1, const ControlInputSaturation& control_input_saturation_2);
-
-bool operator==(const ControlInputSaturation& control_input_saturation_1, const ControlInputSaturation& control_input_saturation_2);
-
-bool operator==(const ControlInputSaturation& control_input_saturation_1, const ControlInputSaturation& control_input_saturation_2);
-
-bool operator!=(const ControlInputSaturation& control_input_saturation_1, const ControlInputSaturation& control_input_saturation_2);
-
-
 #endif

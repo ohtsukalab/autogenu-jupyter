@@ -6,7 +6,6 @@ MultipleShootingWithSaturation::MultipleShootingWithSaturation(const NMPCModel m
     // Set dimensions and parameters.
     model_ = model;
     control_input_saturation_seq_ = control_input_saturation_seq;
-    control_input_saturation_seq_.sortIndex();
     dim_state_ = model_.dimState();
     dim_control_input_ = model_.dimControlInput();
     dim_constraints_ = model_.dimConstraints();
