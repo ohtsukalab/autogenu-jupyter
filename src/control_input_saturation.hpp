@@ -7,29 +7,40 @@
 #define CONTROL_INPUT_SATURATION_H
 
 
-#include <eigen3/Eigen/Core>
-#include "matrixfree_gmres.hpp"
-#include "nmpc_model.hpp"
-#include "init_cgmres.hpp"
-
-
-struct Saturation{
-public:
-    int index;
-    double max;
-    double min;
-};
-
-
 // Stores saturation of control input
 class ControlInputSaturation{
 private:
-    std::vector<Saturation> control_input_saturation_;
+    int index_;
+    double max_;
+    double min_;
+    double weight_;
 
 public:
     ControlInputSaturation();
-    void appendSaturation(const Saturation saturation);
+    ControlInputSaturation(const int index, const double max, const double min, const double weight);
+    void setParams(const int index, const double max, const double min, const double weight);
+
+    int index() const;
+    double max() const;
+    double min() const;
+    double weight() const;
 };
+
+
+// operators for ControlInputSaturation
+bool operator<(const ControlInputSaturation& control_input_saturation_1, const ControlInputSaturation& control_input_saturation_2);
+
+bool operator>(const ControlInputSaturation& control_input_saturation_1, const ControlInputSaturation& control_input_saturation_2);
+
+bool operator<=(const ControlInputSaturation& control_input_saturation_1, const ControlInputSaturation& control_input_saturation_2);
+
+bool operator>=(const ControlInputSaturation& control_input_saturation_1, const ControlInputSaturation& control_input_saturation_2);
+
+bool operator==(const ControlInputSaturation& control_input_saturation_1, const ControlInputSaturation& control_input_saturation_2);
+
+bool operator==(const ControlInputSaturation& control_input_saturation_1, const ControlInputSaturation& control_input_saturation_2);
+
+bool operator!=(const ControlInputSaturation& control_input_saturation_1, const ControlInputSaturation& control_input_saturation_2);
 
 
 #endif
