@@ -65,11 +65,9 @@ void MultipleShootingWithSaturation::initSolution(const double initial_time, con
     Eigen::VectorXd initial_solution_vec(dim_control_input_and_constraints_+2*dim_saturation_), initial_lambda_vec(dim_state_);
     InitCGMRESWithSaturation initializer(model_, control_input_saturation_seq_, difference_increment_, dim_krylov_);
 
-    initial_time_ = initial_time;
-
     // Intialize the solution
+    initial_time_ = initial_time;
     initializer.solve0stepNOCP(initial_time, initial_state_vec, initial_guess_input_vec, convergence_radius, max_iteration, initial_solution_vec);
-
 
     model_.phixFunc(initial_time, initial_state_vec, initial_lambda_vec);
     for(int i=0; i<horizon_division_num_; i++){
@@ -104,6 +102,8 @@ void MultipleShootingWithSaturation::controlUpdate(const double current_time, co
     incremented_state_vec_ = current_state_vec + difference_increment_*dx_vec_;
 
     forwardDifferenceGMRES(current_time, current_state_vec, control_input_and_constraints_seq_, control_input_and_constraints_update_seq_);
+
+    std::exit(1);
 
     // Update state_mat_ and lamdba_mat_ by the difference approximation.
     computeStateAndLambda(incremented_time_, incremented_state_vec_, control_input_and_constraints_seq_+difference_increment_*control_input_and_constraints_update_seq_, (1-difference_increment_*zeta_)*state_error_mat_, (1-difference_increment_*zeta_)*lambda_error_mat_, incremented_state_mat_, incremented_lambda_mat_);

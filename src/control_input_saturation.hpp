@@ -17,12 +17,12 @@ private:
 
 public:
     ControlInputSaturation();
-    ControlInputSaturation(const int index, const double max, const double min, const double dummy_weight);
-    void setParams(const int index, const double max, const double min, const double dummy_weight);
+    ControlInputSaturation(const int index, const double min, const double max, const double dummy_weight);
+    void setParams(const int index, const double min, const double max, const double dummy_weight);
 
     int index() const;
-    double max() const;
     double min() const;
+    double max() const;
     double weight() const;
 };
 

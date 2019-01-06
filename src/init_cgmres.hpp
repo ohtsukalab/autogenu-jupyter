@@ -16,7 +16,7 @@ private:
     NMPCModel model_;
     int dim_solution_;
     double difference_increment_;
-    Eigen::VectorXd solution_update_vec_, incremented_solution_vec_, lambda_vec_, error_vec_, error_vec_1_, error_vec_2_;
+    Eigen::VectorXd solution_update_vec_, lambda_vec_, error_vec_, error_vec_1_, error_vec_2_;
 
     // Computes the optimality error vector under current_solution_vec.
     inline void computeOptimalityErrors(const double time_param, const Eigen::VectorXd& state_vec, const Eigen::VectorXd& current_solution_vec, Eigen::Ref<Eigen::VectorXd> optimality_vec);

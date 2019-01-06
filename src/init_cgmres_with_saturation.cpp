@@ -1,7 +1,7 @@
 #include "init_cgmres_with_saturation.hpp"
 
 
-InitCGMRESWithSaturation::InitCGMRESWithSaturation(const NMPCModel model, const ControlInputSaturationSequence control_input_saturation_seq, const double difference_increment, const int dim_krylov) : MatrixFreeGMRES(model.dimControlInput()+model.dimConstraints(), dim_krylov)
+InitCGMRESWithSaturation::InitCGMRESWithSaturation(const NMPCModel model, const ControlInputSaturationSequence control_input_saturation_seq, const double difference_increment, const int dim_krylov) : MatrixFreeGMRES(model.dimControlInput()+model.dimConstraints()+2*control_input_saturation_seq.dimSaturation(), dim_krylov)
 {
     // Set parameters.
     model_ = model;
@@ -13,7 +13,6 @@ InitCGMRESWithSaturation::InitCGMRESWithSaturation(const NMPCModel model, const 
 
     // Allocate vectors.
     solution_update_vec_.resize(dim_solution_);
-    incremented_solution_vec_.resize(dim_solution_);
     lambda_vec_.resize(model_.dimState());
     error_vec_.resize(dim_solution_);
     error_vec_1_.resize(dim_solution_);
@@ -28,6 +27,7 @@ InitCGMRESWithSaturation::InitCGMRESWithSaturation(const NMPCModel model, const 
 
 
 inline void InitCGMRESWithSaturation::computeSaturationOptimality(const Eigen::VectorXd& control_input_and_constraint_vec, const Eigen::VectorXd& dummy_input_vec, const Eigen::VectorXd& saturation_lagrange_multiplier_vec, Eigen::Ref<Eigen::VectorXd> optimality_for_dummy, Eigen::Ref<Eigen::VectorXd> optimality_for_saturation)
+
 {
     for(int i=0; i<dim_saturation_; i++){
         optimality_for_dummy(i) = control_input_and_constraint_vec(control_input_saturation_seq_.index(i)) * dummy_input_vec(i);
@@ -41,19 +41,14 @@ inline void InitCGMRESWithSaturation::computeSaturationOptimality(const Eigen::V
 inline void InitCGMRESWithSaturation::addDerivativeSaturationWithControlInput(const Eigen::VectorXd& control_input_and_constraints_vec, const Eigen::VectorXd& saturation_lagrange_multiplier_vec, Eigen::Ref<Eigen::VectorXd> optimality_for_control_input_and_constraints_vec)
 {
     for(int i=0; i<dim_saturation_; i++){
-        optimality_for_control_input_and_constraints_vec(control_input_saturation_seq_.index(i)) += saturation_lagrange_multiplier_vec(i) * (2*control_input_and_constraints_vec(control_input_saturation_seq_.index(i)) - control_input_saturation_seq_.min(i) - control_input_saturation_seq_.max(i));
+        optimality_for_control_input_and_constraints_vec(control_input_saturation_seq_.index(i)) += (2*control_input_and_constraints_vec(control_input_saturation_seq_.index(i)) - control_input_saturation_seq_.min(i) - control_input_saturation_seq_.max(i)) * saturation_lagrange_multiplier_vec(i);
     }
 }
 
 
-
 void InitCGMRESWithSaturation::solve0stepNOCP(const double initial_time, const Eigen::VectorXd& initial_state_vec, const Eigen::VectorXd& initial_guess_vec, const double convergence_radius, const int max_iteration, Eigen::Ref<Eigen::VectorXd> solution_vec)
 {
-    std::cout << "dim_saturation_ = " << dim_saturation_ << std::endl;
-    for(int i=0; i<control_input_saturation_seq_.dimSaturation(); i++){
-        std::cout << i << " saturaion: " << "index=" << control_input_saturation_seq_.index(i) << ", min=" << control_input_saturation_seq_.min(i) << ", max=" << control_input_saturation_seq_.max(i) << ", weight=" << control_input_saturation_seq_.weight(i) << std::endl;
-    }
-
+    // Substitute initial guess solution
     solution_vec.segment(0, dim_control_input_and_constraints_) = initial_guess_vec;
     for(int i=0; i<dim_saturation_; i++){
         solution_vec(dim_control_input_and_constraints_+i) = std::sqrt(
@@ -62,19 +57,21 @@ void InitCGMRESWithSaturation::solve0stepNOCP(const double initial_time, const E
         );
     }
     for(int i=0; i<dim_saturation_; i++){
-        solution_vec(dim_control_input_and_constraints_+dim_saturation_+i) = 0;
+        solution_vec(dim_control_input_and_constraints_+dim_saturation_+i) = 0.001;
     }
 
-    std::cout << "after setting initial guess solution" << std::endl;
-
+    // Solve the 0step nonlinear optimal control problem
     computeOptimalityErrors(initial_time, initial_state_vec, solution_vec, error_vec_);
     int i=0;
     while(error_vec_.squaredNorm() > convergence_radius && i < max_iteration){
+        std::cout << "while loop: i = " << i << ", errorNorm = " << error_vec_.squaredNorm() << std::endl;
         forwardDifferenceGMRES(initial_time, initial_state_vec, solution_vec, solution_update_vec_);
         solution_vec += solution_update_vec_;
         computeOptimalityErrors(initial_time, initial_state_vec, solution_vec, error_vec_);
         i++;
     }
+    std::cout << solution_vec << std::endl;
+    std::exit(1);
 }
 
 
@@ -108,7 +105,6 @@ Eigen::VectorXd InitCGMRESWithSaturation::getControlInputSaturationError(const d
 }
 
 
-
 inline void InitCGMRESWithSaturation::computeOptimalityErrors(const double time_param, const Eigen::VectorXd& state_vec, const Eigen::VectorXd& solution_vec, Eigen::Ref<Eigen::VectorXd> optimality_vec)
 {
     model_.phixFunc(time_param, state_vec, lambda_vec_);
@@ -122,14 +118,15 @@ inline void InitCGMRESWithSaturation::computeOptimalityErrors(const double time_
 void InitCGMRESWithSaturation::bFunc(const double time_param, const Eigen::VectorXd& state_vec, const Eigen::VectorXd& current_solution_vec, Eigen::Ref<Eigen::VectorXd> equation_error_vec) 
 {
     computeOptimalityErrors(time_param, state_vec, current_solution_vec, error_vec_);
-    equation_error_vec = - error_vec_;
+    computeOptimalityErrors(time_param, state_vec, current_solution_vec+difference_increment_*solution_update_vec_, error_vec_1_);
+
+    equation_error_vec = - error_vec_ - (error_vec_1_ - error_vec_)/difference_increment_;
 }
 
 
 void InitCGMRESWithSaturation::axFunc(const double time_param, const Eigen::VectorXd& state_vec, const Eigen::VectorXd& current_solution_vec, const Eigen::VectorXd& direction_vec, Eigen::Ref<Eigen::VectorXd> forward_difference_error_vec)
 {
-    incremented_solution_vec_ = current_solution_vec + difference_increment_ * direction_vec;
-    computeOptimalityErrors(time_param, state_vec, incremented_solution_vec_, error_vec_1_);
+    computeOptimalityErrors(time_param, state_vec, current_solution_vec+difference_increment_*direction_vec, error_vec_1_);
 
-    forward_difference_error_vec = (error_vec_1_ - error_vec_) / difference_increment_;
+    forward_difference_error_vec = (error_vec_1_ - error_vec_)/difference_increment_;
 }

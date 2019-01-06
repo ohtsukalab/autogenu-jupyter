@@ -14,11 +14,11 @@ private:
 
 
 public:
-    void appendControlInputSaturation(const int index, const double max, const double min, const double dummy_weight);
+    void appendControlInputSaturation(const int index, const double min, const double max, const double dummy_weight);
     int dimSaturation() const;
     int index(const int num_saturation) const;
-    double max(const int num_saturation) const;
     double min(const int num_saturation) const;
+    double max(const int num_saturation) const;
     double weight(const int num_saturation) const;
 };
 
