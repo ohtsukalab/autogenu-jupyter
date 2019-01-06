@@ -62,12 +62,15 @@ MultipleShootingWithSaturation::MultipleShootingWithSaturation(const NMPCModel m
 
 void MultipleShootingWithSaturation::initSolution(const double initial_time, const Eigen::VectorXd& initial_state_vec, const Eigen::VectorXd& initial_guess_input_vec, const double convergence_radius, const int max_iteration)
 {
-    Eigen::VectorXd initial_solution_vec(dim_control_input_and_constraints_), initial_lambda_vec(dim_state_);
+    Eigen::VectorXd initial_solution_vec(dim_control_input_and_constraints_+2*dim_saturation_), initial_lambda_vec(dim_state_);
     InitCGMRESWithSaturation initializer(model_, control_input_saturation_seq_, difference_increment_, dim_krylov_);
+
     initial_time_ = initial_time;
 
     // Intialize the solution
     initializer.solve0stepNOCP(initial_time, initial_state_vec, initial_guess_input_vec, convergence_radius, max_iteration, initial_solution_vec);
+
+
     model_.phixFunc(initial_time, initial_state_vec, initial_lambda_vec);
     for(int i=0; i<horizon_division_num_; i++){
         control_input_and_constraints_seq_.segment(i*dim_control_input_and_constraints_, dim_control_input_and_constraints_) = initial_solution_vec.segment(0, dim_control_input_and_constraints_);

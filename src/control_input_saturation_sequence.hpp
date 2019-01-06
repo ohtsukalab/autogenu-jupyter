@@ -10,6 +10,9 @@ class ControlInputSaturationSequence{
 private:
     std::vector<ControlInputSaturation> control_input_saturation_seq_;
 
+    int findSameIndex(const int index);
+
+
 public:
     void appendControlInputSaturation(const int index, const double max, const double min, const double dummy_weight);
     int dimSaturation() const;

@@ -49,13 +49,23 @@ inline void InitCGMRESWithSaturation::addDerivativeSaturationWithControlInput(co
 
 void InitCGMRESWithSaturation::solve0stepNOCP(const double initial_time, const Eigen::VectorXd& initial_state_vec, const Eigen::VectorXd& initial_guess_vec, const double convergence_radius, const int max_iteration, Eigen::Ref<Eigen::VectorXd> solution_vec)
 {
+    std::cout << "dim_saturation_ = " << dim_saturation_ << std::endl;
+    for(int i=0; i<control_input_saturation_seq_.dimSaturation(); i++){
+        std::cout << i << " saturaion: " << "index=" << control_input_saturation_seq_.index(i) << ", min=" << control_input_saturation_seq_.min(i) << ", max=" << control_input_saturation_seq_.max(i) << ", weight=" << control_input_saturation_seq_.weight(i) << std::endl;
+    }
+
     solution_vec.segment(0, dim_control_input_and_constraints_) = initial_guess_vec;
     for(int i=0; i<dim_saturation_; i++){
-        solution_vec(dim_control_input_and_constraints_+i) = std::sqrt((control_input_saturation_seq_.max(i)-control_input_saturation_seq_.min(i))*(control_input_saturation_seq_.max(i)-control_input_saturation_seq_.min(i))/4 - (initial_guess_vec(control_input_saturation_seq_.index(i)) - (control_input_saturation_seq_.max(i)+control_input_saturation_seq_.min(i))/2)*(initial_guess_vec(control_input_saturation_seq_.index(i)) - (control_input_saturation_seq_.max(i)+control_input_saturation_seq_.min(i))/2));
+        solution_vec(dim_control_input_and_constraints_+i) = std::sqrt(
+            (control_input_saturation_seq_.max(i)-control_input_saturation_seq_.min(i))*(control_input_saturation_seq_.max(i)-control_input_saturation_seq_.min(i))/4 - (initial_guess_vec(control_input_saturation_seq_.index(i)) 
+            - (control_input_saturation_seq_.max(i)+control_input_saturation_seq_.min(i))/2)*(initial_guess_vec(control_input_saturation_seq_.index(i)) - (control_input_saturation_seq_.max(i)+control_input_saturation_seq_.min(i))/2)
+        );
     }
     for(int i=0; i<dim_saturation_; i++){
         solution_vec(dim_control_input_and_constraints_+dim_saturation_+i) = 0;
     }
+
+    std::cout << "after setting initial guess solution" << std::endl;
 
     computeOptimalityErrors(initial_time, initial_state_vec, solution_vec, error_vec_);
     int i=0;
