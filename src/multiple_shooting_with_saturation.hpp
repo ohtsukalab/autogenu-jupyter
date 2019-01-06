@@ -29,14 +29,14 @@ private:
 
     Eigen::VectorXd dx_vec_, incremented_state_vec_, control_input_and_constraints_seq_, incremented_control_input_and_constraints_seq_, control_input_and_constraints_error_seq_, control_input_and_constraints_error_seq_1_, control_input_and_constraints_error_seq_2_, control_input_and_constraints_error_seq_3_, control_input_and_constraints_error_seq_4_, control_input_and_constraints_update_seq_;
 
-    Eigen::MatrixXd state_mat_, lambda_mat_, incremented_state_mat_, incremented_lambda_mat_, state_error_mat_, state_error_mat_1_, lambda_error_mat_, lambda_error_mat_1_, state_update_mat_, lambda_update_mat_, dummy_input_mat_, saturation_lagrange_multiplier_mat_, saturation_error_mat_, dummy_error_mat_, saturation_error_mat_1_, dummy_error_mat_1_;
+    Eigen::MatrixXd state_mat_, lambda_mat_, incremented_state_mat_, incremented_lambda_mat_, state_error_mat_, state_error_mat_1_, lambda_error_mat_, lambda_error_mat_1_, state_update_mat_, lambda_update_mat_, dummy_input_mat_, saturation_lagrange_multiplier_mat_, dummy_error_mat_, saturation_error_mat_, dummy_error_mat_1_, saturation_error_mat_1_, dummy_update_mat_, saturation_update_mat_;
 
     // Adds partial derivative of the saturation with respect to the control input
     inline void addDerivativeSaturationWithControlInput(const Eigen::VectorXd& control_input_and_constraints_vec, const Eigen::VectorXd& saturation_lagrange_multiplier_vec, Eigen::Ref<Eigen::VectorXd> optimality_for_control_input_and_constraints_vec);
 
     // Compute optimality error except for saturation on the control input
     // Computes the optimaliy error for control input and constraints under current solution.
-    inline void computeOptimalityErrorforControlInputAndConstraints(const double time_param, const Eigen::VectorXd& state_vec, const Eigen::VectorXd& control_input_and_constraints_seq, const Eigen::MatrixXd& state_mat, const Eigen::MatrixXd& lambda_mat, const Eigen::MatrixXd& saturation_lagrange_multiplier_seq, Eigen::Ref<Eigen::VectorXd> optimality_for_control_input_and_constraints);
+    inline void computeOptimalityErrorforControlInputAndConstraints(const double time_param, const Eigen::VectorXd& state_vec, const Eigen::VectorXd& control_input_and_constraints_seq, const Eigen::MatrixXd& state_mat, const Eigen::MatrixXd& lambda_mat, const Eigen::MatrixXd& saturation_lagrange_multiplier_mat, Eigen::Ref<Eigen::VectorXd> optimality_for_control_input_and_constraints);
 
     // Computes the optimaliy error for state and lambda under current solution.
     inline void computeOptimalityErrorforStateAndLambda(const double time_param, const Eigen::VectorXd& state_vec, const Eigen::VectorXd& control_input_and_constraints_seq, const Eigen::MatrixXd& state_mat, const Eigen::MatrixXd& lambda_mat, Eigen::Ref<Eigen::MatrixXd> optimality_for_state, Eigen::Ref<Eigen::MatrixXd> optimality_for_lambda);
@@ -55,8 +55,8 @@ private:
     // Multiply the derivative of saturation with respect to the variables about saturation
     inline void multiplySaturationSelfDerivativeInverse(const Eigen::VectorXd& control_input_and_constraints_seq, const Eigen::MatrixXd& dummy_input_seq, const Eigen::MatrixXd& saturation_lagrange_multiplier_seq, const Eigen::MatrixXd& multiplied_dummy_mat, const Eigen::MatrixXd& multiplied_saturation_mat, Eigen::Ref<Eigen::MatrixXd> optimality_for_dummy, Eigen::Ref<Eigen::MatrixXd> optimality_for_saturation);
 
-    // Multiply the derivative of the optiamlity of control input and constraints with respect to the variables about saturation
-    inline void multiplyOptimalityDerivativeSaturation(const Eigen::VectorXd& control_input_and_constraints_seq, const Eigen::VectorXd& multiplied_vec, Eigen::Ref<Eigen::VectorXd> returned_vec);
+    // Multiply the derivative of the optimality conditions about control input with respect to the variables about saturation
+    inline void multiplyOptimalityDerivativeWithSaturation(const Eigen::VectorXd& control_input_and_constraints_seq, const Eigen::MatrixXd& dummy_input_seq, const Eigen::MatrixXd& saturation_lagrange_multiplier_seq, const Eigen::MatrixXd& multiplied_dummy_mat, const Eigen::MatrixXd& multiplied_saturation_mat, Eigen::Ref<Eigen::VectorXd> optimality_for_control_input_and_constraints);
 
 
     // Generates basis of the Krylov subspace

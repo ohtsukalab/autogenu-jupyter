@@ -30,10 +30,10 @@ inline void InitCGMRESWithSaturation::computeSaturationOptimality(const Eigen::V
 
 {
     for(int i=0; i<dim_saturation_; i++){
-        optimality_for_dummy(i) = control_input_and_constraint_vec(control_input_saturation_seq_.index(i)) * dummy_input_vec(i);
+        optimality_for_dummy(i) = saturation_lagrange_multiplier_vec(i) * dummy_input_vec(i);
     }
     for(int i=0; i<dim_saturation_; i++){
-        optimality_for_saturation(i) = (control_input_and_constraint_vec(control_input_saturation_seq_.index(i)) - (control_input_saturation_seq_.min(i)+control_input_saturation_seq_.max(i))/2) * (control_input_and_constraint_vec(control_input_saturation_seq_.index(i)) - (control_input_saturation_seq_.min(i)+control_input_saturation_seq_.max(i))/2) - (control_input_saturation_seq_.max(i) - control_input_saturation_seq_.min(i)) * (control_input_saturation_seq_.max(i) - control_input_saturation_seq_.min(i))/4 + dummy_input_vec(i) * dummy_input_vec(i);
+        optimality_for_saturation(i) = (control_input_and_constraint_vec(control_input_saturation_seq_.index(i))-(control_input_saturation_seq_.min(i)+control_input_saturation_seq_.max(i))/2) * (control_input_and_constraint_vec(control_input_saturation_seq_.index(i))-(control_input_saturation_seq_.min(i)+control_input_saturation_seq_.max(i))/2) - (control_input_saturation_seq_.max(i)-control_input_saturation_seq_.min(i)) * (control_input_saturation_seq_.max(i)-control_input_saturation_seq_.min(i))/4 + dummy_input_vec(i) * dummy_input_vec(i);
     }
 }
 
@@ -64,14 +64,11 @@ void InitCGMRESWithSaturation::solve0stepNOCP(const double initial_time, const E
     computeOptimalityErrors(initial_time, initial_state_vec, solution_vec, error_vec_);
     int i=0;
     while(error_vec_.squaredNorm() > convergence_radius && i < max_iteration){
-        std::cout << "while loop: i = " << i << ", errorNorm = " << error_vec_.squaredNorm() << std::endl;
         forwardDifferenceGMRES(initial_time, initial_state_vec, solution_vec, solution_update_vec_);
         solution_vec += solution_update_vec_;
         computeOptimalityErrors(initial_time, initial_state_vec, solution_vec, error_vec_);
         i++;
     }
-    std::cout << solution_vec << std::endl;
-    std::exit(1);
 }
 
 
