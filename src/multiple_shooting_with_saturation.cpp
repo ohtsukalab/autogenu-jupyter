@@ -33,7 +33,6 @@ MultipleShootingWithSaturation::MultipleShootingWithSaturation(const NMPCModel m
     control_input_and_constraints_error_seq_1_.resize(dim_control_input_and_constraints_seq_);
     control_input_and_constraints_error_seq_2_.resize(dim_control_input_and_constraints_seq_);
     control_input_and_constraints_error_seq_3_.resize(dim_control_input_and_constraints_seq_);
-    control_input_and_constraints_error_seq_4_.resize(dim_control_input_and_constraints_seq_);
     control_input_and_constraints_update_seq_.resize(dim_control_input_and_constraints_seq_);
 
     state_mat_.resize(dim_state_, horizon_division_num);
@@ -61,6 +60,7 @@ MultipleShootingWithSaturation::MultipleShootingWithSaturation(const NMPCModel m
     state_update_mat_ = Eigen::MatrixXd::Zero(dim_state_, horizon_division_num);
     lambda_update_mat_ = Eigen::MatrixXd::Zero(dim_state_, horizon_division_num);
 }
+
 
 
 void MultipleShootingWithSaturation::initSolution(const double initial_time, const Eigen::VectorXd& initial_state_vec, const Eigen::VectorXd& initial_guess_input_vec, const double convergence_radius, const int max_iteration)
@@ -98,6 +98,78 @@ void MultipleShootingWithSaturation::initSolution(const double initial_time, con
 }
 
 
+void MultipleShootingWithSaturation::initSolution(const double initial_time, const Eigen::VectorXd& initial_state_vec, const Eigen::VectorXd& initial_guess_input_vec, const Eigen::VectorXd& initial_guess_lagrange_multiplier, const double convergence_radius, const int max_iteration)
+{
+    Eigen::VectorXd initial_solution_vec(dim_control_input_and_constraints_+2*dim_saturation_), initial_lambda_vec(dim_state_);
+    InitCGMRESWithSaturation initializer(model_, control_input_saturation_seq_, difference_increment_, dim_krylov_);
+
+    // Intialize the solution
+    initial_time_ = initial_time;
+    initializer.solve0stepNOCP(initial_time, initial_state_vec, initial_guess_input_vec, initial_guess_lagrange_multiplier, convergence_radius, max_iteration, initial_solution_vec);
+
+    model_.phixFunc(initial_time, initial_state_vec, initial_lambda_vec);
+    for(int i=0; i<horizon_division_num_; i++){
+        control_input_and_constraints_seq_.segment(i*dim_control_input_and_constraints_, dim_control_input_and_constraints_) = initial_solution_vec.segment(0, dim_control_input_and_constraints_);
+        dummy_input_mat_.col(i) = initial_solution_vec.segment(dim_control_input_and_constraints_, dim_saturation_);
+        saturation_lagrange_multiplier_mat_.col(i) = initial_solution_vec.segment(dim_control_input_and_constraints_+dim_saturation_, dim_saturation_);
+        state_mat_.col(i) = initial_state_vec;
+        lambda_mat_.col(i) = initial_lambda_vec;
+    }
+
+    // Intialize the optimality error.
+    Eigen::VectorXd initial_control_input_and_constraints_error(dim_control_input_and_constraints_), initial_dummy_input_error(dim_saturation_), initial_saturation_error(dim_saturation_);
+    initial_control_input_and_constraints_error = initializer.getControlInputAndConstraintsError(initial_time, initial_state_vec, initial_solution_vec);
+    initial_dummy_input_error = initializer.getDummyInputError(initial_time, initial_state_vec, initial_solution_vec);
+    initial_saturation_error= initializer.getControlInputSaturationError(initial_time, initial_state_vec, initial_solution_vec);
+
+    for(int i=0; i<horizon_division_num_; i++){
+        control_input_and_constraints_error_seq_.segment(i*dim_control_input_and_constraints_, dim_control_input_and_constraints_) = initial_control_input_and_constraints_error;
+        dummy_error_mat_.col(i) = initial_dummy_input_error;
+        saturation_error_mat_.col(i) = initial_saturation_error;
+    }
+
+    state_error_mat_ = Eigen::MatrixXd::Zero(dim_state_, horizon_division_num_);
+    lambda_error_mat_ = Eigen::MatrixXd::Zero(dim_state_, horizon_division_num_);
+}
+
+
+
+void MultipleShootingWithSaturation::initSolution(const double initial_time, const Eigen::VectorXd& initial_state_vec, const Eigen::VectorXd& initial_guess_input_vec, const double initial_guess_lagrange_multiplier, const double convergence_radius, const int max_iteration)
+{
+    Eigen::VectorXd initial_solution_vec(dim_control_input_and_constraints_+2*dim_saturation_), initial_lambda_vec(dim_state_);
+    InitCGMRESWithSaturation initializer(model_, control_input_saturation_seq_, difference_increment_, dim_krylov_);
+
+    // Intialize the solution
+    initial_time_ = initial_time;
+    initializer.solve0stepNOCP(initial_time, initial_state_vec, initial_guess_input_vec, initial_guess_lagrange_multiplier, convergence_radius, max_iteration, initial_solution_vec);
+
+    model_.phixFunc(initial_time, initial_state_vec, initial_lambda_vec);
+    for(int i=0; i<horizon_division_num_; i++){
+        control_input_and_constraints_seq_.segment(i*dim_control_input_and_constraints_, dim_control_input_and_constraints_) = initial_solution_vec.segment(0, dim_control_input_and_constraints_);
+        dummy_input_mat_.col(i) = initial_solution_vec.segment(dim_control_input_and_constraints_, dim_saturation_);
+        saturation_lagrange_multiplier_mat_.col(i) = initial_solution_vec.segment(dim_control_input_and_constraints_+dim_saturation_, dim_saturation_);
+        state_mat_.col(i) = initial_state_vec;
+        lambda_mat_.col(i) = initial_lambda_vec;
+    }
+
+    // Intialize the optimality error.
+    Eigen::VectorXd initial_control_input_and_constraints_error(dim_control_input_and_constraints_), initial_dummy_input_error(dim_saturation_), initial_saturation_error(dim_saturation_);
+    initial_control_input_and_constraints_error = initializer.getControlInputAndConstraintsError(initial_time, initial_state_vec, initial_solution_vec);
+    initial_dummy_input_error = initializer.getDummyInputError(initial_time, initial_state_vec, initial_solution_vec);
+    initial_saturation_error= initializer.getControlInputSaturationError(initial_time, initial_state_vec, initial_solution_vec);
+
+    for(int i=0; i<horizon_division_num_; i++){
+        control_input_and_constraints_error_seq_.segment(i*dim_control_input_and_constraints_, dim_control_input_and_constraints_) = initial_control_input_and_constraints_error;
+        dummy_error_mat_.col(i) = initial_dummy_input_error;
+        saturation_error_mat_.col(i) = initial_saturation_error;
+    }
+
+    state_error_mat_ = Eigen::MatrixXd::Zero(dim_state_, horizon_division_num_);
+    lambda_error_mat_ = Eigen::MatrixXd::Zero(dim_state_, horizon_division_num_);
+}
+
+
+
 void MultipleShootingWithSaturation::controlUpdate(const double current_time, const double sampling_period, const Eigen::VectorXd& current_state_vec, Eigen::Ref<Eigen::VectorXd> optimal_control_input_vec)
 {
     // Predict the incremented state.
@@ -114,6 +186,8 @@ void MultipleShootingWithSaturation::controlUpdate(const double current_time, co
     state_mat_ += sampling_period * state_update_mat_;
     lambda_mat_ += sampling_period * lambda_update_mat_;
 
+    // std::cout << state_mat_ << std::endl;
+    // std::cout << lambda_mat_ << std::endl;
 
     // Update dummy_input_mat_ and saturation_lagrange_multiplier_mat_
     computeOptimalityErrorforSaturation(control_input_and_constraints_seq_, dummy_input_mat_, saturation_lagrange_multiplier_mat_, dummy_error_mat_, saturation_error_mat_);
@@ -122,12 +196,24 @@ void MultipleShootingWithSaturation::controlUpdate(const double current_time, co
     dummy_input_mat_ += sampling_period * dummy_update_mat_;
     saturation_lagrange_multiplier_mat_ += sampling_period * saturation_update_mat_;
 
+    // std::cout << dummy_input_mat_ << std::endl;
+    // std::cout << saturation_lagrange_multiplier_mat_ << std::endl;
 
     // Update control_input_and_constraints_seq_.
     control_input_and_constraints_seq_ += sampling_period * control_input_and_constraints_update_seq_;
 
+    // std::cout << control_input_and_constraints_seq_ << std::endl;
+    // std::exit(1);
+
     optimal_control_input_vec = control_input_and_constraints_seq_.segment(0, dim_control_input_);
 }
+
+
+void MultipleShootingWithSaturation::getControlInput(Eigen::Ref<Eigen::VectorXd> control_input_vec) const
+{
+    control_input_vec = control_input_and_constraints_seq_.segment(0, dim_control_input_);
+}
+
 
 
 double MultipleShootingWithSaturation::getError(const double current_time, const Eigen::VectorXd& current_state_vec)
@@ -147,7 +233,6 @@ double MultipleShootingWithSaturation::getError(const double current_time, const
     for(int i=0; i<horizon_division_num_; i++){
         squared_error += (state_error_mat.col(i).squaredNorm() + lambda_error_mat.col(i).squaredNorm() + dummy_error_mat.col(i).squaredNorm() + saturation_error_mat.col(i).squaredNorm());
     }
-
 
     return std::sqrt(squared_error);
 }
@@ -299,24 +384,26 @@ void MultipleShootingWithSaturation::bFunc(const double time_param, const Eigen:
     computeOptimalityErrorforStateAndLambda(incremented_time_, incremented_state_vec_, current_solution_vec, state_mat_, lambda_mat_, state_error_mat_1_, lambda_error_mat_1_);
 
     computeStateAndLambda(incremented_time_, incremented_state_vec_, current_solution_vec, (1-difference_increment_*zeta_)*state_error_mat_, (1-difference_increment_*zeta_)*lambda_error_mat_, incremented_state_mat_, incremented_lambda_mat_);
-    computeOptimalityErrorforControlInputAndConstraints(incremented_time_, incremented_state_vec_, current_solution_vec, incremented_state_mat_, incremented_lambda_mat_, saturation_lagrange_multiplier_mat_, control_input_and_constraints_error_seq_3_);
-
     computeOptimalityErrorforSaturation(current_solution_vec, dummy_input_mat_, saturation_lagrange_multiplier_mat_, dummy_error_mat_, saturation_error_mat_);
-    multiplySaturationSelfDerivativeInverse(current_solution_vec, dummy_input_mat_, saturation_lagrange_multiplier_mat_, -zeta_*dummy_error_mat_, -zeta_*saturation_error_mat_, dummy_error_mat_1_, saturation_error_mat_1_);
-    multiplyOptimalityDerivativeWithSaturation(control_input_and_constraints_seq_, dummy_input_mat_, saturation_lagrange_multiplier_mat_, dummy_error_mat_1_, saturation_error_mat_1_, control_input_and_constraints_error_seq_4_);
+    multiplySaturationSelfDerivativeInverse(control_input_and_constraints_seq_, dummy_input_mat_, saturation_lagrange_multiplier_mat_, -zeta_*dummy_error_mat_, -zeta_*saturation_error_mat_, dummy_error_mat_1_, saturation_error_mat_1_);
+
+    computeOptimalityErrorforControlInputAndConstraints(incremented_time_, incremented_state_vec_, current_solution_vec, incremented_state_mat_, incremented_lambda_mat_, saturation_lagrange_multiplier_mat_+difference_increment_*saturation_error_mat_1_, control_input_and_constraints_error_seq_3_);
 
 
-    incremented_control_input_and_constraints_seq_ = current_solution_vec + difference_increment_ * control_input_and_constraints_update_seq_;
+    incremented_control_input_and_constraints_seq_ = current_solution_vec + difference_increment_*control_input_and_constraints_update_seq_;
     computeStateAndLambda(incremented_time_, incremented_state_vec_, incremented_control_input_and_constraints_seq_, state_error_mat_1_, lambda_error_mat_1_, incremented_state_mat_, incremented_lambda_mat_);
-    computeOptimalityErrorforControlInputAndConstraints(incremented_time_, incremented_state_vec_, incremented_control_input_and_constraints_seq_, incremented_state_mat_, incremented_lambda_mat_, saturation_lagrange_multiplier_mat_, control_input_and_constraints_error_seq_2_);
 
-    equation_error_vec = - (zeta_ - 1/difference_increment_) * control_input_and_constraints_error_seq_ - control_input_and_constraints_error_seq_3_/difference_increment_ - control_input_and_constraints_error_seq_4_ - (control_input_and_constraints_error_seq_2_ - control_input_and_constraints_error_seq_1_)/difference_increment_;
+    multiplySaturationDerivativeWithControlInput(current_solution_vec, control_input_and_constraints_update_seq_, dummy_error_mat_, saturation_error_mat_);
+    multiplySaturationSelfDerivativeInverse(current_solution_vec, dummy_input_mat_, saturation_lagrange_multiplier_mat_, dummy_error_mat_, saturation_error_mat_, dummy_error_mat_1_, saturation_error_mat_1_);
+    computeOptimalityErrorforControlInputAndConstraints(incremented_time_, incremented_state_vec_, incremented_control_input_and_constraints_seq_, incremented_state_mat_, incremented_lambda_mat_, saturation_lagrange_multiplier_mat_-difference_increment_*saturation_error_mat_1_, control_input_and_constraints_error_seq_2_);
+
+    equation_error_vec = - (zeta_ - 1/difference_increment_) * control_input_and_constraints_error_seq_ - control_input_and_constraints_error_seq_3_/difference_increment_ - (control_input_and_constraints_error_seq_2_-control_input_and_constraints_error_seq_1_)/difference_increment_;
 }
 
 
 void MultipleShootingWithSaturation::axFunc(const double time_param, const Eigen::VectorXd& state_vec, const Eigen::VectorXd& current_solution_vec, const Eigen::VectorXd& direction_vec, Eigen::Ref<Eigen::VectorXd> forward_difference_error_vec)
 {
-    incremented_control_input_and_constraints_seq_ = current_solution_vec + difference_increment_ * direction_vec;
+    incremented_control_input_and_constraints_seq_ = current_solution_vec + difference_increment_*direction_vec;
 
     computeStateAndLambda(incremented_time_, incremented_state_vec_, incremented_control_input_and_constraints_seq_, state_error_mat_1_, lambda_error_mat_1_, incremented_state_mat_, incremented_lambda_mat_);
 

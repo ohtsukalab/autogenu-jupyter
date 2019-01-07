@@ -114,6 +114,12 @@ double MultipleShootingCGMRES::getError(const double current_time, const Eigen::
     return std::sqrt(squared_error);
 }
 
+void MultipleShootingCGMRES::getControlInput(Eigen::Ref<Eigen::VectorXd> control_input_vec) const
+{
+    control_input_vec = control_input_and_constraints_seq_.segment(0, dim_control_input_);
+}
+
+
 
 inline void MultipleShootingCGMRES::computeOptimalityErrorforControlInputAndConstraints(const double time_param, const Eigen::VectorXd& state_vec, const Eigen::VectorXd& control_input_and_constraints_seq, const Eigen::MatrixXd& state_mat, const Eigen::MatrixXd& lambda_mat, Eigen::Ref<Eigen::VectorXd> optimality_for_control_input_and_constraints)
 {

@@ -65,6 +65,13 @@ void ContinuationGMRES::controlUpdate(const double current_time, const double sa
 }
 
 
+void ContinuationGMRES::getControlInput(Eigen::Ref<Eigen::VectorXd> control_input_vec) const
+{
+    control_input_vec = solution_vec_.segment(0, dim_control_input_);
+}
+
+
+
 double ContinuationGMRES::getError(const double current_time, const Eigen::VectorXd& current_state_vec)
 {
     Eigen::VectorXd error_vec(dim_solution_);

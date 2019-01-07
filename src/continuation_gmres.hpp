@@ -46,6 +46,9 @@ public:
     // Updates the solution by solving the matrix-free GMRES.
     void controlUpdate(const double current_time, const double sampling_period, const Eigen::VectorXd& current_state_vec, Eigen::Ref<Eigen::VectorXd> optimal_control_input_vec);
 
+    // Returns the intial vector of the control input sequence
+    void getControlInput(Eigen::Ref<Eigen::VectorXd> control_input_vec) const;
+
     // Returns the optimality error norm under the current_state_vec and the current solution.
     double getError(const double current_time, const Eigen::VectorXd& current_state_vec);
 };

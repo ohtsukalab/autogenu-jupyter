@@ -17,12 +17,11 @@ InitCGMRESWithSaturation::InitCGMRESWithSaturation(const NMPCModel model, const 
     error_vec_.resize(dim_solution_);
     error_vec_1_.resize(dim_solution_);
     error_vec_2_.resize(dim_solution_);
+    initial_lagrange_multiplier_vec_.resize(dim_saturation_);
 
     // Initialize solution of the forward-difference GMRES.
-    for(int i=0; i<dim_solution_; i++){
-        solution_update_vec_(i) = 0.0;
-        error_vec_(i) = 0.0;
-    }
+    solution_update_vec_ = Eigen::VectorXd::Zero(dim_solution_);
+    error_vec_ = Eigen::VectorXd::Zero(dim_solution_);
 }
 
 
@@ -56,8 +55,56 @@ void InitCGMRESWithSaturation::solve0stepNOCP(const double initial_time, const E
             - (control_input_saturation_seq_.max(i)+control_input_saturation_seq_.min(i))/2)*(initial_guess_vec(control_input_saturation_seq_.index(i)) - (control_input_saturation_seq_.max(i)+control_input_saturation_seq_.min(i))/2)
         );
     }
+    solution_vec.segment(dim_control_input_and_constraints_+dim_saturation_, dim_saturation_) = Eigen::VectorXd::Zero(dim_saturation_);
+
+    // Solve the 0step nonlinear optimal control problem
+    computeOptimalityErrors(initial_time, initial_state_vec, solution_vec, error_vec_);
+    int i=0;
+    while(error_vec_.squaredNorm() > convergence_radius && i < max_iteration){
+        forwardDifferenceGMRES(initial_time, initial_state_vec, solution_vec, solution_update_vec_);
+        solution_vec += solution_update_vec_;
+        computeOptimalityErrors(initial_time, initial_state_vec, solution_vec, error_vec_);
+        i++;
+    }
+}
+
+
+void InitCGMRESWithSaturation::solve0stepNOCP(const double initial_time, const Eigen::VectorXd& initial_state_vec, const Eigen::VectorXd& initial_guess_vec, const Eigen::VectorXd& initial_guess_lagrange_multiplier, const double convergence_radius, const int max_iteration, Eigen::Ref<Eigen::VectorXd> solution_vec)
+{
+    // Substitute initial guess solution
+    solution_vec.segment(0, dim_control_input_and_constraints_) = initial_guess_vec;
     for(int i=0; i<dim_saturation_; i++){
-        solution_vec(dim_control_input_and_constraints_+dim_saturation_+i) = 0.001;
+        solution_vec(dim_control_input_and_constraints_+i) = std::sqrt(
+            (control_input_saturation_seq_.max(i)-control_input_saturation_seq_.min(i))*(control_input_saturation_seq_.max(i)-control_input_saturation_seq_.min(i))/4 - (initial_guess_vec(control_input_saturation_seq_.index(i)) 
+            - (control_input_saturation_seq_.max(i)+control_input_saturation_seq_.min(i))/2)*(initial_guess_vec(control_input_saturation_seq_.index(i)) - (control_input_saturation_seq_.max(i)+control_input_saturation_seq_.min(i))/2)
+        );
+    }
+    solution_vec.segment(dim_control_input_and_constraints_+dim_saturation_, dim_saturation_) = initial_guess_lagrange_multiplier;
+
+    // Solve the 0step nonlinear optimal control problem
+    computeOptimalityErrors(initial_time, initial_state_vec, solution_vec, error_vec_);
+    int i=0;
+    while(error_vec_.squaredNorm() > convergence_radius && i < max_iteration){
+        forwardDifferenceGMRES(initial_time, initial_state_vec, solution_vec, solution_update_vec_);
+        solution_vec += solution_update_vec_;
+        computeOptimalityErrors(initial_time, initial_state_vec, solution_vec, error_vec_);
+        i++;
+    }
+}
+
+
+void InitCGMRESWithSaturation::solve0stepNOCP(const double initial_time, const Eigen::VectorXd& initial_state_vec, const Eigen::VectorXd& initial_guess_vec, const double initial_guess_lagrange_multiplier, const double convergence_radius, const int max_iteration, Eigen::Ref<Eigen::VectorXd> solution_vec)
+{
+    // Substitute initial guess solution
+    solution_vec.segment(0, dim_control_input_and_constraints_) = initial_guess_vec;
+    for(int i=0; i<dim_saturation_; i++){
+        solution_vec(dim_control_input_and_constraints_+i) = std::sqrt(
+            (control_input_saturation_seq_.max(i)-control_input_saturation_seq_.min(i))*(control_input_saturation_seq_.max(i)-control_input_saturation_seq_.min(i))/4 - (initial_guess_vec(control_input_saturation_seq_.index(i)) 
+            - (control_input_saturation_seq_.max(i)+control_input_saturation_seq_.min(i))/2)*(initial_guess_vec(control_input_saturation_seq_.index(i)) - (control_input_saturation_seq_.max(i)+control_input_saturation_seq_.min(i))/2)
+        );
+    }
+    for(int i=0; i<dim_saturation_; i++){
+        solution_vec(dim_control_input_and_constraints_+dim_saturation_+i) = initial_guess_lagrange_multiplier;
     }
 
     // Solve the 0step nonlinear optimal control problem
