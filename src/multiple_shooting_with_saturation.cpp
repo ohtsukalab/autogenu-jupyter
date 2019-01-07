@@ -317,7 +317,7 @@ inline void MultipleShootingWithSaturation::computeOptimalityErrorforSaturation(
 {
     for(int i=0; i<horizon_division_num_; i++){
         for(int j=0; j<dim_saturation_; j++){
-            optimality_for_dummy(j,i) = saturation_lagrange_multiplier_seq(j,i) * dummy_input_seq(j,i);
+            optimality_for_dummy(j,i) = 2 * saturation_lagrange_multiplier_seq(j,i) * dummy_input_seq(j,i) - control_input_saturation_seq_.weight(j);
         }
     }
     for(int i=0; i<horizon_division_num_; i++){
@@ -349,29 +349,30 @@ inline void MultipleShootingWithSaturation::multiplySaturationSelfDerivativeInve
 {
     for(int i=0; i<horizon_division_num_; i++){
         for(int j=0; j<dim_saturation_; j++){
-            optimality_for_dummy(j,i) = multiplied_saturation_mat(j,i)/dummy_input_seq(j,i);
+            optimality_for_dummy(j,i) = multiplied_saturation_mat(j,i)/(2*dummy_input_seq(j,i));
         }
     }
     for(int i=0; i<horizon_division_num_; i++){
         for(int j=0; j<dim_saturation_; j++){
-            optimality_for_saturation(j,i) = multiplied_dummy_mat(j,i)/dummy_input_seq(j,i) - multiplied_saturation_mat(j,i) * (saturation_lagrange_multiplier_seq(j,i)+control_input_saturation_seq_.weight(j))/(dummy_input_seq(j,i)*dummy_input_seq(j,i));
+            // optimality_for_saturation(j,i) = multiplied_dummy_mat(j,i)/dummy_input_seq(j,i) - multiplied_saturation_mat(j,i) * (saturation_lagrange_multiplier_seq(j,i)+control_input_saturation_seq_.weight(j))/(dummy_input_seq(j,i)*dummy_input_seq(j,i));
+            optimality_for_saturation(j,i) = multiplied_dummy_mat(j,i)/(2*dummy_input_seq(j,i)) - multiplied_saturation_mat(j,i) * saturation_lagrange_multiplier_seq(j,i)/(2*dummy_input_seq(j,i)*dummy_input_seq(j,i));
         }
     }
 }
 
 
-inline void MultipleShootingWithSaturation::multiplyOptimalityDerivativeWithSaturation(const Eigen::VectorXd& control_input_and_constraints_seq, const Eigen::MatrixXd& dummy_input_seq, const Eigen::MatrixXd& saturation_lagrange_multiplier_seq, const Eigen::MatrixXd& multiplied_dummy_mat, const Eigen::MatrixXd& multiplied_saturation_mat, Eigen::Ref<Eigen::VectorXd> optimality_for_control_input_and_constraints)
-{
-    for(int i=0; i<dim_control_input_and_constraints_seq_; i++){
-        optimality_for_control_input_and_constraints(i) = 0;
-    }
+// inline void MultipleShootingWithSaturation::multiplyOptimalityDerivativeWithSaturation(const Eigen::VectorXd& control_input_and_constraints_seq, const Eigen::MatrixXd& dummy_input_seq, const Eigen::MatrixXd& saturation_lagrange_multiplier_seq, const Eigen::MatrixXd& multiplied_dummy_mat, const Eigen::MatrixXd& multiplied_saturation_mat, Eigen::Ref<Eigen::VectorXd> optimality_for_control_input_and_constraints)
+// {
+//     for(int i=0; i<dim_control_input_and_constraints_seq_; i++){
+//         optimality_for_control_input_and_constraints(i) = 0;
+//     }
 
-    for(int i=0; i<horizon_division_num_; i++){
-        for(int j=0; j<dim_saturation_; j++){
-            optimality_for_control_input_and_constraints(i*dim_control_input_and_constraints_+control_input_saturation_seq_.index(j)) = (2*control_input_and_constraints_seq(i*dim_control_input_and_constraints_+control_input_saturation_seq_.index(j)) - control_input_saturation_seq_.min(j) - control_input_saturation_seq_.max(j)) * saturation_lagrange_multiplier_seq(j,i);
-        }
-    }
-}
+//     for(int i=0; i<horizon_division_num_; i++){
+//         for(int j=0; j<dim_saturation_; j++){
+//             optimality_for_control_input_and_constraints(i*dim_control_input_and_constraints_+control_input_saturation_seq_.index(j)) = (2*control_input_and_constraints_seq(i*dim_control_input_and_constraints_+control_input_saturation_seq_.index(j)) - control_input_saturation_seq_.min(j) - control_input_saturation_seq_.max(j)) * saturation_lagrange_multiplier_seq(j,i);
+//         }
+//     }
+// }
 
 
 

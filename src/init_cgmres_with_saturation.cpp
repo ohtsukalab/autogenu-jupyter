@@ -29,7 +29,7 @@ inline void InitCGMRESWithSaturation::computeSaturationOptimality(const Eigen::V
 
 {
     for(int i=0; i<dim_saturation_; i++){
-        optimality_for_dummy(i) = saturation_lagrange_multiplier_vec(i) * dummy_input_vec(i);
+        optimality_for_dummy(i) = 2 * saturation_lagrange_multiplier_vec(i) * dummy_input_vec(i) - control_input_saturation_seq_.weight(i);
     }
     for(int i=0; i<dim_saturation_; i++){
         optimality_for_saturation(i) = (control_input_and_constraint_vec(control_input_saturation_seq_.index(i))-(control_input_saturation_seq_.min(i)+control_input_saturation_seq_.max(i))/2) * (control_input_and_constraint_vec(control_input_saturation_seq_.index(i))-(control_input_saturation_seq_.min(i)+control_input_saturation_seq_.max(i))/2) - (control_input_saturation_seq_.max(i)-control_input_saturation_seq_.min(i)) * (control_input_saturation_seq_.max(i)-control_input_saturation_seq_.min(i))/4 + dummy_input_vec(i) * dummy_input_vec(i);

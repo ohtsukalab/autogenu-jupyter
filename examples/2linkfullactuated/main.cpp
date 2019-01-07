@@ -20,8 +20,8 @@ int main()
 
     //  If you use MultipleShootingWithSaturation, you have to describe the saturaions on the control input in ControlInputSaturationSequence.
     ControlInputSaturationSequence control_input_saturation_seq;
-    control_input_saturation_seq.appendControlInputSaturation(0, -3, 3, 1.0e-05);
-    control_input_saturation_seq.appendControlInputSaturation(1, -5, 5, 1.0e-05);
+    control_input_saturation_seq.appendControlInputSaturation(0, -3, 3, 1.0e-03);
+    control_input_saturation_seq.appendControlInputSaturation(1, -1.5, 1.5, 1.0e-03);
     MultipleShootingWithSaturation cgmres_solver(nmpc_model, control_input_saturation_seq, 0.5, 1.0, 50, 1.0e-06, 1000, 5);
 
 
