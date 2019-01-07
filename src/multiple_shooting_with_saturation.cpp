@@ -361,21 +361,6 @@ inline void MultipleShootingWithSaturation::multiplySaturationSelfDerivativeInve
 }
 
 
-// inline void MultipleShootingWithSaturation::multiplyOptimalityDerivativeWithSaturation(const Eigen::VectorXd& control_input_and_constraints_seq, const Eigen::MatrixXd& dummy_input_seq, const Eigen::MatrixXd& saturation_lagrange_multiplier_seq, const Eigen::MatrixXd& multiplied_dummy_mat, const Eigen::MatrixXd& multiplied_saturation_mat, Eigen::Ref<Eigen::VectorXd> optimality_for_control_input_and_constraints)
-// {
-//     for(int i=0; i<dim_control_input_and_constraints_seq_; i++){
-//         optimality_for_control_input_and_constraints(i) = 0;
-//     }
-
-//     for(int i=0; i<horizon_division_num_; i++){
-//         for(int j=0; j<dim_saturation_; j++){
-//             optimality_for_control_input_and_constraints(i*dim_control_input_and_constraints_+control_input_saturation_seq_.index(j)) = (2*control_input_and_constraints_seq(i*dim_control_input_and_constraints_+control_input_saturation_seq_.index(j)) - control_input_saturation_seq_.min(j) - control_input_saturation_seq_.max(j)) * saturation_lagrange_multiplier_seq(j,i);
-//         }
-//     }
-// }
-
-
-
 void MultipleShootingWithSaturation::bFunc(const double time_param, const Eigen::VectorXd& state_vec, const Eigen::VectorXd& current_solution_vec, Eigen::Ref<Eigen::VectorXd> equation_error_vec)
 {
     computeOptimalityErrorforControlInputAndConstraints(time_param, state_vec, current_solution_vec, state_mat_, lambda_mat_, saturation_lagrange_multiplier_mat_, control_input_and_constraints_error_seq_);
