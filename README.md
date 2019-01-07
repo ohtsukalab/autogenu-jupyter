@@ -1,5 +1,5 @@
 # Introduction
-This project provides Continuation/GMRES method (C/GMRES method), a fast algorithm of NMPC, and the multiple shooting based C/GMRES method.
+This project provides Continuation/GMRES method (C/GMRES method), a fast algorithm of NMPC, and the multiple shooting based C/GMRES method. In the multiple shooting based C/GMRES method, the computational cost is reduced by condensing the state variables, the Lagrange multiplier of the state equation, the dummy input in the saturation of the control input, and the Lagrange multiplier of the saturation.
 
 
 # Requirement
@@ -11,7 +11,7 @@ This project provides Continuation/GMRES method (C/GMRES method), a fast algorit
 
 
 # Usage
-After setting the parameters of your model of NMPC in nmpc_model.hpp, writing equations in nmpc_model.cpp, and setting simulation conditions in main.cpp, build files as follows:
+First, set the parameters of your model of NMPC in nmpc_model.hpp, write equations in nmpc_model.cpp, and set simulation conditions in main.cpp, build files as follows:
 
 ```
 $ mkdir build
