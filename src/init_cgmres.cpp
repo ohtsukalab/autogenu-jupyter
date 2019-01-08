@@ -1,6 +1,30 @@
 #include "init_cgmres.hpp"
 
 
+inline void InitCGMRES::computeOptimalityErrors(const double time_param, const Eigen::VectorXd& state_vec, const Eigen::VectorXd& current_solution_vec, Eigen::Ref<Eigen::VectorXd> optimality_vec)
+{
+    model_.phixFunc(time_param, state_vec, lambda_vec_);
+    model_.huFunc(time_param, state_vec, current_solution_vec, lambda_vec_, optimality_vec);
+}
+
+
+void InitCGMRES::bFunc(const double time_param, const Eigen::VectorXd& state_vec, const Eigen::VectorXd& current_solution_vec, Eigen::Ref<Eigen::VectorXd> b_vec) 
+{
+    computeOptimalityErrors(time_param, state_vec, current_solution_vec, error_vec_);
+    computeOptimalityErrors(time_param, state_vec, current_solution_vec+difference_increment_*solution_update_vec_, error_vec_1_);
+
+    b_vec = - error_vec_ - (error_vec_1_ - error_vec_)/difference_increment_;
+}
+
+
+void InitCGMRES::axFunc(const double time_param, const Eigen::VectorXd& state_vec, const Eigen::VectorXd& current_solution_vec, const Eigen::VectorXd& direction_vec, Eigen::Ref<Eigen::VectorXd> ax_vec)
+{
+    computeOptimalityErrors(time_param, state_vec, current_solution_vec+difference_increment_*direction_vec, error_vec_1_);
+
+    ax_vec = (error_vec_1_ - error_vec_)/difference_increment_;
+}
+
+
 InitCGMRES::InitCGMRES(const NMPCModel model, const double difference_increment, const int dim_krylov) : MatrixFreeGMRES(model.dimControlInput()+model.dimConstraints(), dim_krylov)
 {
     // Set parameters.
@@ -44,28 +68,4 @@ Eigen::VectorXd InitCGMRES::getOptimalityErrorVec(const double initial_time, con
     computeOptimalityErrors(initial_time, initial_state_vec, current_solution_vec, error_vec);
 
     return error_vec;
-}
-
-
-inline void InitCGMRES::computeOptimalityErrors(const double time_param, const Eigen::VectorXd& state_vec, const Eigen::VectorXd& current_solution_vec, Eigen::Ref<Eigen::VectorXd> optimality_vec)
-{
-    model_.phixFunc(time_param, state_vec, lambda_vec_);
-    model_.huFunc(time_param, state_vec, current_solution_vec, lambda_vec_, optimality_vec);
-}
-
-
-void InitCGMRES::bFunc(const double time_param, const Eigen::VectorXd& state_vec, const Eigen::VectorXd& current_solution_vec, Eigen::Ref<Eigen::VectorXd> equation_error_vec) 
-{
-    computeOptimalityErrors(time_param, state_vec, current_solution_vec, error_vec_);
-    computeOptimalityErrors(time_param, state_vec, current_solution_vec+difference_increment_*solution_update_vec_, error_vec_1_);
-
-    equation_error_vec = - error_vec_ - (error_vec_1_ - error_vec_)/difference_increment_;
-}
-
-
-void InitCGMRES::axFunc(const double time_param, const Eigen::VectorXd& state_vec, const Eigen::VectorXd& current_solution_vec, const Eigen::VectorXd& direction_vec, Eigen::Ref<Eigen::VectorXd> forward_difference_error_vec)
-{
-    computeOptimalityErrors(time_param, state_vec, current_solution_vec+difference_increment_*direction_vec, error_vec_1_);
-
-    forward_difference_error_vec = (error_vec_1_ - error_vec_)/difference_increment_;
 }

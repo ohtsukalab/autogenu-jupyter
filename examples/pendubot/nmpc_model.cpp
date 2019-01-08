@@ -59,22 +59,3 @@ void NMPCModel::huFunc(const double t, const Eigen::VectorXd& x, const Eigen::Ve
 {
     hu[0] = (-d2 * l1 * m2 * (-2 * d2 * d2 * m2 * r[0] * u[0] - 2 * J2 * r[0] * u[0] + lmd[3]) * cos(x[1]) + (u[0] * r[0] * ((d2 * d2) + l1 * l1) * m2 + (u[0] * (d1 * d1 * m1 + J1 + J2) * r[0]) + lmd[2] - lmd[3]) * (d2 * d2 * m2 + J2)) / (d2 * d2 * m2 + J2) / (0.2e1 * d2 * m2 * l1 * cos(x[1]) + ((d2 * d2) + l1 * l1) * m2 + (d1 * d1 * m1) + J1 + J2);
 }
-
-
-
-int NMPCModel::dimState() const
-{
-    return dim_state_;
-}
-
-
-int NMPCModel::dimControlInput() const
-{
-    return dim_control_input_;
-}
-
-
-int NMPCModel::dimConstraints() const
-{
-    return dim_constraints_;
-}

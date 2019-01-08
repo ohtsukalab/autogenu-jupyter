@@ -1,5 +1,5 @@
 //
-// Computes the initial solution of the C/GMRES method.
+// Computes the initial solution of the C/GMRES method using the Newton GMRES method.
 //
 
 #ifndef INIT_CGMRES_H
@@ -10,7 +10,7 @@
 #include "matrixfree_gmres.hpp"
 
 
-// Computes the initial solution of the C/GMRES method using the Newton method.
+// Computes the initial solution of the C/GMRES method using the Newton GMRES method.
 class InitCGMRES final : public MatrixFreeGMRES{
 private:
     NMPCModel model_;
@@ -22,10 +22,11 @@ private:
     inline void computeOptimalityErrors(const double time_param, const Eigen::VectorXd& state_vec, const Eigen::VectorXd& current_solution_vec, Eigen::Ref<Eigen::VectorXd> optimality_vec);
 
     // Computes a vector correspongin to b in Ax=b
-    void bFunc(const double time_param, const Eigen::VectorXd& state_vec, const Eigen::VectorXd& current_solution_vec, Eigen::Ref<Eigen::VectorXd> equation_error_vec) override;
+    void bFunc(const double time_param, const Eigen::VectorXd& state_vec, const Eigen::VectorXd& current_solution_vec, Eigen::Ref<Eigen::VectorXd> b_vec) override;
 
     // Generates a vector corresponding to Ax in Ax=b with using the forward difference approximation.
-    void axFunc(const double time_param, const Eigen::VectorXd& state_vec, const Eigen::VectorXd& current_solution_vec, const Eigen::VectorXd& direction_vec, Eigen::Ref<Eigen::VectorXd> forward_difference_error_vec) override;
+    void axFunc(const double time_param, const Eigen::VectorXd& state_vec, const Eigen::VectorXd& current_solution_vec, const Eigen::VectorXd& direction_vec, Eigen::Ref<Eigen::VectorXd> ax_vec) override;
+
 
 public:
     // Sets parameters and allocates vectors.

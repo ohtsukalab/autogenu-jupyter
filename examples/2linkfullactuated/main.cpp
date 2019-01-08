@@ -2,7 +2,7 @@
 #include "continuation_gmres.hpp"
 #include "multiple_shooting_cgmres.hpp"
 #include "control_input_saturation_sequence.hpp"
-#include "multiple_shooting_with_saturation.hpp"
+#include "multiple_shooting_cgmres_with_saturation.hpp"
 #include "simulator.hpp"
 
 
@@ -11,18 +11,14 @@ int main()
     // Define the model in NMPC.
     NMPCModel nmpc_model;
 
-
     // Define the solver of C/GMRES.
-
     // ContinuationGMRES cgmres_solver(nmpc_model, 0.5, 1.0, 50, 1.0e-06, 1000, 5);
-
     // MultipleShootingCGMRES cgmres_solver(nmpc_model, 0.5, 1.0, 50, 1.0e-06, 1000, 5);
-
-    //  If you use MultipleShootingWithSaturation, you have to describe the saturaions on the control input in ControlInputSaturationSequence.
+    //  If you use MultipleShootingCGMRESWithSaturation, you have to describe the saturaions on the control input in ControlInputSaturationSequence before define the solver.
     ControlInputSaturationSequence control_input_saturation_seq;
     control_input_saturation_seq.appendControlInputSaturation(0, -3, 3, 1.0e-03);
     control_input_saturation_seq.appendControlInputSaturation(1, -1.5, 1.5, 1.0e-03);
-    MultipleShootingWithSaturation cgmres_solver(nmpc_model, control_input_saturation_seq, 0.5, 1.0, 50, 1.0e-06, 1000, 5);
+    MultipleShootingCGMRESWithSaturation cgmres_solver(nmpc_model, control_input_saturation_seq, 0.5, 1.0, 50, 1.0e-06, 1000, 5);
 
 
     // Define the simulator.
@@ -34,7 +30,7 @@ int main()
 
     // Set the initial guess of the control input vector.
     Eigen::VectorXd initial_guess_control_input(nmpc_model.dimControlInput()+nmpc_model.dimConstraints());
-    initial_guess_control_input = Eigen::VectorXd::Zero(nmpc_model.dimControlInput()+nmpc_model.dimConstraints());
+    initial_guess_control_input << 0.1, 0.1;
 
     // Initialize the solution of the C/GMRES method.
     Eigen::VectorXd initial_guess_lagrange_multiplier(control_input_saturation_seq.dimSaturation());

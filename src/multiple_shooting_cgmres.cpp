@@ -1,6 +1,100 @@
 #include "multiple_shooting_cgmres.hpp"
 
 
+inline void MultipleShootingCGMRES::computeOptimalityErrorforControlInputAndConstraints(const double time_param, const Eigen::VectorXd& state_vec, const Eigen::VectorXd& control_input_and_constraints_seq, const Eigen::MatrixXd& state_mat, const Eigen::MatrixXd& lambda_mat, Eigen::Ref<Eigen::VectorXd> optimality_for_control_input_and_constraints)
+{
+    // Set and discretize the horizon.
+    double horizon_length = horizon_max_length_ * (1.0 - std::exp(- alpha_ * (time_param - initial_time_)));
+    double delta_tau = horizon_length / horizon_division_num_;
+
+    // Compute optimality error for control input and constraints.
+    model_.huFunc(time_param, state_vec, control_input_and_constraints_seq.segment(0, dim_control_input_and_constraints_), lambda_mat.col(0), optimality_for_control_input_and_constraints.segment(0, dim_control_input_and_constraints_));
+    double tau = time_param+delta_tau;
+    for(int i=1; i<horizon_division_num_; i++, tau+=delta_tau){
+        model_.huFunc(tau, state_mat.col(i-1), control_input_and_constraints_seq.segment(i*dim_control_input_and_constraints_, dim_control_input_and_constraints_), lambda_mat.col(i), optimality_for_control_input_and_constraints.segment(i*dim_control_input_and_constraints_, dim_control_input_and_constraints_));
+    }
+}
+
+
+inline void MultipleShootingCGMRES::computeOptimalityErrorforStateAndLambda(const double time_param, const Eigen::VectorXd& state_vec, const Eigen::VectorXd& control_input_and_constraints_seq, const Eigen::MatrixXd& state_mat, const Eigen::MatrixXd& lambda_mat, Eigen::Ref<Eigen::MatrixXd> optimality_for_state, Eigen::Ref<Eigen::MatrixXd> optimality_for_lambda)
+{
+    // Set and discretize the horizon.
+    double horizon_length = horizon_max_length_ * (1.0 - std::exp(- alpha_ * (time_param - initial_time_)));
+    double delta_tau = horizon_length / horizon_division_num_;
+
+    // Compute optimality error for state.
+    model_.stateFunc(time_param, state_vec, control_input_and_constraints_seq.segment(0, dim_control_input_), dx_vec_);
+    optimality_for_state.col(0) = state_mat.col(0) - state_vec - delta_tau * dx_vec_;
+    double tau = time_param + delta_tau;
+    for(int i=1; i<horizon_division_num_; i++, tau+=delta_tau){
+        model_.stateFunc(tau, state_mat.col(i-1), control_input_and_constraints_seq.segment(i*dim_control_input_and_constraints_, dim_control_input_), dx_vec_);
+        optimality_for_state.col(i) = state_mat.col(i) - state_mat.col(i-1) - delta_tau * dx_vec_;
+    }
+
+    // Compute optimality error for lambda.
+    model_.phixFunc(tau, state_mat.col(horizon_division_num_-1), dx_vec_);
+    optimality_for_lambda.col(horizon_division_num_-1) = lambda_mat.col(horizon_division_num_-1) - dx_vec_;
+    for(int i=horizon_division_num_-1; i>=1; i--, tau-=delta_tau){
+        model_.hxFunc(tau, state_mat.col(i-1), control_input_and_constraints_seq.segment(i*dim_control_input_and_constraints_, dim_control_input_and_constraints_), lambda_mat.col(i), dx_vec_);
+        optimality_for_lambda.col(i-1) = lambda_mat.col(i-1) - lambda_mat.col(i) - delta_tau * dx_vec_;
+    }
+}
+
+
+inline void MultipleShootingCGMRES::computeStateAndLambda(const double time_param, const Eigen::VectorXd& state_vec, const Eigen::VectorXd& control_input_and_constraints_seq, const Eigen::MatrixXd& optimality_for_state, const Eigen::MatrixXd& optimality_for_lambda, Eigen::Ref<Eigen::MatrixXd> state_mat, Eigen::Ref<Eigen::MatrixXd> lambda_mat)
+{
+    // Set and discretize the horizon.
+    double horizon_length = horizon_max_length_ * (1.0 - std::exp(- alpha_ * (time_param - initial_time_)));
+    double delta_tau = horizon_length / horizon_division_num_;
+
+    // Compute the sequence of state under the error for state.
+    model_.stateFunc(time_param, state_vec, control_input_and_constraints_seq.segment(0, dim_control_input_), dx_vec_);
+    state_mat.col(0) = state_vec + delta_tau * dx_vec_ + optimality_for_state.col(0);
+    double tau = time_param + delta_tau;
+    for(int i=1; i<horizon_division_num_; i++, tau+=delta_tau){
+        model_.stateFunc(tau, state_mat.col(i-1), control_input_and_constraints_seq.segment(i*dim_control_input_and_constraints_, dim_control_input_), dx_vec_);
+        state_mat.col(i) = state_mat.col(i-1) + delta_tau * dx_vec_ + optimality_for_state.col(i);
+    }
+
+    // Compute the sequence of lambda under the error for lambda.
+    model_.phixFunc(tau, state_mat.col(horizon_division_num_-1), dx_vec_);
+    lambda_mat.col(horizon_division_num_-1) = dx_vec_ + optimality_for_lambda.col(horizon_division_num_-1);
+    for(int i=horizon_division_num_-1; i>=1; i--, tau-=delta_tau){
+        model_.hxFunc(tau, state_mat.col(i-1), control_input_and_constraints_seq.segment(i*dim_control_input_and_constraints_, dim_control_input_and_constraints_), lambda_mat.col(i), dx_vec_);
+        lambda_mat.col(i-1) = lambda_mat.col(i) + delta_tau * dx_vec_ + optimality_for_lambda.col(i-1);
+    }
+}
+
+
+void MultipleShootingCGMRES::bFunc(const double time_param, const Eigen::VectorXd& state_vec, const Eigen::VectorXd& current_solution_vec, Eigen::Ref<Eigen::VectorXd> b_vec)
+{
+    computeOptimalityErrorforControlInputAndConstraints(time_param, state_vec, current_solution_vec, state_mat_, lambda_mat_, control_input_and_constraints_error_seq_);
+    computeOptimalityErrorforControlInputAndConstraints(incremented_time_, incremented_state_vec_, current_solution_vec, state_mat_, lambda_mat_, control_input_and_constraints_error_seq_1_);
+
+    computeOptimalityErrorforStateAndLambda(time_param, state_vec, current_solution_vec, state_mat_, lambda_mat_, state_error_mat_, lambda_error_mat_);
+    computeOptimalityErrorforStateAndLambda(incremented_time_, incremented_state_vec_, current_solution_vec, state_mat_, lambda_mat_, state_error_mat_1_, lambda_error_mat_1_);
+
+    computeStateAndLambda(incremented_time_, incremented_state_vec_, current_solution_vec, (1-difference_increment_*zeta_)*state_error_mat_, (1-difference_increment_*zeta_)*lambda_error_mat_, incremented_state_mat_, incremented_lambda_mat_);
+    computeOptimalityErrorforControlInputAndConstraints(incremented_time_, incremented_state_vec_, current_solution_vec, incremented_state_mat_, incremented_lambda_mat_, control_input_and_constraints_error_seq_3_);
+
+    incremented_control_input_and_constraints_seq_ = current_solution_vec + difference_increment_ * control_input_and_constraints_update_seq_;
+    computeStateAndLambda(incremented_time_, incremented_state_vec_, incremented_control_input_and_constraints_seq_, state_error_mat_1_, lambda_error_mat_1_, incremented_state_mat_, incremented_lambda_mat_);
+    computeOptimalityErrorforControlInputAndConstraints(incremented_time_, incremented_state_vec_, incremented_control_input_and_constraints_seq_, incremented_state_mat_, incremented_lambda_mat_, control_input_and_constraints_error_seq_2_);
+
+    b_vec = (1/difference_increment_ - zeta_) * control_input_and_constraints_error_seq_ - control_input_and_constraints_error_seq_3_/difference_increment_ - (control_input_and_constraints_error_seq_2_-control_input_and_constraints_error_seq_1_)/difference_increment_;
+}
+
+
+void MultipleShootingCGMRES::axFunc(const double time_param, const Eigen::VectorXd& state_vec, const Eigen::VectorXd& current_solution_vec, const Eigen::VectorXd& direction_vec, Eigen::Ref<Eigen::VectorXd> ax_vec)
+{
+    incremented_control_input_and_constraints_seq_ = current_solution_vec + difference_increment_ * direction_vec;
+    computeStateAndLambda(incremented_time_, incremented_state_vec_, incremented_control_input_and_constraints_seq_, state_error_mat_1_, lambda_error_mat_1_, incremented_state_mat_, incremented_lambda_mat_);
+    computeOptimalityErrorforControlInputAndConstraints(incremented_time_, incremented_state_vec_, incremented_control_input_and_constraints_seq_, incremented_state_mat_, incremented_lambda_mat_, control_input_and_constraints_error_seq_2_);
+
+    ax_vec =(control_input_and_constraints_error_seq_2_-control_input_and_constraints_error_seq_1_)/difference_increment_;
+}
+
+
 MultipleShootingCGMRES::MultipleShootingCGMRES(const NMPCModel model, const double horizon_max_length, const double alpha, const int horizon_division_num, const double difference_increment, const double zeta, const int dim_krylov) : MatrixFreeGMRES((model.dimControlInput()+model.dimConstraints())*horizon_division_num, dim_krylov)
 {
     // Set dimensions and parameters.
@@ -114,101 +208,8 @@ double MultipleShootingCGMRES::getError(const double current_time, const Eigen::
     return std::sqrt(squared_error);
 }
 
-void MultipleShootingCGMRES::getControlInput(Eigen::Ref<Eigen::VectorXd> control_input_vec) const
+
+Eigen::VectorXd MultipleShootingCGMRES::getControlInput() const
 {
-    control_input_vec = control_input_and_constraints_seq_.segment(0, dim_control_input_);
-}
-
-
-
-inline void MultipleShootingCGMRES::computeOptimalityErrorforControlInputAndConstraints(const double time_param, const Eigen::VectorXd& state_vec, const Eigen::VectorXd& control_input_and_constraints_seq, const Eigen::MatrixXd& state_mat, const Eigen::MatrixXd& lambda_mat, Eigen::Ref<Eigen::VectorXd> optimality_for_control_input_and_constraints)
-{
-    // Set and discretize the horizon.
-    double horizon_length = horizon_max_length_ * (1.0 - std::exp(- alpha_ * (time_param - initial_time_)));
-    double delta_tau = horizon_length / horizon_division_num_;
-
-    model_.huFunc(time_param, state_vec, control_input_and_constraints_seq.segment(0, dim_control_input_and_constraints_), lambda_mat.col(0), optimality_for_control_input_and_constraints.segment(0, dim_control_input_and_constraints_));
-    double tau = time_param+delta_tau;
-    for(int i=1; i<horizon_division_num_; i++, tau+=delta_tau){
-        model_.huFunc(tau, state_mat.col(i-1), control_input_and_constraints_seq.segment(i*dim_control_input_and_constraints_, dim_control_input_and_constraints_), lambda_mat.col(i), optimality_for_control_input_and_constraints.segment(i*dim_control_input_and_constraints_, dim_control_input_and_constraints_));
-    }
-}
-
-
-inline void MultipleShootingCGMRES::computeOptimalityErrorforStateAndLambda(const double time_param, const Eigen::VectorXd& state_vec, const Eigen::VectorXd& control_input_and_constraints_seq, const Eigen::MatrixXd& state_mat, const Eigen::MatrixXd& lambda_mat, Eigen::Ref<Eigen::MatrixXd> optimality_for_state, Eigen::Ref<Eigen::MatrixXd> optimality_for_lambda)
-{
-    // Set and discretize the horizon.
-    double horizon_length = horizon_max_length_ * (1.0 - std::exp(- alpha_ * (time_param - initial_time_)));
-    double delta_tau = horizon_length / horizon_division_num_;
-
-    // Compute optimality error for state.
-    model_.stateFunc(time_param, state_vec, control_input_and_constraints_seq.segment(0, dim_control_input_), dx_vec_);
-    optimality_for_state.col(0) = state_mat.col(0) - state_vec - delta_tau * dx_vec_;
-    double tau = time_param + delta_tau;
-    for(int i=1; i<horizon_division_num_; i++, tau+=delta_tau){
-        model_.stateFunc(tau, state_mat.col(i-1), control_input_and_constraints_seq.segment(i*dim_control_input_and_constraints_, dim_control_input_), dx_vec_);
-        optimality_for_state.col(i) = state_mat.col(i) - state_mat.col(i-1) - delta_tau * dx_vec_;
-    }
-
-    // Compute optimality error for lambda.
-    model_.phixFunc(tau, state_mat.col(horizon_division_num_-1), dx_vec_);
-    optimality_for_lambda.col(horizon_division_num_-1) = lambda_mat.col(horizon_division_num_-1) - dx_vec_;
-    for(int i=horizon_division_num_-1; i>=1; i--, tau-=delta_tau){
-        model_.hxFunc(tau, state_mat.col(i-1), control_input_and_constraints_seq.segment(i*dim_control_input_and_constraints_, dim_control_input_and_constraints_), lambda_mat.col(i), dx_vec_);
-        optimality_for_lambda.col(i-1) = lambda_mat.col(i-1) - lambda_mat.col(i) - delta_tau * dx_vec_;
-    }
-}
-
-
-inline void MultipleShootingCGMRES::computeStateAndLambda(const double time_param, const Eigen::VectorXd& state_vec, const Eigen::VectorXd& control_input_and_constraints_seq, const Eigen::MatrixXd& optimality_for_state, const Eigen::MatrixXd& optimality_for_lambda, Eigen::Ref<Eigen::MatrixXd> state_mat, Eigen::Ref<Eigen::MatrixXd> lambda_mat)
-{
-    // Set and discretize the horizon.
-    double horizon_length = horizon_max_length_ * (1.0 - std::exp(- alpha_ * (time_param - initial_time_)));
-    double delta_tau = horizon_length / horizon_division_num_;
-
-    // Compute the sequence of state under the error for state.
-    model_.stateFunc(time_param, state_vec, control_input_and_constraints_seq.segment(0, dim_control_input_), dx_vec_);
-    state_mat.col(0) = state_vec + delta_tau * dx_vec_ + optimality_for_state.col(0);
-    double tau = time_param + delta_tau;
-    for(int i=1; i<horizon_division_num_; i++, tau+=delta_tau){
-        model_.stateFunc(tau, state_mat.col(i-1), control_input_and_constraints_seq.segment(i*dim_control_input_and_constraints_, dim_control_input_), dx_vec_);
-        state_mat.col(i) = state_mat.col(i-1) + delta_tau * dx_vec_ + optimality_for_state.col(i);
-    }
-
-    // Compute the sequence of lambda under the error for lambda.
-    model_.phixFunc(tau, state_mat.col(horizon_division_num_-1), dx_vec_);
-    lambda_mat.col(horizon_division_num_-1) = dx_vec_ + optimality_for_lambda.col(horizon_division_num_-1);
-    for(int i=horizon_division_num_-1; i>=1; i--, tau-=delta_tau){
-        model_.hxFunc(tau, state_mat.col(i-1), control_input_and_constraints_seq.segment(i*dim_control_input_and_constraints_, dim_control_input_and_constraints_), lambda_mat.col(i), dx_vec_);
-        lambda_mat.col(i-1) = lambda_mat.col(i) + delta_tau * dx_vec_ + optimality_for_lambda.col(i-1);
-    }
-}
-
-
-void MultipleShootingCGMRES::bFunc(const double time_param, const Eigen::VectorXd& state_vec, const Eigen::VectorXd& current_solution_vec, Eigen::Ref<Eigen::VectorXd> equation_error_vec)
-{
-    computeOptimalityErrorforControlInputAndConstraints(time_param, state_vec, current_solution_vec, state_mat_, lambda_mat_, control_input_and_constraints_error_seq_);
-    computeOptimalityErrorforControlInputAndConstraints(incremented_time_, incremented_state_vec_, current_solution_vec, state_mat_, lambda_mat_, control_input_and_constraints_error_seq_1_);
-
-    computeOptimalityErrorforStateAndLambda(time_param, state_vec, current_solution_vec, state_mat_, lambda_mat_, state_error_mat_, lambda_error_mat_);
-    computeOptimalityErrorforStateAndLambda(incremented_time_, incremented_state_vec_, current_solution_vec, state_mat_, lambda_mat_, state_error_mat_1_, lambda_error_mat_1_);
-
-    computeStateAndLambda(incremented_time_, incremented_state_vec_, current_solution_vec, (1-difference_increment_*zeta_)*state_error_mat_, (1-difference_increment_*zeta_)*lambda_error_mat_, incremented_state_mat_, incremented_lambda_mat_);
-    computeOptimalityErrorforControlInputAndConstraints(incremented_time_, incremented_state_vec_, current_solution_vec, incremented_state_mat_, incremented_lambda_mat_, control_input_and_constraints_error_seq_3_);
-
-    incremented_control_input_and_constraints_seq_ = current_solution_vec + difference_increment_ * control_input_and_constraints_update_seq_;
-    computeStateAndLambda(incremented_time_, incremented_state_vec_, incremented_control_input_and_constraints_seq_, state_error_mat_1_, lambda_error_mat_1_, incremented_state_mat_, incremented_lambda_mat_);
-    computeOptimalityErrorforControlInputAndConstraints(incremented_time_, incremented_state_vec_, incremented_control_input_and_constraints_seq_, incremented_state_mat_, incremented_lambda_mat_, control_input_and_constraints_error_seq_2_);
-
-    equation_error_vec = - (zeta_ - 1/difference_increment_) * control_input_and_constraints_error_seq_ - control_input_and_constraints_error_seq_3_/difference_increment_ - (control_input_and_constraints_error_seq_2_-control_input_and_constraints_error_seq_1_)/difference_increment_;
-}
-
-
-void MultipleShootingCGMRES::axFunc(const double time_param, const Eigen::VectorXd& state_vec, const Eigen::VectorXd& current_solution_vec, const Eigen::VectorXd& direction_vec, Eigen::Ref<Eigen::VectorXd> forward_difference_error_vec)
-{
-    incremented_control_input_and_constraints_seq_ = current_solution_vec + difference_increment_ * direction_vec;
-    computeStateAndLambda(incremented_time_, incremented_state_vec_, incremented_control_input_and_constraints_seq_, state_error_mat_1_, lambda_error_mat_1_, incremented_state_mat_, incremented_lambda_mat_);
-    computeOptimalityErrorforControlInputAndConstraints(incremented_time_, incremented_state_vec_, incremented_control_input_and_constraints_seq_, incremented_state_mat_, incremented_lambda_mat_, control_input_and_constraints_error_seq_2_);
-
-    forward_difference_error_vec =(control_input_and_constraints_error_seq_2_-control_input_and_constraints_error_seq_1_)/difference_increment_;
+    return control_input_and_constraints_seq_.segment(0, dim_control_input_);
 }

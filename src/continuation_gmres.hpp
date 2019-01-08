@@ -14,7 +14,7 @@
 
 
 // Solves the nonlinear optimal control problem using the C/GMRES method.
-// You have to describe the model of a system you want to control in nmpc_model.hpp and nmpc_model.cpp. 
+// Describe the model of a system to be controlled in nmpc_model.hpp and nmpc_model.cpp. 
 class ContinuationGMRES final : virtual public MatrixFreeGMRES{
 private:
     NMPCModel model_;
@@ -30,10 +30,10 @@ private:
     inline void computeOptimalityError(const double time_param, const Eigen::VectorXd& state_vec, const Eigen::VectorXd& current_solution_vec, Eigen::Ref<Eigen::VectorXd> optimality_vec);
 
     // Computes a vector correspongin to b in Ax=b
-    void bFunc(const double time_param, const Eigen::VectorXd& state_vec, const Eigen::VectorXd& current_solution_vec, Eigen::Ref<Eigen::VectorXd> equation_error_vec) override;
+    void bFunc(const double time_param, const Eigen::VectorXd& state_vec, const Eigen::VectorXd& current_solution_vec, Eigen::Ref<Eigen::VectorXd> b_vec) override;
 
     // Generates a vector corresponding to Ax in Ax=b with using the forward difference approximation.
-    void axFunc(const double time_param, const Eigen::VectorXd& state_vec, const Eigen::VectorXd& current_solution_vec, const Eigen::VectorXd& direction_vec, Eigen::Ref<Eigen::VectorXd> forward_difference_error_vec) override;
+    void axFunc(const double time_param, const Eigen::VectorXd& state_vec, const Eigen::VectorXd& current_solution_vec, const Eigen::VectorXd& direction_vec, Eigen::Ref<Eigen::VectorXd> ax_vec) override;
 
 
 public:
@@ -47,7 +47,7 @@ public:
     void controlUpdate(const double current_time, const double sampling_period, const Eigen::VectorXd& current_state_vec, Eigen::Ref<Eigen::VectorXd> optimal_control_input_vec);
 
     // Returns the intial vector of the control input sequence
-    void getControlInput(Eigen::Ref<Eigen::VectorXd> control_input_vec) const;
+    Eigen::VectorXd getControlInput() const;
 
     // Returns the optimality error norm under the current_state_vec and the current solution.
     double getError(const double current_time, const Eigen::VectorXd& current_state_vec);

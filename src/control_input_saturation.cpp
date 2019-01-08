@@ -26,27 +26,3 @@ void ControlInputSaturation::setParams(const int index, const double min, const 
     max_ = max;
     dummy_weight_ = dummy_weight;
 }
-
-
-int ControlInputSaturation::index() const
-{
-    return index_;
-}
-
-
-double ControlInputSaturation::min() const
-{
-    return min_;
-}
-
-
-double ControlInputSaturation::max() const
-{
-    return max_;
-}
-
-
-double ControlInputSaturation::weight() const
-{
-    return dummy_weight_;
-}

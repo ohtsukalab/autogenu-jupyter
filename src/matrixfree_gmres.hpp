@@ -28,7 +28,7 @@ private:
     virtual void bFunc(const double time_param, const Eigen::VectorXd& state_vec, const Eigen::VectorXd& current_solution_vec, Eigen::Ref<Eigen::VectorXd> equation_error_vec) = 0;
 
     // Generates a vector corresponding to Ax in Ax=b with using the forward difference approximation.
-    virtual void axFunc(const double time_param, const Eigen::VectorXd& state_vec, const Eigen::VectorXd& current_solution_vec, const Eigen::VectorXd& direction_vec, Eigen::Ref<Eigen::VectorXd> forward_difference_error_vec) = 0;
+    virtual void axFunc(const double time_param, const Eigen::VectorXd& state_vec, const Eigen::VectorXd& current_solution_vec, const Eigen::VectorXd& direction_vec, Eigen::Ref<Eigen::VectorXd> ax_vec) = 0;
 
 public:
     // Sets parameters in the matrix-free GMRES and allocate vectors and matrices used in the matrix-free GMRES.
@@ -38,7 +38,7 @@ public:
     void resetParameters(const int dim_equation, const int dim_krylov);
 
     // Solves the GMRES and generates solution_update_vector, which is a solution of the matrix-free GMRES.
-    void forwardDifferenceGMRES(const double time_param, const Eigen::VectorXd& state_vec, const Eigen::VectorXd& current_solution_vec, Eigen::Ref<Eigen::VectorXd> solution_update_vec);
+    void forwardDifferenceGMRES(const double time_param, const Eigen::VectorXd& state_vec, const Eigen::VectorXd& current_solution_vec, Eigen::Ref<Eigen::VectorXd> b_vec);
 };
 
 

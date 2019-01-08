@@ -1,6 +1,18 @@
 #include "matrixfree_gmres.hpp"
 
 
+inline void MatrixFreeGMRES::givensRotation(Eigen::Ref<Eigen::VectorXd> column_vec, const int i_column)
+{
+    double tmp1, tmp2;
+
+    tmp1 = givens_c_vec_(i_column) * column_vec(i_column) - givens_s_vec_(i_column) * column_vec(i_column+1);
+    tmp2 = givens_s_vec_(i_column) * column_vec(i_column) + givens_c_vec_(i_column) * column_vec(i_column+1);
+
+    column_vec(i_column) = tmp1;
+    column_vec(i_column+1) = tmp2;
+}
+
+
 MatrixFreeGMRES::MatrixFreeGMRES(const int dim_equation, const int k)
 {
     dim_equation_ = dim_equation;
@@ -96,16 +108,4 @@ void MatrixFreeGMRES::forwardDifferenceGMRES(const double time_param, const Eige
         }
         solution_update_vec(i) += tmp;
     }
-}
-
-
-inline void MatrixFreeGMRES::givensRotation(Eigen::Ref<Eigen::VectorXd> column_vec, const int i_column)
-{
-    double tmp1, tmp2;
-
-    tmp1 = givens_c_vec_(i_column) * column_vec(i_column) - givens_s_vec_(i_column) * column_vec(i_column+1);
-    tmp2 = givens_s_vec_(i_column) * column_vec(i_column) + givens_c_vec_(i_column) * column_vec(i_column+1);
-
-    column_vec(i_column) = tmp1;
-    column_vec(i_column+1) = tmp2;
 }

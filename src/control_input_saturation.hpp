@@ -1,29 +1,51 @@
 //
-// The multiple shooting based continuation GMRES (C/GMRES) method, a fast algorithm of nonlinear model predictive control (NMPC).
-// This program is witten with reference to "T. Ohtsuka A continuation/GMRES method for fast computation of nonlinear receding horizon control, Automatica, Vol. 40, No. 4, pp. 563-574 (2004)" and "Y. Shimizu, T. Ohtsuka, M. Diehl, A real‐time algorithm for nonlinear receding horizon control using multiple shooting and continuation/Krylov method, International Journal of Robust and Nonlinear Control, Vol. 19, No. 8, pp. 919-936 (2008)".
+// Stores parameters representing the saturation on the control input: the index of the element of the control input that is constrained, the minimum value of the constrained element of the control input, the maximum value of the constrained element of the control input, and the weight parameter on the corresponding dummy input in the cost function.
 //
 
 #ifndef CONTROL_INPUT_SATURATION_H
 #define CONTROL_INPUT_SATURATION_H
 
 
-// Stores saturation of control input
+// Stores parameters representing the saturation on the control input. 
 class ControlInputSaturation{
 private:
+    // index_       : the index of the element of the control input that is constrained.
+    // min_         : the minimum value of the constrained element of the control input.
+    // max_         : the maximum value of the constrained element of the control input.
+    // dummy_weight_: the weight parameter on the corresponding dummy input in the cost function.
     int index_;
-    double max_;
     double min_;
+    double max_;
     double dummy_weight_;
 
+
 public:
+    // Default constructor: sets as index=0, min=0, max=0, and dummy_weight=0.
     ControlInputSaturation();
+
+    // Sets index_, min_, max_, dummy_weight_.
     ControlInputSaturation(const int index, const double min, const double max, const double dummy_weight);
+
+
+    // Sets index_, min_, max_, dummy_weight_.
     void setParams(const int index, const double min, const double max, const double dummy_weight);
 
-    int index() const;
-    double min() const;
-    double max() const;
-    double weight() const;
+
+    inline int index() const{
+        return index_;
+    }
+
+    inline double min() const{
+        return min_;
+    }
+
+    inline double max() const{
+        return max_;
+    }
+
+    inline double dummy_weight() const{
+        return dummy_weight_;
+    }
 };
 
 

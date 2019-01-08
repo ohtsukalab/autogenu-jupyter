@@ -52,14 +52,18 @@ public:
     void huFunc(const double t, const Eigen::VectorXd& x, const Eigen::VectorXd& u, const Eigen::VectorXd& lmd, Eigen::Ref<Eigen::VectorXd> hu);
 
 
-    // Returns dimension of state.
-    int dimState() const;
 
-    // Returns dimension of control input.
-    int dimControlInput() const;
+    int dimState() const{
+        return dim_state_;
+    }
 
-    // Returns dimension of constraints.
-    int dimConstraints() const;
+    int dimControlInput() const{
+        return dim_control_input_;
+    }
+
+    int dimConstraints() const{
+        return dim_constraints_;
+    }
 };
 
 

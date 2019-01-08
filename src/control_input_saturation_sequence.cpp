@@ -13,7 +13,6 @@ int ControlInputSaturationSequence::findSameIndex(const int index)
 }
 
 
-
 void ControlInputSaturationSequence::appendControlInputSaturation(const int index, const double min, const double max, const double dummy_weight)
 {
     if(findSameIndex(index) < control_input_saturation_seq_.size()){
@@ -25,33 +24,7 @@ void ControlInputSaturationSequence::appendControlInputSaturation(const int inde
 }
 
 
-
 int ControlInputSaturationSequence::dimSaturation() const
 {
     return control_input_saturation_seq_.size();
-}
-
-
-int ControlInputSaturationSequence::index(const int num_saturation) const
-{
-    return control_input_saturation_seq_[num_saturation].index();
-}
-
-
-double ControlInputSaturationSequence::min(const int num_saturation) const
-{
-    return control_input_saturation_seq_[num_saturation].min();
-}
-
-
-double ControlInputSaturationSequence::max(const int num_saturation) const
-{
-    return control_input_saturation_seq_[num_saturation].max();
-}
-
-
-
-double ControlInputSaturationSequence::weight(const int num_saturation) const
-{
-    return control_input_saturation_seq_[num_saturation].weight();
 }

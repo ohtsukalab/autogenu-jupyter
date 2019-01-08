@@ -15,5 +15,7 @@ add_subdirectory(src)
 add_executable(a.out ${MODEL_DIR}/main.cpp)
 
 target_link_libraries(a.out simulator)
-target_link_libraries(a.out nmpcsolver)
+target_link_libraries(a.out cgmres_solver) # The original C/GMRES
+target_link_libraries(a.out multiple_shooting_cgmres) # The multiple shooting based C/GMRES without condensing of saturations on the control input
+target_link_libraries(a.out multiple_shooting_cgmres_with_saturation) # The multiple shooting based C/GMRES with condensing of saturations on the control input
 target_link_libraries(a.out model)

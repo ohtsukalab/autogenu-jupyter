@@ -35,7 +35,7 @@ void Simulator::simulation(ContinuationGMRES cgmres_solver, const Eigen::VectorX
 
     double total_time = 0;
     current_state_vec = initial_state_vec;
-    cgmres_solver.getControlInput(control_input_vec);
+    control_input_vec = cgmres_solver.getControlInput();
     std::cout << "Start simulation" << std::endl;
     for(double current_time=start_time; current_time<end_time; current_time+= sampling_period){
         saveData(state_data, control_input_data, error_data, current_time, current_state_vec, control_input_vec, cgmres_solver.getError(current_time, current_state_vec));
@@ -85,7 +85,7 @@ void Simulator::simulation(MultipleShootingCGMRES cgmres_solver, const Eigen::Ve
 
     double total_time = 0;
     current_state_vec = initial_state_vec;
-    cgmres_solver.getControlInput(control_input_vec);
+    control_input_vec = cgmres_solver.getControlInput();
     std::cout << "Start simulation" << std::endl;
     for(double current_time=start_time; current_time<end_time; current_time+= sampling_period){
         saveData(state_data, control_input_data, error_data, current_time, current_state_vec, control_input_vec, cgmres_solver.getError(current_time, current_state_vec));
@@ -124,7 +124,7 @@ void Simulator::simulation(MultipleShootingCGMRES cgmres_solver, const Eigen::Ve
 
 
 
-void Simulator::simulation(MultipleShootingWithSaturation cgmres_solver, const Eigen::VectorXd& initial_state_vec, const double start_time, const double end_time, const double sampling_period, const std::string savefile_name)
+void Simulator::simulation(MultipleShootingCGMRESWithSaturation cgmres_solver, const Eigen::VectorXd& initial_state_vec, const double start_time, const double end_time, const double sampling_period, const std::string savefile_name)
 {
     Eigen::VectorXd current_state_vec(model_.dimState()), next_state_vec(model_.dimState()), control_input_vec(model_.dimControlInput());
     std::chrono::system_clock::time_point start_clock, end_clock;
@@ -136,7 +136,7 @@ void Simulator::simulation(MultipleShootingWithSaturation cgmres_solver, const E
 
     double total_time = 0;
     current_state_vec = initial_state_vec;
-    cgmres_solver.getControlInput(control_input_vec);
+    control_input_vec = cgmres_solver.getControlInput();
     std::cout << "Start simulation" << std::endl;
     for(double current_time=start_time; current_time<end_time; current_time+= sampling_period){
         saveData(state_data, control_input_data, error_data, current_time, current_state_vec, control_input_vec, cgmres_solver.getError(current_time, current_state_vec));
