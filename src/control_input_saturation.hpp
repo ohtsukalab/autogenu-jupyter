@@ -17,19 +17,20 @@ private:
     double min_;
     double max_;
     double dummy_weight_;
+    double quadratic_weight_;
 
 
 public:
     // Default constructor: sets as index=0, min=0, max=0, and dummy_weight=0.
     ControlInputSaturation();
 
-    // Sets index_, min_, max_, dummy_weight_.
+    // Sets index_, min_, max_, dummy_weight_, quadratic_weight.
+    ControlInputSaturation(const int index, const double min, const double max, const double dummy_weight, const double quadratic_weight);
     ControlInputSaturation(const int index, const double min, const double max, const double dummy_weight);
 
-
-    // Sets index_, min_, max_, dummy_weight_.
+    // Sets index_, min_, max_, dummy_weight_, quadratic_weight.
+    void setParams(const int index, const double min, const double max, const double dummy_weight, const double quadratic_weight);
     void setParams(const int index, const double min, const double max, const double dummy_weight);
-
 
     inline int index() const{
         return index_;
@@ -45,6 +46,10 @@ public:
 
     inline double dummy_weight() const{
         return dummy_weight_;
+    }
+
+    inline double quadratic_weight() const{
+        return quadratic_weight_;
     }
 };
 

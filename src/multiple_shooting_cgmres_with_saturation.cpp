@@ -1,7 +1,7 @@
 #include "multiple_shooting_cgmres_with_saturation.hpp"
 
 
-inline void MultipleShootingCGMRESWithSaturation::addDerivativeSaturationWithControlInput(const Eigen::VectorXd& control_input_and_constraints_vec, const Eigen::VectorXd& saturation_lagrange_multiplier_vec, Eigen::Ref<Eigen::VectorXd> optimality_for_control_input_and_constraints_vec)
+inline void MultipleShootingCGMRESWithSaturation::addHamiltonianDerivativeWithControlInput(const Eigen::VectorXd& control_input_and_constraints_vec, const Eigen::VectorXd& saturation_lagrange_multiplier_vec, Eigen::Ref<Eigen::VectorXd> optimality_for_control_input_and_constraints_vec)
 {
     for(int i=0; i<dim_saturation_; i++){
         optimality_for_control_input_and_constraints_vec(saturation_seq_.index(i)) += (2*control_input_and_constraints_vec(saturation_seq_.index(i)) - saturation_seq_.min(i) - saturation_seq_.max(i)) * saturation_lagrange_multiplier_vec(i);
@@ -12,7 +12,7 @@ inline void MultipleShootingCGMRESWithSaturation::addDerivativeSaturationWithCon
 inline void MultipleShootingCGMRESWithSaturation::computeDummyOptimality(const Eigen::VectorXd& dummy_input_vec, const Eigen::VectorXd& saturation_lagrange_multiplier_vec, Eigen::Ref<Eigen::VectorXd> optimality_for_dummy)
 {
     for(int i=0; i<dim_saturation_; i++){
-        optimality_for_dummy(i) = 2 * dummy_input_vec(i) * saturation_lagrange_multiplier_vec(i) - saturation_seq_.dummy_weight(i);
+        optimality_for_dummy(i) = 2 * (saturation_seq_.quadratic_weight(i) + saturation_lagrange_multiplier_vec(i)) * dummy_input_vec(i) - saturation_seq_.dummy_weight(i);
     }
 }
 
@@ -33,12 +33,12 @@ inline void MultipleShootingCGMRESWithSaturation::computeOptimalityErrorforContr
 
     // Compute optimality error for contol input and constraints.
     model_.huFunc(time_param, state_vec, control_input_and_constraints_seq.segment(0, dim_control_input_and_constraints_), lambda_mat.col(0), optimality_for_control_input_and_constraints.segment(0, dim_control_input_and_constraints_));
-    addDerivativeSaturationWithControlInput(control_input_and_constraints_seq.segment(0, dim_control_input_and_constraints_), saturation_lagrange_multiplier_mat.col(0), optimality_for_control_input_and_constraints.segment(0, dim_control_input_and_constraints_));
+    addHamiltonianDerivativeWithControlInput(control_input_and_constraints_seq.segment(0, dim_control_input_and_constraints_), saturation_lagrange_multiplier_mat.col(0), optimality_for_control_input_and_constraints.segment(0, dim_control_input_and_constraints_));
 
     double tau = time_param+delta_tau;
     for(int i=1; i<horizon_division_num_; i++, tau+=delta_tau){
         model_.huFunc(tau, state_mat.col(i-1), control_input_and_constraints_seq.segment(i*dim_control_input_and_constraints_, dim_control_input_and_constraints_), lambda_mat.col(i), optimality_for_control_input_and_constraints.segment(i*dim_control_input_and_constraints_, dim_control_input_and_constraints_));
-        addDerivativeSaturationWithControlInput(control_input_and_constraints_seq.segment(i*dim_control_input_and_constraints_, dim_control_input_and_constraints_), saturation_lagrange_multiplier_mat.col(i), optimality_for_control_input_and_constraints.segment(i*dim_control_input_and_constraints_, dim_control_input_and_constraints_));
+        addHamiltonianDerivativeWithControlInput(control_input_and_constraints_seq.segment(i*dim_control_input_and_constraints_, dim_control_input_and_constraints_), saturation_lagrange_multiplier_mat.col(i), optimality_for_control_input_and_constraints.segment(i*dim_control_input_and_constraints_, dim_control_input_and_constraints_));
     }
 }
 
@@ -97,34 +97,43 @@ inline void MultipleShootingCGMRESWithSaturation::computeOptimalityErrorforSatur
 {
     for(int i=0; i<horizon_division_num_; i++){
         computeDummyOptimality(dummy_input_seq.col(i), saturation_lagrange_multiplier_seq.col(i), optimality_for_dummy.col(i));
+    }
+    for(int i=0; i<horizon_division_num_; i++){
         computeSaturationOptimality(control_input_and_constraints_seq.segment(i*dim_control_input_and_constraints_,dim_control_input_and_constraints_), dummy_input_seq.col(i), optimality_for_saturation.col(i));
     }
 }
 
 
-inline void MultipleShootingCGMRESWithSaturation::multiplySaturationDerivativeWithControlInput(const Eigen::VectorXd& control_input_and_constraints_seq, const Eigen::VectorXd& multiplied_control_input_and_constraints_vec, Eigen::Ref<Eigen::MatrixXd> optimality_for_dummy, Eigen::Ref<Eigen::MatrixXd> optimality_for_saturation)
+inline void MultipleShootingCGMRESWithSaturation::multiplySaturationErrorInverse(const Eigen::VectorXd& control_input_and_constraints_seq, const Eigen::MatrixXd& dummy_input_seq, const Eigen::MatrixXd& saturation_lagrange_multiplier_seq, const Eigen::MatrixXd& multiplied_dummy_input_seq, const Eigen::MatrixXd& multiplied_lagrange_multiplier_seq, Eigen::Ref<Eigen::MatrixXd> resulted_dummy_input_seq, Eigen::Ref<Eigen::MatrixXd> resulted_lagrange_multiplier_seq)
 {
     for(int i=0; i<horizon_division_num_; i++){
         for(int j=0; j<dim_saturation_; j++){
-            optimality_for_dummy(j,i) = 0;
+            resulted_dummy_input_seq(j,i) = multiplied_lagrange_multiplier_seq(j,i)/(2*dummy_input_seq(j,i));
         }
     }
     for(int i=0; i<horizon_division_num_; i++){
         for(int j=0; j<dim_saturation_; j++){
-            optimality_for_saturation(j,i) = (2*control_input_and_constraints_seq(i*dim_control_input_and_constraints_+saturation_seq_.index(j)) - saturation_seq_.min(j) - saturation_seq_.max(j)) * multiplied_control_input_and_constraints_vec(i*dim_control_input_and_constraints_+saturation_seq_.index(j));
+            resulted_lagrange_multiplier_seq(j,i) = multiplied_dummy_input_seq(j,i)/(2*dummy_input_seq(j,i)) - ((saturation_lagrange_multiplier_seq(j,i) + saturation_seq_.quadratic_weight(j)) * resulted_dummy_input_seq(j,i))/dummy_input_seq(j,i);
         }
     }
 }
 
 
-inline void MultipleShootingCGMRESWithSaturation::multiplySaturationSelfDerivativeInverse(const Eigen::VectorXd& control_input_and_constraints_seq, const Eigen::MatrixXd& dummy_input_seq, const Eigen::MatrixXd& saturation_lagrange_multiplier_seq, const Eigen::MatrixXd& multiplied_dummy_mat, const Eigen::MatrixXd& multiplied_saturation_mat, Eigen::Ref<Eigen::MatrixXd> optimality_for_dummy, Eigen::Ref<Eigen::MatrixXd> optimality_for_saturation)
+inline void MultipleShootingCGMRESWithSaturation::computeDummyOptimalityDifference(const Eigen::VectorXd& control_input_and_constraints_seq, const Eigen::MatrixXd& dummy_input_seq, const Eigen::VectorXd& control_input_and_constraints_update_seq, Eigen::Ref<Eigen::MatrixXd> dummy_difference_seq)
 {
     for(int i=0; i<horizon_division_num_; i++){
         for(int j=0; j<dim_saturation_; j++){
-            optimality_for_dummy(j,i) = multiplied_saturation_mat(j,i)/(2*dummy_input_seq(j,i));
+            dummy_difference_seq(j,i) = ((2*control_input_and_constraints_seq(i*dim_control_input_and_constraints_+saturation_seq_.index(j)) - saturation_seq_.min(j) - saturation_seq_.max(j)) * control_input_and_constraints_update_seq(i*dim_control_input_and_constraints_+saturation_seq_.index(j))) / (2*dummy_input_seq(j,i));
         }
+    }
+}
+
+
+inline void MultipleShootingCGMRESWithSaturation::computeSaturationOptimalityDifference(const Eigen::VectorXd& control_input_and_constraints_seq, const Eigen::MatrixXd& dummy_input_seq, const Eigen::MatrixXd& saturation_lagrange_multiplier_seq, const Eigen::VectorXd& control_input_and_constraints_update_seq, Eigen::Ref<Eigen::MatrixXd> saturation_difference_seq)
+{
+    for(int i=0; i<horizon_division_num_; i++){
         for(int j=0; j<dim_saturation_; j++){
-            optimality_for_saturation(j,i) = multiplied_dummy_mat(j,i)/(2*dummy_input_seq(j,i)) - multiplied_saturation_mat(j,i) * saturation_lagrange_multiplier_seq(j,i)/(2*dummy_input_seq(j,i)*dummy_input_seq(j,i));
+            saturation_difference_seq(j,i) = - ((saturation_lagrange_multiplier_seq(j,i) + saturation_seq_.quadratic_weight(j)) * (2*control_input_and_constraints_seq(i*dim_control_input_and_constraints_+saturation_seq_.index(j)) - saturation_seq_.min(j) - saturation_seq_.max(j)) * control_input_and_constraints_update_seq(i*dim_control_input_and_constraints_+saturation_seq_.index(j))) / (2 * dummy_input_seq(j,i) * dummy_input_seq(j,i));
         }
     }
 }
@@ -139,19 +148,16 @@ void MultipleShootingCGMRESWithSaturation::bFunc(const double time_param, const 
     computeOptimalityErrorforStateAndLambda(incremented_time_, incremented_state_vec_, current_solution_vec, state_mat_, lambda_mat_, state_error_mat_1_, lambda_error_mat_1_);
 
     computeStateAndLambda(incremented_time_, incremented_state_vec_, current_solution_vec, (1-difference_increment_*zeta_)*state_error_mat_, (1-difference_increment_*zeta_)*lambda_error_mat_, incremented_state_mat_, incremented_lambda_mat_);
-
+    
     computeOptimalityErrorforSaturation(current_solution_vec, dummy_input_mat_, saturation_lagrange_multiplier_mat_, dummy_error_mat_, saturation_error_mat_);
-    multiplySaturationSelfDerivativeInverse(control_input_and_constraints_seq_, dummy_input_mat_, saturation_lagrange_multiplier_mat_, dummy_error_mat_, saturation_error_mat_, dummy_error_mat_1_, saturation_error_mat_1_);
+    multiplySaturationErrorInverse(current_solution_vec, dummy_input_mat_, saturation_lagrange_multiplier_mat_, -zeta_*dummy_error_mat_, -zeta_*saturation_error_mat_, dummy_error_mat_1_, saturation_error_mat_1_);
 
-    computeOptimalityErrorforControlInputAndConstraints(incremented_time_, incremented_state_vec_, current_solution_vec, incremented_state_mat_, incremented_lambda_mat_, saturation_lagrange_multiplier_mat_-zeta_*difference_increment_*saturation_error_mat_1_, control_input_and_constraints_error_seq_3_);
-
+    computeOptimalityErrorforControlInputAndConstraints(incremented_time_, incremented_state_vec_, current_solution_vec, incremented_state_mat_, incremented_lambda_mat_, saturation_lagrange_multiplier_mat_+difference_increment_*saturation_error_mat_1_, control_input_and_constraints_error_seq_3_);
 
     incremented_control_input_and_constraints_seq_ = current_solution_vec + difference_increment_*control_input_and_constraints_update_seq_;
     computeStateAndLambda(incremented_time_, incremented_state_vec_, incremented_control_input_and_constraints_seq_, state_error_mat_1_, lambda_error_mat_1_, incremented_state_mat_, incremented_lambda_mat_);
-
-    multiplySaturationDerivativeWithControlInput(current_solution_vec, control_input_and_constraints_update_seq_, dummy_error_mat_, saturation_error_mat_);
-    multiplySaturationSelfDerivativeInverse(current_solution_vec, dummy_input_mat_, saturation_lagrange_multiplier_mat_, dummy_error_mat_, saturation_error_mat_, dummy_error_mat_1_, saturation_error_mat_1_);
-    computeOptimalityErrorforControlInputAndConstraints(incremented_time_, incremented_state_vec_, incremented_control_input_and_constraints_seq_, incremented_state_mat_, incremented_lambda_mat_, saturation_lagrange_multiplier_mat_-difference_increment_*saturation_error_mat_1_, control_input_and_constraints_error_seq_2_);
+    computeSaturationOptimalityDifference(current_solution_vec, dummy_input_mat_, saturation_lagrange_multiplier_mat_, control_input_and_constraints_update_seq_, saturation_update_mat_);
+    computeOptimalityErrorforControlInputAndConstraints(incremented_time_, incremented_state_vec_, incremented_control_input_and_constraints_seq_, incremented_state_mat_, incremented_lambda_mat_, saturation_lagrange_multiplier_mat_-difference_increment_*saturation_update_mat_, control_input_and_constraints_error_seq_2_);
 
 
     b_vec = (1/difference_increment_ - zeta_) * control_input_and_constraints_error_seq_ - control_input_and_constraints_error_seq_3_/difference_increment_ - (control_input_and_constraints_error_seq_2_-control_input_and_constraints_error_seq_1_)/difference_increment_;
@@ -160,88 +166,72 @@ void MultipleShootingCGMRESWithSaturation::bFunc(const double time_param, const 
 
 void MultipleShootingCGMRESWithSaturation::axFunc(const double time_param, const Eigen::VectorXd& state_vec, const Eigen::VectorXd& current_solution_vec, const Eigen::VectorXd& direction_vec, Eigen::Ref<Eigen::VectorXd> ax_vec)
 {
-    incremented_control_input_and_constraints_seq_ = current_solution_vec + difference_increment_*direction_vec;
+    incremented_control_input_and_constraints_seq_ = current_solution_vec+difference_increment_*direction_vec;
 
     computeStateAndLambda(incremented_time_, incremented_state_vec_, incremented_control_input_and_constraints_seq_, state_error_mat_1_, lambda_error_mat_1_, incremented_state_mat_, incremented_lambda_mat_);
-
-    multiplySaturationDerivativeWithControlInput(current_solution_vec, direction_vec, dummy_error_mat_, saturation_error_mat_);
-    multiplySaturationSelfDerivativeInverse(current_solution_vec, dummy_input_mat_, saturation_lagrange_multiplier_mat_, dummy_error_mat_, saturation_error_mat_, dummy_error_mat_1_, saturation_error_mat_1_);
-
-    computeOptimalityErrorforControlInputAndConstraints(incremented_time_, incremented_state_vec_, incremented_control_input_and_constraints_seq_, incremented_state_mat_, incremented_lambda_mat_, saturation_lagrange_multiplier_mat_-difference_increment_*saturation_error_mat_1_, control_input_and_constraints_error_seq_2_);
+    computeSaturationOptimalityDifference(current_solution_vec, dummy_input_mat_, saturation_lagrange_multiplier_mat_, direction_vec, saturation_update_mat_);
+    computeOptimalityErrorforControlInputAndConstraints(incremented_time_, incremented_state_vec_, incremented_control_input_and_constraints_seq_, incremented_state_mat_, incremented_lambda_mat_, saturation_lagrange_multiplier_mat_-difference_increment_*saturation_update_mat_, control_input_and_constraints_error_seq_2_);
 
 
-    ax_vec =(control_input_and_constraints_error_seq_2_ - control_input_and_constraints_error_seq_1_)/difference_increment_;
+    ax_vec = (control_input_and_constraints_error_seq_2_ - control_input_and_constraints_error_seq_1_)/difference_increment_;
 }
 
 
-
-MultipleShootingCGMRESWithSaturation::MultipleShootingCGMRESWithSaturation(const NMPCModel model, const ControlInputSaturationSequence saturation_seq, const double horizon_max_length, const double alpha, const int horizon_division_num, const double difference_increment, const double zeta, const int dim_krylov) : MatrixFreeGMRES((model.dimControlInput()+model.dimConstraints())*horizon_division_num, dim_krylov)
+MultipleShootingCGMRESWithSaturation::MultipleShootingCGMRESWithSaturation(const ControlInputSaturationSequence saturation_seq, const double horizon_max_length, const double alpha, const int horizon_division_num, const double difference_increment, const double zeta, const int dim_krylov) : MatrixFreeGMRES(), 
+    model_(), 
+    saturation_seq_(saturation_seq), 
+    dim_state_(model_.dimState()), 
+    dim_control_input_(model_.dimControlInput()), 
+    dim_constraints_(model_.dimConstraints()), 
+    dim_control_input_and_constraints_(model_.dimControlInput()+model_.dimConstraints()), 
+    dim_control_input_and_constraints_seq_(horizon_division_num*(model_.dimControlInput()+model_.dimConstraints())), 
+    dim_saturation_(saturation_seq.dimSaturation()), 
+    dim_saturation_seq_(horizon_division_num*saturation_seq.dimSaturation()), 
+    horizon_division_num_(horizon_division_num), 
+    dim_krylov_(dim_krylov), 
+    initial_time_(0), 
+    horizon_max_length_(horizon_max_length), 
+    alpha_(alpha), 
+    zeta_(zeta), 
+    difference_increment_(difference_increment), 
+    incremented_time_(0), 
+    dx_vec_(Eigen::VectorXd::Zero(dim_state_)), 
+    incremented_state_vec_(Eigen::VectorXd::Zero(dim_state_)), 
+    control_input_and_constraints_seq_(Eigen::VectorXd::Zero(dim_control_input_and_constraints_seq_)), 
+    incremented_control_input_and_constraints_seq_(Eigen::VectorXd::Zero(dim_control_input_and_constraints_seq_)), 
+    control_input_and_constraints_error_seq_(Eigen::VectorXd::Zero(dim_control_input_and_constraints_seq_)), 
+    control_input_and_constraints_error_seq_1_(Eigen::VectorXd::Zero(dim_control_input_and_constraints_seq_)), 
+    control_input_and_constraints_error_seq_2_(Eigen::VectorXd::Zero(dim_control_input_and_constraints_seq_)), 
+    control_input_and_constraints_error_seq_3_(Eigen::VectorXd::Zero(dim_control_input_and_constraints_seq_)), 
+    control_input_and_constraints_update_seq_(Eigen::VectorXd::Zero(dim_control_input_and_constraints_seq_)), 
+    state_mat_(Eigen::MatrixXd::Zero(dim_state_, horizon_division_num)), 
+    lambda_mat_(Eigen::MatrixXd::Zero(dim_state_, horizon_division_num)), 
+    incremented_state_mat_(Eigen::MatrixXd::Zero(dim_state_, horizon_division_num)), 
+    incremented_lambda_mat_(Eigen::MatrixXd::Zero(dim_state_, horizon_division_num)), 
+    state_error_mat_(Eigen::MatrixXd::Zero(dim_state_, horizon_division_num)), 
+    state_error_mat_1_(Eigen::MatrixXd::Zero(dim_state_, horizon_division_num)), 
+    lambda_error_mat_(Eigen::MatrixXd::Zero(dim_state_, horizon_division_num)), 
+    lambda_error_mat_1_(Eigen::MatrixXd::Zero(dim_state_, horizon_division_num)), 
+    state_update_mat_(Eigen::MatrixXd::Zero(dim_state_, horizon_division_num)), 
+    lambda_update_mat_(Eigen::MatrixXd::Zero(dim_state_, horizon_division_num)), 
+    dummy_input_mat_(Eigen::MatrixXd::Zero(dim_saturation_, horizon_division_num)), 
+    saturation_lagrange_multiplier_mat_(Eigen::MatrixXd::Zero(dim_saturation_, horizon_division_num)), 
+    dummy_error_mat_(Eigen::MatrixXd::Zero(dim_saturation_, horizon_division_num)), 
+    dummy_error_mat_1_(Eigen::MatrixXd::Zero(dim_saturation_, horizon_division_num)), 
+    saturation_error_mat_(Eigen::MatrixXd::Zero(dim_saturation_, horizon_division_num)), 
+    saturation_error_mat_1_(Eigen::MatrixXd::Zero(dim_saturation_, horizon_division_num)), 
+    dummy_update_mat_(Eigen::MatrixXd::Zero(dim_saturation_, horizon_division_num)), 
+    saturation_update_mat_(Eigen::MatrixXd::Zero(dim_saturation_, horizon_division_num))
 {
-    // Set dimensions and parameters.
-    model_ = model;
-    saturation_seq_ = saturation_seq;
-    dim_state_ = model_.dimState();
-    dim_control_input_ = model_.dimControlInput();
-    dim_constraints_ = model_.dimConstraints();
-    dim_control_input_and_constraints_ = dim_control_input_ + dim_constraints_;
-    dim_state_and_lambda_ = 2*dim_state_;
-    dim_control_input_and_constraints_seq_ = horizon_division_num * dim_control_input_and_constraints_;
-    dim_state_and_lambda_seq_ = horizon_division_num * dim_state_and_lambda_;
-    dim_saturation_ = saturation_seq_.dimSaturation();
-    dim_saturation_seq_ = horizon_division_num * dim_saturation_;
-
-    // Set parameters for horizon and the C/GMRES.
-    horizon_max_length_ = horizon_max_length;
-    alpha_ = alpha;
-    horizon_division_num_ = horizon_division_num;
-    difference_increment_ = difference_increment;
-    zeta_ = zeta;
-    dim_krylov_ = dim_krylov;
-
-
-    // Allocate vectors and matrices.
-    dx_vec_.resize(dim_state_);
-    incremented_state_vec_.resize(dim_state_);
-    control_input_and_constraints_seq_.resize(dim_control_input_and_constraints_seq_);
-    incremented_control_input_and_constraints_seq_.resize(dim_control_input_and_constraints_seq_);
-    control_input_and_constraints_error_seq_.resize(dim_control_input_and_constraints_seq_);
-    control_input_and_constraints_error_seq_1_.resize(dim_control_input_and_constraints_seq_);
-    control_input_and_constraints_error_seq_2_.resize(dim_control_input_and_constraints_seq_);
-    control_input_and_constraints_error_seq_3_.resize(dim_control_input_and_constraints_seq_);
-    control_input_and_constraints_update_seq_.resize(dim_control_input_and_constraints_seq_);
-
-    state_mat_.resize(dim_state_, horizon_division_num);
-    lambda_mat_.resize(dim_state_, horizon_division_num);
-    incremented_state_mat_.resize(dim_state_, horizon_division_num);
-    incremented_lambda_mat_.resize(dim_state_, horizon_division_num);
-    state_error_mat_.resize(dim_state_, horizon_division_num);
-    state_error_mat_1_.resize(dim_state_, horizon_division_num);
-    lambda_error_mat_.resize(dim_state_, horizon_division_num);
-    lambda_error_mat_1_.resize(dim_state_, horizon_division_num);
-    state_update_mat_.resize(dim_state_, horizon_division_num);
-    lambda_update_mat_.resize(dim_state_, horizon_division_num);
-    dummy_input_mat_.resize(dim_saturation_, horizon_division_num_);
-    saturation_lagrange_multiplier_mat_.resize(dim_saturation_, horizon_division_num_);
-    dummy_error_mat_.resize(dim_saturation_, horizon_division_num_);
-    saturation_error_mat_.resize(dim_saturation_, horizon_division_num_);
-    dummy_error_mat_1_.resize(dim_saturation_, horizon_division_num_);
-    saturation_error_mat_1_.resize(dim_saturation_, horizon_division_num_);
-    dummy_update_mat_.resize(dim_saturation_, horizon_division_num_);
-    saturation_update_mat_.resize(dim_saturation_, horizon_division_num_);
-
-
-    // Initialize solution of the forward-difference GMRES.
-    control_input_and_constraints_update_seq_ = Eigen::VectorXd::Zero(dim_control_input_and_constraints_seq_);
-    state_update_mat_ = Eigen::MatrixXd::Zero(dim_state_, horizon_division_num);
-    lambda_update_mat_ = Eigen::MatrixXd::Zero(dim_state_, horizon_division_num);
-    saturation_update_mat_ = Eigen::MatrixXd::Zero(dim_saturation_, horizon_division_num);
+    // Set dimensions and parameters in GMRES.
+    setGMRESParams((model_.dimControlInput()+model_.dimConstraints())*horizon_division_num, dim_krylov);
 }
 
 
 void MultipleShootingCGMRESWithSaturation::initSolution(const double initial_time, const Eigen::VectorXd& initial_state_vec, const Eigen::VectorXd& initial_guess_input_vec, const double convergence_radius, const int max_iteration)
 {
     Eigen::VectorXd initial_solution_vec(dim_control_input_and_constraints_+2*dim_saturation_), initial_lambda_vec(dim_state_);
-    InitCGMRESWithSaturation initializer(model_, saturation_seq_, difference_increment_, dim_krylov_);
+    InitCGMRESWithSaturation initializer(saturation_seq_, difference_increment_, dim_krylov_);
 
     // Intialize the solution
     initial_time_ = initial_time;
@@ -276,7 +266,7 @@ void MultipleShootingCGMRESWithSaturation::initSolution(const double initial_tim
 void MultipleShootingCGMRESWithSaturation::initSolution(const double initial_time, const Eigen::VectorXd& initial_state_vec, const Eigen::VectorXd& initial_guess_input_vec, const Eigen::VectorXd& initial_guess_lagrange_multiplier, const double convergence_radius, const int max_iteration)
 {
     Eigen::VectorXd initial_solution_vec(dim_control_input_and_constraints_+2*dim_saturation_), initial_lambda_vec(dim_state_);
-    InitCGMRESWithSaturation initializer(model_, saturation_seq_, difference_increment_, dim_krylov_);
+    InitCGMRESWithSaturation initializer(saturation_seq_, difference_increment_, dim_krylov_);
 
     // Intialize the solution
     initial_time_ = initial_time;
@@ -311,7 +301,7 @@ void MultipleShootingCGMRESWithSaturation::initSolution(const double initial_tim
 void MultipleShootingCGMRESWithSaturation::initSolution(const double initial_time, const Eigen::VectorXd& initial_state_vec, const Eigen::VectorXd& initial_guess_input_vec, const double initial_guess_lagrange_multiplier, const double convergence_radius, const int max_iteration)
 {
     Eigen::VectorXd initial_solution_vec(dim_control_input_and_constraints_+2*dim_saturation_), initial_lambda_vec(dim_state_);
-    InitCGMRESWithSaturation initializer(model_, saturation_seq_, difference_increment_, dim_krylov_);
+    InitCGMRESWithSaturation initializer(saturation_seq_, difference_increment_, dim_krylov_);
 
     // Intialize the solution
     initial_time_ = initial_time;
@@ -362,11 +352,11 @@ void MultipleShootingCGMRESWithSaturation::controlUpdate(const double current_ti
     lambda_mat_ += sampling_period * lambda_update_mat_;
 
     // Update dummy_input_mat_ and saturation_lagrange_multiplier_mat_.
-    computeOptimalityErrorforSaturation(control_input_and_constraints_seq_, dummy_input_mat_, saturation_lagrange_multiplier_mat_, dummy_error_mat_, saturation_error_mat_);
-    multiplySaturationDerivativeWithControlInput(control_input_and_constraints_seq_, control_input_and_constraints_update_seq_, dummy_error_mat_1_, saturation_error_mat_1_);
-    multiplySaturationSelfDerivativeInverse(control_input_and_constraints_seq_, dummy_input_mat_, saturation_lagrange_multiplier_mat_, -zeta_*dummy_error_mat_-dummy_error_mat_1_, -zeta_*saturation_error_mat_-saturation_error_mat_1_, dummy_update_mat_, saturation_update_mat_);
-    dummy_input_mat_ += sampling_period * dummy_update_mat_;
-    saturation_lagrange_multiplier_mat_ += sampling_period * saturation_update_mat_;
+    computeDummyOptimalityDifference(control_input_and_constraints_seq_, dummy_input_mat_, control_input_and_constraints_update_seq_, dummy_update_mat_);
+    computeSaturationOptimalityDifference(control_input_and_constraints_seq_, dummy_input_mat_, saturation_lagrange_multiplier_mat_, control_input_and_constraints_update_seq_, saturation_update_mat_);
+
+    dummy_input_mat_ += sampling_period * (dummy_error_mat_1_-dummy_update_mat_);
+    saturation_lagrange_multiplier_mat_ += sampling_period * (saturation_error_mat_1_-saturation_update_mat_);
 
     // Update control_input_and_constraints_seq_.
     control_input_and_constraints_seq_ += sampling_period * control_input_and_constraints_update_seq_;

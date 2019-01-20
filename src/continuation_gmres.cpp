@@ -43,44 +43,40 @@ inline void ContinuationGMRES::axFunc(const double time_param, const Eigen::Vect
 
 
 
-ContinuationGMRES::ContinuationGMRES(const NMPCModel model, const double horizon_max_length, const double alpha, const int horizon_division_num, const double difference_increment, const double zeta, const int dim_krylov) : MatrixFreeGMRES((model.dimControlInput()+model.dimConstraints())*horizon_division_num, dim_krylov)
+ContinuationGMRES::ContinuationGMRES(const double horizon_max_length, const double alpha, const int horizon_division_num, const double difference_increment, const double zeta, const int max_dim_krylov) : MatrixFreeGMRES(), 
+    model_(), 
+    dim_state_(model_.dimState()), 
+    dim_control_input_(model_.dimControlInput()), 
+    dim_constraints_(model_.dimConstraints()), 
+    dim_control_input_and_constraints_(model_.dimControlInput()+model_.dimConstraints()), 
+    dim_solution_(horizon_division_num*(model_.dimControlInput()+model_.dimConstraints())), 
+    horizon_division_num_(horizon_division_num), 
+    max_dim_krylov_(max_dim_krylov), 
+    initial_time_(0), 
+    horizon_max_length_(horizon_max_length), 
+    alpha_(alpha), 
+    zeta_(zeta), 
+    difference_increment_(difference_increment), 
+    incremented_time_(0), 
+    dx_vec_(Eigen::VectorXd::Zero(dim_state_)), 
+    incremented_state_vec_(Eigen::VectorXd::Zero(dim_state_)),
+    solution_vec_(Eigen::VectorXd::Zero(dim_solution_)), 
+    optimality_vec_(Eigen::VectorXd::Zero(dim_solution_)), 
+    optimality_vec_1_(Eigen::VectorXd::Zero(dim_solution_)), 
+    optimality_vec_2_(Eigen::VectorXd::Zero(dim_solution_)), 
+    solution_update_vec_(Eigen::VectorXd::Zero(dim_solution_)), 
+    state_mat_(Eigen::MatrixXd::Zero(dim_state_, horizon_division_num+1)), 
+    lambda_mat_(Eigen::MatrixXd::Zero(dim_state_, horizon_division_num+1))
 {
-    // Set dimensions and parameters.
-    model_ = model;
-    dim_state_ = model_.dimState();
-    dim_control_input_ = model_.dimControlInput();
-    dim_constraints_ = model_.dimConstraints();
-    dim_control_input_and_constraints_ = dim_control_input_ + dim_constraints_;
-    dim_solution_ = horizon_division_num * dim_control_input_and_constraints_;
-
-    // Set parameters for horizon and the C/GMRES.
-    horizon_max_length_ = horizon_max_length;
-    alpha_ = alpha;
-    horizon_division_num_ = horizon_division_num;
-    difference_increment_ = difference_increment;
-    zeta_ = zeta;
-    dim_krylov_ = dim_krylov;
-
-    // Allocate matrices and vectors.
-    dx_vec_.resize(dim_state_);
-    incremented_state_vec_.resize(dim_state_);
-    state_mat_.resize(dim_state_, horizon_division_num_+1);
-    lambda_mat_.resize(dim_state_, horizon_division_num_+1);
-    solution_vec_.resize(dim_solution_);
-    optimality_vec_.resize(dim_solution_);
-    optimality_vec_1_.resize(dim_solution_);
-    optimality_vec_2_.resize(dim_solution_);
-    solution_update_vec_.resize(dim_solution_);
-
-    // Initialize solution of the forward-difference GMRES.
-    solution_update_vec_ = Eigen::VectorXd::Zero(dim_solution_);
+    // Set dimensions and parameters in GMRES.
+    setGMRESParams(dim_solution_, max_dim_krylov);
 }
 
 
 void ContinuationGMRES::initSolution(const double initial_time, const Eigen::VectorXd& initial_state_vec, const Eigen::VectorXd& initial_guess_input_vec, const double convergence_radius, const int max_iteration)
 {
     Eigen::VectorXd initial_solution_vec(dim_control_input_and_constraints_);
-    InitCGMRES initializer(model_, difference_increment_, dim_krylov_);
+    InitCGMRES initializer(difference_increment_, max_dim_krylov_);
 
     initial_time_ = initial_time;
     initializer.solve0stepNOCP(initial_time, initial_state_vec, initial_guess_input_vec, convergence_radius, max_iteration, initial_solution_vec);

@@ -88,66 +88,59 @@ void MultipleShootingCGMRES::bFunc(const double time_param, const Eigen::VectorX
 void MultipleShootingCGMRES::axFunc(const double time_param, const Eigen::VectorXd& state_vec, const Eigen::VectorXd& current_solution_vec, const Eigen::VectorXd& direction_vec, Eigen::Ref<Eigen::VectorXd> ax_vec)
 {
     incremented_control_input_and_constraints_seq_ = current_solution_vec + difference_increment_ * direction_vec;
+
     computeStateAndLambda(incremented_time_, incremented_state_vec_, incremented_control_input_and_constraints_seq_, state_error_mat_1_, lambda_error_mat_1_, incremented_state_mat_, incremented_lambda_mat_);
     computeOptimalityErrorforControlInputAndConstraints(incremented_time_, incremented_state_vec_, incremented_control_input_and_constraints_seq_, incremented_state_mat_, incremented_lambda_mat_, control_input_and_constraints_error_seq_2_);
 
-    ax_vec =(control_input_and_constraints_error_seq_2_-control_input_and_constraints_error_seq_1_)/difference_increment_;
+    ax_vec = (control_input_and_constraints_error_seq_2_-control_input_and_constraints_error_seq_1_)/difference_increment_;
 }
 
 
-MultipleShootingCGMRES::MultipleShootingCGMRES(const NMPCModel model, const double horizon_max_length, const double alpha, const int horizon_division_num, const double difference_increment, const double zeta, const int dim_krylov) : MatrixFreeGMRES((model.dimControlInput()+model.dimConstraints())*horizon_division_num, dim_krylov)
+MultipleShootingCGMRES::MultipleShootingCGMRES(const double horizon_max_length, const double alpha, const int horizon_division_num, const double difference_increment, const double zeta, const int max_dim_krylov) : MatrixFreeGMRES(), 
+    model_(), 
+    dim_state_(model_.dimState()), 
+    dim_control_input_(model_.dimControlInput()),
+    dim_constraints_(model_.dimConstraints()),
+    dim_control_input_and_constraints_(model_.dimControlInput()+model_.dimConstraints()), 
+    dim_state_and_lambda_(2*model_.dimState()), 
+    dim_control_input_and_constraints_seq_(horizon_division_num*dim_control_input_and_constraints_), 
+    horizon_division_num_(horizon_division_num),
+    max_dim_krylov_(max_dim_krylov), 
+    initial_time_(0),
+    horizon_max_length_(horizon_max_length), 
+    alpha_(alpha), 
+    zeta_(zeta), 
+    difference_increment_(difference_increment),
+    incremented_time_(0), 
+    dx_vec_(Eigen::VectorXd::Zero(dim_state_)), 
+    incremented_state_vec_(Eigen::VectorXd::Zero(dim_state_)), 
+    control_input_and_constraints_seq_(Eigen::VectorXd::Zero(dim_control_input_and_constraints_seq_)), 
+    incremented_control_input_and_constraints_seq_(Eigen::VectorXd::Zero(dim_control_input_and_constraints_seq_)), 
+    control_input_and_constraints_error_seq_(Eigen::VectorXd::Zero(dim_control_input_and_constraints_seq_)), 
+    control_input_and_constraints_error_seq_1_(Eigen::VectorXd::Zero(dim_control_input_and_constraints_seq_)), 
+    control_input_and_constraints_error_seq_2_(Eigen::VectorXd::Zero(dim_control_input_and_constraints_seq_)), 
+    control_input_and_constraints_error_seq_3_(Eigen::VectorXd::Zero(dim_control_input_and_constraints_seq_)), 
+    control_input_and_constraints_update_seq_(Eigen::VectorXd::Zero(dim_control_input_and_constraints_seq_)), 
+    state_mat_(Eigen::MatrixXd::Zero(dim_state_, horizon_division_num)), 
+    lambda_mat_(Eigen::MatrixXd::Zero(dim_state_, horizon_division_num)), 
+    incremented_state_mat_(Eigen::MatrixXd::Zero(dim_state_, horizon_division_num)), 
+    incremented_lambda_mat_(Eigen::MatrixXd::Zero(dim_state_, horizon_division_num)), 
+    state_error_mat_(Eigen::MatrixXd::Zero(dim_state_, horizon_division_num)), 
+    state_error_mat_1_(Eigen::MatrixXd::Zero(dim_state_, horizon_division_num)), 
+    lambda_error_mat_(Eigen::MatrixXd::Zero(dim_state_, horizon_division_num)), 
+    lambda_error_mat_1_(Eigen::MatrixXd::Zero(dim_state_, horizon_division_num)), 
+    state_update_mat_(Eigen::MatrixXd::Zero(dim_state_, horizon_division_num)), 
+    lambda_update_mat_(Eigen::MatrixXd::Zero(dim_state_, horizon_division_num))
 {
-    // Set dimensions and parameters.
-    model_ = model;
-    dim_state_ = model_.dimState();
-    dim_control_input_ = model_.dimControlInput();
-    dim_constraints_ = model_.dimConstraints();
-    dim_control_input_and_constraints_ = dim_control_input_ + dim_constraints_;
-    dim_state_and_lambda_ = 2*dim_state_;
-    dim_control_input_and_constraints_seq_ = horizon_division_num * dim_control_input_and_constraints_;
-    dim_state_and_lambda_seq_ = horizon_division_num * dim_state_and_lambda_;
-
-    // Set parameters for horizon and the C/GMRES.
-    horizon_max_length_ = horizon_max_length;
-    alpha_ = alpha;
-    horizon_division_num_ = horizon_division_num;
-    difference_increment_ = difference_increment;
-    zeta_ = zeta;
-    dim_krylov_ = dim_krylov;
-
-    // Allocate vectors and matrices.
-    dx_vec_.resize(dim_state_);
-    incremented_state_vec_.resize(dim_state_);
-    control_input_and_constraints_seq_.resize(dim_control_input_and_constraints_seq_);
-    incremented_control_input_and_constraints_seq_.resize(dim_control_input_and_constraints_seq_);
-    control_input_and_constraints_error_seq_.resize(dim_control_input_and_constraints_seq_);
-    control_input_and_constraints_error_seq_1_.resize(dim_control_input_and_constraints_seq_);
-    control_input_and_constraints_error_seq_2_.resize(dim_control_input_and_constraints_seq_);
-    control_input_and_constraints_error_seq_3_.resize(dim_control_input_and_constraints_seq_);
-    control_input_and_constraints_update_seq_.resize(dim_control_input_and_constraints_seq_);
-
-    state_mat_.resize(dim_state_, horizon_division_num);
-    lambda_mat_.resize(dim_state_, horizon_division_num);
-    incremented_state_mat_.resize(dim_state_, horizon_division_num);
-    incremented_lambda_mat_.resize(dim_state_, horizon_division_num);
-    state_error_mat_.resize(dim_state_, horizon_division_num);
-    state_error_mat_1_.resize(dim_state_, horizon_division_num);
-    lambda_error_mat_.resize(dim_state_, horizon_division_num);
-    lambda_error_mat_1_.resize(dim_state_, horizon_division_num);
-    state_update_mat_.resize(dim_state_, horizon_division_num);
-    lambda_update_mat_.resize(dim_state_, horizon_division_num);
-
-    // Initialize solution of the forward-difference GMRES.
-    control_input_and_constraints_update_seq_ = Eigen::VectorXd::Zero(dim_control_input_and_constraints_seq_);
-    state_update_mat_ = Eigen::MatrixXd::Zero(dim_state_, horizon_division_num);
-    lambda_update_mat_ = Eigen::MatrixXd::Zero(dim_state_, horizon_division_num);
+    // Set dimensions and parameters in GMRES.
+    setGMRESParams(dim_control_input_and_constraints_seq_, max_dim_krylov);
 }
 
 
 void MultipleShootingCGMRES::initSolution(const double initial_time, const Eigen::VectorXd& initial_state_vec, const Eigen::VectorXd& initial_guess_input_vec, const double convergence_radius, const int max_iteration)
 {
     Eigen::VectorXd initial_control_input_and_constraints_vec(dim_control_input_and_constraints_), initial_control_input_and_constraints_error(dim_control_input_and_constraints_), initial_lambda_vec(dim_state_);
-    InitCGMRES initializer(model_, difference_increment_, dim_krylov_);
+    InitCGMRES initializer(difference_increment_, max_dim_krylov_);
     initial_time_ = initial_time;
 
     // Intialize the solution

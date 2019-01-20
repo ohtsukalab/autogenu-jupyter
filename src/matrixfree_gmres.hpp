@@ -31,11 +31,13 @@ private:
     virtual void axFunc(const double time_param, const Eigen::VectorXd& state_vec, const Eigen::VectorXd& current_solution_vec, const Eigen::VectorXd& direction_vec, Eigen::Ref<Eigen::VectorXd> ax_vec) = 0;
 
 public:
-    // Sets parameters in the matrix-free GMRES and allocate vectors and matrices used in the matrix-free GMRES.
-    MatrixFreeGMRES(const int dim_equation, const int dim_krylov);
+    // default constructor: set dim_equation_ and max_dim_krylov_ zero, and all vectors and matrices having just an element of 0
+    // costructor with arguments: sets dimensions of the solution vector and the Krylov subspace and reallocate vectors and matrices used in the matrix-free GMRES.
+    MatrixFreeGMRES();
+    MatrixFreeGMRES(const int dim_equation, const int max_dim_krylov);
 
-    // Resets parameters in the matrix-free GMRES and reallocate vectors and matrices used in the matrix-free GMRES.
-    void resetParameters(const int dim_equation, const int dim_krylov);
+    // Sets dimensions of the solution vector and the Krylov subspace and reallocate vectors and matrices used in the matrix-free GMRES.
+    void setGMRESParams(const int dim_equation, const int max_dim_krylov);
 
     // Solves the GMRES and generates solution_update_vector, which is a solution of the matrix-free GMRES.
     void forwardDifferenceGMRES(const double time_param, const Eigen::VectorXd& state_vec, const Eigen::VectorXd& current_solution_vec, Eigen::Ref<Eigen::VectorXd> b_vec);

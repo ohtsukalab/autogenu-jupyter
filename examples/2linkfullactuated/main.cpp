@@ -12,17 +12,17 @@ int main()
     NMPCModel nmpc_model;
 
     // Define the solver of C/GMRES.
-    // ContinuationGMRES cgmres_solver(nmpc_model, 0.5, 1.0, 50, 1.0e-06, 1000, 5);
-    // MultipleShootingCGMRES cgmres_solver(nmpc_model, 0.5, 1.0, 50, 1.0e-06, 1000, 5);
+    // ContinuationGMRES cgmres_solver(0.5, 1.0, 50, 1.0e-06, 1000, 5);
+    // MultipleShootingCGMRES cgmres_solver(0.5, 1.0, 50, 1.0e-06, 1000, 5);
     //  If you use MultipleShootingCGMRESWithSaturation, you have to describe the saturaions on the control input in ControlInputSaturationSequence before define the solver.
     ControlInputSaturationSequence control_input_saturation_seq;
-    control_input_saturation_seq.appendControlInputSaturation(0, -3, 3, 1.0e-03);
-    control_input_saturation_seq.appendControlInputSaturation(1, -1.5, 1.5, 1.0e-03);
-    MultipleShootingCGMRESWithSaturation cgmres_solver(nmpc_model, control_input_saturation_seq, 0.5, 1.0, 50, 1.0e-06, 1000, 5);
+    control_input_saturation_seq.appendControlInputSaturation(0, -3, 3, 1.0e-02, 0);
+    control_input_saturation_seq.appendControlInputSaturation(1, -1.5, 1.5, 1.0e-02, 0);
+    MultipleShootingCGMRESWithSaturation cgmres_solver(control_input_saturation_seq, 0.5, 1.0, 50, 1.0e-06, 1000, 5);
 
 
     // Define the simulator.
-    Simulator cgmres_simulator(nmpc_model);
+    Simulator cgmres_simulator;
 
     // Set the initial state.
     Eigen::VectorXd initial_state(nmpc_model.dimState());

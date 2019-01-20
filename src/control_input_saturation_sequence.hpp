@@ -20,8 +20,10 @@ private:
 
 
 public:
-    // Appends a saturation that has parameters in arguments to control_input_saturation_seq_. If there is the saturation that has the same index in arguments, overwrite its min_, max_, and dummy_weight_.
+    // Appends a saturation that has parameters in arguments to control_input_saturation_seq_. If there is the saturation that has the same index in arguments, overwrite its min_, max_, dummy_weight_, and quadratic_weight.
+    void appendControlInputSaturation(const int index, const double min, const double max, const double dummy_weight, const double quadratic_weight);
     void appendControlInputSaturation(const int index, const double min, const double max, const double dummy_weight);
+
 
     // Returns the total number of saturations.
     int dimSaturation() const;
@@ -41,6 +43,10 @@ public:
 
     inline double dummy_weight(const int num_saturation) const{
         return control_input_saturation_seq_[num_saturation].dummy_weight();
+    }
+
+    inline double quadratic_weight(const int num_saturation) const{
+        return control_input_saturation_seq_[num_saturation].quadratic_weight();
     }
 };
 

@@ -17,14 +17,9 @@ void Simulator::saveData(std::ofstream& state_data, std::ofstream& control_input
 }
 
 
-Simulator::Simulator(const NMPCModel model) : NumericalIntegrator(model)
-{
-    model_ = model;
-}
-
-
 void Simulator::simulation(ContinuationGMRES cgmres_solver, const Eigen::VectorXd& initial_state_vec, const double start_time, const double end_time, const double sampling_period, const std::string savefile_name)
 {
+    NumericalIntegrator integrator;
     Eigen::VectorXd current_state_vec(model_.dimState()), next_state_vec(model_.dimState()), control_input_vec(model_.dimControlInput());
     std::chrono::system_clock::time_point start_clock, end_clock;
 
@@ -41,7 +36,7 @@ void Simulator::simulation(ContinuationGMRES cgmres_solver, const Eigen::VectorX
         saveData(state_data, control_input_data, error_data, current_time, current_state_vec, control_input_vec, cgmres_solver.getError(current_time, current_state_vec));
 
         // Compute the next state vector using the 4th Runge-Kutta-Gill method.
-        rungeKuttaGill(current_time, current_state_vec, control_input_vec, sampling_period, next_state_vec);
+        next_state_vec = integrator.rungeKuttaGill(current_time, current_state_vec, control_input_vec, sampling_period);
 
         // Update the solution and measure computational time.
         start_clock = std::chrono::system_clock::now();
@@ -75,6 +70,7 @@ void Simulator::simulation(ContinuationGMRES cgmres_solver, const Eigen::VectorX
 
 void Simulator::simulation(MultipleShootingCGMRES cgmres_solver, const Eigen::VectorXd& initial_state_vec, const double start_time, const double end_time, const double sampling_period, const std::string savefile_name)
 {
+    NumericalIntegrator integrator;
     Eigen::VectorXd current_state_vec(model_.dimState()), next_state_vec(model_.dimState()), control_input_vec(model_.dimControlInput());
     std::chrono::system_clock::time_point start_clock, end_clock;
 
@@ -91,7 +87,7 @@ void Simulator::simulation(MultipleShootingCGMRES cgmres_solver, const Eigen::Ve
         saveData(state_data, control_input_data, error_data, current_time, current_state_vec, control_input_vec, cgmres_solver.getError(current_time, current_state_vec));
 
         // Compute the next state vector using the 4th Runge-Kutta-Gill method.
-        rungeKuttaGill(current_time, current_state_vec, control_input_vec, sampling_period, next_state_vec);
+        next_state_vec = integrator.rungeKuttaGill(current_time, current_state_vec, control_input_vec, sampling_period);
 
         // Update the solution and measure computational time.
         start_clock = std::chrono::system_clock::now();
@@ -126,6 +122,7 @@ void Simulator::simulation(MultipleShootingCGMRES cgmres_solver, const Eigen::Ve
 
 void Simulator::simulation(MultipleShootingCGMRESWithSaturation cgmres_solver, const Eigen::VectorXd& initial_state_vec, const double start_time, const double end_time, const double sampling_period, const std::string savefile_name)
 {
+    NumericalIntegrator integrator;
     Eigen::VectorXd current_state_vec(model_.dimState()), next_state_vec(model_.dimState()), control_input_vec(model_.dimControlInput());
     std::chrono::system_clock::time_point start_clock, end_clock;
 
@@ -142,7 +139,7 @@ void Simulator::simulation(MultipleShootingCGMRESWithSaturation cgmres_solver, c
         saveData(state_data, control_input_data, error_data, current_time, current_state_vec, control_input_vec, cgmres_solver.getError(current_time, current_state_vec));
 
         // Compute the next state vector using the 4th Runge-Kutta-Gill method.
-        rungeKuttaGill(current_time, current_state_vec, control_input_vec, sampling_period, next_state_vec);
+        next_state_vec = integrator.rungeKuttaGill(current_time, current_state_vec, control_input_vec, sampling_period);
 
         // Update the solution and measure computational time.
         start_clock = std::chrono::system_clock::now();

@@ -18,13 +18,13 @@
 class ContinuationGMRES final : virtual public MatrixFreeGMRES{
 private:
     NMPCModel model_;
-    int dim_state_, dim_control_input_, dim_constraints_, dim_control_input_and_constraints_, dim_solution_, horizon_division_num_, dim_krylov_;
+    int dim_state_, dim_control_input_, dim_constraints_, dim_control_input_and_constraints_, dim_solution_, horizon_division_num_, max_dim_krylov_;
 
     // initial_time_, horizon_max_length_, alpha_ : parameters of the length of the horizon
     // The horizon length at time t is given by horizon_max_length_*(1.0-std::exp(-alpha_*(time_param-initial_time_))).
     double initial_time_, horizon_max_length_, alpha_, zeta_, difference_increment_, incremented_time_;
-    Eigen::MatrixXd state_mat_, lambda_mat_;
     Eigen::VectorXd dx_vec_, incremented_state_vec_, solution_vec_, optimality_vec_, optimality_vec_1_, optimality_vec_2_, solution_update_vec_;
+    Eigen::MatrixXd state_mat_, lambda_mat_;
 
     // Computes the optimaliy error vector under current_solution_vec.
     inline void computeOptimalityError(const double time_param, const Eigen::VectorXd& state_vec, const Eigen::VectorXd& current_solution_vec, Eigen::Ref<Eigen::VectorXd> optimality_vec);
@@ -38,7 +38,7 @@ private:
 
 public:
     // Sets parameters and allocates vectors and matrices.
-    ContinuationGMRES(const NMPCModel model, const double horizon_max_length, const double alpha, const int horizon_division_num, const double difference_increment, const double zeta, const int dim_krylov);
+    ContinuationGMRES(const double horizon_max_length, const double alpha, const int horizon_division_num, const double difference_increment, const double zeta, const int max_dim_krylov);
 
     // Initializes the solution of the C/GMRES method.
     void initSolution(const double initial_time, const Eigen::VectorXd& initial_state_vec, const Eigen::VectorXd& initial_guess_input_vec, const double convergence_radius, const int max_iteration);

@@ -18,7 +18,7 @@
 class MultipleShootingCGMRES final : virtual public MatrixFreeGMRES{
 private:
     NMPCModel model_;
-    int dim_state_, dim_control_input_, dim_constraints_, dim_control_input_and_constraints_, dim_state_and_lambda_, dim_control_input_and_constraints_seq_, dim_state_and_lambda_seq_, horizon_division_num_, dim_krylov_;
+    int dim_state_, dim_control_input_, dim_constraints_, dim_control_input_and_constraints_, dim_state_and_lambda_, dim_control_input_and_constraints_seq_, horizon_division_num_, max_dim_krylov_;
 
     // initial_time_, horizon_max_length_, alpha_ : parameters of the length of the horizon
     // The horizon length at time t is given by horizon_max_length_*(1.0-std::exp(-alpha_*(time_param-initial_time_))).
@@ -44,7 +44,7 @@ private:
 
 public:
     // Sets parameters and allocates vectors and matrices.
-    MultipleShootingCGMRES(const NMPCModel model, const double horizon_max_length, const double alpha, const int horizon_division_num, const double difference_increment, const double zeta, const int dim_krylov);
+    MultipleShootingCGMRES(const double horizon_max_length, const double alpha, const int horizon_division_num, const double difference_increment, const double zeta, const int max_dim_krylov);
 
     // Initializes the solution of the C/GMRES method.
     void initSolution(const double initial_time, const Eigen::VectorXd& initial_state_vec, const Eigen::VectorXd& initial_guess_input_vec, const double convergence_radius, const int max_iteration);

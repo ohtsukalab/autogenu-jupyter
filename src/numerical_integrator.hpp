@@ -17,13 +17,13 @@ private:
     Eigen::VectorXd dx_vec_, k1_vec_, k2_vec_, k3_vec_, k4_vec_;
 public:
     // Allocates vectors.
-    NumericalIntegrator(const NMPCModel model);
+    NumericalIntegrator();
 
     // Euler method for the state equation.
-    void euler(const double current_time, const Eigen::VectorXd& current_state_vec, const Eigen::VectorXd& control_input_vec, const double integration_length, Eigen::Ref<Eigen::VectorXd> next_state_vec);
+    Eigen::VectorXd euler(const double current_time, const Eigen::VectorXd& current_state_vec, const Eigen::VectorXd& control_input_vec, const double integration_length);
 
     // The four-step Runge-Kutta-Gill method for the state equation.
-    void rungeKuttaGill(const double current_time, const Eigen::VectorXd& current_state_vec, const Eigen::VectorXd& control_input_vec, const double integration_length, Eigen::Ref<Eigen::VectorXd> next_state_vec);
+    Eigen::VectorXd rungeKuttaGill(const double current_time, const Eigen::VectorXd& current_state_vec, const Eigen::VectorXd& control_input_vec, const double integration_length);
 };
 
 

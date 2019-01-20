@@ -25,25 +25,18 @@ void InitCGMRES::axFunc(const double time_param, const Eigen::VectorXd& state_ve
 }
 
 
-InitCGMRES::InitCGMRES(const NMPCModel model, const double difference_increment, const int dim_krylov) : MatrixFreeGMRES(model.dimControlInput()+model.dimConstraints(), dim_krylov)
+InitCGMRES::InitCGMRES(const double difference_increment, const int max_dim_krylov) : MatrixFreeGMRES(), 
+    model_(), 
+    dim_solution_(model_.dimControlInput()+model_.dimConstraints()), 
+    difference_increment_(difference_increment), 
+    solution_update_vec_(Eigen::VectorXd::Zero(dim_solution_)), 
+    lambda_vec_(Eigen::VectorXd::Zero(model_.dimState())), 
+    error_vec_(Eigen::VectorXd::Zero(dim_solution_)), 
+    error_vec_1_(Eigen::VectorXd::Zero(dim_solution_)), 
+    error_vec_2_(Eigen::VectorXd::Zero(dim_solution_))
 {
-    // Set parameters.
-    model_ = model;
-    difference_increment_ = difference_increment;
-    dim_solution_ = model_.dimControlInput()+model_.dimConstraints();
-
-    // Allocate vectors.
-    solution_update_vec_.resize(dim_solution_);
-    lambda_vec_.resize(model_.dimState());
-    error_vec_.resize(dim_solution_);
-    error_vec_1_.resize(dim_solution_);
-    error_vec_2_.resize(dim_solution_);
-
-    // Initialize solution of the forward-difference GMRES.
-    for(int i=0; i<dim_solution_; i++){
-        solution_update_vec_(i) = 0.0;
-        error_vec_(i) = 0.0;
-    }
+    // Set dimensions and parameters in GMRES.
+    setGMRESParams(dim_solution_, max_dim_krylov);
 }
 
 
@@ -52,7 +45,7 @@ void InitCGMRES::solve0stepNOCP(const double initial_time, const Eigen::VectorXd
     int i=0;
     solution_vec = initial_guess_vec;
     computeOptimalityErrors(initial_time, initial_state_vec, solution_vec, error_vec_);
-    while(error_vec_.squaredNorm() > convergence_radius && i < max_iteration){
+    while(error_vec_.squaredNorm() > convergence_radius*convergence_radius && i < max_iteration){
         forwardDifferenceGMRES(initial_time, initial_state_vec, solution_vec, solution_update_vec_);
         solution_vec += solution_update_vec_;
         computeOptimalityErrors(initial_time, initial_state_vec, solution_vec, error_vec_);

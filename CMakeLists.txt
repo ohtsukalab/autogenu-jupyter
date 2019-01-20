@@ -5,6 +5,7 @@ set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_FLAGS "-O3")
 
 set(MODEL_DIR ${CMAKE_SOURCE_DIR}/examples/2linkfullactuated)
+# set(MODEL_DIR ${CMAKE_SOURCE_DIR}/examples/pendubot)
 
 include_directories(${CMAKE_SOURCE_DIR})
 include_directories(src)

@@ -30,7 +30,7 @@ private:
 
 public:
     // Sets parameters and allocates vectors.
-    InitCGMRES(const NMPCModel model, const double difference_increment, const int dim_krylov);
+    InitCGMRES(const double difference_increment, const int max_dim_krylov);
 
     // Calls the forwardDifferenceGMRES, solves the GMRES, and obtains the solution of the initialization for the C/GMRES method.
     void solve0stepNOCP(const double initial_time, const Eigen::VectorXd& initial_state_vec, const Eigen::VectorXd& initial_guess_vec, const double convergence_radius, const int max_iteration, Eigen::Ref<Eigen::VectorXd> solution_vec);

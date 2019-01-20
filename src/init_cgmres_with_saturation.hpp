@@ -24,7 +24,7 @@ private:
 
 
     // Adds partial derivative of the saturation with respect to the control input
-    inline void addDerivativeSaturationWithControlInput(const Eigen::VectorXd& control_input_and_constraints_vec, const Eigen::VectorXd& saturation_lagrange_multiplier_vec, Eigen::Ref<Eigen::VectorXd> optimality_for_control_input_and_constraints_vec);
+    inline void addHamiltonianDerivativeWithControlInput(const Eigen::VectorXd& control_input_and_constraints_vec, const Eigen::VectorXd& saturation_lagrange_multiplier_vec, Eigen::Ref<Eigen::VectorXd> optimality_for_control_input_and_constraints_vec);
 
     // Computes the optimality for the dummy input
     inline void computeDummyOptimality(const Eigen::VectorXd& dummy_input_vec, const Eigen::VectorXd& saturation_lagrange_multiplier_vec, Eigen::Ref<Eigen::VectorXd> optimality_for_dummy);
@@ -45,11 +45,11 @@ private:
 
 public:
     // Sets parameters and allocates vectors.
-    InitCGMRESWithSaturation(const NMPCModel model, const ControlInputSaturationSequence saturation_seq, const double difference_increment, const int dim_krylov);
+    InitCGMRESWithSaturation(const ControlInputSaturationSequence saturation_seq, const double difference_increment, const int max_dim_krylov);
 
 
     // Calls the forwardDifferenceGMRES, solves the GMRES, and obtains the solution 
-    void solve0stepNOCP(const double initial_time, const Eigen::VectorXd& initial_state_vec, const Eigen::VectorXd& initial_guess_vec, const Eigen::VectorXd& initial_guess_lagrange_multiplier, const double convergence_radius, const int max_iteration, Eigen::Ref<Eigen::VectorXd> solution_vec);
+    void solve0stepNOCP(const double initial_time, const Eigen::VectorXd& initial_state_vec, const Eigen::VectorXd& initial_guess_control_input_vec, const Eigen::VectorXd& initial_guess_lagrange_multiplier, const double convergence_radius, const int max_iteration, Eigen::Ref<Eigen::VectorXd> solution_vec);
 
     // Returns the optimality error for the control input and constraints under current_solution_vec.
     Eigen::VectorXd getControlInputAndConstraintsError(const double initial_time, const Eigen::VectorXd& initial_state_vec, const Eigen::VectorXd& current_solution_vec);

@@ -13,52 +13,58 @@ inline void MatrixFreeGMRES::givensRotation(Eigen::Ref<Eigen::VectorXd> column_v
 }
 
 
-MatrixFreeGMRES::MatrixFreeGMRES(const int dim_equation, const int k)
+MatrixFreeGMRES::MatrixFreeGMRES() : 
+    dim_equation_(0), 
+    max_dim_krylov_(0), 
+    hessenberg_mat_(0,0), 
+    basis_mat_(0,0), 
+    b_vec_(0), 
+    givens_c_vec_(0), 
+    givens_s_vec_(0), 
+    g_vec_(0)
 {
-    dim_equation_ = dim_equation;
-    max_dim_krylov_ = k;
-
-    // Allocate matrices and vectors for matrix-free GMRES.
-    hessenberg_mat_.resize(max_dim_krylov_+1, max_dim_krylov_+1);
-    basis_mat_.resize(dim_equation_, max_dim_krylov_+1);
-    b_vec_.resize(dim_equation_);
-    givens_c_vec_.resize(max_dim_krylov_+1);
-    givens_s_vec_.resize(max_dim_krylov_+1);
-    g_vec_.resize(max_dim_krylov_+1);
 }
 
 
-void MatrixFreeGMRES::resetParameters(const int dim_equation, const int k)
+MatrixFreeGMRES::MatrixFreeGMRES(const int dim_equation, const int max_dim_krylov) : 
+    dim_equation_(dim_equation), 
+    max_dim_krylov_(max_dim_krylov), 
+    hessenberg_mat_(Eigen::MatrixXd::Zero(max_dim_krylov+1, max_dim_krylov+1)), 
+    basis_mat_(Eigen::MatrixXd::Zero(dim_equation, max_dim_krylov+1)), 
+    b_vec_(Eigen::VectorXd::Zero(dim_equation)), 
+    givens_c_vec_(Eigen::VectorXd::Zero(max_dim_krylov+1)), 
+    givens_s_vec_(Eigen::VectorXd::Zero(max_dim_krylov+1)), 
+    g_vec_(Eigen::VectorXd::Zero(max_dim_krylov+1))
+{}
+
+
+void MatrixFreeGMRES::setGMRESParams(const int dim_equation, const int max_dim_krylov)
 {
     dim_equation_ = dim_equation;
-    max_dim_krylov_ = k;
+    max_dim_krylov_ = max_dim_krylov;
 
-    // Reallocate matrices and vectors for matrix-free GMRES.
-    hessenberg_mat_.resize(max_dim_krylov_+1, max_dim_krylov_+1);
-    basis_mat_.resize(dim_equation_, max_dim_krylov_+1);
-    b_vec_.resize(dim_equation_);
-    givens_c_vec_.resize(max_dim_krylov_+1);
-    givens_s_vec_.resize(max_dim_krylov_+1);
-    g_vec_.resize(max_dim_krylov_+1);
+    hessenberg_mat_ = Eigen::MatrixXd::Zero(max_dim_krylov+1, max_dim_krylov+1);
+    basis_mat_ = Eigen::MatrixXd::Zero(dim_equation, max_dim_krylov+1);
+    b_vec_ = Eigen::VectorXd::Zero(dim_equation);
+    givens_c_vec_ = Eigen::VectorXd::Zero(max_dim_krylov+1);
+    givens_s_vec_ = Eigen::VectorXd::Zero(max_dim_krylov+1);
+    g_vec_ = Eigen::VectorXd::Zero(max_dim_krylov+1);
 }
 
 
 void MatrixFreeGMRES::forwardDifferenceGMRES(const double time_param, const Eigen::VectorXd& state_vec, const Eigen::VectorXd& current_solution_vec, Eigen::Ref<Eigen::VectorXd> solution_update_vec)
 {
     // Initialize vectors for QR factrization by Givens rotation.
-    for(int i=0; i<=max_dim_krylov_; i++){
-        givens_c_vec_(i) = 0.0;
-        givens_s_vec_(i) = 0.0;
-        g_vec_(i) = 0.0;
-    }
+    givens_c_vec_ = Eigen::VectorXd::Zero(max_dim_krylov_+1);
+    givens_s_vec_ = Eigen::VectorXd::Zero(max_dim_krylov_+1);
+    g_vec_ = Eigen::VectorXd::Zero(max_dim_krylov_+1);
 
     // Generate the initial basis of the Krylov subspace.
     bFunc(time_param, state_vec, current_solution_vec, b_vec_);
     g_vec_(0) = b_vec_.norm();
     basis_mat_.col(0) = b_vec_ / g_vec_(0);
 
-
-    // k : the dimension of the Krylov subspace at the current iteration.
+    // : the dimension of the Krylov subspace at the current iteration.
     int k;
     for(k=0; k<max_dim_krylov_; k++){
         axFunc(time_param, state_vec, current_solution_vec, basis_mat_.col(k), basis_mat_.col(k+1));

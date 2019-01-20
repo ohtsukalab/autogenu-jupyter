@@ -21,7 +21,7 @@ private:
     NMPCModel model_;
     ControlInputSaturationSequence saturation_seq_;
 
-    int dim_state_, dim_control_input_, dim_constraints_, dim_control_input_and_constraints_, dim_state_and_lambda_, dim_control_input_and_constraints_seq_, dim_state_and_lambda_seq_, dim_saturation_, dim_saturation_seq_, horizon_division_num_, dim_krylov_;
+    int dim_state_, dim_control_input_, dim_constraints_, dim_control_input_and_constraints_, dim_control_input_and_constraints_seq_, dim_saturation_, dim_saturation_seq_, horizon_division_num_, dim_krylov_;
 
     // initial_time_, horizon_max_length_, alpha_ : parameters of the length of the horizon
     // The horizon length at time t is given by horizon_max_length_*(1.0-std::exp(-alpha_*(time_param-initial_time_))).
@@ -29,12 +29,12 @@ private:
 
     Eigen::VectorXd dx_vec_, incremented_state_vec_, control_input_and_constraints_seq_, incremented_control_input_and_constraints_seq_, control_input_and_constraints_error_seq_, control_input_and_constraints_error_seq_1_, control_input_and_constraints_error_seq_2_, control_input_and_constraints_error_seq_3_, control_input_and_constraints_update_seq_;
 
-    Eigen::MatrixXd state_mat_, lambda_mat_, incremented_state_mat_, incremented_lambda_mat_, state_error_mat_, state_error_mat_1_, lambda_error_mat_, lambda_error_mat_1_, state_update_mat_, lambda_update_mat_, dummy_input_mat_, saturation_lagrange_multiplier_mat_, dummy_error_mat_, saturation_error_mat_, dummy_error_mat_1_, saturation_error_mat_1_, dummy_update_mat_, saturation_update_mat_;
+    Eigen::MatrixXd state_mat_, lambda_mat_, incremented_state_mat_, incremented_lambda_mat_, state_error_mat_, state_error_mat_1_, lambda_error_mat_, lambda_error_mat_1_, state_update_mat_, lambda_update_mat_, dummy_input_mat_, saturation_lagrange_multiplier_mat_, dummy_error_mat_, dummy_error_mat_1_, saturation_error_mat_, saturation_error_mat_1_, dummy_update_mat_, saturation_update_mat_;
 
 
     // Compute 1step optimality error about the saturation
     // Adds partial derivative of the saturation with respect to the control input
-    inline void addDerivativeSaturationWithControlInput(const Eigen::VectorXd& control_input_and_constraints_vec, const Eigen::VectorXd& saturation_lagrange_multiplier_vec, Eigen::Ref<Eigen::VectorXd> optimality_for_control_input_and_constraints_vec);
+    inline void addHamiltonianDerivativeWithControlInput(const Eigen::VectorXd& control_input_and_constraints_vec, const Eigen::VectorXd& saturation_lagrange_multiplier_vec, Eigen::Ref<Eigen::VectorXd> optimality_for_control_input_and_constraints_vec);
 
     // Computes the optimality for the dummy input
     inline void computeDummyOptimality(const Eigen::VectorXd& dummy_input_vec, const Eigen::VectorXd& saturation_lagrange_multiplier_vec, Eigen::Ref<Eigen::VectorXd> optimality_for_dummy);
@@ -58,11 +58,11 @@ private:
 
 
     // Functions for saturations
-    // Multiplies the derivative of saturation with respect to the control input and other constraints with a vector
-    inline void multiplySaturationDerivativeWithControlInput(const Eigen::VectorXd& control_input_and_constraints_seq, const Eigen::VectorXd& multiplied_control_input_and_constraints_vec, Eigen::Ref<Eigen::MatrixXd> optimality_for_dummy, Eigen::Ref<Eigen::MatrixXd> optimality_for_saturation);
+    inline void multiplySaturationErrorInverse(const Eigen::VectorXd& control_input_and_constraints_seq, const Eigen::MatrixXd& dummy_input_seq, const Eigen::MatrixXd& saturation_lagrange_multiplier_seq, const Eigen::MatrixXd& multiplied_dummy_input_seq, const Eigen::MatrixXd& multiplied_lagrange_multiplier_seq, Eigen::Ref<Eigen::MatrixXd> resulted_dummy_input_seq, Eigen::Ref<Eigen::MatrixXd> resulted_lagrange_multiplier_seq);
 
-    // Multiply the derivative of saturation with respect to the variables about saturation
-    inline void multiplySaturationSelfDerivativeInverse(const Eigen::VectorXd& control_input_and_constraints_seq, const Eigen::MatrixXd& dummy_input_seq, const Eigen::MatrixXd& saturation_lagrange_multiplier_seq, const Eigen::MatrixXd& multiplied_dummy_mat, const Eigen::MatrixXd& multiplied_saturation_mat, Eigen::Ref<Eigen::MatrixXd> optimality_for_dummy, Eigen::Ref<Eigen::MatrixXd> optimality_for_saturation);
+    inline void computeDummyOptimalityDifference(const Eigen::VectorXd& control_input_and_constraints_seq, const Eigen::MatrixXd& dummy_input_seq, const Eigen::VectorXd& control_input_and_constraints_update_seq, Eigen::Ref<Eigen::MatrixXd> dummy_difference_seq);
+    
+    inline void computeSaturationOptimalityDifference(const Eigen::VectorXd& control_input_and_constraints_seq, const Eigen::MatrixXd& dummy_input_seq, const Eigen::MatrixXd& saturation_lagrange_multiplier_seq, const Eigen::VectorXd& control_input_and_constraints_update_seq, Eigen::Ref<Eigen::MatrixXd> saturation_difference_seq);
 
 
     // Computes a vector correspongin to b in Ax=b
@@ -74,16 +74,15 @@ private:
 
 public:
     // Sets parameters and allocates vectors and matrices.
-    MultipleShootingCGMRESWithSaturation(const NMPCModel model, const ControlInputSaturationSequence saturation_seq, const double horizon_max_length, const double alpha, const int horizon_division_num, const double difference_increment, const double zeta, const int dim_krylov);
+    MultipleShootingCGMRESWithSaturation(const ControlInputSaturationSequence saturation_seq, const double horizon_max_length, const double alpha, const int horizon_division_num, const double difference_increment, const double zeta, const int dim_krylov);
 
 
-    // Initializes the solution of the C/GMRES method with setting all the initial guess Lagrange multipliers of the condensed saturation to 0.
+    // Initializes the solution of the multiple shooting based C/GMRES method with condensing of the saturations on the control input
+    // 1: with setting all the initial guess Lagrange multipliers of the condensed saturation to 0.
+    // 2: with setting the initial guess Lagrange multiplier vector of the condensed saturations to initial_guess_lagrange_multiplier.
+    // 3: with setting all the initial guess Lagrange multipliers of the condensed saturation to initial_guess_lagrange_multiplier.
     void initSolution(const double initial_time, const Eigen::VectorXd& initial_state_vec, const Eigen::VectorXd& initial_guess_input_vec, const double convergence_radius, const int max_iteration);
-
-    // Initializes the solution of the C/GMRES method with setting the initial guess Lagrange multiplier vector of the condensed saturations to initial_guess_lagrange_multiplier.
     void initSolution(const double initial_time, const Eigen::VectorXd& initial_state_vec, const Eigen::VectorXd& initial_guess_input_vec, const Eigen::VectorXd& initial_guess_lagrange_multiplier, const double convergence_radius, const int max_iteration);
-
-    // Initializes the solution of the C/GMRES method with setting all the initial guess Lagrange multipliers of the condensed saturation to initial_guess_lagrange_multiplier.
     void initSolution(const double initial_time, const Eigen::VectorXd& initial_state_vec, const Eigen::VectorXd& initial_guess_input_vec, const double initial_guess_lagrange_multiplier, const double convergence_radius, const int max_iteration);
 
 
