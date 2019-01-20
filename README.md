@@ -49,16 +49,10 @@ and save its animation by
 $ python3 2linkanimation.py example save example
 ```
 
-# Demos
-### The original C/GMRES method for a pendubot
-![pendubot_cgmres](https://raw.github.com/wiki/mayataka/CGMRES/images/pendubot_cgmres.png)
-
+# Demo
 ### The multiple shooting based C/GMRES method for a pendubot
-![pendubot_multiple_shooting](https://raw.github.com/wiki/mayataka/CGMRES/images/pendubot_multiple_shooting.png)
-
-### The multiple shooting based C/GMRES method with condensing of variables with respect to the constraints of the saturation function on the control input
-![pendubot_multiple_shooting_with_sat](https://raw.github.com/wiki/mayataka/CGMRES/images/2linkarm_with_saturation.png)
-
+![pendubot_multiple_shooting_gif](https://raw.githubusercontent.com/wiki/mayataka/CGMRES/images/fps=20.gif)
+![pendubot_multiple_shooting_png](https://raw.github.com/wiki/mayataka/CGMRES/images/pendubot_multiple_shooting.png)
 
 
 # References
