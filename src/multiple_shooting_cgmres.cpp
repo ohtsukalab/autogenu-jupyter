@@ -157,8 +157,6 @@ void MultipleShootingCGMRES::initSolution(const double initial_time, const Eigen
     for(int i=0; i<horizon_division_num_; i++){
         control_input_and_constraints_error_seq_.segment(i*dim_control_input_and_constraints_, dim_control_input_and_constraints_) = initial_control_input_and_constraints_error;
     }
-    state_error_mat_ = Eigen::MatrixXd::Zero(dim_state_, horizon_division_num_);
-    lambda_error_mat_ = Eigen::MatrixXd::Zero(dim_state_, horizon_division_num_);
 }
 
 

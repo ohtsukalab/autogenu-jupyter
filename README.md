@@ -1,5 +1,9 @@
 # Introduction
-This project provides Continuation/GMRES method (C/GMRES method), a fast algorithm of NMPC, and the multiple shooting based C/GMRES method. In the multiple shooting based C/GMRES method, the computational cost is reduced by condensing the state variables, the Lagrange multiplier of the state equation, the dummy input in the saturation of the control input, and the Lagrange multiplier of the saturation.
+This code provides the continuation/GMRES method (C/GMRES method) based solver for nonlinear model predictive control (NMPC). 
+
+- The original C/GMRES method 
+- The multiple shooting based C/GMRES method with
+- The multiple shooting based C/GMRES method with condensing of variables with respect to the constraints of the saturation function on the control input
 
 
 # Requirement
@@ -11,7 +15,7 @@ This project provides Continuation/GMRES method (C/GMRES method), a fast algorit
 
 
 # Usage
-First, set the parameters of your model of NMPC in nmpc_model.hpp, write equations in nmpc_model.cpp, and set simulation conditions in main.cpp, build files as follows:
+First, set the parameters of your model of NMPC in nmpc_model.hpp, write equations in nmpc_model.cpp, and set simulation conditions in main.cpp. Next, build files as follows:
 
 ```
 $ mkdir build
@@ -44,6 +48,16 @@ and save its animation by
 ```
 $ python3 2linkanimation.py example save example
 ```
+
+# Demos
+### The original C/GMRES method for a pendubot
+![pendubot_cgmres](https://raw.github.com/wiki/mayataka/CGMRES/images/pendubot_cgmres.png)
+
+### The multiple shooting based C/GMRES method for a pendubot
+![pendubot_multiple_shooting](https://raw.github.com/wiki/mayataka/CGMRES/images/pendubot_multiple_shooting.png)
+
+### The multiple shooting based C/GMRES method with condensing of variables with respect to the constraints of the saturation function on the control input
+![pendubot_multiple_shooting_with_sat](https://raw.github.com/wiki/mayataka/CGMRES/images/2linkarm_with_saturation.png)
 
 
 

@@ -257,9 +257,6 @@ void MultipleShootingCGMRESWithSaturation::initSolution(const double initial_tim
         dummy_error_mat_.col(i) = initial_dummy_input_error;
         saturation_error_mat_.col(i) = initial_saturation_error;
     }
-
-    state_error_mat_ = Eigen::MatrixXd::Zero(dim_state_, horizon_division_num_);
-    lambda_error_mat_ = Eigen::MatrixXd::Zero(dim_state_, horizon_division_num_);
 }
 
 
@@ -292,9 +289,6 @@ void MultipleShootingCGMRESWithSaturation::initSolution(const double initial_tim
         dummy_error_mat_.col(i) = initial_dummy_input_error;
         saturation_error_mat_.col(i) = initial_saturation_error;
     }
-
-    state_error_mat_ = Eigen::MatrixXd::Zero(dim_state_, horizon_division_num_);
-    lambda_error_mat_ = Eigen::MatrixXd::Zero(dim_state_, horizon_division_num_);
 }
 
 
@@ -327,9 +321,6 @@ void MultipleShootingCGMRESWithSaturation::initSolution(const double initial_tim
         dummy_error_mat_.col(i) = initial_dummy_input_error;
         saturation_error_mat_.col(i) = initial_saturation_error;
     }
-
-    state_error_mat_ = Eigen::MatrixXd::Zero(dim_state_, horizon_division_num_);
-    lambda_error_mat_ = Eigen::MatrixXd::Zero(dim_state_, horizon_division_num_);
 }
 
 

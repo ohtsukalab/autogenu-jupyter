@@ -11,8 +11,8 @@ int main()
     NMPCModel nmpc_model;
 
     // Define the solver of C/GMRES.
-    ContinuationGMRES cgmres_solver(1.0, 1.0, 50, 1.0e-06, 1000, 5);
-    // MultipleShootingCGMRES cgmres_solver(1.0, 1.0, 50, 1.0e-06, 1000, 3);
+    // ContinuationGMRES cgmres_solver(1.0, 1.0, 50, 1.0e-06, 1000, 5);
+    MultipleShootingCGMRES cgmres_solver(1.0, 1.0, 50, 1.0e-06, 1000, 3);
 
     // Define the simulator.
     Simulator cgmres_simulator;
