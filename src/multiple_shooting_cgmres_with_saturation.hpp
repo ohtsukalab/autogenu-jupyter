@@ -27,7 +27,7 @@ private:
     // The horizon length at time t is given by horizon_max_length_*(1.0-std::exp(-alpha_*(time_param-initial_time_))).
     double initial_time_, horizon_max_length_, alpha_, zeta_, difference_increment_, incremented_time_;
 
-    Eigen::VectorXd dx_vec_, incremented_state_vec_, control_input_and_constraints_seq_, incremented_control_input_and_constraints_seq_, control_input_and_constraints_error_seq_, control_input_and_constraints_error_seq_1_, control_input_and_constraints_error_seq_2_, control_input_and_constraints_error_seq_3_, control_input_and_constraints_update_seq_;
+    Eigen::VectorXd dx_vec_, incremented_state_vec_, control_input_and_constraints_seq_, control_input_and_constraints_error_seq_, control_input_and_constraints_error_seq_1_, control_input_and_constraints_error_seq_2_, control_input_and_constraints_error_seq_3_, control_input_and_constraints_update_seq_;
 
     Eigen::MatrixXd state_mat_, lambda_mat_, incremented_state_mat_, incremented_lambda_mat_, state_error_mat_, state_error_mat_1_, lambda_error_mat_, lambda_error_mat_1_, state_update_mat_, lambda_update_mat_, dummy_input_mat_, saturation_lagrange_multiplier_mat_, dummy_error_mat_, dummy_error_mat_1_, saturation_error_mat_, saturation_error_mat_1_, dummy_update_mat_, saturation_update_mat_;
 

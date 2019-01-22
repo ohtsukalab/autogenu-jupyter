@@ -33,7 +33,7 @@ int main()
     cgmres_solver.initSolution(0, initial_state, initial_guess_control_input, 1.0e-06, 50);
 
     // Perform a numerical simulation.
-    cgmres_simulator.simulation(cgmres_solver, initial_state, 0, 10, 0.001, "example");
+    cgmres_simulator.simulation(cgmres_solver, initial_state, 0, 10, 0.001, "example1");
 
 
     return 0;

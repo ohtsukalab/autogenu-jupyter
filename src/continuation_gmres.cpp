@@ -15,11 +15,17 @@ void ContinuationGMRES::computeOptimalityError(const double time_param, const Ei
         state_mat_.col(i+1) = state_mat_.col(i) + delta_tau * dx_vec_;
     }
 
-    // Compute the Lagrange multiplier and the optimality condition over the horizon on the basis of the control_input_vec and the current_state_vec.
+    // Compute the Lagrange multiplier over the horizon on the basis of the control_input_vec and the current_state_vec.
     model_.phixFunc(tau, state_mat_.col(horizon_division_num_), lambda_mat_.col(horizon_division_num_));
     for(int i=horizon_division_num_-1; i>=0; i--, tau-=delta_tau){
         model_.hxFunc(tau, state_mat_.col(i), current_solution_vec.segment(i*dim_control_input_and_constraints_, dim_control_input_and_constraints_), lambda_mat_.col(i+1), dx_vec_);
         lambda_mat_.col(i) = lambda_mat_.col(i+1) + delta_tau * dx_vec_;
+
+    }
+
+    // Compute the optimality condition over the horizon on the basis of the control_input_vec and the current_state_vec.
+    tau = time_param;
+    for(int i=0; i<horizon_division_num_; i++, tau+=delta_tau){
         model_.huFunc(tau, state_mat_.col(i), current_solution_vec.segment(i*dim_control_input_and_constraints_, dim_control_input_and_constraints_), lambda_mat_.col(i+1), optimality_vec.segment(i*dim_control_input_and_constraints_, dim_control_input_and_constraints_));
     }
 }
@@ -31,7 +37,7 @@ void ContinuationGMRES::bFunc(const double time_param, const Eigen::VectorXd& st
     computeOptimalityError(incremented_time_, incremented_state_vec_, current_solution_vec, optimality_vec_1_);
     computeOptimalityError(incremented_time_, incremented_state_vec_, current_solution_vec+difference_increment_*solution_update_vec_, optimality_vec_2_);
 
-    b_vec = (1/difference_increment_-zeta_) *optimality_vec_ - optimality_vec_2_/difference_increment_;
+    b_vec = (1/difference_increment_-zeta_)*optimality_vec_ - optimality_vec_2_/difference_increment_;
 }
 
 

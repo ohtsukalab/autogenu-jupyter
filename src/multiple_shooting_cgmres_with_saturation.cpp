@@ -154,10 +154,10 @@ void MultipleShootingCGMRESWithSaturation::bFunc(const double time_param, const 
 
     computeOptimalityErrorforControlInputAndConstraints(incremented_time_, incremented_state_vec_, current_solution_vec, incremented_state_mat_, incremented_lambda_mat_, saturation_lagrange_multiplier_mat_+difference_increment_*saturation_error_mat_1_, control_input_and_constraints_error_seq_3_);
 
-    incremented_control_input_and_constraints_seq_ = current_solution_vec + difference_increment_*control_input_and_constraints_update_seq_;
-    computeStateAndLambda(incremented_time_, incremented_state_vec_, incremented_control_input_and_constraints_seq_, state_error_mat_1_, lambda_error_mat_1_, incremented_state_mat_, incremented_lambda_mat_);
+
+    computeStateAndLambda(incremented_time_, incremented_state_vec_, current_solution_vec+difference_increment_*control_input_and_constraints_update_seq_, state_error_mat_1_, lambda_error_mat_1_, incremented_state_mat_, incremented_lambda_mat_);
     computeSaturationOptimalityDifference(current_solution_vec, dummy_input_mat_, saturation_lagrange_multiplier_mat_, control_input_and_constraints_update_seq_, saturation_update_mat_);
-    computeOptimalityErrorforControlInputAndConstraints(incremented_time_, incremented_state_vec_, incremented_control_input_and_constraints_seq_, incremented_state_mat_, incremented_lambda_mat_, saturation_lagrange_multiplier_mat_-difference_increment_*saturation_update_mat_, control_input_and_constraints_error_seq_2_);
+    computeOptimalityErrorforControlInputAndConstraints(incremented_time_, incremented_state_vec_, current_solution_vec+difference_increment_*control_input_and_constraints_update_seq_, incremented_state_mat_, incremented_lambda_mat_, saturation_lagrange_multiplier_mat_-difference_increment_*saturation_update_mat_, control_input_and_constraints_error_seq_2_);
 
 
     b_vec = (1/difference_increment_ - zeta_) * control_input_and_constraints_error_seq_ - control_input_and_constraints_error_seq_3_/difference_increment_ - (control_input_and_constraints_error_seq_2_-control_input_and_constraints_error_seq_1_)/difference_increment_;
@@ -166,11 +166,9 @@ void MultipleShootingCGMRESWithSaturation::bFunc(const double time_param, const 
 
 void MultipleShootingCGMRESWithSaturation::axFunc(const double time_param, const Eigen::VectorXd& state_vec, const Eigen::VectorXd& current_solution_vec, const Eigen::VectorXd& direction_vec, Eigen::Ref<Eigen::VectorXd> ax_vec)
 {
-    incremented_control_input_and_constraints_seq_ = current_solution_vec+difference_increment_*direction_vec;
-
-    computeStateAndLambda(incremented_time_, incremented_state_vec_, incremented_control_input_and_constraints_seq_, state_error_mat_1_, lambda_error_mat_1_, incremented_state_mat_, incremented_lambda_mat_);
+    computeStateAndLambda(incremented_time_, incremented_state_vec_, current_solution_vec+difference_increment_*direction_vec, state_error_mat_1_, lambda_error_mat_1_, incremented_state_mat_, incremented_lambda_mat_);
     computeSaturationOptimalityDifference(current_solution_vec, dummy_input_mat_, saturation_lagrange_multiplier_mat_, direction_vec, saturation_update_mat_);
-    computeOptimalityErrorforControlInputAndConstraints(incremented_time_, incremented_state_vec_, incremented_control_input_and_constraints_seq_, incremented_state_mat_, incremented_lambda_mat_, saturation_lagrange_multiplier_mat_-difference_increment_*saturation_update_mat_, control_input_and_constraints_error_seq_2_);
+    computeOptimalityErrorforControlInputAndConstraints(incremented_time_, incremented_state_vec_, current_solution_vec+difference_increment_*direction_vec, incremented_state_mat_, incremented_lambda_mat_, saturation_lagrange_multiplier_mat_-difference_increment_*saturation_update_mat_, control_input_and_constraints_error_seq_2_);
 
 
     ax_vec = (control_input_and_constraints_error_seq_2_ - control_input_and_constraints_error_seq_1_)/difference_increment_;
@@ -198,7 +196,6 @@ MultipleShootingCGMRESWithSaturation::MultipleShootingCGMRESWithSaturation(const
     dx_vec_(Eigen::VectorXd::Zero(dim_state_)), 
     incremented_state_vec_(Eigen::VectorXd::Zero(dim_state_)), 
     control_input_and_constraints_seq_(Eigen::VectorXd::Zero(dim_control_input_and_constraints_seq_)), 
-    incremented_control_input_and_constraints_seq_(Eigen::VectorXd::Zero(dim_control_input_and_constraints_seq_)), 
     control_input_and_constraints_error_seq_(Eigen::VectorXd::Zero(dim_control_input_and_constraints_seq_)), 
     control_input_and_constraints_error_seq_1_(Eigen::VectorXd::Zero(dim_control_input_and_constraints_seq_)), 
     control_input_and_constraints_error_seq_2_(Eigen::VectorXd::Zero(dim_control_input_and_constraints_seq_)), 
