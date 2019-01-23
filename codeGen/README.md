@@ -1,10 +1,14 @@
 # Introduction
-This code provides an automatic code generation for nonlinear model predictive control (NMPC) using the continuation/GMRES (C/GMRES) method.
+This code provides an automatic code generation for nonlinear model predictive control (NMPC).
 
 # Requirement
-- Python3
+- Python 3.6.x
 - SymPy
 - Jupyter Notebook (IPython)
 
+# Usage
+Open codeGenforNMPC.ipynb using Jupyter Notebook and you can generate nmpc_model.hpp and nmpc_model.cpp.
+
+
 # Caution
-Do not change files in templates\_for\_codeGen.
+Do not change files in codegen_modules/templates\_for\_codeGen.
