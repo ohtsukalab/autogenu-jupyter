@@ -11,26 +11,26 @@ The following solvers are provided:
 - C++11
 - Cmake
 - Eigen 3
-- Python 3.6.x, Jupyter Notebook, SymPy (to generate nmpc_model.hpp, nmpc_model.cpp, main.cpp by AutoGenU.ipynb)
-- Python 3.6.x, NumPy, seaborn (to plot simulation data on AutoGenU.ipynb)
+- Python 3.6.x, Jupyter Notebook, SymPy (to generate `nmpc_model.hpp`, `nmpc_model.cpp`, `main.cpp`, and `CMakeLists.txt` by `AutoGenU.ipynb`)
+- Python 3.6.x, NumPy, seaborn (to plot simulation data on `AutoGenU.ipynb`)
 
 
 # Usage
-### AutoGenU
-AutoGenU generates following source files under your setting state equation and cost function: 
-- nmpc_model.hpp
-- nmpc_model.cpp
-- main.cpp
-- CMakeLists.txt
-You can also build source files for numerical simulation, execute numerical simulation, and plot or save simulation result on AutoGenU.
+## AutoGenU
+`AutoGenU.ipynb` generates following source files under your setting state equation and cost function: 
+- `nmpc_model.hpp`
+- `nmpc_model.cpp`
+- `main.cpp`
+- `CMakeLists.txt`
+You can also build source files for numerical simulation, execute numerical simulation, and plot or save simulation result on `AutoGenU.ipynb`.
 
 
-### C/GMRES based solvers
-The C/GMRES based solvers in src/solver directory can be used independently of AutoGenU. First, you have to set the following files:  
-- nmpc_model.hpp: write parameters in your model  
-- nmpc_model.cpp: write equations of your model  
-- main.cpp: write parameters of solvers 
-AutoGenU.ipynb generates these source files automatically. After setting these files, set CMakeLists.txt and build source files. 
+## C/GMRES based solvers of NMPC
+The C/GMRES based solvers in src/solver directory can be used independently of `AutoGenU.ipynb`. First, you have to set the following files:  
+- `nmpc_model.hpp`: write parameters in your model  
+- `nmpc_model.cpp`: write equations of your model  
+- `main.cpp`: write parameters of solvers 
+After setting these files, set `CMakeLists.txt` and build source files. Note that `AutoGenU.ipynb` generates these source files and `CMakeLists.txt` automatically.
 
 
 # Demo
