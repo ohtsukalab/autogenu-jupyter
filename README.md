@@ -26,7 +26,7 @@ You can also build source files for numerical simulation, execute numerical simu
 
 
 ## C/GMRES based solvers of NMPC
-The C/GMRES based solvers in src/solver directory can be used independently of `AutoGenU.ipynb`. First, you have to set the following files:  
+The C/GMRES based solvers in `src/solver` directory can be used independently of `AutoGenU.ipynb`. First, you have to set the following files:  
 - `nmpc_model.hpp`: write parameters in your model  
 - `nmpc_model.cpp`: write equations of your model  
 - `main.cpp`: write parameters of solvers 
