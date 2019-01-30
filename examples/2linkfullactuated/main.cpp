@@ -1,28 +1,18 @@
 #include "nmpc_model.hpp"
-#include "continuation_gmres.hpp"
-#include "multiple_shooting_cgmres.hpp"
 #include "control_input_saturation_sequence.hpp"
 #include "multiple_shooting_cgmres_with_saturation.hpp"
-#include "simulator.hpp"
+#include "multiple_shooting_cgmres_with_saturation_simulator.hpp"
 
 
 int main()
 {
-    // Define the model in NMPC.
     NMPCModel nmpc_model;
 
-    // Define the solver of C/GMRES.
-    // ContinuationGMRES cgmres_solver(0.5, 1.0, 50, 1.0e-06, 1000, 5);
-    // MultipleShootingCGMRES cgmres_solver(0.5, 1.0, 50, 1.0e-06, 1000, 5);
-    //  If you use MultipleShootingCGMRESWithSaturation, you have to describe the saturaions on the control input in ControlInputSaturationSequence before define the solver.
     ControlInputSaturationSequence control_input_saturation_seq;
     control_input_saturation_seq.appendControlInputSaturation(0, -3, 3, 1.0e-02, 1.0e-02);
     control_input_saturation_seq.appendControlInputSaturation(1, -1.5, 1.5, 1.0e-02, 1.0e-02);
-    MultipleShootingCGMRESWithSaturation cgmres_solver(control_input_saturation_seq, 0.5, 1.0, 50, 1.0e-06, 1000, 5);
+    MultipleShootingCGMRESWithSaturation nmpc_solver(control_input_saturation_seq, 0.5, 1.0, 50, 1.0e-06, 1000, 5);
 
-
-    // Define the simulator.
-    Simulator cgmres_simulator;
 
     // Set the initial state.
     Eigen::VectorXd initial_state(nmpc_model.dimState());
@@ -35,11 +25,10 @@ int main()
     // Initialize the solution of the C/GMRES method.
     Eigen::VectorXd initial_guess_lagrange_multiplier(control_input_saturation_seq.dimSaturation());
     initial_guess_lagrange_multiplier << 1.0e-03, 1.0e-03;
-    cgmres_solver.initSolution(0, initial_state, initial_guess_control_input, initial_guess_lagrange_multiplier, 1.0e-06, 50);
+    nmpc_solver.initSolution(0, initial_state, initial_guess_control_input, initial_guess_lagrange_multiplier, 1.0e-06, 50);
 
     // Perform a numerical simulation.
-    cgmres_simulator.simulation(cgmres_solver, initial_state, 0, 5, 0.001, "example");
-
+    nmpcsim::simulation(nmpc_solver, initial_state, 0, 5, 0.001, "example");
 
     return 0;
 }
