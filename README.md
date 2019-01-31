@@ -1,7 +1,7 @@
 # Introduction
 This project provides the continuation/GMRES method (C/GMRES method) based solvers for nonlinear model predictive control (NMPC) and an automatic code generator for NMPC, called AutoGenU.
 
-The following solvers are provided: 
+The following C/GMRES based solvers are provided: 
 - The original C/GMRES method (single shooting)
 - The multiple shooting based C/GMRES method
 - The multiple shooting based C/GMRES method with condensing of variables with respect to the constraints on the saturation function on the control input
@@ -9,7 +9,7 @@ The following solvers are provided:
 
 # Requirement
 - C++11
-- Cmake
+- CMake
 - Eigen 3
 - Python 3.6.x, Jupyter Notebook, SymPy (to generate `nmpc_model.hpp`, `nmpc_model.cpp`, `main.cpp`, and `CMakeLists.txt` by `AutoGenU.ipynb`)
 - Python 3.6.x, NumPy, seaborn (to plot simulation data on `AutoGenU.ipynb`)
@@ -18,10 +18,10 @@ The following solvers are provided:
 # Usage
 ## AutoGenU
 `AutoGenU.ipynb` generates following source files under your setting state equation and cost function: 
-- `nmpc_model.hpp`
-- `nmpc_model.cpp`
-- `main.cpp`
-- `CMakeLists.txt`
+- `nmpc_model.hpp`  
+- `nmpc_model.cpp`  
+- `main.cpp`  
+- `CMakeLists.txt`  
 You can also build source files for numerical simulation, execute numerical simulation, and plot or save simulation result on `AutoGenU.ipynb`.
 
 
@@ -29,7 +29,7 @@ You can also build source files for numerical simulation, execute numerical simu
 The C/GMRES based solvers in `src/solver` directory can be used independently of `AutoGenU.ipynb`. First, you have to set the following files:  
 - `nmpc_model.hpp`: write parameters in your model  
 - `nmpc_model.cpp`: write equations of your model  
-- `main.cpp`: write parameters of solvers 
+- `main.cpp`: write parameters of solvers  
 After setting these files, set `CMakeLists.txt` and build source files. Note that `AutoGenU.ipynb` generates these source files and `CMakeLists.txt` automatically.
 
 

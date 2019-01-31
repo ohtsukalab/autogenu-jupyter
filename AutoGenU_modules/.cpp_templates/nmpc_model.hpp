@@ -7,7 +7,7 @@
 
 #define _USE_MATH_DEFINES
 
-#include <eigen3/Eigen/Core>
+#include <Eigen/Core>
 #include <cmath>
 
 

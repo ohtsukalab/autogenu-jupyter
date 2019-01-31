@@ -7,7 +7,7 @@
 #define MULTIPLE_SHOOTING_CGMRES_WITH_SATURATION_H
 
 
-#include <eigen3/Eigen/Core>
+#include <Eigen/Core>
 #include "matrixfree_gmres.hpp"
 #include "nmpc_model.hpp"
 #include "init_cgmres_with_saturation.hpp"

@@ -10,7 +10,7 @@
 #include <string>
 #include <sys/stat.h>
 // #include <direct.h> include this header instead of <sys/stat.h> when you use Windows OS. 
-#include <eigen3/Eigen/Core>
+#include <Eigen/Core>
 
 
 namespace nmpcsim{

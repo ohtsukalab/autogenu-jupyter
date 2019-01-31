@@ -122,6 +122,8 @@ def generateCMake(solver_index, model_name):
     f_cmake.write('set(SIMULATOR_DIR ${CMAKE_SOURCE_DIR}/src/simulator)\n')
     f_cmake.write('set(MODEL_DIR ${CMAKE_SOURCE_DIR}/'+'models/'+str(model_name)+')\n')
     f_cmake.write('\n')
+    f_cmake.write('find_package(Eigen3 REQUIRED)\n')
+    f_cmake.write('include_directories(${EIGEN3_INCLUDE_DIR})\n')
     f_cmake.write('include_directories(${SOLVER_DIR})\n')
     f_cmake.write('include_directories(${SIMULATOR_DIR})\n')
     f_cmake.write('include_directories(${MODEL_DIR})\n')

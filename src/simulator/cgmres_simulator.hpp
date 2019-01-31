@@ -9,7 +9,7 @@
 #include <iostream>
 #include <fstream>
 #include <chrono>
-#include <eigen3/Eigen/Core>
+#include <Eigen/Core>
 #include "nmpc_model.hpp"
 #include "numerical_integrator.hpp"
 #include "save_simulation_data.hpp"

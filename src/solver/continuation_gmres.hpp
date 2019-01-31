@@ -7,7 +7,7 @@
 #define CONTINUATION_GMRES_H
 
 
-#include <eigen3/Eigen/Core>
+#include <Eigen/Core>
 #include "matrixfree_gmres.hpp"
 #include "nmpc_model.hpp"
 #include "init_cgmres.hpp"

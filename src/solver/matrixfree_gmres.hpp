@@ -8,7 +8,7 @@
 
 
 #include <iostream>
-#include <eigen3/Eigen/Core>
+#include <Eigen/Core>
 #include "nmpc_model.hpp"
 
 

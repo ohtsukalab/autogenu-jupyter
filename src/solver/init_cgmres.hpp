@@ -6,7 +6,7 @@
 #define INIT_CGMRES_H
 
 
-#include <eigen3/Eigen/Core>
+#include <Eigen/Core>
 #include "matrixfree_gmres.hpp"
 
 

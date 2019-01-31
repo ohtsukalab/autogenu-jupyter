@@ -6,7 +6,7 @@
 #define INIT_CGMRES_WITH_SATURATION_H
 
 
-#include <eigen3/Eigen/Core>
+#include <Eigen/Core>
 #include "matrixfree_gmres.hpp"
 #include "control_input_saturation_sequence.hpp"
 

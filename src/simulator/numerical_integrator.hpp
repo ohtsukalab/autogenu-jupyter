@@ -7,7 +7,7 @@
 
 
 #include "nmpc_model.hpp"
-#include <eigen3/Eigen/Core>
+#include <Eigen/Core>
 
 
 // Supports numerical integration of the state equation of the system described in nmpc_model.hpp for numerical simnulations.
