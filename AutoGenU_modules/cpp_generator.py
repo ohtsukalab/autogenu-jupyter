@@ -4,6 +4,7 @@ from AutoGenU_modules import cpp_executor
 import sympy
 import linecache
 import subprocess
+import platform
 
 
 def makeModelDir(model_name):
@@ -110,7 +111,7 @@ def generateMain(solver_index, solver_params, initialization_params, simulation_
     f_main.close()
 
 
-def generateCMake(solver_index, model_name):
+def generateCMake(solver_index, model_name, eigen3_path=None):
     f_cmake = open('CMakeLists.txt', 'w')
     f_cmake.write('cmake_minimum_required(VERSION 3.1)\n')
     f_cmake.write('project(cgmres_simulator CXX)\n')
@@ -122,7 +123,10 @@ def generateCMake(solver_index, model_name):
     f_cmake.write('set(SIMULATOR_DIR ${CMAKE_SOURCE_DIR}/src/simulator)\n')
     f_cmake.write('set(MODEL_DIR ${CMAKE_SOURCE_DIR}/'+'models/'+str(model_name)+')\n')
     f_cmake.write('\n')
-    f_cmake.write('find_package(Eigen3 REQUIRED)\n')
+    if(eigen3_path==None):
+        f_cmake.write('find_package(Eigen3 REQUIRED)\n')
+    else:
+        f_cmake.write('set(EIGEN3_INCLUDE_DIR eigen3_path)\n')
     f_cmake.write('include_directories(${EIGEN3_INCLUDE_DIR})\n')
     f_cmake.write('include_directories(${SOLVER_DIR})\n')
     f_cmake.write('include_directories(${SIMULATOR_DIR})\n')
@@ -185,17 +189,32 @@ def generateCMake(solver_index, model_name):
 
     f_cmake.write('\n')
     f_cmake.write('\n')
-    f_cmake.write('add_executable(a.out ${MODEL_DIR}/main.cpp)\n')
-    if(solver_index == 1):
-        f_cmake.write('target_link_libraries(a.out cgmres)\n')
-        f_cmake.write('target_link_libraries(a.out cgmres_simulator)\n')
-    elif(solver_index == 2):
-        f_cmake.write('target_link_libraries(a.out multiple_shooting_cgmres)\n')
-        f_cmake.write('target_link_libraries(a.out multiple_shooting_cgmres_simulator)\n')
-    elif(solver_index == 3):
-        f_cmake.write('target_link_libraries(a.out multiple_shooting_cgmres_with_saturation)\n')
-        f_cmake.write('target_link_libraries(a.out multiple_shooting_cgmres_with_saturation_simulator)\n')
-    f_cmake.write('target_link_libraries(a.out nmpcmodel)\n')
+    if(platform.system() == 'Windows'):
+        f_cmake.write('add_executable(a.exe ${MODEL_DIR}/main.cpp)\n')
+        if(solver_index == 1):
+            f_cmake.write('target_link_libraries(a.exe cgmres)\n')
+            f_cmake.write('target_link_libraries(a.exe cgmres_simulator)\n')
+        elif(solver_index == 2):
+            f_cmake.write('target_link_libraries(a.exe multiple_shooting_cgmres)\n')
+            f_cmake.write('target_link_libraries(a.exe multiple_shooting_cgmres_simulator)\n')
+        elif(solver_index == 3):
+            f_cmake.write('target_link_libraries(a.exe multiple_shooting_cgmres_with_saturation)\n')
+            f_cmake.write('target_link_libraries(a.exe multiple_shooting_cgmres_with_saturation_simulator)\n')
+        f_cmake.write('target_link_libraries(a.exe nmpcmodel)\n')
+    else:
+        f_cmake.write('add_executable(a.out ${MODEL_DIR}/main.cpp)\n')
+        if(solver_index == 1):
+            f_cmake.write('target_link_libraries(a.out cgmres)\n')
+            f_cmake.write('target_link_libraries(a.out cgmres_simulator)\n')
+        elif(solver_index == 2):
+            f_cmake.write('target_link_libraries(a.out multiple_shooting_cgmres)\n')
+            f_cmake.write('target_link_libraries(a.out multiple_shooting_cgmres_simulator)\n')
+        elif(solver_index == 3):
+            f_cmake.write('target_link_libraries(a.out multiple_shooting_cgmres_with_saturation)\n')
+            f_cmake.write('target_link_libraries(a.out multiple_shooting_cgmres_with_saturation_simulator)\n')
+        f_cmake.write('target_link_libraries(a.out nmpcmodel)\n')
+
+
     f_cmake.close()
 
 
