@@ -21,7 +21,8 @@ The following C/GMRES based solvers are provided:
 - `nmpc_model.hpp`  
 - `nmpc_model.cpp`  
 - `main.cpp`  
-- `CMakeLists.txt`  
+- `CMakeLists.txt`
+
 You can also build source files for numerical simulation, execute numerical simulation, and plot or save simulation result on `AutoGenU.ipynb`.
 
 
@@ -30,6 +31,7 @@ The C/GMRES based solvers in `src/solver` directory can be used independently of
 - `nmpc_model.hpp`: write parameters in your model  
 - `nmpc_model.cpp`: write equations of your model  
 - `main.cpp`: write parameters of solvers  
+
 After setting these files, set `CMakeLists.txt` and build source files. Note that `AutoGenU.ipynb` generates these source files and `CMakeLists.txt` automatically.
 
 
