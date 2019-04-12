@@ -7,7 +7,7 @@
 #define CONTINUATION_GMRES_H
 
 
-#include "linear_func.hpp"
+#include "linear_funcs.hpp"
 #include "matrixfree_gmres.hpp"
 #include "nmpc_model.hpp"
 #include "init_cgmres.hpp"
@@ -23,11 +23,11 @@ private:
     // initial_time_, horizon_max_length_, alpha_ : parameters of the length of the horizon
     // The horizon length at time t is given by horizon_max_length_*(1.0-std::exp(-alpha_*(time_param-initial_time_))).
     double initial_time_, horizon_max_length_, alpha_, zeta_, difference_increment_, incremented_time_;
-    double* dx_vec_, incremented_state_vec_, solution_vec_, incremented_solution_vec_, optimality_vec_, optimality_vec_1_, optimality_vec_2_, solution_update_vec_;
-    double** state_mat_, lambda_mat_;
+    double *dx_vec_, *incremented_state_vec_, *solution_vec_, *incremented_solution_vec_, *optimality_vec_, *optimality_vec_1_, *optimality_vec_2_, *solution_update_vec_;
+    double **state_mat_, **lambda_mat_;
 
     // Computes the optimaliy error vector under current_solution_vec.
-    inline void computeOptimalityError(const double time_param, const double* state_vec, const double* current_solution_vec, double* optimality_vec);
+    inline void computeOptimalityError(const double time_param, const double* state_vec, const double* current_solution_vec, double* optimality_error_vec);
 
     // Computes a vector correspongin to b in Ax=b
     void bFunc(const double time_param, const double* state_vec, const double* current_solution_vec, double* b_vec) override;

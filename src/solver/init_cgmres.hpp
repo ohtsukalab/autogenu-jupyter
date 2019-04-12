@@ -16,7 +16,7 @@ private:
     NMPCModel model_;
     int dim_solution_;
     double difference_increment_;
-    double* solution_update_vec_, incremented_solution_vec_, lambda_vec_, error_vec_, error_vec_1_, error_vec_2_;
+    double *solution_update_vec_, *incremented_solution_vec_, *lambda_vec_, *error_vec_, *error_vec_1_, *error_vec_2_;
 
     // Computes the optimality error vector under current_solution_vec.
     inline void computeOptimalityErrors(const double time_param, const double* state_vec, const double* current_solution_vec, double* optimality_vec);

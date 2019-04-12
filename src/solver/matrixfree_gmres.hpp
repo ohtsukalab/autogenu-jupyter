@@ -18,8 +18,8 @@
 class MatrixFreeGMRES {
 private:
     int dim_equation_, max_dim_krylov_;
-    double** hessenberg_mat_, basis_mat_;
-    double* b_vec_, givens_c_vec_, givens_s_vec_, g_vec_;
+    double **hessenberg_mat_, **basis_mat_;
+    double *b_vec_, *givens_c_vec_, *givens_s_vec_, *g_vec_;
 
     // Applies the Givens rotation for i_column element and i_column+1 element of  column_vec, which is a column vector of a matrix.
     inline void givensRotation(double* column_vec, const int i_column);

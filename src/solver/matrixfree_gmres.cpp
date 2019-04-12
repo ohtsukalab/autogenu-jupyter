@@ -75,6 +75,7 @@ void MatrixFreeGMRES::forwardDifferenceGMRES(const double time_param, const doub
     // Generate the initial basis of the Krylov subspace.
     bFunc(time_param, state_vec, current_solution_vec, b_vec_);
     g_vec_[0] = std::sqrt(linearfunc::squaredNorm(dim_equation_, b_vec_));
+    // basis_mat_[0] = b_vec_ / g_vec[0]
     for(int i=0; i<dim_equation_; i++){
         basis_mat_[0][i] = b_vec_[i] / g_vec_[0];
     }
@@ -84,18 +85,18 @@ void MatrixFreeGMRES::forwardDifferenceGMRES(const double time_param, const doub
     for(k=0; k<max_dim_krylov_; k++){
         axFunc(time_param, state_vec, current_solution_vec, basis_mat_[k], basis_mat_[k+1]);
         for(int j=0; j<=k; j++){
-            hessenberg_mat_[k,j] = linearfunc::innerProduct(dim_equation_, basis_mat_[k+1], basis_mat_[j]);
-            // basis_mat_.col(k+1) -= hessenberg_mat_(j,k) * basis_mat_.col(j);
+            hessenberg_mat_[k][j] = linearfunc::innerProduct(dim_equation_, basis_mat_[k+1], basis_mat_[j]);
+            // basis_mat_[k+1] -= hessenberg_mat_[k,j] * basis_mat_[j];
             for(int i=0; i<dim_equation_; i++){
-                basis_mat_[k+1][i] -= hessenberg_mat_[k,j] * basis_mat_[j][i];
+                basis_mat_[k+1][i] -= hessenberg_mat_[k][j] * basis_mat_[j][i];
             }
         }
-        hessenberg_mat_[k,k+1] = std::sqrt(linearfunc::squaredNorm(dim_equation_, basis_mat_[k+1]));
+        hessenberg_mat_[k][k+1] = std::sqrt(linearfunc::squaredNorm(dim_equation_, basis_mat_[k+1]));
 
-        if(hessenberg_mat_[k,k+1] != 0){
-            // basis_mat_.col(k+1) = basis_mat_.col(k+1) / hessenberg_mat_(k+1,k);
+        if(hessenberg_mat_[k][k+1] != 0){
+            // basis_mat_[k+1] = basis_mat_[k+1] / hessenberg_mat_[k,k+1];
             for(int i=0; i<dim_equation_; i++){
-                basis_mat_[k+1][i] = basis_mat_[k+1][i] / hessenberg_mat_[k,k+1];
+                basis_mat_[k+1][i] = basis_mat_[k+1][i] / hessenberg_mat_[k][k+1];
             }
         }
         else {
@@ -107,12 +108,12 @@ void MatrixFreeGMRES::forwardDifferenceGMRES(const double time_param, const doub
         for(int j=0; j<k; j++){
             givensRotation(hessenberg_mat_[k], j);
         }
-        double nu = std::sqrt(hessenberg_mat_[k,k]*hessenberg_mat_[k,k] + hessenberg_mat_[k,k+1]*hessenberg_mat_[k,k+1]);
+        double nu = std::sqrt(hessenberg_mat_[k][k]*hessenberg_mat_[k][k] + hessenberg_mat_[k][k+1]*hessenberg_mat_[k][k+1]);
         if(nu != 0) {
-            givens_c_vec_[k] = hessenberg_mat_[k,k] / nu;
-            givens_s_vec_[k] = - hessenberg_mat_[k,k+1] / nu;
-            hessenberg_mat_[k,k] = givens_c_vec_[k] * hessenberg_mat_[k,k] - givens_s_vec_[k] * hessenberg_mat_[k,k+1];
-            hessenberg_mat_[k,k+1] = 0;
+            givens_c_vec_[k] = hessenberg_mat_[k][k] / nu;
+            givens_s_vec_[k] = - hessenberg_mat_[k][k+1] / nu;
+            hessenberg_mat_[k][k] = givens_c_vec_[k] * hessenberg_mat_[k][k] - givens_s_vec_[k] * hessenberg_mat_[k][k+1];
+            hessenberg_mat_[k][k+1] = 0;
             givensRotation(g_vec_,k);
         }
         else{
@@ -124,14 +125,14 @@ void MatrixFreeGMRES::forwardDifferenceGMRES(const double time_param, const doub
     for(int i=k-1; i>=0; i--){
         double tmp=g_vec_[i];
         for(int j=i+1; j<k; j++){
-            tmp -= hessenberg_mat_[j,i] * givens_c_vec_[j];
+            tmp -= hessenberg_mat_[j][i] * givens_c_vec_[j];
         }
-        givens_c_vec_[i] = tmp / hessenberg_mat_[i,i];
+        givens_c_vec_[i] = tmp / hessenberg_mat_[i][i];
     }
     for(int i=0; i<dim_equation_; i++){
         double tmp=0;
         for(int j=0; j<k; j++){
-            tmp += basis_mat_[j,i] * givens_c_vec_[j];
+            tmp += basis_mat_[j][i] * givens_c_vec_[j];
         }
         solution_update_vec[i] += tmp;
     }
