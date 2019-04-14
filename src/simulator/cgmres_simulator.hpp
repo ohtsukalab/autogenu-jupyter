@@ -20,7 +20,7 @@
 // Updates the state using the method in NumericalIntegrator.
 namespace nmpcsim{
     // Perform a numerical simulation for the C/GMRES method.
-    void simulation(ContinuationGMRES nmpc_solver, const double* initial_state_vec, const double start_time, const double end_time, const double sampling_period, const std::string savefile_name);
+    void simulation(ContinuationGMRES& nmpc_solver, const double* initial_state_vec, const double start_time, const double end_time, const double sampling_period, const std::string savefile_name);
 };
 
 

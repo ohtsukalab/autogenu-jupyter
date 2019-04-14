@@ -17,6 +17,7 @@
 // This class allocates vectors and matrices used in matrix-free GMRES and computes the solution of GMRES.
 class MatrixFreeGMRES {
 private:
+    bool allocation_flag_;
     int dim_equation_, max_dim_krylov_;
     double **hessenberg_mat_, **basis_mat_;
     double *b_vec_, *givens_c_vec_, *givens_s_vec_, *g_vec_;
@@ -30,12 +31,17 @@ private:
     // Generates a vector corresponding to Ax in Ax=b with using the forward difference approximation.
     virtual void axFunc(const double time_param, const double* state_vec, const double* current_solution_vec, const double* direction_vec, double* ax_vec) = 0;
 
+
 public:
-    // default constructor: set dim_equation_ and max_dim_krylov_ zero, and all vectors and matrices having just an element of 0
-    // costructor with arguments: sets dimensions of the solution vector and the Krylov subspace and reallocate vectors and matrices used in the matrix-free GMRES.
+    // Sets dim_equation_ and max_dim_krylov_ zero, and all vectors and matrices having nullptr.
     MatrixFreeGMRES();
+
+    // Sets dimensions of the solution vector and the Krylov subspace and allocate vectors and matrices used in the matrix-free GMRES.
     MatrixFreeGMRES(const int dim_equation, const int max_dim_krylov);
+
+    // Free memory of vectors and matrices.
     ~MatrixFreeGMRES();
+
 
     // Sets dimensions of the solution vector and the Krylov subspace and reallocate vectors and matrices used in the matrix-free GMRES.
     void setGMRESParams(const int dim_equation, const int max_dim_krylov);

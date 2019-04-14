@@ -1,7 +1,7 @@
 #include "cgmres_simulator.hpp"
 
 
-void nmpcsim::simulation(ContinuationGMRES nmpc_solver, const double* initial_state_vec, const double start_time, const double end_time, const double sampling_period, const std::string savefile_name)
+void nmpcsim::simulation(ContinuationGMRES& nmpc_solver, const double* initial_state_vec, const double start_time, const double end_time, const double sampling_period, const std::string savefile_name)
 {
     NMPCModel model;
     NumericalIntegrator integrator;

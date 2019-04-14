@@ -18,6 +18,7 @@
 class ContinuationGMRES final : virtual public MatrixFreeGMRES{
 private:
     NMPCModel model_;
+    bool allocation_flag_;
     int dim_state_, dim_control_input_, dim_constraints_, dim_control_input_and_constraints_, dim_solution_, horizon_division_num_, max_dim_krylov_;
 
     // initial_time_, horizon_max_length_, alpha_ : parameters of the length of the horizon
@@ -37,8 +38,13 @@ private:
 
 
 public:
+    // Sets parameters zero and sets vectors and matrices nullptr.
+    ContinuationGMRES();
+
     // Sets parameters and allocates vectors and matrices.
     ContinuationGMRES(const double horizon_max_length, const double alpha, const int horizon_division_num, const double difference_increment, const double zeta, const int max_dim_krylov);
+
+    // Free vectors and matrices.
     ~ContinuationGMRES();
 
 

@@ -39,8 +39,24 @@ void InitCGMRES::axFunc(const double time_param, const double* state_vec, const 
 }
 
 
+
+InitCGMRES::InitCGMRES() : MatrixFreeGMRES(), 
+    model_(), 
+    allocation_flag_(false), 
+    dim_solution_(0), 
+    difference_increment_(0), 
+    solution_update_vec_(nullptr), 
+    incremented_solution_vec_(nullptr), 
+    lambda_vec_(nullptr), 
+    error_vec_(nullptr), 
+    error_vec_1_(nullptr), 
+    error_vec_2_(nullptr)
+{}
+
+
 InitCGMRES::InitCGMRES(const double difference_increment, const int max_dim_krylov) : MatrixFreeGMRES(), 
     model_(), 
+    allocation_flag_(true), 
     dim_solution_(model_.dimControlInput()+model_.dimConstraints()), 
     difference_increment_(difference_increment), 
     solution_update_vec_(linearfunc::newVector(dim_solution_)), 
@@ -57,14 +73,15 @@ InitCGMRES::InitCGMRES(const double difference_increment, const int max_dim_kryl
 
 InitCGMRES::~InitCGMRES()
 {
-    linearfunc::deleteVector(solution_update_vec_);
-    linearfunc::deleteVector(incremented_solution_vec_);
-    linearfunc::deleteVector(lambda_vec_);
-    linearfunc::deleteVector(error_vec_);
-    linearfunc::deleteVector(error_vec_1_);
-    linearfunc::deleteVector(error_vec_2_);
+    if(allocation_flag_ == true){
+        linearfunc::deleteVector(solution_update_vec_);
+        linearfunc::deleteVector(incremented_solution_vec_);
+        linearfunc::deleteVector(lambda_vec_);
+        linearfunc::deleteVector(error_vec_);
+        linearfunc::deleteVector(error_vec_1_);
+        linearfunc::deleteVector(error_vec_2_);
+    }
 }
-
 
 
 void InitCGMRES::solve0stepNOCP(const double initial_time, const double* initial_state_vec, const double* initial_guess_vec, const double convergence_radius, const int max_iteration, double* solution_vec)

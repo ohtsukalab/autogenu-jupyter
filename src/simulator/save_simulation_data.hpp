@@ -5,7 +5,7 @@
 #ifndef SAVE_SIMULATION_DATA_H
 #define SAVE_SIMULATION_DATA_H
 
-
+#include <iostream>
 #include <fstream>
 #include <string>
 #include <sys/stat.h>

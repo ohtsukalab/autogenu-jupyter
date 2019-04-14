@@ -1,7 +1,6 @@
 #include "linear_funcs.hpp"
 
 
-
 double* linearfunc::newVector(const int dim)
 {
     double* vec = new double[dim];
@@ -18,7 +17,7 @@ void linearfunc::deleteVector(double* vec)
 }
 
 
-double** linearfunc::newMatrix(const int dim_column, const int dim_row)
+double** linearfunc::newMatrix(const int dim_row, const int dim_column)
 {
     double** mat = new double*[dim_row];
     mat[0] = new double[dim_row*dim_column];
@@ -56,4 +55,17 @@ double linearfunc::squaredNorm(const int dim, const double *vec)
         ans += vec[i] * vec[i];
     }
     return ans;
+}
+
+
+void linearfunc::print_mat(double **mat, const int dim_row, const int dim_column)
+{
+    for(int i=0; i<dim_column; i++){
+        for(int j=0; j<dim_row; j++){
+            std::cout << mat[j][i] << " ";
+        }
+        std::cout << std::endl;
+    }
+
+    std::cout << std::endl;
 }
