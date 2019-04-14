@@ -39,7 +39,6 @@ void ContinuationGMRES::computeOptimalityError(const double time_param, const do
 }
 
 
-
 void ContinuationGMRES::bFunc(const double time_param, const double* state_vec, const double* current_solution_vec, double* b_vec)
 {
     // incremented_solution_vec_ = current_solution_vec + difference_incremente_*solution_update_vec_
@@ -64,6 +63,7 @@ inline void ContinuationGMRES::axFunc(const double time_param, const double* sta
         incremented_solution_vec_[i] = current_solution_vec[i] + difference_increment_*direction_vec[i];
     }
     computeOptimalityError(incremented_time_, incremented_state_vec_, incremented_solution_vec_, optimality_vec_2_);
+
     // ax_vec = (optimality_vec_2_ - optimality_vec_1_)/difference_increment_
     for(int i=0; i<dim_solution_; i++){
         ax_vec[i] = (optimality_vec_2_[i] - optimality_vec_1_[i])/difference_increment_;
@@ -71,38 +71,8 @@ inline void ContinuationGMRES::axFunc(const double time_param, const double* sta
 }
 
 
-ContinuationGMRES::ContinuationGMRES() : MatrixFreeGMRES(), 
-    model_(), 
-    allocation_flag_(false), 
-    dim_state_(0), 
-    dim_control_input_(0), 
-    dim_constraints_(0), 
-    dim_control_input_and_constraints_(0), 
-    dim_solution_(0), 
-    horizon_division_num_(0), 
-    max_dim_krylov_(0), 
-    initial_time_(0), 
-    horizon_max_length_(0), 
-    alpha_(0), 
-    zeta_(0), 
-    difference_increment_(0), 
-    incremented_time_(0), 
-    dx_vec_(nullptr), 
-    incremented_state_vec_(nullptr),
-    solution_vec_(nullptr), 
-    incremented_solution_vec_(nullptr), 
-    optimality_vec_(nullptr), 
-    optimality_vec_1_(nullptr), 
-    optimality_vec_2_(nullptr), 
-    solution_update_vec_(nullptr), 
-    state_mat_(nullptr), 
-    lambda_mat_(nullptr)
-{}
-
-
 ContinuationGMRES::ContinuationGMRES(const double horizon_max_length, const double alpha, const int horizon_division_num, const double difference_increment, const double zeta, const int max_dim_krylov) : MatrixFreeGMRES(), 
     model_(), 
-    allocation_flag_(true), 
     dim_state_(model_.dimState()), 
     dim_control_input_(model_.dimControlInput()), 
     dim_constraints_(model_.dimConstraints()), 
@@ -134,18 +104,16 @@ ContinuationGMRES::ContinuationGMRES(const double horizon_max_length, const doub
 
 ContinuationGMRES::~ContinuationGMRES()
 {
-    if(allocation_flag_ == true){
-        linearfunc::deleteVector(dx_vec_);
-        linearfunc::deleteVector(incremented_state_vec_);
-        linearfunc::deleteVector(solution_vec_);
-        linearfunc::deleteVector(incremented_solution_vec_);
-        linearfunc::deleteVector(optimality_vec_);
-        linearfunc::deleteVector(optimality_vec_1_);
-        linearfunc::deleteVector(optimality_vec_2_);
-        linearfunc::deleteVector(solution_update_vec_);
-        linearfunc::deleteMatrix(state_mat_);
-        linearfunc::deleteMatrix(lambda_mat_);
-    }
+    linearfunc::deleteVector(dx_vec_);
+    linearfunc::deleteVector(incremented_state_vec_);
+    linearfunc::deleteVector(solution_vec_);
+    linearfunc::deleteVector(incremented_solution_vec_);
+    linearfunc::deleteVector(optimality_vec_);
+    linearfunc::deleteVector(optimality_vec_1_);
+    linearfunc::deleteVector(optimality_vec_2_);
+    linearfunc::deleteVector(solution_update_vec_);
+    linearfunc::deleteMatrix(state_mat_);
+    linearfunc::deleteMatrix(lambda_mat_);
 }
 
 
@@ -186,8 +154,8 @@ void ContinuationGMRES::controlUpdate(const double current_time, const double sa
 
     // Solves the matrix-free GMRES and updates the solution.
     forwardDifferenceGMRES(current_time, current_state_vec, solution_vec_, solution_update_vec_);
-    // solution_vec_ += sampling_period*solution_update_vec_
 
+    // solution_vec_ += sampling_period*solution_update_vec_
     for(int i=0; i<dim_solution_; i++){
         solution_vec_[i] += sampling_period * solution_update_vec_[i];
     }

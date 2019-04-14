@@ -1,8 +1,8 @@
 #include "nmpc_model.hpp"
-#include "continuation_gmres.hpp"
-#include "cgmres_simulator.hpp"
-// #include "multiple_shooting_cgmres.hpp"
-// #include "multiple_shooting_cgmres_simulator.hpp"
+// #include "continuation_gmres.hpp"
+// #include "cgmres_simulator.hpp"
+#include "multiple_shooting_cgmres.hpp"
+#include "multiple_shooting_cgmres_simulator.hpp"
 
 
 int main()
@@ -11,7 +11,8 @@ int main()
     NMPCModel nmpc_model;
 
     // Define the solver of C/GMRES.
-    ContinuationGMRES nmpc_solver(1.0, 1.0, 50, 1.0e-06, 1000, 3);
+    // ContinuationGMRES nmpc_solver(1.0, 1.0, 50, 1.0e-06, 1000, 3);
+    MultipleShootingCGMRES nmpc_solver(1.0, 1.0, 50, 1.0e-06, 1000, 3);
 
     // Set the initial state.
     double initial_state[4] = {0};

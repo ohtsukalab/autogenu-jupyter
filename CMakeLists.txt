@@ -20,7 +20,7 @@ add_library(
     cgmres 
     STATIC 
     ${SOLVER_DIR}/linear_funcs.cpp
-    ${SOLVER_DIR}/continuation_gmres.cpp
+    ${SOLVER_DIR}/multiple_shooting_cgmres.cpp
     ${SOLVER_DIR}/init_cgmres.cpp
     ${SOLVER_DIR}/matrixfree_gmres.cpp
 )
@@ -28,7 +28,7 @@ add_library(
 add_library(
     cgmres_simulator 
     STATIC 
-    ${SIMULATOR_DIR}/cgmres_simulator.cpp
+    ${SIMULATOR_DIR}/multiple_shooting_cgmres_simulator.cpp
     ${SIMULATOR_DIR}/save_simulation_data.cpp
     ${SIMULATOR_DIR}/numerical_integrator.cpp
 )
