@@ -15,16 +15,14 @@ int main()
 
 
     // Set the initial state.
-    Eigen::VectorXd initial_state(nmpc_model.dimState());
-    initial_state = Eigen::VectorXd::Zero(nmpc_model.dimState());
+    double initial_state[4] = {0};
 
     // Set the initial guess of the control input vector.
-    Eigen::VectorXd initial_guess_control_input(nmpc_model.dimControlInput()+nmpc_model.dimConstraints());
-    initial_guess_control_input << 0.1, 0.1;
+
+    double initial_guess_control_input[2] = {0.1, 0.1};
 
     // Initialize the solution of the C/GMRES method.
-    Eigen::VectorXd initial_guess_lagrange_multiplier(control_input_saturation_seq.dimSaturation());
-    initial_guess_lagrange_multiplier << 1.0e-03, 1.0e-03;
+    double initial_guess_lagrange_multiplier[2] = {1.0e-03, 1.0e-03};
     nmpc_solver.initSolution(0, initial_state, initial_guess_control_input, initial_guess_lagrange_multiplier, 1.0e-06, 50);
 
     // Perform a numerical simulation.
