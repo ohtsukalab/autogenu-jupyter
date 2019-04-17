@@ -174,9 +174,7 @@ MultipleShootingCGMRES::MultipleShootingCGMRES(const double horizon_max_length, 
     state_error_mat_(linearfunc::newMatrix(horizon_division_num, dim_state_)), 
     state_error_mat_1_(linearfunc::newMatrix(horizon_division_num, dim_state_)), 
     lambda_error_mat_(linearfunc::newMatrix(horizon_division_num, dim_state_)), 
-    lambda_error_mat_1_(linearfunc::newMatrix(horizon_division_num, dim_state_)), 
-    state_update_mat_(linearfunc::newMatrix(horizon_division_num, dim_state_)), 
-    lambda_update_mat_(linearfunc::newMatrix(horizon_division_num, dim_state_)) 
+    lambda_error_mat_1_(linearfunc::newMatrix(horizon_division_num, dim_state_))
 {
     // Set dimensions and parameters in GMRES.
     setGMRESParams(dim_control_input_and_constraints_seq_, max_dim_krylov);
@@ -202,8 +200,6 @@ MultipleShootingCGMRES::~MultipleShootingCGMRES()
     linearfunc::deleteMatrix(state_error_mat_1_);
     linearfunc::deleteMatrix(lambda_error_mat_);
     linearfunc::deleteMatrix(lambda_error_mat_1_);
-    linearfunc::deleteMatrix(state_update_mat_);
-    linearfunc::deleteMatrix(lambda_update_mat_);
 }
 
 
@@ -272,28 +268,19 @@ void MultipleShootingCGMRES::controlUpdate(const double current_time, const doub
         }
     }
     computeStateAndLambda(incremented_time_, incremented_state_vec_, incremented_control_input_and_constraints_seq_, state_error_mat_1_, lambda_error_mat_1_, incremented_state_mat_, incremented_lambda_mat_);
+
     // state_update_mat_ = (incremented_state_mat_ - state_mat_)/difference_increment_;
-    for(int i=0; i<horizon_division_num_; i++){
-        for(int j=0; j<dim_state_; j++){
-            state_update_mat_[i][j] = (incremented_state_mat_[i][j] - state_mat_[i][j])/difference_increment_;
-        }
-    }
-    // lambda_update_mat_ = (incremented_lambda_mat_ - lambda_mat_)/difference_increment_;
-    for(int i=0; i<horizon_division_num_; i++){
-        for(int j=0; j<dim_state_; j++){
-            lambda_update_mat_[i][j] = (incremented_lambda_mat_[i][j] - lambda_mat_[i][j])/difference_increment_;
-        }
-    }
     // state_mat_ += sampling_period * state_update_mat_;
     for(int i=0; i<horizon_division_num_; i++){
         for(int j=0; j<dim_state_; j++){
-            state_mat_[i][j] += sampling_period * state_update_mat_[i][j];
+            state_mat_[i][j] += sampling_period * (incremented_state_mat_[i][j] - state_mat_[i][j])/difference_increment_;;
         }
     }
+    // lambda_update_mat_ = (incremented_lambda_mat_ - lambda_mat_)/difference_increment_;
     // lambda_mat_ += sampling_period * lambda_update_mat_;
     for(int i=0; i<horizon_division_num_; i++){
         for(int j=0; j<dim_state_; j++){
-            lambda_mat_[i][j] += sampling_period * lambda_update_mat_[i][j];
+            lambda_mat_[i][j] += sampling_period * (incremented_lambda_mat_[i][j] - lambda_mat_[i][j])/difference_increment_;
         }
     }
 

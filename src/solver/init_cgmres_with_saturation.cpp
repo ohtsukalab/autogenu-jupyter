@@ -28,11 +28,11 @@ inline void InitCGMRESWithSaturation::computeSaturationOptimality(const double* 
 inline void InitCGMRESWithSaturation::computeOptimalityErrors(const double time_param, const double* state_vec, const double* solution_vec, double* optimality_vec)
 {
     model_.phixFunc(time_param, state_vec, lambda_vec_);
-    model_.huFunc(time_param, state_vec, dim_control_input_and_constraints_, lambda_vec_, optimality_vec);
-    addHamiltonianDerivativeWithControlInput(solution_vec, solution_vec[dim_control_input_and_constraints_+dim_saturation_], optimality_vec);
+    model_.huFunc(time_param, state_vec, solution_vec, lambda_vec_, optimality_vec);
+    addHamiltonianDerivativeWithControlInput(solution_vec, &(solution_vec[dim_control_input_and_constraints_+dim_saturation_]), optimality_vec);
 
-    computeDummyOptimality(solution_vec[dim_control_input_and_constraints_], solution_vec[dim_control_input_and_constraints_+dim_saturation_], optimality_vec[dim_control_input_and_constraints_]);
-    computeSaturationOptimality(solution_vec, solution_vec[dim_control_input_and_constraints_], optimality_vec[dim_control_input_and_constraints_+dim_saturation_]);
+    computeDummyOptimality(&(solution_vec[dim_control_input_and_constraints_]), &(solution_vec[dim_control_input_and_constraints_+dim_saturation_]), &(optimality_vec[dim_control_input_and_constraints_]));
+    computeSaturationOptimality(solution_vec, &(solution_vec[dim_control_input_and_constraints_]), &(optimality_vec[dim_control_input_and_constraints_+dim_saturation_]));
 }
 
 
@@ -154,6 +154,6 @@ void InitCGMRESWithSaturation::getControlInputSaturationError(const double initi
     computeOptimalityErrors(initial_time, initial_state_vec, current_solution_vec, error_vec);
 
     for(int i=0; i<dim_saturation_; i++){
-        control_input_saturation_error_vec[dim_control_input_and_constraints_+dim_saturation_+i] = error_vec[i];
+        control_input_saturation_error_vec[i] = error_vec[dim_control_input_and_constraints_+dim_saturation_+i];
     }
 }
