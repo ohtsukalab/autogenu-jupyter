@@ -57,7 +57,7 @@ inline void MultipleShootingCGMRESWithSaturation::computeOptimalityErrorforState
     double tau = time_param + delta_tau;
     for(int i=1; i<horizon_division_num_; i++, tau+=delta_tau){
         model_.stateFunc(tau, state_mat[i-1], &(control_input_and_constraints_seq[i*dim_control_input_and_constraints_]), dx_vec_);
-        for(j=0; j<dim_state_; j++){
+        for(int j=0; j<dim_state_; j++){
             optimality_for_state[i][j] = state_mat[i][j] - state_mat[i-1][j] - delta_tau*dx_vec_[j];
         }
     }
@@ -158,8 +158,6 @@ inline void MultipleShootingCGMRESWithSaturation::computeSaturationOptimalityDif
 
 void MultipleShootingCGMRESWithSaturation::bFunc(const double time_param, const double* state_vec, const double* current_solution_vec, double* b_vec)
 {
-    computeStateAndLambda(incremented_time_, incremented_state_vec_, current_solution_vec, (1-difference_increment_*zeta_)*state_error_mat_, (1-difference_increment_*zeta_)*lambda_error_mat_, incremented_state_mat_, incremented_lambda_mat_);
-
     computeOptimalityErrorforControlInputAndConstraints(time_param, state_vec, current_solution_vec, state_mat_, lambda_mat_, saturation_lagrange_multiplier_mat_, control_input_and_constraints_error_seq_);
     computeOptimalityErrorforControlInputAndConstraints(incremented_time_, incremented_state_vec_, current_solution_vec, state_mat_, lambda_mat_, saturation_lagrange_multiplier_mat_, control_input_and_constraints_error_seq_1_);
     computeOptimalityErrorforStateAndLambda(time_param, state_vec, current_solution_vec, state_mat_, lambda_mat_, state_error_mat_, lambda_error_mat_);
@@ -211,7 +209,7 @@ void MultipleShootingCGMRESWithSaturation::bFunc(const double time_param, const 
     computeOptimalityErrorforControlInputAndConstraints(incremented_time_, incremented_state_vec_, incremented_control_input_and_constraints_seq_, incremented_state_mat_, incremented_lambda_mat_, incremented_saturation_lagrange_multiplier_mat_, control_input_and_constraints_error_seq_2_);
 
     for(int i=0; i<dim_control_input_and_constraints_seq_; i++){
-        b_vec = (1/difference_increment_ - zeta_) * control_input_and_constraints_error_seq_[i] - control_input_and_constraints_error_seq_3_[i]/difference_increment_ - (control_input_and_constraints_error_seq_2_[i]-control_input_and_constraints_error_seq_1_[i])/difference_increment_;
+        b_vec[i] = (1/difference_increment_ - zeta_) * control_input_and_constraints_error_seq_[i] - control_input_and_constraints_error_seq_3_[i]/difference_increment_ - (control_input_and_constraints_error_seq_2_[i]-control_input_and_constraints_error_seq_1_[i])/difference_increment_;
     }
 }
 
@@ -421,7 +419,7 @@ void MultipleShootingCGMRESWithSaturation::initSolution(const double initial_tim
 }
 
 
-void MultipleShootingCGMRESWithSaturation::initSolution(const double initial_time, const Eigen::VectorXd& initial_state_vec, const Eigen::VectorXd& initial_guess_input_vec, const double* initial_guess_lagrange_multiplier_vec, const double convergence_radius, const int max_iteration)
+void MultipleShootingCGMRESWithSaturation::initSolution(const double initial_time, const double* initial_state_vec, const double* initial_guess_input_vec, const double* initial_guess_lagrange_multiplier_vec, const double convergence_radius, const int max_iteration)
 {
     double initial_solution_vec[dim_control_input_and_constraints_+2*dim_saturation_], initial_lambda_vec[dim_state_];
     InitCGMRESWithSaturation initializer(saturation_seq_, difference_increment_, dim_krylov_);
@@ -547,15 +545,13 @@ double MultipleShootingCGMRESWithSaturation::getError(const double current_time,
     double control_input_and_constraints_error_seq[dim_control_input_and_constraints_seq_]; 
     computeOptimalityErrorforControlInputAndConstraints(current_time, current_state_vec, control_input_and_constraints_seq_, state_mat_, lambda_mat_, saturation_lagrange_multiplier_mat_, control_input_and_constraints_error_seq);
 
-    double state_error_mat[horizon_division_num_][dim_state_], lambda_error_mat[horizon_division_num_][dim_state_];
-    computeOptimalityErrorforStateAndLambda(current_time, current_state_vec, control_input_and_constraints_seq_, state_mat_, lambda_mat_, state_error_mat, lambda_error_mat);
+    computeOptimalityErrorforStateAndLambda(current_time, current_state_vec, control_input_and_constraints_seq_, state_mat_, lambda_mat_, state_error_mat_, lambda_error_mat_);
 
-    double dummy_error_mat[horizon_division_num][dim_saturation_], saturation_error_mat[horizon_division_num][dim_saturation_];
-    computeOptimalityErrorforSaturation(control_input_and_constraints_seq_, dummy_input_mat_, saturation_lagrange_multiplier_mat_, dummy_error_mat, saturation_error_mat);
+    computeOptimalityErrorforSaturation(control_input_and_constraints_seq_, dummy_input_mat_, saturation_lagrange_multiplier_mat_, dummy_error_mat_, saturation_error_mat_);
 
     double squared_error = linearfunc::squaredNorm(dim_control_input_and_constraints_seq_, control_input_and_constraints_error_seq);    
     for(int i=0; i<horizon_division_num_; i++){
-        squared_error += (linearfunc::squaredNorm(dim_state_, state_error_mat[i]) + linearfunc::squaredNorm(dim_state_, lambda_error_mat[i]) + linearfunc::squaredNorm(dim_saturation_, dummy_error_mat_[i]) + linearfunc::squaredNorm(dim_saturation_, saturation_error_mat[i]));
+        squared_error += (linearfunc::squaredNorm(dim_state_, state_error_mat_[i]) + linearfunc::squaredNorm(dim_state_, lambda_error_mat_[i]) + linearfunc::squaredNorm(dim_saturation_, dummy_error_mat_[i]) + linearfunc::squaredNorm(dim_saturation_, saturation_error_mat_[i]));
     }
 
     return std::sqrt(squared_error);

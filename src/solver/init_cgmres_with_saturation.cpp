@@ -4,7 +4,7 @@
 inline void InitCGMRESWithSaturation::addHamiltonianDerivativeWithControlInput(const double* control_input_and_constraints_vec, const double* saturation_lagrange_multiplier_vec, double* optimality_for_control_input_and_constraints_vec)
 {
     for(int i=0; i<dim_saturation_; i++){
-        optimality_for_control_input_and_constraints_vec[saturation_seq_.index(i)] += [2*control_input_and_constraints_vec(saturation_seq_.index(i)] - saturation_seq_.min(i) - saturation_seq_.max(i)) * saturation_lagrange_multiplier_vec[i];
+        optimality_for_control_input_and_constraints_vec[saturation_seq_.index(i)] += (2*control_input_and_constraints_vec[saturation_seq_.index(i)] - saturation_seq_.min(i) - saturation_seq_.max(i)) * saturation_lagrange_multiplier_vec[i];
     }
 }
 
@@ -83,7 +83,7 @@ InitCGMRESWithSaturation::InitCGMRESWithSaturation(const ControlInputSaturationS
 }
 
 
-InitCGMRESWithSaturation::InitCGMRESWithSaturation()
+InitCGMRESWithSaturation::~InitCGMRESWithSaturation()
 {
     linearfunc::deleteVector(incremented_solution_vec_);
     linearfunc::deleteVector(solution_update_vec_);
@@ -99,13 +99,13 @@ void InitCGMRESWithSaturation::solve0stepNOCP(const double initial_time, const d
 {
     // Substitute initial guess solution to solution_vec.
     for(int i=0; i<dim_control_input_and_constraints_; i++){
-        solution_vec_[i] = initial_guess_control_input_vec[i]
+        solution_vec[i] = initial_guess_control_input_vec[i];
     }
     for(int i=0; i<dim_saturation_; i++){
         solution_vec[dim_control_input_and_constraints_+i] = std::sqrt((saturation_seq_.max(i)-saturation_seq_.min(i))*(saturation_seq_.max(i)-saturation_seq_.min(i))/4 - (initial_guess_control_input_vec[saturation_seq_.index(i)] - (saturation_seq_.max(i)+saturation_seq_.min(i))/2)*(initial_guess_control_input_vec[saturation_seq_.index(i)] - (saturation_seq_.max(i)+saturation_seq_.min(i))/2));
     }
     for(int i=0; i<dim_saturation_; i++){
-        solution_vec_[dim_control_input_and_constraints_+dim_saturation_+i] = initial_guess_lagrange_multiplier[i];
+        solution_vec[dim_control_input_and_constraints_+dim_saturation_+i] = initial_guess_lagrange_multiplier[i];
     }
 
     // Solve the 0step nonlinear optimal control problem using Newton GMRES method.

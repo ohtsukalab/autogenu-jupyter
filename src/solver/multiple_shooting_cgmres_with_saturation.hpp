@@ -76,6 +76,8 @@ public:
     // Sets parameters and allocates vectors and matrices.
     MultipleShootingCGMRESWithSaturation(const ControlInputSaturationSequence saturation_seq, const double horizon_max_length, const double alpha, const int horizon_division_num, const double difference_increment, const double zeta, const int dim_krylov);
 
+    // Free vectors and matrices.
+    ~MultipleShootingCGMRESWithSaturation();
 
     // Initializes the solution of the multiple shooting based C/GMRES method with condensing of the saturations on the control input
     // 1: with setting all the initial guess Lagrange multipliers of the condensed saturation to 0.
