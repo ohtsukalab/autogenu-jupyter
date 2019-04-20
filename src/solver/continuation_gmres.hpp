@@ -7,7 +7,7 @@
 #define CONTINUATION_GMRES_H
 
 
-#include <Eigen/Core>
+#include "linear_funcs.hpp"
 #include "matrixfree_gmres.hpp"
 #include "nmpc_model.hpp"
 #include "init_cgmres.hpp"
@@ -23,34 +23,38 @@ private:
     // initial_time_, horizon_max_length_, alpha_ : parameters of the length of the horizon
     // The horizon length at time t is given by horizon_max_length_*(1.0-std::exp(-alpha_*(time_param-initial_time_))).
     double initial_time_, horizon_max_length_, alpha_, zeta_, difference_increment_, incremented_time_;
-    Eigen::VectorXd dx_vec_, incremented_state_vec_, solution_vec_, optimality_vec_, optimality_vec_1_, optimality_vec_2_, solution_update_vec_;
-    Eigen::MatrixXd state_mat_, lambda_mat_;
+    double *dx_vec_, *incremented_state_vec_, *solution_vec_, *incremented_solution_vec_, *optimality_vec_, *optimality_vec_1_, *optimality_vec_2_, *solution_update_vec_;
+    double **state_mat_, **lambda_mat_;
 
     // Computes the optimaliy error vector under current_solution_vec.
-    inline void computeOptimalityError(const double time_param, const Eigen::VectorXd& state_vec, const Eigen::VectorXd& current_solution_vec, Eigen::Ref<Eigen::VectorXd> optimality_vec);
+    inline void computeOptimalityError(const double time_param, const double* state_vec, const double* current_solution_vec, double* optimality_error_vec);
 
     // Computes a vector correspongin to b in Ax=b
-    void bFunc(const double time_param, const Eigen::VectorXd& state_vec, const Eigen::VectorXd& current_solution_vec, Eigen::Ref<Eigen::VectorXd> b_vec) override;
+    void bFunc(const double time_param, const double* state_vec, const double* current_solution_vec, double* b_vec) override;
 
     // Generates a vector corresponding to Ax in Ax=b with using the forward difference approximation.
-    void axFunc(const double time_param, const Eigen::VectorXd& state_vec, const Eigen::VectorXd& current_solution_vec, const Eigen::VectorXd& direction_vec, Eigen::Ref<Eigen::VectorXd> ax_vec) override;
+    void axFunc(const double time_param, const double* state_vec, const double* current_solution_vec, const double* direction_vec, double* ax_vec) override;
 
 
 public:
     // Sets parameters and allocates vectors and matrices.
     ContinuationGMRES(const double horizon_max_length, const double alpha, const int horizon_division_num, const double difference_increment, const double zeta, const int max_dim_krylov);
 
+    // Free vectors and matrices.
+    ~ContinuationGMRES();
+
+
     // Initializes the solution of the C/GMRES method.
-    void initSolution(const double initial_time, const Eigen::VectorXd& initial_state_vec, const Eigen::VectorXd& initial_guess_input_vec, const double convergence_radius, const int max_iteration);
+    void initSolution(const double initial_time, const double* initial_state_vec, const double* initial_guess_input_vec, const double convergence_radius, const int max_iteration);
 
     // Updates the solution by solving the matrix-free GMRES.
-    void controlUpdate(const double current_time, const double sampling_period, const Eigen::VectorXd& current_state_vec, Eigen::Ref<Eigen::VectorXd> optimal_control_input_vec);
+    void controlUpdate(const double current_time, const double sampling_period, const double* current_state_vec, double* optimal_control_input_vec);
 
     // Returns the intial vector of the control input sequence
-    Eigen::VectorXd getControlInput() const;
+    void getControlInput(double* control_input_vec) const;
 
     // Returns the optimality error norm under the current_state_vec and the current solution.
-    double getError(const double current_time, const Eigen::VectorXd& current_state_vec);
+    double getError(const double current_time, const double* current_state_vec);
 };
 
 

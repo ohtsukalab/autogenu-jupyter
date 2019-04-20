@@ -9,22 +9,20 @@ int main()
     NMPCModel nmpc_model;
 
     ControlInputSaturationSequence control_input_saturation_seq;
-    control_input_saturation_seq.appendControlInputSaturation(0, -3, 3, 1.0e-02, 1.0e-02);
-    control_input_saturation_seq.appendControlInputSaturation(1, -1.5, 1.5, 1.0e-02, 1.0e-02);
+    control_input_saturation_seq.appendControlInputSaturation(0, -3, 3, 1.0e-02, 0);
+    control_input_saturation_seq.appendControlInputSaturation(1, -1.5, 1.5, 1.0e-02, 0);
     MultipleShootingCGMRESWithSaturation nmpc_solver(control_input_saturation_seq, 0.5, 1.0, 50, 1.0e-06, 1000, 5);
 
 
     // Set the initial state.
-    Eigen::VectorXd initial_state(nmpc_model.dimState());
-    initial_state = Eigen::VectorXd::Zero(nmpc_model.dimState());
+    double initial_state[4] = {0};
 
     // Set the initial guess of the control input vector.
-    Eigen::VectorXd initial_guess_control_input(nmpc_model.dimControlInput()+nmpc_model.dimConstraints());
-    initial_guess_control_input << 0.1, 0.1;
+
+    double initial_guess_control_input[] = {0.1, 0.1};
 
     // Initialize the solution of the C/GMRES method.
-    Eigen::VectorXd initial_guess_lagrange_multiplier(control_input_saturation_seq.dimSaturation());
-    initial_guess_lagrange_multiplier << 1.0e-03, 1.0e-03;
+    double initial_guess_lagrange_multiplier[2] = {1.0e-03, 1.0e-03};
     nmpc_solver.initSolution(0, initial_state, initial_guess_control_input, initial_guess_lagrange_multiplier, 1.0e-06, 50);
 
     // Perform a numerical simulation.

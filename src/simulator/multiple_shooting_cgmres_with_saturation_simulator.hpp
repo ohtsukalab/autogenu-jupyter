@@ -9,7 +9,6 @@
 #include <iostream>
 #include <fstream>
 #include <chrono>
-#include <Eigen/Core>
 #include "nmpc_model.hpp"
 #include "numerical_integrator.hpp"
 #include "save_simulation_data.hpp"
@@ -21,7 +20,7 @@
 // Updates the state using the method in NumericalIntegrator.
 namespace nmpcsim{
     // Perform a numerical simulation for the C/GMRES and the multiple shooting based C/GMRES with condensing for the saturation on the control input.
-    void simulation(MultipleShootingCGMRESWithSaturation nmpc_solver, const Eigen::VectorXd& initial_state_vec, const double start_time, const double end_time, const double sampling_period, const std::string savefile_name);
+    void simulation(MultipleShootingCGMRESWithSaturation& nmpc_solver, const double* initial_state_vec, const double start_time, const double end_time, const double sampling_period, const std::string savefile_name);
 };
 
 

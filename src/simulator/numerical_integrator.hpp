@@ -7,23 +7,21 @@
 
 
 #include "nmpc_model.hpp"
-#include <Eigen/Core>
 
 
 // Supports numerical integration of the state equation of the system described in nmpc_model.hpp for numerical simnulations.
 class NumericalIntegrator{
 private:
     NMPCModel model_;
-    Eigen::VectorXd dx_vec_, k1_vec_, k2_vec_, k3_vec_, k4_vec_;
+
 public:
-    // Allocates vectors.
     NumericalIntegrator();
 
     // Euler method for the state equation.
-    Eigen::VectorXd euler(const double current_time, const Eigen::VectorXd& current_state_vec, const Eigen::VectorXd& control_input_vec, const double integration_length);
+    void euler(const double current_time, const double* current_state_vec, const double* control_input_vec, const double integration_length, double* integrated_state);
 
     // The four-step Runge-Kutta-Gill method for the state equation.
-    Eigen::VectorXd rungeKuttaGill(const double current_time, const Eigen::VectorXd& current_state_vec, const Eigen::VectorXd& control_input_vec, const double integration_length);
+    void rungeKuttaGill(const double current_time, const double* current_state_vec, const double* control_input_vec, const double integration_length, double* integrated_state);
 };
 
 

@@ -6,7 +6,7 @@
 // x : state vector
 // u : control input vector
 // f : the value of f(t, x, u)
-void NMPCModel::stateFunc(const double t, const Eigen::VectorXd& x, const Eigen::VectorXd& u, Eigen::Ref<Eigen::VectorXd> f)
+void NMPCModel::stateFunc(const double t, const double* x, const double* u, double* f)
 {
 
 }
@@ -17,7 +17,7 @@ void NMPCModel::stateFunc(const double t, const Eigen::VectorXd& x, const Eigen:
 // t    : time parameter
 // x    : state vector
 // phix : the value of dphi/dx(t, x)
-void NMPCModel::phixFunc(const double t, const Eigen::VectorXd& x, Eigen::Ref<Eigen::VectorXd> phix)
+void NMPCModel::phixFunc(const double t, const double* x, double* phix)
 {
 
 }
@@ -31,7 +31,7 @@ void NMPCModel::phixFunc(const double t, const Eigen::VectorXd& x, Eigen::Ref<Ei
 // u   : control input vector
 // lmd : the Lagrange multiplier for the state equation
 // hx  : the value of dH/dx(t, x, u, lmd)
-void NMPCModel::hxFunc(const double t, const Eigen::VectorXd& x, const Eigen::VectorXd& u, const Eigen::VectorXd& lmd, Eigen::Ref<Eigen::VectorXd> hx)
+void NMPCModel::hxFunc(const double t, const double* x, const double* u, const double* lmd, double* hx)
 {
 
 }
@@ -45,7 +45,7 @@ void NMPCModel::hxFunc(const double t, const Eigen::VectorXd& x, const Eigen::Ve
 // u   : control input vector
 // lmd : the Lagrange multiplier for the state equation
 // hu  : the value of dH/du(t, x, u, lmd)
-void NMPCModel::huFunc(const double t, const Eigen::VectorXd& x, const Eigen::VectorXd& u, const Eigen::VectorXd& lmd, Eigen::Ref<Eigen::VectorXd> hu)
+void NMPCModel::huFunc(const double t, const double* x, const double* u, const double* lmd, double* hu)
 {
 
 }

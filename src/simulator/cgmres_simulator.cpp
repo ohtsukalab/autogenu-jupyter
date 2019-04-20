@@ -1,11 +1,11 @@
 #include "cgmres_simulator.hpp"
 
 
-void nmpcsim::simulation(ContinuationGMRES nmpc_solver, const Eigen::VectorXd& initial_state_vec, const double start_time, const double end_time, const double sampling_period, const std::string savefile_name)
+void nmpcsim::simulation(ContinuationGMRES& nmpc_solver, const double* initial_state_vec, const double start_time, const double end_time, const double sampling_period, const std::string savefile_name)
 {
     NMPCModel model;
     NumericalIntegrator integrator;
-    Eigen::VectorXd current_state_vec(model.dimState()), next_state_vec(model.dimState()), control_input_vec(model.dimControlInput());
+    double current_state_vec[model.dimState()], next_state_vec[model.dimState()], control_input_vec[model.dimControlInput()];
     std::chrono::system_clock::time_point start_clock, end_clock;
 
     std::string save_dir_name("simulation_result");
@@ -16,14 +16,17 @@ void nmpcsim::simulation(ContinuationGMRES nmpc_solver, const Eigen::VectorXd& i
     std::ofstream conditions_data(save_dir_name + "/" + savefile_name + "_conditions.dat");
 
     double total_time = 0;
-    current_state_vec = initial_state_vec;
-    control_input_vec = nmpc_solver.getControlInput();
+    for(int i=0; i<model.dimState(); i++){
+        current_state_vec[i] = initial_state_vec[i];
+    }
+    nmpc_solver.getControlInput(control_input_vec);
+
     std::cout << "Start simulation" << std::endl;
     for(double current_time=start_time; current_time<end_time; current_time+= sampling_period){
-        saveData(state_data, control_input_data, error_data, current_time, current_state_vec, control_input_vec, nmpc_solver.getError(current_time, current_state_vec));
+        saveData(model.dimState(), model.dimControlInput(), state_data, control_input_data, error_data, current_time, current_state_vec, control_input_vec, nmpc_solver.getError(current_time, current_state_vec));
 
         // Compute the next state vector using the 4th Runge-Kutta-Gill method.
-        next_state_vec = integrator.rungeKuttaGill(current_time, current_state_vec, control_input_vec, sampling_period);
+        integrator.rungeKuttaGill(current_time, current_state_vec, control_input_vec, sampling_period, next_state_vec);
 
         // Update the solution and measure computational time.
         start_clock = std::chrono::system_clock::now();
@@ -35,7 +38,9 @@ void nmpcsim::simulation(ContinuationGMRES nmpc_solver, const Eigen::VectorXd& i
         step_time *= 1e-06;
         total_time += step_time;
 
-        current_state_vec = next_state_vec;
+        for(int i=0; i<model.dimState(); i++){
+            current_state_vec[i] = next_state_vec[i];
+        }
     }
     std::cout << "End simulation" << std::endl;
     std::cout << "Total CPU time for control update: " << total_time << " [sec]" << std::endl;

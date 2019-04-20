@@ -8,8 +8,8 @@
 
 
 #include <iostream>
-#include <Eigen/Core>
 #include "nmpc_model.hpp"
+#include "linear_funcs.hpp"
 
 
 // Serves the matrix-free GMRES method, which supports solving the nonlinear problem by using the GMRES method that solves a linear problem Ax = b in a short computational time.
@@ -17,30 +17,37 @@
 // This class allocates vectors and matrices used in matrix-free GMRES and computes the solution of GMRES.
 class MatrixFreeGMRES {
 private:
+    bool allocation_flag_;
     int dim_equation_, max_dim_krylov_;
-    Eigen::MatrixXd hessenberg_mat_, basis_mat_;
-    Eigen::VectorXd b_vec_, givens_c_vec_, givens_s_vec_, g_vec_;
+    double **hessenberg_mat_, **basis_mat_;
+    double *b_vec_, *givens_c_vec_, *givens_s_vec_, *g_vec_;
 
     // Applies the Givens rotation for i_column element and i_column+1 element of  column_vec, which is a column vector of a matrix.
-    inline void givensRotation(Eigen::Ref<Eigen::VectorXd> column_vec, const int i_column);
+    inline void givensRotation(double* column_vec, const int i_column);
 
     // Generates a vector corresponding to b in Ax=b.
-    virtual void bFunc(const double time_param, const Eigen::VectorXd& state_vec, const Eigen::VectorXd& current_solution_vec, Eigen::Ref<Eigen::VectorXd> equation_error_vec) = 0;
+    virtual void bFunc(const double time_param, const double* state_vec, const double* current_solution_vec, double* equation_error_vec) = 0;
 
     // Generates a vector corresponding to Ax in Ax=b with using the forward difference approximation.
-    virtual void axFunc(const double time_param, const Eigen::VectorXd& state_vec, const Eigen::VectorXd& current_solution_vec, const Eigen::VectorXd& direction_vec, Eigen::Ref<Eigen::VectorXd> ax_vec) = 0;
+    virtual void axFunc(const double time_param, const double* state_vec, const double* current_solution_vec, const double* direction_vec, double* ax_vec) = 0;
+
 
 public:
-    // default constructor: set dim_equation_ and max_dim_krylov_ zero, and all vectors and matrices having just an element of 0
-    // costructor with arguments: sets dimensions of the solution vector and the Krylov subspace and reallocate vectors and matrices used in the matrix-free GMRES.
+    // Sets dim_equation_ and max_dim_krylov_ zero, and all vectors and matrices having nullptr.
     MatrixFreeGMRES();
+
+    // Sets dimensions of the solution vector and the Krylov subspace and allocate vectors and matrices used in the matrix-free GMRES.
     MatrixFreeGMRES(const int dim_equation, const int max_dim_krylov);
+
+    // Free memory of vectors and matrices.
+    ~MatrixFreeGMRES();
+
 
     // Sets dimensions of the solution vector and the Krylov subspace and reallocate vectors and matrices used in the matrix-free GMRES.
     void setGMRESParams(const int dim_equation, const int max_dim_krylov);
 
     // Solves the GMRES and generates solution_update_vector, which is a solution of the matrix-free GMRES.
-    void forwardDifferenceGMRES(const double time_param, const Eigen::VectorXd& state_vec, const Eigen::VectorXd& current_solution_vec, Eigen::Ref<Eigen::VectorXd> b_vec);
+    void forwardDifferenceGMRES(const double time_param, const double* state_vec, const double* current_solution_vec, double* b_vec);
 };
 
 

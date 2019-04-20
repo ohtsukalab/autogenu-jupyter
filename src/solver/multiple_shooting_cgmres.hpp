@@ -7,7 +7,7 @@
 #define MULTIPLE_SHOOTING_CGMRES_H
 
 
-#include <Eigen/Core>
+#include "linear_funcs.hpp"
 #include "matrixfree_gmres.hpp"
 #include "nmpc_model.hpp"
 #include "init_cgmres.hpp"
@@ -23,40 +23,45 @@ private:
     // initial_time_, horizon_max_length_, alpha_ : parameters of the length of the horizon
     // The horizon length at time t is given by horizon_max_length_*(1.0-std::exp(-alpha_*(time_param-initial_time_))).
     double initial_time_, horizon_max_length_, alpha_, zeta_, difference_increment_, incremented_time_;
-    Eigen::VectorXd dx_vec_, incremented_state_vec_, control_input_and_constraints_seq_, control_input_and_constraints_error_seq_, control_input_and_constraints_error_seq_1_, control_input_and_constraints_error_seq_2_, control_input_and_constraints_error_seq_3_,control_input_and_constraints_update_seq_;
-    Eigen::MatrixXd state_mat_, lambda_mat_, incremented_state_mat_, incremented_lambda_mat_, state_error_mat_, state_error_mat_1_, lambda_error_mat_, lambda_error_mat_1_, state_update_mat_, lambda_update_mat_;
+    double *dx_vec_, *incremented_state_vec_, *control_input_and_constraints_seq_, *incremented_control_input_and_constraints_seq_, *control_input_and_constraints_error_seq_, *control_input_and_constraints_error_seq_1_, *control_input_and_constraints_error_seq_2_, *control_input_and_constraints_error_seq_3_,*control_input_and_constraints_update_seq_;
+    double **state_mat_, **lambda_mat_, **incremented_state_mat_, **incremented_lambda_mat_, **state_error_mat_, **state_error_mat_1_, **lambda_error_mat_, **lambda_error_mat_1_;
+
 
     // Computes the optimaliy error for control input and constraints under current solution.
-    inline void computeOptimalityErrorforControlInputAndConstraints(const double time_param, const Eigen::VectorXd& state_vec, const Eigen::VectorXd& control_input_and_constraints_seq, const Eigen::MatrixXd& state_mat, const Eigen::MatrixXd& lambda_mat, Eigen::Ref<Eigen::VectorXd> optimality_for_control_input_and_constraints);
+    inline void computeOptimalityErrorforControlInputAndConstraints(const double time_param, const double* state_vec, const double* control_input_and_constraints_seq, double const* const* state_mat, double const* const* lambda_mat, double* optimality_for_control_input_and_constraints);
 
     // Computes the optimaliy error for state and lambda under current solution.
-    inline void computeOptimalityErrorforStateAndLambda(const double time_param, const Eigen::VectorXd& state_vec, const Eigen::VectorXd& control_input_and_constraints_seq, const Eigen::MatrixXd& state_mat, const Eigen::MatrixXd& lambda_mat, Eigen::Ref<Eigen::MatrixXd> optimality_for_state, Eigen::Ref<Eigen::MatrixXd> optimality_for_lambda);
+    inline void computeOptimalityErrorforStateAndLambda(const double time_param, const double* state_vec, const double* control_input_and_constraints_seq, double const* const* state_mat, double const* const* lambda_mat, double** optimality_for_state, double** optimality_for_lambda);
 
     // Computes the sequence of state and lambda under the error for state and lambda for condencing.
-    inline void computeStateAndLambda(const double time_param, const Eigen::VectorXd& state_vec, const Eigen::VectorXd& control_input_and_constraints_seq, const Eigen::MatrixXd& optimality_for_state, const Eigen::MatrixXd& optimality_for_lambda, Eigen::Ref<Eigen::MatrixXd> state_mat, Eigen::Ref<Eigen::MatrixXd> lambda_mat);
+    inline void computeStateAndLambda(const double time_param, const double* state_vec, const double* control_input_and_constraints_seq, double const* const* optimality_for_state, double const* const* optimality_for_lambda, double** state_mat, double** lambda_mat);
 
     // Computes a vector correspongin to b in Ax=b
-    void bFunc(const double time_param, const Eigen::VectorXd& state_vec, const Eigen::VectorXd& current_solution_vec, Eigen::Ref<Eigen::VectorXd> b_vec) override;
+    void bFunc(const double time_param, const double* state_vec, const double* current_solution_vec, double* b_vec) override;
 
     // Generates a vector corresponding to Ax in Ax=b with using the forward difference approximation.
-    void axFunc(const double time_param, const Eigen::VectorXd& state_vec, const Eigen::VectorXd& current_solution_vec, const Eigen::VectorXd& direction_vec, Eigen::Ref<Eigen::VectorXd> ax_vec) override;
+    void axFunc(const double time_param, const double* state_vec, const double* current_solution_vec, const double* direction_vec, double* ax_vec) override;
 
 
 public:
     // Sets parameters and allocates vectors and matrices.
     MultipleShootingCGMRES(const double horizon_max_length, const double alpha, const int horizon_division_num, const double difference_increment, const double zeta, const int max_dim_krylov);
 
+    // Free vectors and matrices.
+    ~MultipleShootingCGMRES();
+
+
     // Initializes the solution of the C/GMRES method.
-    void initSolution(const double initial_time, const Eigen::VectorXd& initial_state_vec, const Eigen::VectorXd& initial_guess_input_vec, const double convergence_radius, const int max_iteration);
+    void initSolution(const double initial_time, const double* initial_state_vec, const double* initial_guess_input_vec, const double convergence_radius, const int max_iteration);
 
     // Updates the solution by solving the matrix-free GMRES.
-    void controlUpdate(const double current_time, const double sampling_period, const Eigen::VectorXd& current_state_vec, Eigen::Ref<Eigen::VectorXd> optimal_control_input_vec);
+    void controlUpdate(const double current_time, const double sampling_period, const double* current_state_vec, double* optimal_control_input_vec);
 
     // Returns the intial vector of the control input sequence
-    Eigen::VectorXd getControlInput() const;
+    void getControlInput(double* control_input_vec) const;
 
     // Returns the optimality error norm under the current_state_vec and the current solution.
-    double getError(const double current_time, const Eigen::VectorXd& current_state_vec);
+    double getError(const double current_time, const double* current_state_vec);
 };
 
 

@@ -80,20 +80,20 @@ def generateMain(solver_index, solver_params, initialization_params, simulation_
 
     # initial state
     f_main.write('    // Set the initial state.\n')
-    f_main.write('    Eigen::VectorXd initial_state(nmpc_model.dimState());\n')
-    f_main.write('    initial_state << ')
+    f_main.write('    Eigen::VectorXd initial_state[')+str(len(simulation_params.initial_state))+('];\n')
+    f_main.write('    initial_state = {')
     for i in range(len(simulation_params.initial_state)-1):
         f_main.write(str(simulation_params.initial_state[i]) + ', ')
-    f_main.write(str(simulation_params.initial_state[-1]) + ';\n')    
+    f_main.write(str(simulation_params.initial_state[-1]) + '};\n')    
     f_main.write('\n')
 
     # initial guess solution
     f_main.write('    // Set the initial guess solution.\n')
-    f_main.write('    Eigen::VectorXd initial_guess_solution(nmpc_model.dimControlInput()+nmpc_model.dimConstraints());\n')
-    f_main.write('    initial_guess_solution << ')
+    f_main.write('    Eigen::VectorXd initial_guess_solution(')+str(len(initialization_params.initial_guess_solution))+('];\n')
+    f_main.write('    initial_guess_solution = {')
     for i in range(len(initialization_params.initial_guess_solution)-1):
         f_main.write(str(initialization_params.initial_guess_solution[i]) + ', ')
-    f_main.write(str(initialization_params.initial_guess_solution[-1]) + ';\n')    
+    f_main.write(str(initialization_params.initial_guess_solution[-1]) + '};\n')    
     f_main.write('\n')
     f_main.write('\n')
 
@@ -123,11 +123,6 @@ def generateCMake(solver_index, model_name, eigen3_path=None):
     f_cmake.write('set(SIMULATOR_DIR ${CMAKE_SOURCE_DIR}/src/simulator)\n')
     f_cmake.write('set(MODEL_DIR ${CMAKE_SOURCE_DIR}/'+'models/'+str(model_name)+')\n')
     f_cmake.write('\n')
-    if(eigen3_path==None):
-        f_cmake.write('find_package(Eigen3 REQUIRED)\n')
-    else:
-        f_cmake.write('set(EIGEN3_INCLUDE_DIR eigen3_path)\n')
-    f_cmake.write('include_directories(${EIGEN3_INCLUDE_DIR})\n')
     f_cmake.write('include_directories(${SOLVER_DIR})\n')
     f_cmake.write('include_directories(${SIMULATOR_DIR})\n')
     f_cmake.write('include_directories(${MODEL_DIR})\n')
@@ -143,6 +138,7 @@ def generateCMake(solver_index, model_name, eigen3_path=None):
         f_cmake.write('    ${SOLVER_DIR}/continuation_gmres.cpp\n')
         f_cmake.write('    ${SOLVER_DIR}/init_cgmres.cpp\n')
         f_cmake.write('    ${SOLVER_DIR}/matrixfree_gmres.cpp\n')
+        f_cmake.write('    ${SOLVER_DIR}/linear_funcs.cpp\n')
         f_cmake.write(')\n')
         f_cmake.write('\n')
         f_cmake.write('add_library(\n')
@@ -159,6 +155,7 @@ def generateCMake(solver_index, model_name, eigen3_path=None):
         f_cmake.write('    ${SOLVER_DIR}/multiple_shooting_cgmres.cpp\n')
         f_cmake.write('    ${SOLVER_DIR}/init_cgmres.cpp\n')
         f_cmake.write('    ${SOLVER_DIR}/matrixfree_gmres.cpp\n')
+        f_cmake.write('    ${SOLVER_DIR}/linear_funcs.cpp\n')
         f_cmake.write(')\n')
         f_cmake.write('\n')
         f_cmake.write('add_library(\n')
@@ -177,6 +174,7 @@ def generateCMake(solver_index, model_name, eigen3_path=None):
         f_cmake.write('    ${SOLVER_DIR}/control_input_saturation.cpp\n')
         f_cmake.write('    ${SOLVER_DIR}/control_input_saturation_sequence.cpp\n')
         f_cmake.write('    ${SOLVER_DIR}/matrixfree_gmres.cpp\n')
+        f_cmake.write('    ${SOLVER_DIR}/linear_funcs.cpp\n')
         f_cmake.write(')\n')
         f_cmake.write('\n')
         f_cmake.write('add_library(\n')
