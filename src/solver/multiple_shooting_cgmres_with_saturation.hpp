@@ -22,14 +22,15 @@ private:
     ControlInputSaturationSequence saturation_seq_;
 
     int dim_state_, dim_control_input_, dim_constraints_, dim_control_input_and_constraints_, dim_control_input_and_constraints_seq_, dim_saturation_, dim_saturation_seq_, horizon_division_num_, dim_krylov_;
-
+    int *saturation_index;
     // initial_time_, horizon_max_length_, alpha_ : parameters of the length of the horizon
     // The horizon length at time t is given by horizon_max_length_*(1.0-std::exp(-alpha_*(time_param-initial_time_))).
     double initial_time_, horizon_max_length_, alpha_, zeta_, difference_increment_, incremented_time_;
 
     double *dx_vec_, *incremented_state_vec_, *control_input_and_constraints_seq_, *incremented_control_input_and_constraints_seq_, *control_input_and_constraints_error_seq_, *control_input_and_constraints_error_seq_1_, *control_input_and_constraints_error_seq_2_, *control_input_and_constraints_error_seq_3_, *control_input_and_constraints_update_seq_;
 
-    double **state_mat_, **lambda_mat_, **incremented_state_mat_, **incremented_lambda_mat_, **state_error_mat_, **state_error_mat_1_, **lambda_error_mat_, **lambda_error_mat_1_, **dummy_input_mat_, **incremented_saturation_lagrange_multiplier_mat_, **saturation_lagrange_multiplier_mat_, **dummy_error_mat_, **dummy_error_mat_1_, **saturation_error_mat_, **saturation_error_mat_1_, **dummy_update_mat_, **saturation_update_mat_;
+    double **state_mat_, **state_mat_1_, **lambda_mat_1_, **lambda_mat_, **incremented_state_mat_, **incremented_lambda_mat_, **state_error_mat_, **state_error_mat_1_, **lambda_error_mat_, **lambda_error_mat_1_,**dummy_input_mat_, **dummy_input_mat_1_, **saturation_lagrange_multiplier_mat_, 
+    **saturation_lagrange_multiplier_mat_1_, **incremented_saturation_lagrange_multiplier_mat_, **dummy_error_mat_, **dummy_error_mat_1_,**saturation_error_mat_, **saturation_error_mat_1_, **dummy_update_mat_, **saturation_update_mat_;
 
 
     // Compute 1step optimality error about the saturation
@@ -79,12 +80,15 @@ public:
     // Free vectors and matrices.
     ~MultipleShootingCGMRESWithSaturation();
 
+
     // Initializes the solution of the multiple shooting based C/GMRES method with condensing of the saturations on the control input
     // 1: with setting all the initial guess Lagrange multipliers of the condensed saturation to 0.
-    // 2: with setting the initial guess Lagrange multiplier vector of the condensed saturations to initial_guess_lagrange_multiplier.
-    // 3: with setting all the initial guess Lagrange multipliers of the condensed saturation to initial_guess_lagrange_multiplier.
     void initSolution(const double initial_time, const double* initial_state_vec, const double* initial_guess_input_vec, const double convergence_radius, const int max_iteration);
+
+    // 2: with setting all the initial guess Lagrange multipliers of the condensed saturation to initial_guess_lagrange_multiplier.
     void initSolution(const double initial_time, const double* initial_state_vec, const double* initial_guess_input_vec, const double initial_guess_lagrange_multiplier, const double convergence_radius, const int max_iteration);
+
+    // 3: with setting the initial guess Lagrange multiplier vector of the condensed saturations to initial_guess_lagrange_multiplier.
     void initSolution(const double initial_time, const double* initial_state_vec, const double* initial_guess_input_vec, const double* initial_guess_lagrange_multiplier_vec, const double convergence_radius, const int max_iteration);
 
 

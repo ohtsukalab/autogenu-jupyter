@@ -9,8 +9,8 @@ int main()
     NMPCModel nmpc_model;
 
     ControlInputSaturationSequence control_input_saturation_seq;
-    control_input_saturation_seq.appendControlInputSaturation(0, -3, 3, 1.0e-02, 1.0e-02);
-    control_input_saturation_seq.appendControlInputSaturation(1, -1.5, 1.5, 1.0e-02, 1.0e-02);
+    control_input_saturation_seq.appendControlInputSaturation(0, -3, 3, 1.0e-02, 0);
+    control_input_saturation_seq.appendControlInputSaturation(1, -1.5, 1.5, 1.0e-02, 0);
     MultipleShootingCGMRESWithSaturation nmpc_solver(control_input_saturation_seq, 0.5, 1.0, 50, 1.0e-06, 1000, 5);
 
 
