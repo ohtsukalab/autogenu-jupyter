@@ -10,7 +10,6 @@ The following C/GMRES based solvers are provided:
 # Requirement
 - C++11
 - CMake
-- Eigen 3
 - Python 3.6.x, Jupyter Notebook, SymPy (to generate `nmpc_model.hpp`, `nmpc_model.cpp`, `main.cpp`, and `CMakeLists.txt` by `AutoGenU.ipynb`)
 - Python 3.6.x, NumPy, seaborn (to plot simulation data on `AutoGenU.ipynb`)
 
