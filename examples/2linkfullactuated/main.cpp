@@ -19,7 +19,7 @@ int main()
 
     // Set the initial guess of the control input vector.
 
-    double initial_guess_control_input[2] = {0.1, 0.1};
+    double initial_guess_control_input[] = {0.1, 0.1};
 
     // Initialize the solution of the C/GMRES method.
     double initial_guess_lagrange_multiplier[2] = {1.0e-03, 1.0e-03};

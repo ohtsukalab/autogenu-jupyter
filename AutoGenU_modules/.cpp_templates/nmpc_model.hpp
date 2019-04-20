@@ -7,7 +7,6 @@
 
 #define _USE_MATH_DEFINES
 
-#include <Eigen/Core>
 #include <cmath>
 
 
@@ -20,16 +19,16 @@ private:
 
 public:
     // State equation of the model.
-    void stateFunc(const double t, const Eigen::VectorXd& x, const Eigen::VectorXd& u, Eigen::Ref<Eigen::VectorXd> f);
+    void stateFunc(const double t, const double* x, const double* u, double* f);
 
     // Partial derivative of the terminal cost with respect to state.
-    void phixFunc(const double t, const Eigen::VectorXd& x, Eigen::Ref<Eigen::VectorXd> phix);
+    void phixFunc(const double t, const double* x, double* phix);
 
     // Partial derivative of the Hamiltonian with respect to state.
-    void hxFunc(const double t, const Eigen::VectorXd& x, const Eigen::VectorXd& u, const Eigen::VectorXd& lmd, Eigen::Ref<Eigen::VectorXd> hx);
+    void hxFunc(const double t, const double* x, const double* u, const double* lmd, double* hx);
 
     // Partial derivative of the Hamiltonian with respect to control input and constraints.
-    void huFunc(const double t, const Eigen::VectorXd& x, const Eigen::VectorXd& u, const Eigen::VectorXd& lmd, Eigen::Ref<Eigen::VectorXd> hu);
+    void huFunc(const double t, const double* x, const double* u, const double* lmd, double* hu);
 
 
 
