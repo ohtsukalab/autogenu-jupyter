@@ -80,8 +80,7 @@ def generateMain(solver_index, solver_params, initialization_params, simulation_
 
     # initial state
     f_main.write('    // Set the initial state.\n')
-    f_main.write('    Eigen::VectorXd initial_state[')+str(len(simulation_params.initial_state))+('];\n')
-    f_main.write('    initial_state = {')
+    f_main.write('    double initial_state['+str(len(simulation_params.initial_state))+'] = {')
     for i in range(len(simulation_params.initial_state)-1):
         f_main.write(str(simulation_params.initial_state[i]) + ', ')
     f_main.write(str(simulation_params.initial_state[-1]) + '};\n')    
@@ -89,8 +88,7 @@ def generateMain(solver_index, solver_params, initialization_params, simulation_
 
     # initial guess solution
     f_main.write('    // Set the initial guess solution.\n')
-    f_main.write('    Eigen::VectorXd initial_guess_solution(')+str(len(initialization_params.initial_guess_solution))+('];\n')
-    f_main.write('    initial_guess_solution = {')
+    f_main.write('    double initial_guess_solution['+str(len(initialization_params.initial_guess_solution))+'] = {')
     for i in range(len(initialization_params.initial_guess_solution)-1):
         f_main.write(str(initialization_params.initial_guess_solution[i]) + ', ')
     f_main.write(str(initialization_params.initial_guess_solution[-1]) + '};\n')    
@@ -111,7 +109,7 @@ def generateMain(solver_index, solver_params, initialization_params, simulation_
     f_main.close()
 
 
-def generateCMake(solver_index, model_name, eigen3_path=None):
+def generateCMake(solver_index, model_name):
     f_cmake = open('CMakeLists.txt', 'w')
     f_cmake.write('cmake_minimum_required(VERSION 3.1)\n')
     f_cmake.write('project(cgmres_simulator CXX)\n')
