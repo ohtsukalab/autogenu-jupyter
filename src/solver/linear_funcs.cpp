@@ -56,16 +56,3 @@ double linearfunc::squaredNorm(const int dim, const double *vec)
     }
     return ans;
 }
-
-
-void linearfunc::print_mat(double **mat, const int dim_row, const int dim_column)
-{
-    for(int i=0; i<dim_column; i++){
-        for(int j=0; j<dim_row; j++){
-            std::cout << mat[j][i] << " ";
-        }
-        std::cout << std::endl;
-    }
-
-    std::cout << std::endl;
-}

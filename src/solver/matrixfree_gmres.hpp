@@ -13,8 +13,8 @@
 
 
 // Serves the matrix-free GMRES method, which supports solving the nonlinear problem by using the GMRES method that solves a linear problem Ax = b in a short computational time.
-// You have to inherit this class and override bFunc() and axFunc() which generates vectors corresponding to b and Ax in Ax=b, respectively.
 // This class allocates vectors and matrices used in matrix-free GMRES and computes the solution of GMRES.
+// You have to inherit this class and override bFunc() and axFunc() which generates vectors corresponding to b and Ax in Ax=b, respectively.
 class MatrixFreeGMRES {
 private:
     bool allocation_flag_;

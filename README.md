@@ -10,8 +10,8 @@ The following C/GMRES based solvers are provided:
 # Requirement
 - C++11
 - CMake
-- Python 3.6.x, Jupyter Notebook, SymPy (to generate `nmpc_model.hpp`, `nmpc_model.cpp`, `main.cpp`, and `CMakeLists.txt` by `AutoGenU.ipynb`)
-- Python 3.6.x, NumPy, seaborn (to plot simulation data on `AutoGenU.ipynb`)
+- Python 3, Jupyter Notebook or Jupyter Lab, SymPy (to generate `nmpc_model.hpp`, `nmpc_model.cpp`, `main.cpp`, and `CMakeLists.txt` by `AutoGenU.ipynb`)
+- Python 3, NumPy, seaborn (to plot simulation data on `AutoGenU.ipynb`)
 
 
 # Usage
@@ -26,12 +26,12 @@ You can also build source files for numerical simulation, execute numerical simu
 
 
 ## C/GMRES based solvers of NMPC
-The C/GMRES based solvers in `src/solver` directory can be used independently of `AutoGenU.ipynb`. First, you have to set the following files:  
+The C/GMRES based solvers in `src/solver` directory can be used independently of `AutoGenU.ipynb`. You are then required the following files:
 - `nmpc_model.hpp`: write parameters in your model  
 - `nmpc_model.cpp`: write equations of your model  
 - `main.cpp`: write parameters of solvers  
 
-After setting these files, set `CMakeLists.txt` and build source files. Note that `AutoGenU.ipynb` generates these source files and `CMakeLists.txt` automatically.
+In addition to these files, you have to write `CMakeLists.txt` to build source files.
 
 
 # Demo

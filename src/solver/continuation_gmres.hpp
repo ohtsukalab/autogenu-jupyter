@@ -13,15 +13,14 @@
 #include "init_cgmres.hpp"
 
 
-// Solves the nonlinear optimal control problem using the C/GMRES method.
-// Describe the model of a system to be controlled in nmpc_model.hpp and nmpc_model.cpp. 
+// Solves the nonlinear optimal control problem for NMPC using the C/GMRES method.
 class ContinuationGMRES final : virtual public MatrixFreeGMRES{
 private:
     NMPCModel model_;
     int dim_state_, dim_control_input_, dim_constraints_, dim_control_input_and_constraints_, dim_solution_, horizon_division_num_, max_dim_krylov_;
 
     // initial_time_, horizon_max_length_, alpha_ : parameters of the length of the horizon
-    // The horizon length at time t is given by horizon_max_length_*(1.0-std::exp(-alpha_*(time_param-initial_time_))).
+    // The horizon length at time t is given by horizon_max_length_*(1.0-std::exp(-alpha_*(t - initial_time_))).
     double initial_time_, horizon_max_length_, alpha_, zeta_, difference_increment_, incremented_time_;
     double *dx_vec_, *incremented_state_vec_, *solution_vec_, *incremented_solution_vec_, *optimality_vec_, *optimality_vec_1_, *optimality_vec_2_, *solution_update_vec_;
     double **state_mat_, **lambda_mat_;

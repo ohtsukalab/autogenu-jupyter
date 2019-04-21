@@ -14,14 +14,13 @@
 
 
 // Solves the nonlinear optimal control problem using the mutiple shooting based C/GMRES method.
-// Describe the model of a system to be controlled in nmpc_model.hpp and nmpc_model.cpp. 
 class MultipleShootingCGMRES final : virtual public MatrixFreeGMRES{
 private:
     NMPCModel model_;
     int dim_state_, dim_control_input_, dim_constraints_, dim_control_input_and_constraints_, dim_state_and_lambda_, dim_control_input_and_constraints_seq_, horizon_division_num_, max_dim_krylov_;
 
     // initial_time_, horizon_max_length_, alpha_ : parameters of the length of the horizon
-    // The horizon length at time t is given by horizon_max_length_*(1.0-std::exp(-alpha_*(time_param-initial_time_))).
+    // The horizon length at time t is given by horizon_max_length_*(1.0-std::exp(-alpha_*(t - initial_time_))).
     double initial_time_, horizon_max_length_, alpha_, zeta_, difference_increment_, incremented_time_;
     double *dx_vec_, *incremented_state_vec_, *control_input_and_constraints_seq_, *incremented_control_input_and_constraints_seq_, *control_input_and_constraints_error_seq_, *control_input_and_constraints_error_seq_1_, *control_input_and_constraints_error_seq_2_, *control_input_and_constraints_error_seq_3_,*control_input_and_constraints_update_seq_;
     double **state_mat_, **lambda_mat_, **incremented_state_mat_, **incremented_lambda_mat_, **state_error_mat_, **state_error_mat_1_, **lambda_error_mat_, **lambda_error_mat_1_;
@@ -33,7 +32,7 @@ private:
     // Computes the optimaliy error for state and lambda under current solution.
     inline void computeOptimalityErrorforStateAndLambda(const double time_param, const double* state_vec, const double* control_input_and_constraints_seq, double const* const* state_mat, double const* const* lambda_mat, double** optimality_for_state, double** optimality_for_lambda);
 
-    // Computes the sequence of state and lambda under the error for state and lambda for condencing.
+    // Computes the sequence of state and lambda under the error for state and lambda for the condencing.
     inline void computeStateAndLambda(const double time_param, const double* state_vec, const double* control_input_and_constraints_seq, double const* const* optimality_for_state, double const* const* optimality_for_lambda, double** state_mat, double** lambda_mat);
 
     // Computes a vector correspongin to b in Ax=b

@@ -29,9 +29,6 @@ namespace linearfunc{
 
     // Returns squared norm of a vector.
     double squaredNorm(const int dim, const double *vec);
-
-    // Print a matrix on console.
-    void print_mat(double **mat, const int dim_row, const int dim_column);
 }
 
 
