@@ -35,14 +35,14 @@ In addition to these files, you have to write `CMakeLists.txt` to build source f
 
 
 # Demos
-### Inverting a pendulum using the multiple shooting based C/GMRES method
+### Inverting a pendubot using the multiple shooting based C/GMRES method
 ![pendubot_multiple_shooting_gif](https://raw.githubusercontent.com/wiki/mayataka/CGMRES/images/pendubot_multiple_shooting.gif)
 ![pendubot_multiple_shooting_png](https://raw.github.com/wiki/mayataka/CGMRES/images/pendubot_multiple_shooting.png)
 
 
-### Inverting a pendulum using the multiple shooting based C/GMRES method with condensing of variables with respect to the constraints on the saturation function on the control input
-![pendubot_multiple_shooting_gif](https://raw.githubusercontent.com/wiki/mayataka/CGMRES/images/pendubot_with_saturation.gif)
-![pendubot_multiple_shooting_png](https://raw.github.com/wiki/mayataka/CGMRES/images/pendubot_with_saturation.png)
+### Inverting a pendubot using the multiple shooting based C/GMRES method with condensing of variables with respect to the constraints on the saturation function on the control input
+![pendubot_with_saturation_gif](https://raw.githubusercontent.com/wiki/mayataka/CGMRES/images/pendubot_with_saturation.gif)
+![pendubot_with_saturation_png](https://raw.github.com/wiki/mayataka/CGMRES/images/pendubot_with_saturation.png)
 
 # License
 MIT
