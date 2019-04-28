@@ -8,8 +8,8 @@ import platform
 
 
 def makeModelDir(model_name):
-    subprocess.run(['mkdir', 'models'], stdout = subprocess.PIPE, stderr = subprocess.PIPE)
-    subprocess.run(['mkdir', model_name], cwd='models', stdout = subprocess.PIPE, stderr = subprocess.PIPE)
+    subprocess.run(['mkdir', 'models'], stdout = subprocess.PIPE, stderr = subprocess.PIPE, shell=True)
+    subprocess.run(['mkdir', model_name], cwd='models', stdout = subprocess.PIPE, stderr = subprocess.PIPE, shell=True)
 
 
 def generateCpp(dimx, dimu, dimc, fxu, Cxu, phix, hx, hu, model_name):
