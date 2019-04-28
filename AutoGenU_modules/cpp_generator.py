@@ -1,4 +1,4 @@
-from AutoGenU_modules import solver_params_sets as solverparam
+from AutoGenU_modules import solver_params as solverparam
 from AutoGenU_modules import simulation_params as simparam
 from AutoGenU_modules import cpp_executor
 import sympy
@@ -152,9 +152,12 @@ def generateCMake(solver_index, model_name):
         f_cmake.write('add_library(\n')
         f_cmake.write('    cgmres_simulator\n')
         f_cmake.write('    STATIC\n')
-        f_cmake.write('    ${SIMULATOR_DIR}/cgmres_simulator.cpp\n')
-        f_cmake.write('    ${SIMULATOR_DIR}/save_simulation_data.cpp\n')
+        if(platform.system() == 'Windows'):
+            f_cmake.write('    ${SIMULATOR_DIR}/save_simulation_data_for_windows.cpp\n')
+        else:
+            f_cmake.write('    ${SIMULATOR_DIR}/save_simulation_data.cpp\n')
         f_cmake.write('    ${SIMULATOR_DIR}/numerical_integrator.cpp\n')
+        f_cmake.write('    ${SIMULATOR_DIR}/cgmres_simulator.cpp\n')
         f_cmake.write(')\n')
     elif(solver_index == 2):
         f_cmake.write('add_library(\n')
@@ -169,9 +172,12 @@ def generateCMake(solver_index, model_name):
         f_cmake.write('add_library(\n')
         f_cmake.write('    multiple_shooting_cgmres_simulator\n')
         f_cmake.write('    STATIC\n')
-        f_cmake.write('    ${SIMULATOR_DIR}/multiple_shooting_cgmres_simulator.cpp\n')
-        f_cmake.write('    ${SIMULATOR_DIR}/save_simulation_data.cpp\n')
+        if(platform.system() == 'Windows'):
+            f_cmake.write('    ${SIMULATOR_DIR}/save_simulation_data_for_windows.cpp\n')
+        else:
+            f_cmake.write('    ${SIMULATOR_DIR}/save_simulation_data.cpp\n')
         f_cmake.write('    ${SIMULATOR_DIR}/numerical_integrator.cpp\n')
+        f_cmake.write('    ${SIMULATOR_DIR}/multiple_shooting_cgmres_simulator.cpp\n')
         f_cmake.write(')\n')
     elif(solver_index == 3):
         f_cmake.write('add_library(\n')
@@ -188,9 +194,12 @@ def generateCMake(solver_index, model_name):
         f_cmake.write('add_library(\n')
         f_cmake.write('    multiple_shooting_cgmres_with_saturation_simulator\n')
         f_cmake.write('    STATIC\n')
-        f_cmake.write('    ${SIMULATOR_DIR}/multiple_shooting_cgmres_with_saturation_simulator.cpp\n')
-        f_cmake.write('    ${SIMULATOR_DIR}/save_simulation_data.cpp\n')
+        if(platform.system() == 'Windows'):
+            f_cmake.write('    ${SIMULATOR_DIR}/save_simulation_data_for_windows.cpp\n')
+        else:
+            f_cmake.write('    ${SIMULATOR_DIR}/save_simulation_data.cpp\n')
         f_cmake.write('    ${SIMULATOR_DIR}/numerical_integrator.cpp\n')
+        f_cmake.write('    ${SIMULATOR_DIR}/multiple_shooting_cgmres_with_saturation_simulator.cpp\n')
         f_cmake.write(')\n')
 
     f_cmake.write('\n')
