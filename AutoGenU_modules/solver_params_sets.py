@@ -9,7 +9,8 @@ class SolverParams:
 
 
 class InitializationParams:
-    def __init__(self, initial_guess_solution, convergence_radius, maximum_itr_newton):
+    def __init__(self, initial_guess_solution, convergence_radius, maximum_itr_newton, initial_guess_lagrange_multiplier = None):
         self.initial_guess_solution = initial_guess_solution
         self.convergence_radius = convergence_radius
         self.maximum_itr_newton = maximum_itr_newton
+        self.initial_guess_lagrange_multiplier = initial_guess_lagrange_multiplier

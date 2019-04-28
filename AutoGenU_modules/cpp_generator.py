@@ -87,17 +87,27 @@ def generateMain(solver_index, solver_params, initialization_params, simulation_
     f_main.write('\n')
 
     # initial guess solution
-    f_main.write('    // Set the initial guess solution.\n')
+    f_main.write('    // Set the initial guess of the solution.\n')
     f_main.write('    double initial_guess_solution['+str(len(initialization_params.initial_guess_solution))+'] = {')
     for i in range(len(initialization_params.initial_guess_solution)-1):
         f_main.write(str(initialization_params.initial_guess_solution[i]) + ', ')
     f_main.write(str(initialization_params.initial_guess_solution[-1]) + '};\n')    
     f_main.write('\n')
+    if solver_index == 3 and initialization_params.initial_guess_lagrange_multiplier != None:
+        f_main.write('    // Set the initial guess of the lagrange multiplier for the condensed constraints with respect to the saturation on the function of the control input .\n')
+        f_main.write('    double initial_guess_lagrange_multiplier['+str(len(initialization_params.initial_guess_lagrange_multiplier))+'] = {')
+        for i in range(len(initialization_params.initial_guess_lagrange_multiplier)-1):
+            f_main.write(str(initialization_params.initial_guess_lagrange_multiplier[i]) + ', ')
+        f_main.write(str(initialization_params.initial_guess_lagrange_multiplier[-1]) + '};\n')    
+    f_main.write('\n')
     f_main.write('\n')
 
     # initialization of the solution of the C/GMRES method
     f_main.write('    // Initialize the solution of the C/GMRES method.\n')
-    f_main.write('    nmpc_solver.initSolution('+str(simulation_params.initial_time)+', initial_state, initial_guess_solution, '+str(initialization_params.convergence_radius)+', '+str(initialization_params.maximum_itr_newton)+');\n')
+    if solver_index == 3 and initialization_params.initial_guess_lagrange_multiplier != None:
+        f_main.write('    nmpc_solver.initSolution('+str(simulation_params.initial_time)+', initial_state, initial_guess_solution, initial_guess_lagrange_multiplier, ' +str(initialization_params.convergence_radius)+', '+str(initialization_params.maximum_itr_newton)+');\n')
+    else:
+        f_main.write('    nmpc_solver.initSolution('+str(simulation_params.initial_time)+', initial_state, initial_guess_solution, '+str(initialization_params.convergence_radius)+', '+str(initialization_params.maximum_itr_newton)+');\n')
     f_main.write('\n')
 
     f_main.write('    // Perform a numerical simulation.\n')
