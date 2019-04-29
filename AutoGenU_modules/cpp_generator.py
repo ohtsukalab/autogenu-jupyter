@@ -210,17 +210,17 @@ def generateCMake(solver_index, model_name):
     f_cmake.write('\n')
     f_cmake.write('\n')
     if(platform.system() == 'Windows'):
-        f_cmake.write('add_executable(a.exe ${MODEL_DIR}/main.cpp)\n')
+        f_cmake.write('add_executable(main ${MODEL_DIR}/main.cpp)\n')
         if(solver_index == 1):
-            f_cmake.write('target_link_libraries(a.exe cgmres)\n')
-            f_cmake.write('target_link_libraries(a.exe cgmres_simulator)\n')
+            f_cmake.write('target_link_libraries(main cgmres)\n')
+            f_cmake.write('target_link_libraries(main cgmres_simulator)\n')
         elif(solver_index == 2):
-            f_cmake.write('target_link_libraries(a.exe multiple_shooting_cgmres)\n')
-            f_cmake.write('target_link_libraries(a.exe multiple_shooting_cgmres_simulator)\n')
+            f_cmake.write('target_link_libraries(main multiple_shooting_cgmres)\n')
+            f_cmake.write('target_link_libraries(main multiple_shooting_cgmres_simulator)\n')
         elif(solver_index == 3):
-            f_cmake.write('target_link_libraries(a.exe multiple_shooting_cgmres_with_saturation)\n')
-            f_cmake.write('target_link_libraries(a.exe multiple_shooting_cgmres_with_saturation_simulator)\n')
-        f_cmake.write('target_link_libraries(a.exe nmpcmodel)\n')
+            f_cmake.write('target_link_libraries(main multiple_shooting_cgmres_with_saturation)\n')
+            f_cmake.write('target_link_libraries(main multiple_shooting_cgmres_with_saturation_simulator)\n')
+        f_cmake.write('target_link_libraries(main nmpcmodel)\n')
     else:
         f_cmake.write('add_executable(a.out ${MODEL_DIR}/main.cpp)\n')
         if(solver_index == 1):
