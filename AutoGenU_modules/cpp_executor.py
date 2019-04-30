@@ -16,6 +16,7 @@ def setCMake(simulation_name):
             print(line.rstrip().decode("utf8"))
         print('\n')
 
+
 def makeAndRun(simulation_name):
     if(platform.system() == 'Windows'):
         proc = subprocess.Popen(['cmake', '--build', '.', '--config', 'Release'], cwd='models/'+simulation_name+'/build', stdout = subprocess.PIPE, stderr = subprocess.STDOUT, shell=True)

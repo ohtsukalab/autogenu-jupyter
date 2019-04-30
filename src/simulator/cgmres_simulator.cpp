@@ -44,13 +44,15 @@ void nmpcsim::simulation(ContinuationGMRES& nmpc_solver, const double* initial_s
     }
     std::cout << "End simulation" << std::endl;
     std::cout << "Total CPU time for control update: " << total_time << " [sec]" << std::endl;
+    std::cout << "sampling time: " << sampling_period << " [sec]\n";
+    std::cout << "CPU time for per control update: " << total_time/((int)( (end_time-start_time)/(sampling_period))) << " [sec]\n";
     
     // Save simulation conditions.
     conditions_data << "simulation name: " << savefile_name << "\n";
     conditions_data << "simulation time: " << end_time-start_time << " [sec]\n";
-    conditions_data << "CPU time for control update (total): " << total_time << " [sec]\n";
+    conditions_data << "Total CPU time for control update: " << total_time << " [sec]\n";
     conditions_data << "sampling time: " << sampling_period << " [sec]\n";
-    conditions_data << "CPU time for control update (1step): " << total_time/((int)( (end_time-start_time)/(sampling_period))) << " [sec]\n";
+    conditions_data << "CPU time for per control update: " << total_time/((int)( (end_time-start_time)/(sampling_period))) << " [sec]\n";
 
     state_data.close();
     control_input_data.close();
