@@ -23,11 +23,11 @@ def makeAndRun(simulation_name):
         for line in iter(proc.stdout.readline,b''):
             print(line.rstrip().decode("utf8"))
         print('\n')
-        proc = subprocess.run(['main.exe'], cwd='models/'+simulation_name+'/build/Release', stdout = subprocess.PIPE, stderr = subprocess.STDOUT, shell=True)
+        proc = subprocess.run(['main.exe'], cwd='models/'+simulation_name+'/build', stdout = subprocess.PIPE, stderr = subprocess.STDOUT, shell=True)
         for line in iter(proc.stdout.readline,b''):
             print(line.rstrip().decode("utf8"))
-        subprocess.run(['del', '-r', 'simulation_result'], cwd='models/'+simulation_name, stdout = subprocess.PIPE, stderr = subprocess.PIPE, shell=True)
-        subprocess.run(['mv', 'simulation_result', '../'], cwd='models/'+simulation_name+'/build/Release', stdout = subprocess.PIPE, stderr = subprocess.PIPE, shell=True)
+        subprocess.run(['rd', '/Q', '/S', 'simulation_result'], cwd='models/'+simulation_name, stdout = subprocess.PIPE, stderr = subprocess.PIPE)
+        subprocess.run(['move', 'simulation_result', '../'], cwd='models/'+simulation_name+'/build', stdout = subprocess.PIPE, stderr = subprocess.PIPE)
     else:
         proc = subprocess.Popen(['cmake', '--build', '.'], cwd='models/'+simulation_name+'/build', stdout = subprocess.PIPE, stderr = subprocess.STDOUT)
         for line in iter(proc.stdout.readline,b''):
@@ -36,8 +36,9 @@ def makeAndRun(simulation_name):
         proc = subprocess.Popen(['./a.out'], cwd='models/'+simulation_name+'/build', stdout = subprocess.PIPE, stderr = subprocess.STDOUT)
         for line in iter(proc.stdout.readline,b''):
             print(line.rstrip().decode("utf8"))
-        subprocess.run(['rm', '-r', 'simulation_result'], cwd='models/'+simulation_name, stdout = subprocess.PIPE, stderr = subprocess.PIPE)
-        subprocess.run(['mv', 'simulation_result', '../'], cwd='models/'+simulation_name+'/build', stdout = subprocess.PIPE, stderr = subprocess.PIPE)
+        subprocess.run(['rm', '-r', 'simulation_result'], cwd='models/'+simulation_name, stdout = subprocess.PIPE, stderr = subprocess.PIPE, shell=True)
+        subprocess.run(['mv', 'simulation_result', '../'], cwd='models/'+simulation_name+'/build', stdout = subprocess.PIPE, stderr = subprocess.PIPE, shell=True)
+
 
 
 

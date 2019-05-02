@@ -1,9 +1,9 @@
-#include "save_simulation_data.hpp"
+#include "save_simulation_data_for_windows.hpp"
 
 
 void nmpcsim::makeSaveDir(const std::string dir_name)
 {
-    int error = _mkdir(dir_name.c_str());
+    int error = mkdir(dir_name.c_str());
 }
 
 
