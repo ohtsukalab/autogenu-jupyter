@@ -5,7 +5,7 @@ import platform
 def setCMake(simulation_name):
     if(platform.system() == 'Windows'):
         subprocess.run(['mkdir', 'build'], cwd='models/'+simulation_name, stdout = subprocess.PIPE, stderr = subprocess.PIPE, shell=True)
-        proc = subprocess.Popen(['cmake', '../../..', '-G', '"MinGW Makefiles"'], cwd='models/'+simulation_name+'/build', stdout = subprocess.PIPE, stderr = subprocess.STDOUT, shell=True)
+        proc = subprocess.Popen(['cmake', '../../..', '-G', '\"MinGW Makefiles\"'], cwd='models/'+simulation_name+'/build', stdout = subprocess.PIPE, stderr = subprocess.STDOUT, shell=True)
         for line in iter(proc.stdout.readline,b''):
             print(line.rstrip().decode("utf8"))
         print('\n')
