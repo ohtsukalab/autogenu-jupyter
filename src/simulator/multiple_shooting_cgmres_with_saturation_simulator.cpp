@@ -43,8 +43,8 @@ void nmpcsim::simulation(MultipleShootingCGMRESWithSaturation& nmpc_solver, cons
     }
     std::cout << "End simulation" << std::endl;
     std::cout << "Total CPU time for control update: " << total_time << " [sec]" << std::endl;
-    std::cout << "sampling time: " << sampling_period << " [sec]\n";
-    std::cout << "CPU time for per control update: " << total_time/((int)( (end_time-start_time)/(sampling_period))) << " [sec]\n";
+    std::cout << "sampling time: " << sampling_period << " [sec]" << std::endl;
+    std::cout << "CPU time for per control update: " << total_time/((int)( (end_time-start_time)/(sampling_period))) << " [sec]" << std::endl;
 
     // Save simulation conditions.
     conditions_data << "simulation name: " << savefile_name << "\n";

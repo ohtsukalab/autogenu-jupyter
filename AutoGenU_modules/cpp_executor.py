@@ -23,11 +23,11 @@ def makeAndRun(simulation_name):
         for line in iter(proc.stdout.readline,b''):
             print(line.rstrip().decode("utf8"))
         print('\n')
-        proc = subprocess.run(['main.exe'], cwd='models/'+simulation_name+'/build', stdout = subprocess.PIPE, stderr = subprocess.STDOUT, shell=True)
+        proc = subprocess.Popen(['main.exe'], cwd='models/'+simulation_name+'/build', stdout = subprocess.PIPE, stderr = subprocess.STDOUT, shell=True)
         for line in iter(proc.stdout.readline,b''):
             print(line.rstrip().decode("utf8"))
-        subprocess.run(['rd', '/Q', '/S', 'simulation_result'], cwd='models/'+simulation_name, stdout = subprocess.PIPE, stderr = subprocess.PIPE)
-        subprocess.run(['move', 'simulation_result', '../'], cwd='models/'+simulation_name+'/build', stdout = subprocess.PIPE, stderr = subprocess.PIPE)
+        subprocess.run(['rmdir', '/q', '/s', 'simulation_result'], cwd='models/'+simulation_name, stdout = subprocess.PIPE, stderr = subprocess.PIPE, shell=True)
+        subprocess.run(['move', 'simulation_result', '../'], cwd='models/'+simulation_name+'/build', stdout = subprocess.PIPE, stderr = subprocess.PIPE, shell=True)
     else:
         proc = subprocess.Popen(['cmake', '--build', '.'], cwd='models/'+simulation_name+'/build', stdout = subprocess.PIPE, stderr = subprocess.STDOUT)
         for line in iter(proc.stdout.readline,b''):
