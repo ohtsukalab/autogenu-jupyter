@@ -2,10 +2,13 @@ import subprocess
 import platform
 
 
-def setCMake(simulation_name):
+def setCMake(simulation_name, MSYS=False):
     if(platform.system() == 'Windows'):
         subprocess.run(['mkdir', 'build'], cwd='models/'+simulation_name, stdout = subprocess.PIPE, stderr = subprocess.PIPE, shell=True)
-        proc = subprocess.Popen(['cmake', '../../..', '-G', 'MinGW Makefiles'], cwd='models/'+simulation_name+'/build', stdout = subprocess.PIPE, stderr = subprocess.STDOUT, shell=True)
+        if(MSYS == True):
+            proc = subprocess.Popen(['cmake', '../../..', '-G', 'MSYS Makefiles'], cwd='models/'+simulation_name+'/build', stdout = subprocess.PIPE, stderr = subprocess.STDOUT, shell=True)
+        else:
+            proc = subprocess.Popen(['cmake', '../../..', '-G', 'MinGW Makefiles'], cwd='models/'+simulation_name+'/build', stdout = subprocess.PIPE, stderr = subprocess.STDOUT, shell=True)
         for line in iter(proc.stdout.readline,b''):
             print(line.rstrip().decode("utf8"))
         print('\n')
@@ -15,6 +18,13 @@ def setCMake(simulation_name):
         for line in iter(proc.stdout.readline,b''):
             print(line.rstrip().decode("utf8"))
         print('\n')
+
+
+def removeBuildDir(simulation_name):
+    if(platform.system() == 'Windows'):
+        subprocess.run(['rmdir', '/q', '/s', 'build'], cwd='models/'+simulation_name, stdout = subprocess.PIPE, stderr = subprocess.PIPE, shell=True)
+    else:
+        subprocess.run(['rm', '-r', 'build'], cwd='models/'+simulation_name, stdout = subprocess.PIPE, stderr = subprocess.PIPE)
 
 
 def makeAndRun(simulation_name):
