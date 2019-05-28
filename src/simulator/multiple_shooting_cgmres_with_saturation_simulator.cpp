@@ -8,7 +8,7 @@ void nmpcsim::simulation(MultipleShootingCGMRESWithSaturation& nmpc_solver, cons
     double current_state_vec[model.dimState()], next_state_vec[model.dimState()], control_input_vec[model.dimControlInput()];
     std::chrono::system_clock::time_point start_clock, end_clock;
 
-    std::string save_dir_name("simulation_result");
+    std::string save_dir_name("../simulation_result");
     makeSaveDir(save_dir_name);
     std::ofstream state_data(save_dir_name + "/" + savefile_name + "_state.dat");
     std::ofstream control_input_data(save_dir_name + "/" + savefile_name + "_control_input.dat");

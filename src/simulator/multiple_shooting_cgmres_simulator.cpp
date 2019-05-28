@@ -8,11 +8,12 @@ void nmpcsim::simulation(MultipleShootingCGMRES& nmpc_solver, const double* init
     double current_state_vec[model.dimState()], next_state_vec[model.dimState()], control_input_vec[model.dimControlInput()];
     std::chrono::system_clock::time_point start_clock, end_clock;
 
-    makeSaveDir("simulation_result");
-    std::ofstream state_data("simulation_result/" + savefile_name + "_state.dat");
-    std::ofstream control_input_data("simulation_result/" + savefile_name + "_control_input.dat");
-    std::ofstream error_data("simulation_result/" + savefile_name + "_error.dat");
-    std::ofstream conditions_data("simulation_result/" + savefile_name + "_conditions.dat");
+    std::string save_dir_name("../simulation_result");
+    makeSaveDir(save_dir_name);
+    std::ofstream state_data(save_dir_name + "/" + savefile_name + "_state.dat");
+    std::ofstream control_input_data(save_dir_name + "/" + savefile_name + "_control_input.dat");
+    std::ofstream error_data(save_dir_name + "/" + savefile_name + "_error.dat");
+    std::ofstream conditions_data(save_dir_name + "/" + savefile_name + "_conditions.dat");
 
     double total_time = 0;
     for(int i=0; i<model.dimState(); i++){
