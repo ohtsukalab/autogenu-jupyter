@@ -15,8 +15,6 @@ def makeModelDir(model_name):
         subprocess.run(['mkdir', 'models'], stdout = subprocess.PIPE, stderr = subprocess.PIPE)
         subprocess.run(['mkdir', model_name], cwd='models', stdout = subprocess.PIPE, stderr = subprocess.PIPE)
 
-
-
 def generateCpp(dimx, dimu, dimc, fxu, Cxu, phix, hx, hu, model_name):
     f_model_cpp = open('models/'+str(model_name)+'/nmpc_model.cpp', 'w')
     f_model_cpp.writelines([linecache.getline('AutoGenU/.cpp_templates/nmpc_model.cpp', i) for i in range(0,11)])
@@ -30,7 +28,6 @@ def generateCpp(dimx, dimu, dimc, fxu, Cxu, phix, hx, hu, model_name):
     f_model_cpp.write('}')
     f_model_cpp.close()
 
-
 def generateHpp(dimx, dimu, dimc, scalar_params, array_params, model_name):
     f_model_hpp = open('models/'+str(model_name)+'/nmpc_model.hpp', 'w')
     f_model_hpp.writelines([linecache.getline('AutoGenU/.cpp_templates/nmpc_model.hpp', i) for i in range(0,18)])
@@ -43,7 +40,6 @@ def generateHpp(dimx, dimu, dimc, scalar_params, array_params, model_name):
     f_model_hpp.writelines(['    double ' + str(array_params[i][0]) + '[' + str(array_params[i][1]) + ']' + ' = ' + str(array_params[i][2]) + ';\n' for i in range(len(array_params))])
     f_model_hpp.writelines([linecache.getline('AutoGenU/.cpp_templates/nmpc_model.hpp', i) for i in range(18,51)])
     f_model_hpp.close()
-
 
 def generateMain(solver_index, solver_params, initialization_params, simulation_params, model_name, saturation_list=None):
     # include header
@@ -60,15 +56,11 @@ def generateMain(solver_index, solver_params, initialization_params, simulation_
         f_main.write('#include "multiple_shooting_cgmres_with_saturation.hpp"\n')
         f_main.write('#include "multiple_shooting_cgmres_with_saturation_simulator.hpp"\n')
     f_main.write('\n')
-
     f_main.write('int main()\n')
     f_main.write('{\n')
-
-    # define NMPCModel 
     f_main.write('    // Define the model in NMPC.\n')
     f_main.write('    NMPCModel nmpc_model;\n')
     f_main.write('\n')
-
     # define solver
     f_main.write('    // Define the solver.\n')
     if(solver_index == 1):
@@ -82,7 +74,6 @@ def generateMain(solver_index, solver_params, initialization_params, simulation_
         f_main.write('    MultipleShootingCGMRESWithSaturation nmpc_solver(control_input_saturation_seq, '+str(solver_params.T_f)+', '+str(solver_params.alpha)+', '+str(solver_params.horizon_division_num)+', '+str(solver_params.difference_increment)+', '+str(solver_params.zeta)+', '+str(solver_params.max_dim_krylov)+');\n')
     f_main.write('\n')
     f_main.write('\n')
-
     # initial state
     f_main.write('    // Set the initial state.\n')
     f_main.write('    double initial_state['+str(len(simulation_params.initial_state))+'] = {')
@@ -90,7 +81,6 @@ def generateMain(solver_index, solver_params, initialization_params, simulation_
         f_main.write(str(simulation_params.initial_state[i]) + ', ')
     f_main.write(str(simulation_params.initial_state[-1]) + '};\n')    
     f_main.write('\n')
-
     # initial guess solution
     f_main.write('    // Set the initial guess of the solution.\n')
     f_main.write('    double initial_guess_solution['+str(len(initialization_params.initial_guess_solution))+'] = {')
@@ -106,7 +96,6 @@ def generateMain(solver_index, solver_params, initialization_params, simulation_
         f_main.write(str(initialization_params.initial_guess_lagrange_multiplier[-1]) + '};\n')    
     f_main.write('\n')
     f_main.write('\n')
-
     # initialization of the solution of the C/GMRES method
     f_main.write('    // Initialize the solution of the C/GMRES method.\n')
     if solver_index == 3 and initialization_params.initial_guess_lagrange_multiplier != None:
@@ -114,15 +103,12 @@ def generateMain(solver_index, solver_params, initialization_params, simulation_
     else:
         f_main.write('    nmpc_solver.initSolution('+str(simulation_params.initial_time)+', initial_state, initial_guess_solution, '+str(initialization_params.convergence_radius)+', '+str(initialization_params.maximum_itr_newton)+');\n')
     f_main.write('\n')
-
     f_main.write('    // Perform a numerical simulation.\n')
     f_main.write('    nmpcsim::simulation(nmpc_solver, initial_state, '+str(simulation_params.initial_time)+', '+str(simulation_params.simulation_time)+', '+str(simulation_params.sampling_time)+', "'+model_name+'");\n')
     f_main.write('\n')
-
     f_main.write('    return 0;\n')
     f_main.write('}\n')
     f_main.close()
-
 
 def generateCMake(solver_index, model_name):
     f_cmake = open('CMakeLists.txt', 'w')
@@ -144,7 +130,6 @@ def generateCMake(solver_index, model_name):
     f_cmake.write('\n')
     f_cmake.write('add_subdirectory(${MODEL_DIR})\n')
     f_cmake.write('\n')
-
     if(solver_index == 1):
         f_cmake.write('add_library(\n')
         f_cmake.write('    cgmres\n')
@@ -246,23 +231,22 @@ def generateCMake(solver_index, model_name):
         f_cmake.write('    ${SOLVER_DIR}\n')
         f_cmake.write('    ${SIMULATOR_DIR}\n')
         f_cmake.write(')\n')
-
     f_cmake.write('\n')
     f_cmake.write('\n')
     if(platform.system() == 'Windows'):
         f_cmake.write('add_executable(main ${MODEL_DIR}/main.cpp)\n')
         f_cmake.write('target_link_libraries(main\n')
         f_cmake.write('    PRIVATE\n')
-        f_cmake.write('    nmpcmodel\n')
         if(solver_index == 1):
-            f_cmake.write('    cgmres\n')
             f_cmake.write('    cgmres_simulator\n')
+            f_cmake.write('    cgmres\n')
         elif(solver_index == 2):
-            f_cmake.write('    multiple_shooting_cgmres\n')
             f_cmake.write('    multiple_shooting_cgmres_simulator\n')
+            f_cmake.write('    multiple_shooting_cgmres\n')
         elif(solver_index == 3):
-            f_cmake.write('    multiple_shooting_cgmres_with_saturation\n')
             f_cmake.write('    multiple_shooting_cgmres_with_saturation_simulator\n')
+            f_cmake.write('    multiple_shooting_cgmres_with_saturation\n')
+        f_cmake.write('    nmpcmodel\n')
         f_cmake.write(')\n')
         f_cmake.write('target_compile_options(\n')
         f_cmake.write('    main\n')
@@ -273,19 +257,18 @@ def generateCMake(solver_index, model_name):
         f_cmake.write('add_executable(a.out ${MODEL_DIR}/main.cpp)\n')
         f_cmake.write('target_link_libraries(a.out\n')
         f_cmake.write('    PRIVATE\n')
-        f_cmake.write('    nmpcmodel\n')
         if(solver_index == 1):
-            f_cmake.write('    cgmres\n')
             f_cmake.write('    cgmres_simulator\n')
+            f_cmake.write('    cgmres\n')
         elif(solver_index == 2):
-            f_cmake.write('    multiple_shooting_cgmres\n')
             f_cmake.write('    multiple_shooting_cgmres_simulator\n')
+            f_cmake.write('    multiple_shooting_cgmres\n')
         elif(solver_index == 3):
-            f_cmake.write('    multiple_shooting_cgmres_with_saturation\n')
             f_cmake.write('    multiple_shooting_cgmres_with_saturation_simulator\n')
+            f_cmake.write('    multiple_shooting_cgmres_with_saturation\n')
+        f_cmake.write('    nmpcmodel\n')
         f_cmake.write(')\n')
     f_cmake.close()
-
 
 def generateCMakeForModel(model_name):
     f_cmake = open('models/'+str(model_name)+'/CMakeLists.txt', 'w')

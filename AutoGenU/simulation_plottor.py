@@ -1,50 +1,16 @@
+from AutoGenU import simulation_conditions as simcon
 import numpy as np
 import seaborn as sns
-import re
-
-
-class SimulationConditions:
-    def __init__(self, file_header):
-        # load simulation conditions
-        simulation_conditions = open(file_header + '_conditions' + '.dat')
-        lines = simulation_conditions.readlines()
-
-        # load float simlation time
-        if re.search(r'.',lines[1]):
-            pattern = r'([0-9]+\.?[0-9]*)' 
-            self.__simulation_time = float(re.findall(pattern, lines
-            [1])[0])
-        # load int simulation time
-        else:
-            pattern = r'([0-9])' 
-            self.__simulation_time = float(re.findall(pattern, lines[1])[0])
-
-        # load float sampling time
-        if re.search(r'.',lines[3]):
-            pattern = r'([0-9]+\.?[0-9]*)' 
-            self.__sampling_period = float(re.findall(pattern, lines
-            [3])[0])
-        # load int sampling time
-        else:
-            pattern = r'([0-9])' 
-            self.__sampling_period = float(re.findall(pattern, lines[3])[0])
-
-    def getSimulationTime(self):
-        return self.__simulation_time
-
-    def getSamplingPeriod(self):
-        return self.__sampling_period
 
 
 class SimulationPlottor:
     def __init__(self, model_name):
-        # check the file_header
         # load data
         self.file_header = 'models/' + model_name + '/simulation_result/' + model_name
         self.__time_series_state = np.genfromtxt(self.file_header + '_state' + '.dat')
         self.__time_series_control_input = np.genfromtxt(self.file_header + '_control_input' + '.dat')
         self.__time_series_error = np.genfromtxt(self.file_header + '_error' + '.dat')
-        self.__simulation_conditions = SimulationConditions(self.file_header)
+        self.__simulation_conditions = simcon.SimulationConditions(self.file_header)
         self.__time_sequence = np.linspace(0, self.__simulation_conditions.getSimulationTime(), self.__time_series_state.shape[0])
 
         # replace NaN with 0
@@ -166,3 +132,4 @@ class SimulationPlottor:
 
         # save the graph
         sns.mpl.pyplot.savefig(self.file_header + '.pdf', bbox_inches="tight", pad_inches=0.1)
+        print('The graph of the simlation results is generated at ' + self.file_header + '.pdf\n')
