@@ -11,7 +11,7 @@ The following C/GMRES based solvers are provided:
 - C++11 (MinGW and PATH to it are required for Windows users)
 - CMake
 - Python 3, Jupyter Lab or Jupyter Notebook, SymPy (to generate `nmpc_model.hpp`, `nmpc_model.cpp`, `main.cpp`, and `CMakeLists.txt` by `AutoGenU.ipynb`)
-- Python 3, NumPy, seaborn (to plot simulation data on `AutoGenU.ipynb`)
+- Python 3, NumPy, seaborn, Matplotlib(to plot simulation data on `AutoGenU.ipynb`)
 
 
 # Usage
