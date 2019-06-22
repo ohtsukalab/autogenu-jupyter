@@ -37,15 +37,18 @@ In addition to these files, you have to write `CMakeLists.txt` to build source f
 # Demos
 Demos are presented in `pendubot.ipynb`, `cartpole.ipynb`, and `hexacopter`. You can obtain the following simulation results jusy by runnig these `.ipynb` files.
 
-### Pendubot using `MultipleShootingCGMRESWithSaturation`
+### Pendubot  
+Inverting a pendubot using `MultipleShootingCGMRESWithSaturation`
 ![pendubot_gif](https://raw.githubusercontent.com/wiki/mayataka/CGMRES/images/pendubot.gif)
 ![pendubot_png](https://raw.github.com/wiki/mayataka/CGMRES/images/pendubot.png)
 
-### Cartpole using `ContinuationGMRES`
+### Cartpole
+Inverting a cartpole using `ContinuationGMRES`
 ![cartpole_gif](https://raw.githubusercontent.com/wiki/mayataka/CGMRES/images/cartpole.gif)
 ![cartpole_png](https://raw.github.com/wiki/mayataka/CGMRES/images/cartpole.png)
 
-### Hexacopter using `ContinuationGMRES`
+### Hexacopter 
+Trajectory tracking of a hexacopter using `MultipleShootingCGMRES`
 ![hexacopter_gif](https://raw.githubusercontent.com/wiki/mayataka/CGMRES/images/hexacopter.gif)
 ![hexacopter_png](https://raw.github.com/wiki/mayataka/CGMRES/images/hexacopter.png)
 
