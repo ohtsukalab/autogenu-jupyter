@@ -2,16 +2,16 @@
 This project provides the continuation/GMRES method (C/GMRES method) based solvers for nonlinear model predictive control (NMPC) and an automatic code generator for NMPC, called AutoGenU.
 
 The following C/GMRES based solvers are provided: 
-- The original C/GMRES method (single shooting)
-- The multiple shooting based C/GMRES method
-- The multiple shooting based C/GMRES method with condensing of variables with respect to the constraints on the saturation function on the control input
+- `ContinuationGMRES` : The original C/GMRES method (single shooting)
+- `MultipleShootingCGMRES` : The multiple shooting based C/GMRES method
+- `MultipleShootingCGMRESWithSaturation` : The multiple shooting based C/GMRES method with condensing of variables with respect to the constraints on the saturation function on the control input
 
 
 # Requirement
 - C++11 (MinGW and PATH to it are required for Windows users)
 - CMake
 - Python 3, Jupyter Lab or Jupyter Notebook, SymPy (to generate `nmpc_model.hpp`, `nmpc_model.cpp`, `main.cpp`, and `CMakeLists.txt` by `AutoGenU.ipynb`)
-- Python 3, NumPy, seaborn, Matplotlib(to plot simulation data on `AutoGenU.ipynb`)
+- Python 3, NumPy, Matplotlib, seaborn (to plot simulation data on `AutoGenU.ipynb`)
 
 
 # Usage
@@ -35,14 +35,20 @@ In addition to these files, you have to write `CMakeLists.txt` to build source f
 
 
 # Demos
-- Inverting a pendubot using the multiple shooting based C/GMRES method
-![pendubot_multiple_shooting_gif](https://raw.githubusercontent.com/wiki/mayataka/CGMRES/images/pendubot_multiple_shooting.gif)
-![pendubot_multiple_shooting_png](https://raw.github.com/wiki/mayataka/CGMRES/images/pendubot_multiple_shooting.png)
+Demos are presented in `pendubot.ipynb`, `cartpole.ipynb`, and `hexacopter`. You can obtain the following simulation results jusy by runnig these `.ipynb` files.
 
+### Pendubot using `MultipleShootingCGMRESWithSaturation`
+![pendubot_gif](https://raw.githubusercontent.com/wiki/mayataka/CGMRES/images/pendubot.gif)
+![pendubot_png](https://raw.github.com/wiki/mayataka/CGMRES/images/pendubot.png)
 
-- Inverting a pendubot using the multiple shooting based C/GMRES method with condensing of variables with respect to the constraints on the saturation function on the control input
-![pendubot_with_saturation_gif](https://raw.githubusercontent.com/wiki/mayataka/CGMRES/images/pendubot_with_saturation.gif)
-![pendubot_with_saturation_png](https://raw.github.com/wiki/mayataka/CGMRES/images/pendubot_with_saturation.png)
+### Cartpole using `ContinuationGMRES`
+![cartpole_gif](https://raw.githubusercontent.com/wiki/mayataka/CGMRES/images/cartpole.gif)
+![cartpole_png](https://raw.github.com/wiki/mayataka/CGMRES/images/cartpole.png)
+
+### Hexacopter using `ContinuationGMRES`
+![hexacopter_gif](https://raw.githubusercontent.com/wiki/mayataka/CGMRES/images/hexacopter.gif)
+![hexacopter_png](https://raw.github.com/wiki/mayataka/CGMRES/images/hexacopter.png)
+
 
 # License
 MIT
