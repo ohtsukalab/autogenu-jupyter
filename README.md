@@ -35,20 +35,20 @@ In addition to these files, you have to write `CMakeLists.txt` to build source f
 
 
 # Demos
-Demos are presented in `pendubot.ipynb`, `cartpole.ipynb`, and `hexacopter`. You can obtain the following simulation results jusy by runnig these `.ipynb` files.
+Demos are presented in `pendubot.ipynb`, `cartpole.ipynb`, and `hexacopter.ipynb`. You can obtain the following simulation results jusy by runnig these `.ipynb` files. The details of the each models and formulations are described in each `.ipynb` files.
 
 ### Pendubot  
-Inverting a pendubot using `MultipleShootingCGMRESWithSaturation`
+Inverting a pendubot using `MultipleShootingCGMRESWithSaturation`.
 ![pendubot_gif](https://raw.githubusercontent.com/wiki/mayataka/CGMRES/images/pendubot.gif)
 ![pendubot_png](https://raw.github.com/wiki/mayataka/CGMRES/images/pendubot.png)
 
 ### Cartpole
-Inverting a cartpole using `ContinuationGMRES`
+Inverting a cartpole using `ContinuationGMRES`.
 ![cartpole_gif](https://raw.githubusercontent.com/wiki/mayataka/CGMRES/images/cartpole.gif)
 ![cartpole_png](https://raw.github.com/wiki/mayataka/CGMRES/images/cartpole.png)
 
 ### Hexacopter 
-Trajectory tracking of a hexacopter using `MultipleShootingCGMRES`
+Trajectory tracking of a hexacopter using `MultipleShootingCGMRES`.
 ![hexacopter_gif](https://raw.githubusercontent.com/wiki/mayataka/CGMRES/images/hexacopter.gif)
 ![hexacopter_png](https://raw.github.com/wiki/mayataka/CGMRES/images/hexacopter.png)
 
