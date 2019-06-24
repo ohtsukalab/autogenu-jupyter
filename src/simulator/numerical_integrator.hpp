@@ -10,10 +10,7 @@
 
 
 // Supports numerical integration of the state equation of the system described in nmpc_model.hpp for numerical simnulations.
-class NumericalIntegrator{
-private:
-    NMPCModel model_;
-
+class NumericalIntegrator {
 public:
     NumericalIntegrator();
 
@@ -22,6 +19,9 @@ public:
 
     // The four-step Runge-Kutta-Gill method for the state equation.
     void rungeKuttaGill(const double current_time, const double* current_state_vec, const double* control_input_vec, const double integration_length, double* integrated_state);
+
+private:
+    NMPCModel model_;
 };
 
 

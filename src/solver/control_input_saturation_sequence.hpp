@@ -12,22 +12,13 @@
 
 // Stores sequence of parameters representing the saturation on the control input. 
 class ControlInputSaturationSequence{
-private:
-    std::vector<ControlInputSaturation> control_input_saturation_seq_;
-
-    // Returns the number of the saturation that has the same index if it exists in control_input_saturation_seq_, and returns the total number of saturations otherwise.
-    int findSameIndex(const int index);
-
-
 public:
     // Appends a saturation that has parameters in arguments to control_input_saturation_seq_. If there is the saturation that has the same index in arguments, overwrite its min_, max_, dummy_weight_, and quadratic_weight.
     void appendControlInputSaturation(const int index, const double min, const double max, const double dummy_weight, const double quadratic_weight);
     void appendControlInputSaturation(const int index, const double min, const double max, const double dummy_weight);
 
-
     // Returns the total number of saturations.
     int dimSaturation() const;
-
 
     inline int index(const int num_saturation) const{
         return control_input_saturation_seq_[num_saturation].index();
@@ -48,6 +39,12 @@ public:
     inline double quadratic_weight(const int num_saturation) const{
         return control_input_saturation_seq_[num_saturation].quadratic_weight();
     }
+
+
+private:
+    std::vector<ControlInputSaturation> control_input_saturation_seq_;
+    // Returns the number of the saturation that has the same index if it exists in control_input_saturation_seq_, and returns the total number of saturations otherwise.
+    int findSameIndex(const int index);
 };
 
 

@@ -1,7 +1,7 @@
-#include "cgmres_simulator.hpp"
+#include "multiple_shooting_cgmres_with_saturation_simulator_for_windows.hpp"
 
 
-void nmpcsim::simulation(ContinuationGMRES& nmpc_solver, const double* initial_state_vec, const double start_time, const double end_time, const double sampling_period, const std::string savefile_name)
+void nmpcsim::simulation(MultipleShootingCGMRESWithSaturation& nmpc_solver, const double* initial_state_vec, const double start_time, const double end_time, const double sampling_period, const std::string savefile_name)
 {
     NMPCModel model;
     NumericalIntegrator integrator;
@@ -20,7 +20,6 @@ void nmpcsim::simulation(ContinuationGMRES& nmpc_solver, const double* initial_s
         current_state_vec[i] = initial_state_vec[i];
     }
     nmpc_solver.getControlInput(control_input_vec);
-
     std::cout << "Start simulation" << std::endl;
     for(double current_time=start_time; current_time<end_time; current_time+= sampling_period){
         saveData(model.dimState(), model.dimControlInput(), state_data, control_input_data, error_data, current_time, current_state_vec, control_input_vec, nmpc_solver.getError(current_time, current_state_vec));
@@ -39,14 +38,14 @@ void nmpcsim::simulation(ContinuationGMRES& nmpc_solver, const double* initial_s
         total_time += step_time;
 
         for(int i=0; i<model.dimState(); i++){
-            current_state_vec[i] = next_state_vec[i];
+            current_state_vec[i] = next_state_vec[i];    
         }
     }
     std::cout << "End simulation" << std::endl;
     std::cout << "Total CPU time for control update: " << total_time << " [sec]" << std::endl;
     std::cout << "sampling time: " << sampling_period << " [sec]" << std::endl;
     std::cout << "CPU time for per control update: " << total_time/((int)( (end_time-start_time)/(sampling_period))) << " [sec]" << std::endl;
- 
+
     // Save simulation conditions.
     conditions_data << "simulation name: " << savefile_name << "\n";
     conditions_data << "simulation time: " << end_time-start_time << " [sec]\n";

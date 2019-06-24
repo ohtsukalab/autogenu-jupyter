@@ -11,8 +11,8 @@
 #include <chrono>
 #include "nmpc_model.hpp"
 #include "numerical_integrator.hpp"
-#include "save_simulation_data.hpp"
-#include "multiple_shooting_cgmres_with_saturation.hpp"
+#include "save_simulation_data_for_windows.hpp"
+#include "multiple_shooting_cgmres_with_saturation_for_windows.hpp"
 
 
 // Simulates NMPC using the multiple shooting based C/GMRES method.

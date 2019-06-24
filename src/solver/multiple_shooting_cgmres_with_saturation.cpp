@@ -28,7 +28,7 @@ inline void MultipleShootingCGMRESWithSaturation::computeSaturationOptimality(co
 inline void MultipleShootingCGMRESWithSaturation::computeOptimalityErrorforControlInputAndConstraints(const double time_param, const double* state_vec, const double* control_input_and_constraints_seq, double const* const* state_mat, double const* const* lambda_mat, double const* const* saturation_lagrange_multiplier_mat, double* optimality_for_control_input_and_constraints)
 {
     // Set and discretize the horizon.
-    double horizon_length = horizon_max_length_ * (1.0 - std::exp(- alpha_ * (time_param - initial_time_)));
+    double horizon_length = T_f_ * (1.0 - std::exp(- alpha_ * (time_param - initial_time_)));
     double delta_tau = horizon_length / horizon_division_num_;
 
     // Compute optimality error for contol input and constraints.
@@ -46,7 +46,7 @@ inline void MultipleShootingCGMRESWithSaturation::computeOptimalityErrorforContr
 inline void MultipleShootingCGMRESWithSaturation::computeOptimalityErrorforStateAndLambda(const double time_param, const double* state_vec, const double* control_input_and_constraints_seq, double const* const* state_mat, double const* const* lambda_mat, double** optimality_for_state, double** optimality_for_lambda)
 {
     // Set and discretize the horizon.
-    double horizon_length = horizon_max_length_ * (1.0 - std::exp(- alpha_ * (time_param - initial_time_)));
+    double horizon_length = T_f_ * (1.0 - std::exp(- alpha_ * (time_param - initial_time_)));
     double delta_tau = horizon_length / horizon_division_num_;
 
     // Compute optimality error for state.
@@ -80,7 +80,7 @@ inline void MultipleShootingCGMRESWithSaturation::computeOptimalityErrorforState
 inline void MultipleShootingCGMRESWithSaturation::computeStateAndLambda(const double time_param, const double* state_vec, const double* control_input_and_constraints_seq, double const* const* optimality_for_state, double const* const* optimality_for_lambda, double** state_mat, double** lambda_mat)
 {
     // Set and discretize the horizon.
-    double horizon_length = horizon_max_length_ * (1.0 - std::exp(- alpha_ * (time_param - initial_time_)));
+    double horizon_length = T_f_ * (1.0 - std::exp(- alpha_ * (time_param - initial_time_)));
     double delta_tau = horizon_length / horizon_division_num_;
 
     // Compute the sequence of state under the error for state.
@@ -164,12 +164,12 @@ void MultipleShootingCGMRESWithSaturation::bFunc(const double time_param, const 
     computeOptimalityErrorforStateAndLambda(time_param, state_vec, current_solution_vec, state_mat_, lambda_mat_, state_error_mat_, lambda_error_mat_);
     for(int i=0; i<horizon_division_num_; i++){
         for(int j=0; j<dim_state_; j++){
-            state_error_mat_1_[i][j] = (1-difference_increment_*zeta_)*state_error_mat_[i][j];
+            state_error_mat_1_[i][j] = (1-finite_diff_step_*zeta_)*state_error_mat_[i][j];
         }
     }
     for(int i=0; i<horizon_division_num_; i++){
         for(int j=0; j<dim_state_; j++){
-            lambda_error_mat_1_[i][j] = (1-difference_increment_*zeta_)*lambda_error_mat_[i][j];
+            lambda_error_mat_1_[i][j] = (1-finite_diff_step_*zeta_)*lambda_error_mat_[i][j];
         }
     }
     computeStateAndLambda(incremented_time_, incremented_state_vec_, current_solution_vec, state_error_mat_1_, lambda_error_mat_1_, incremented_state_mat_, incremented_lambda_mat_);
@@ -189,25 +189,25 @@ void MultipleShootingCGMRESWithSaturation::bFunc(const double time_param, const 
     multiplySaturationErrorInverse(current_solution_vec, dummy_input_mat_, saturation_lagrange_multiplier_mat_, dummy_input_mat_1_, saturation_lagrange_multiplier_mat_1_, dummy_error_mat_1_, saturation_error_mat_1_);
     for(int i=0; i<horizon_division_num_; i++){
         for(int j=0; j<dim_saturation_; j++){
-            incremented_saturation_lagrange_multiplier_mat_[i][j] = saturation_lagrange_multiplier_mat_[i][j] + difference_increment_*saturation_error_mat_1_[i][j];
+            incremented_saturation_lagrange_multiplier_mat_[i][j] = saturation_lagrange_multiplier_mat_[i][j] + finite_diff_step_*saturation_error_mat_1_[i][j];
         }
     }
     computeOptimalityErrorforControlInputAndConstraints(incremented_time_, incremented_state_vec_, current_solution_vec, incremented_state_mat_, incremented_lambda_mat_, incremented_saturation_lagrange_multiplier_mat_, control_input_and_constraints_error_seq_3_);
 
     for(int i=0; i<dim_control_input_and_constraints_seq_; i++){
-        incremented_control_input_and_constraints_seq_[i] = current_solution_vec[i] + difference_increment_*control_input_and_constraints_update_seq_[i];
+        incremented_control_input_and_constraints_seq_[i] = current_solution_vec[i] + finite_diff_step_*control_input_and_constraints_update_seq_[i];
     }
     computeStateAndLambda(incremented_time_, incremented_state_vec_, incremented_control_input_and_constraints_seq_, state_error_mat_1_, lambda_error_mat_1_, incremented_state_mat_, incremented_lambda_mat_);
     computeSaturationOptimalityDifference(current_solution_vec, dummy_input_mat_, saturation_lagrange_multiplier_mat_, control_input_and_constraints_update_seq_, saturation_update_mat_);
     for(int i=0; i<horizon_division_num_; i++){
         for(int j=0; j<dim_saturation_; j++){
-            incremented_saturation_lagrange_multiplier_mat_[i][j] = saturation_lagrange_multiplier_mat_[i][j] - difference_increment_*saturation_update_mat_[i][j];
+            incremented_saturation_lagrange_multiplier_mat_[i][j] = saturation_lagrange_multiplier_mat_[i][j] - finite_diff_step_*saturation_update_mat_[i][j];
         }
     }
     computeOptimalityErrorforControlInputAndConstraints(incremented_time_, incremented_state_vec_, incremented_control_input_and_constraints_seq_, incremented_state_mat_, incremented_lambda_mat_, incremented_saturation_lagrange_multiplier_mat_, control_input_and_constraints_error_seq_2_);
 
     for(int i=0; i<dim_control_input_and_constraints_seq_; i++){
-        b_vec[i] = (1/difference_increment_ - zeta_) * control_input_and_constraints_error_seq_[i] - control_input_and_constraints_error_seq_3_[i]/difference_increment_ - (control_input_and_constraints_error_seq_2_[i]-control_input_and_constraints_error_seq_1_[i])/difference_increment_;
+        b_vec[i] = (1/finite_diff_step_ - zeta_) * control_input_and_constraints_error_seq_[i] - control_input_and_constraints_error_seq_3_[i]/finite_diff_step_ - (control_input_and_constraints_error_seq_2_[i]-control_input_and_constraints_error_seq_1_[i])/finite_diff_step_;
     }
 }
 
@@ -216,24 +216,24 @@ void MultipleShootingCGMRESWithSaturation::axFunc(const double time_param, const
 {
 
     for(int i=0; i<dim_control_input_and_constraints_seq_; i++){
-        incremented_control_input_and_constraints_seq_[i] = current_solution_vec[i] + difference_increment_*direction_vec[i];
+        incremented_control_input_and_constraints_seq_[i] = current_solution_vec[i] + finite_diff_step_*direction_vec[i];
     }
     computeStateAndLambda(incremented_time_, incremented_state_vec_, incremented_control_input_and_constraints_seq_, state_error_mat_1_, lambda_error_mat_1_, incremented_state_mat_, incremented_lambda_mat_);
     computeSaturationOptimalityDifference(current_solution_vec, dummy_input_mat_, saturation_lagrange_multiplier_mat_, direction_vec, saturation_update_mat_);
     for(int i=0; i<horizon_division_num_; i++){
         for(int j=0; j<dim_saturation_; j++){
-            incremented_saturation_lagrange_multiplier_mat_[i][j] = saturation_lagrange_multiplier_mat_[i][j] - difference_increment_*saturation_update_mat_[i][j];
+            incremented_saturation_lagrange_multiplier_mat_[i][j] = saturation_lagrange_multiplier_mat_[i][j] - finite_diff_step_*saturation_update_mat_[i][j];
         }
     }
     computeOptimalityErrorforControlInputAndConstraints(incremented_time_, incremented_state_vec_, incremented_control_input_and_constraints_seq_, incremented_state_mat_, incremented_lambda_mat_, incremented_saturation_lagrange_multiplier_mat_, control_input_and_constraints_error_seq_2_);
 
     for(int i=0; i<dim_control_input_and_constraints_seq_; i++){
-        ax_vec[i] = (control_input_and_constraints_error_seq_2_[i] - control_input_and_constraints_error_seq_1_[i])/difference_increment_;
+        ax_vec[i] = (control_input_and_constraints_error_seq_2_[i] - control_input_and_constraints_error_seq_1_[i])/finite_diff_step_;
     }
 }
 
 
-MultipleShootingCGMRESWithSaturation::MultipleShootingCGMRESWithSaturation(const ControlInputSaturationSequence saturation_seq, const double horizon_max_length, const double alpha, const int horizon_division_num, const double difference_increment, const double zeta, const int dim_krylov) : MatrixFreeGMRES(), 
+MultipleShootingCGMRESWithSaturation::MultipleShootingCGMRESWithSaturation(const ControlInputSaturationSequence saturation_seq, const double horizon_max_length, const double alpha, const int horizon_division_num, const double finite_diff_step, const double zeta, const int dim_krylov) : MatrixFreeGMRES(), 
     model_(), 
     saturation_seq_(saturation_seq), 
     dim_state_(model_.dimState()), 
@@ -246,10 +246,10 @@ MultipleShootingCGMRESWithSaturation::MultipleShootingCGMRESWithSaturation(const
     horizon_division_num_(horizon_division_num), 
     dim_krylov_(dim_krylov), 
     initial_time_(0), 
-    horizon_max_length_(horizon_max_length), 
+    T_f_(horizon_max_length), 
     alpha_(alpha), 
     zeta_(zeta), 
-    difference_increment_(difference_increment), 
+    finite_diff_step_(finite_diff_step), 
     incremented_time_(0), 
     dx_vec_(linearfunc::newVector(dim_state_)), 
     incremented_state_vec_(linearfunc::newVector(dim_state_)), 
@@ -325,7 +325,7 @@ MultipleShootingCGMRESWithSaturation::~MultipleShootingCGMRESWithSaturation()
 void MultipleShootingCGMRESWithSaturation::initSolution(const double initial_time, const double* initial_state_vec, const double* initial_guess_input_vec, const double convergence_radius, const int max_iteration)
 {
     double initial_solution_vec[dim_control_input_and_constraints_+2*dim_saturation_], initial_lambda_vec[dim_state_], initial_guess_lagrange_multiplier_vec[dim_saturation_];
-    InitCGMRESWithSaturation initializer(saturation_seq_, difference_increment_, dim_krylov_);
+    InitCGMRESWithSaturation initializer(saturation_seq_, finite_diff_step_, dim_krylov_);
 
     // Intialize the solution
     initial_time_ = initial_time;
@@ -377,7 +377,7 @@ void MultipleShootingCGMRESWithSaturation::initSolution(const double initial_tim
 void MultipleShootingCGMRESWithSaturation::initSolution(const double initial_time, const double* initial_state_vec, const double* initial_guess_input_vec, const double initial_guess_lagrange_multiplier, const double convergence_radius, const int max_iteration)
 {
     double initial_solution_vec[dim_control_input_and_constraints_+2*dim_saturation_], initial_lambda_vec[dim_state_], initial_guess_lagrange_multiplier_vec[dim_saturation_];
-    InitCGMRESWithSaturation initializer(saturation_seq_, difference_increment_, dim_krylov_);
+    InitCGMRESWithSaturation initializer(saturation_seq_, finite_diff_step_, dim_krylov_);
 
     // Intialize the solution
     initial_time_ = initial_time;
@@ -429,7 +429,7 @@ void MultipleShootingCGMRESWithSaturation::initSolution(const double initial_tim
 void MultipleShootingCGMRESWithSaturation::initSolution(const double initial_time, const double* initial_state_vec, const double* initial_guess_input_vec, const double* initial_guess_lagrange_multiplier_vec, const double convergence_radius, const int max_iteration)
 {
     double initial_solution_vec[dim_control_input_and_constraints_+2*dim_saturation_], initial_lambda_vec[dim_state_];
-    InitCGMRESWithSaturation initializer(saturation_seq_, difference_increment_, dim_krylov_);
+    InitCGMRESWithSaturation initializer(saturation_seq_, finite_diff_step_, dim_krylov_);
 
     // Intialize the solution
     initial_time_ = initial_time;
@@ -478,40 +478,40 @@ void MultipleShootingCGMRESWithSaturation::initSolution(const double initial_tim
 void MultipleShootingCGMRESWithSaturation::controlUpdate(const double current_time, const double sampling_period, const double* current_state_vec, double* optimal_control_input_vec)
 {
     // Predict the incremented state.
-    incremented_time_ = current_time + difference_increment_;
+    incremented_time_ = current_time + finite_diff_step_;
     model_.stateFunc(current_time, current_state_vec, control_input_and_constraints_seq_, dx_vec_);
     for(int i=0; i<dim_state_; i++){
-        incremented_state_vec_[i] = current_state_vec[i] + difference_increment_*dx_vec_[i];
+        incremented_state_vec_[i] = current_state_vec[i] + finite_diff_step_*dx_vec_[i];
     }
 
     forwardDifferenceGMRES(current_time, current_state_vec, control_input_and_constraints_seq_, control_input_and_constraints_update_seq_);
 
     // Update state_mat_ and lamdba_mat_ by the difference approximation.
     for(int i=0; i<dim_control_input_and_constraints_seq_; i++){
-        incremented_control_input_and_constraints_seq_[i] = control_input_and_constraints_seq_[i] + difference_increment_*control_input_and_constraints_update_seq_[i];
+        incremented_control_input_and_constraints_seq_[i] = control_input_and_constraints_seq_[i] + finite_diff_step_*control_input_and_constraints_update_seq_[i];
     }
     for(int i=0; i<horizon_division_num_; i++){
         for(int j=0; j<dim_state_; j++){
-            state_error_mat_1_[i][j] = (1-difference_increment_*zeta_)*state_error_mat_[i][j];
+            state_error_mat_1_[i][j] = (1-finite_diff_step_*zeta_)*state_error_mat_[i][j];
         }
     }
     for(int i=0; i<horizon_division_num_; i++){
         for(int j=0; j<dim_state_; j++){
-            lambda_error_mat_1_[i][j] = (1-difference_increment_*zeta_)*lambda_error_mat_[i][j];
+            lambda_error_mat_1_[i][j] = (1-finite_diff_step_*zeta_)*lambda_error_mat_[i][j];
         }
     }
     computeStateAndLambda(incremented_time_, incremented_state_vec_, incremented_control_input_and_constraints_seq_, state_error_mat_1_, lambda_error_mat_1_, incremented_state_mat_, incremented_lambda_mat_);
 
-    // state_mat_ += sampling_period * (incremented_state_mat_ - state_mat_)/difference_increment_;
+    // state_mat_ += sampling_period * (incremented_state_mat_ - state_mat_)/finite_diff_step_;
     for(int i=0; i<horizon_division_num_; i++){
         for(int j=0; j<dim_state_; j++){
-            state_mat_[i][j] += sampling_period * (incremented_state_mat_[i][j] - state_mat_[i][j])/difference_increment_;;
+            state_mat_[i][j] += sampling_period * (incremented_state_mat_[i][j] - state_mat_[i][j])/finite_diff_step_;;
         }
     }
-    // lambda_mat_ += sampling_period * (incremented_lambda_mat_ - lambda_mat_)/difference_increment_;
+    // lambda_mat_ += sampling_period * (incremented_lambda_mat_ - lambda_mat_)/finite_diff_step_;
     for(int i=0; i<horizon_division_num_; i++){
         for(int j=0; j<dim_state_; j++){
-            lambda_mat_[i][j] += sampling_period * (incremented_lambda_mat_[i][j] - lambda_mat_[i][j])/difference_increment_;
+            lambda_mat_[i][j] += sampling_period * (incremented_lambda_mat_[i][j] - lambda_mat_[i][j])/finite_diff_step_;
         }
     }
 
