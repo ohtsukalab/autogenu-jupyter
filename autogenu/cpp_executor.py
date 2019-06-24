@@ -10,7 +10,7 @@ def set_cmake(model_name, MSYS=False):
             MSYS: An optional variable, which should be true when you use 
                 Windows and MSYS is default compiler.
     """
-    if(platform.system() == 'Windows'):
+    if platform.system() == 'Windows':
         subprocess.run(
             ['mkdir', 'build'], 
             cwd='models/'+model_name, 
@@ -18,7 +18,7 @@ def set_cmake(model_name, MSYS=False):
             stderr=subprocess.PIPE, 
             shell=True
         )
-        if(MSYS == True):
+        if MSYS:
             proc = subprocess.Popen(
                 ['cmake', '../../..', '-G', 'MSYS Makefiles'], 
                 cwd='models/'+model_name+'/build', 
@@ -62,7 +62,7 @@ def remove_build_dir(model_name):
         Args: 
             model_name: A string representing the name of the simulation model.
     """
-    if(platform.system() == 'Windows'):
+    if platform.system() == 'Windows':
         subprocess.run(
             ['rmdir', '/q', '/s', 'build'], 
             cwd='models/'+model_name, 
@@ -85,7 +85,7 @@ def make_and_run(model_name):
         Args: 
             model_name: A string representing the name of the simulation model.
     """
-    if(platform.system() == 'Windows'):
+    if platform.system() == 'Windows':
         proc = subprocess.Popen(
             ['cmake', '--build', '.'], 
             cwd='models/'+model_name+'/build', 

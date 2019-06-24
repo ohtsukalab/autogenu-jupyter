@@ -1,11 +1,13 @@
-from autogenu import simulation_conditions as simcon
+import sys
+
 import numpy as np
 import seaborn as sns
-from matplotlib.animation import FuncAnimation
 import matplotlib.pyplot as plt
 import mpl_toolkits.mplot3d as a3
 import mpl_toolkits.mplot3d.art3d as art3d 
-import sys
+from matplotlib.animation import FuncAnimation
+
+from autogenu import simulation_conditions as simcon
 
 
 class TwoLinkArm(object):
