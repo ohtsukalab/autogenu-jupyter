@@ -2,8 +2,8 @@
 // Simulator of the multiple shooting based C/GMRES method with condensing for the saturation on the control input..
 //
 
-#ifndef MULTIPLE_SHOOTING_CGMRES_WITH_SATURATION_SIMULATOR_H
-#define MULTIPLE_SHOOTING_CGMRES_WITH_SATURATION_SIMULATOR_H
+#ifndef MULTIPLE_SHOOTING_CGMRES_WITH_SATURATION_SIMULATOR_FOR_WIN_H
+#define MULTIPLE_SHOOTING_CGMRES_WITH_SATURATION_SIMULATOR_FOR_WIN_H
 
 
 #include <iostream>
@@ -11,8 +11,9 @@
 #include <chrono>
 #include "nmpc_model.hpp"
 #include "numerical_integrator.hpp"
-#include "save_simulation_data_for_windows.hpp"
-#include "multiple_shooting_cgmres_with_saturation_for_windows.hpp"
+#include "save_simulation_data.hpp"
+#include "make_save_dir_for_win.hpp"
+#include "multiple_shooting_cgmres_with_saturation.hpp"
 
 
 // Simulates NMPC using the multiple shooting based C/GMRES method.

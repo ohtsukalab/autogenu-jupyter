@@ -17,7 +17,7 @@
 class MultipleShootingCGMRES final : virtual public MatrixFreeGMRES{
 public:
     // Sets parameters and allocates vectors and matrices.
-    MultipleShootingCGMRES(const double horizon_max_length, const double alpha, const int horizon_division_num, const double finite_diff_step, const double zeta, const int kmax);
+    MultipleShootingCGMRES(const double T_f, const double alpha, const int horizon_division_num, const double finite_diff_step, const double zeta, const int kmax);
 
     // Free vectors and matrices.
     ~MultipleShootingCGMRES();

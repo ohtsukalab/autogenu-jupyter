@@ -20,7 +20,7 @@ public:
     ~InitCGMRESWithSaturation();
 
     // Calls the forwardDifferenceGMRES, solves the GMRES, and obtains the solution 
-    void solve0stepNOCP(const double initial_time, const double* initial_state_vec, const double* initial_guess_control_input_vec, const double* initial_guess_lagrange_multiplier, const double convergence_radius, const int max_iteration, double* solution_vec);
+    void solveOCPForInit(const double initial_time, const double* initial_state_vec, const double* initial_guess_control_input_vec, const double* initial_guess_lagrange_multiplier, const double convergence_radius, const int max_iteration, double* solution_vec);
 
     // Returns the optimality error for the control input and constraints under current_solution_vec.
     void getControlInputAndConstraintsError(const double initial_time, const double* initial_state_vec, const double* current_solution_vec, double* control_input_and_constraints_error_vec);

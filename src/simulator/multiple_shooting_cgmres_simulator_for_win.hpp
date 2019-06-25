@@ -2,8 +2,8 @@
 // Simulator of the multiple shooting based C/GMRES method.
 //
 
-#ifndef MULTIPLE_SHOOTING_CGMRES_SIMULATOR_H
-#define MULTIPLE_SHOOTING_CGMRES_SIMULATOR_H
+#ifndef MULTIPLE_SHOOTING_CGMRES_SIMULATOR_FOR_WIN_H
+#define MULTIPLE_SHOOTING_CGMRES_SIMULATOR_FOR_WIN_H
 
 
 #include <iostream>
@@ -11,7 +11,8 @@
 #include <chrono>
 #include "nmpc_model.hpp"
 #include "numerical_integrator.hpp"
-#include "save_simulation_data_for_windows.hpp"
+#include "save_simulation_data.hpp"
+#include "make_save_dir_for_win.hpp"
 #include "multiple_shooting_cgmres.hpp"
 
 

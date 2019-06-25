@@ -1,4 +1,4 @@
-#include "cgmres_simulator_for_windows.hpp"
+#include "cgmres_simulator_for_win.hpp"
 
 
 void nmpcsim::simulation(ContinuationGMRES& nmpc_solver, const double* initial_state_vec, const double start_time, const double end_time, const double sampling_period, const std::string savefile_name)
@@ -9,7 +9,7 @@ void nmpcsim::simulation(ContinuationGMRES& nmpc_solver, const double* initial_s
     std::chrono::system_clock::time_point start_clock, end_clock;
 
     std::string save_dir_name("../simulation_result");
-    makeSaveDir(save_dir_name);
+    makeSaveDirForWin(save_dir_name);
     std::ofstream state_data(save_dir_name + "/" + savefile_name + "_state.dat");
     std::ofstream control_input_data(save_dir_name + "/" + savefile_name + "_control_input.dat");
     std::ofstream error_data(save_dir_name + "/" + savefile_name + "_error.dat");

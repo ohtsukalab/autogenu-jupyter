@@ -1,7 +1,7 @@
 #include "continuation_gmres.hpp"
 
 
-ContinuationGMRES::ContinuationGMRES(const double horizon_max_length, const double alpha, const int horizon_division_num, const double finite_diff_step, const double zeta, const int kmax) : MatrixFreeGMRES(), 
+ContinuationGMRES::ContinuationGMRES(const double T_f, const double alpha, const int horizon_division_num, const double finite_diff_step, const double zeta, const int kmax) : MatrixFreeGMRES(), 
     model_(), 
     dim_state_(model_.dimState()), 
     dim_control_input_(model_.dimControlInput()), 
@@ -11,7 +11,7 @@ ContinuationGMRES::ContinuationGMRES(const double horizon_max_length, const doub
     horizon_division_num_(horizon_division_num), 
     kmax_(kmax), 
     initial_time_(0), 
-    T_f_(horizon_max_length), 
+    T_f_(T_f), 
     alpha_(alpha), 
     zeta_(zeta), 
     finite_diff_step_(finite_diff_step), 
@@ -52,15 +52,15 @@ void ContinuationGMRES::initSolution(const double initial_time, const double* in
     double initial_solution_vec[dim_control_input_and_constraints_], initial_error_vec[dim_control_input_and_constraints_];
     InitCGMRES initializer(finite_diff_step_, kmax_);
     initial_time_ = initial_time;
-    initializer.solve0stepNOCP(initial_time, initial_state_vec, initial_guess_input_vec, convergence_radius, max_iteration, initial_solution_vec);
+    initializer.solveOCPForInit(initial_time, initial_state_vec, initial_guess_input_vec, convergence_radius, max_iteration, initial_solution_vec);
     initializer.getOptimalityErrorVec(initial_time, initial_state_vec, initial_solution_vec, initial_error_vec);
-    for(int i=0; i<horizon_division_num_; i++){
+    for (int i=0; i<horizon_division_num_; i++) {
         // Intialize the solution_vec_.
-        for(int j=0; j<dim_control_input_and_constraints_; j++){
+        for (int j=0; j<dim_control_input_and_constraints_; j++) {
             solution_vec_[i*dim_control_input_and_constraints_+j] = initial_solution_vec[j];
         }
         // Intialize the optimality_vec_.
-        for(int j=0; j<dim_control_input_and_constraints_; j++){
+        for (int j=0; j<dim_control_input_and_constraints_; j++) {
             optimality_vec_[i*dim_control_input_and_constraints_+j] = initial_error_vec[j];
         }
     }
@@ -72,14 +72,14 @@ void ContinuationGMRES::controlUpdate(const double current_time, const double sa
     // Predict the incremented state.
     incremented_time_ = current_time + finite_diff_step_;
     model_.stateFunc(current_time, current_state_vec, solution_vec_, dx_vec_);
-    for(int i=0; i<dim_state_; i++){
-        incremented_state_vec_[i] = current_state_vec[i] + finite_diff_step_*dx_vec_[i];
+    for (int i=0; i<dim_state_; i++) {
+        incremented_state_vec_[i] = current_state_vec[i] + finite_diff_step_ * dx_vec_[i];
     }
     forwardDifferenceGMRES(current_time, current_state_vec, solution_vec_, solution_update_vec_);
-    for(int i=0; i<dim_solution_; i++){
+    for (int i=0; i<dim_solution_; i++) {
         solution_vec_[i] += sampling_period * solution_update_vec_[i];
     }
-    for(int i=0; i<dim_control_input_; i++){
+    for (int i=0; i<dim_control_input_; i++) {
         optimal_control_input_vec[i] = solution_vec_[i];
     }
 }
@@ -87,7 +87,7 @@ void ContinuationGMRES::controlUpdate(const double current_time, const double sa
 
 void ContinuationGMRES::getControlInput(double* control_input_vec) const
 {
-    for(int i=0; i<dim_control_input_; i++){
+    for (int i=0; i<dim_control_input_; i++) {
         control_input_vec[i] = solution_vec_[i];
     }
 }
@@ -108,29 +108,29 @@ void ContinuationGMRES::computeOptimalityError(const double time_param, const do
     double delta_tau = horizon_length / horizon_division_num_;
 
     // Compute the state trajectory over the horizon on the basis of the control_input_vec and the current_state_vec.
-    for(int i=0; i<dim_state_; i++){
+    for (int i=0; i<dim_state_; i++) {
         state_mat_[0][i] = state_vec[i];
     }
     double tau=time_param;
-    for(int i=0; i<horizon_division_num_; i++, tau+=delta_tau){
+    for (int i=0; i<horizon_division_num_; i++, tau+=delta_tau) {
         model_.stateFunc(tau, state_mat_[i], &(current_solution_vec[i*dim_control_input_and_constraints_]), dx_vec_);
-        for(int j=0; j<dim_state_; j++){
-            state_mat_[i+1][j] = state_mat_[i][j] + delta_tau*dx_vec_[j];
+        for (int j=0; j<dim_state_; j++) {
+            state_mat_[i+1][j] = state_mat_[i][j] + delta_tau * dx_vec_[j];
         }
     }
 
     // Compute the Lagrange multiplier over the horizon on the basis of the control_input_vec and the current_state_vec.
     model_.phixFunc(tau, state_mat_[horizon_division_num_], lambda_mat_[horizon_division_num_]);
-    for(int i=horizon_division_num_-1; i>=0; i--, tau-=delta_tau){
+    for (int i=horizon_division_num_-1; i>=0; i--, tau-=delta_tau) {
         model_.hxFunc(tau, state_mat_[i], &(current_solution_vec[i*dim_control_input_and_constraints_]), lambda_mat_[i+1], dx_vec_);
-        for(int j=0; j<dim_state_; j++){
-            lambda_mat_[i][j] = lambda_mat_[i+1][j] + delta_tau*dx_vec_[j];
+        for (int j=0; j<dim_state_; j++) {
+            lambda_mat_[i][j] = lambda_mat_[i+1][j] + delta_tau * dx_vec_[j];
         }
     }
 
     // Compute the optimality condition over the horizon on the basis of the control_input_vec and the current_state_vec.
     tau = time_param;
-    for(int i=0; i<horizon_division_num_; i++, tau+=delta_tau){
+    for (int i=0; i<horizon_division_num_; i++, tau+=delta_tau) {
         model_.huFunc(tau, state_mat_[i], &(current_solution_vec[i*dim_control_input_and_constraints_]), lambda_mat_[i+1], &(optimality_error_vec[i*dim_control_input_and_constraints_]));
     }
 }
@@ -138,27 +138,27 @@ void ContinuationGMRES::computeOptimalityError(const double time_param, const do
 
 void ContinuationGMRES::bFunc(const double time_param, const double* state_vec, const double* current_solution_vec, double* b_vec)
 {
-    for(int i=0; i<dim_solution_; i++){
+    for (int i=0; i<dim_solution_; i++) {
         incremented_solution_vec_[i] = current_solution_vec[i] + finite_diff_step_*solution_update_vec_[i];
     }
     computeOptimalityError(time_param, state_vec, current_solution_vec, optimality_vec_);
     computeOptimalityError(incremented_time_, incremented_state_vec_, current_solution_vec, optimality_vec_1_);
     computeOptimalityError(incremented_time_, incremented_state_vec_, incremented_solution_vec_, optimality_vec_2_);
 
-    for(int i=0; i<dim_solution_; i++){
-        b_vec[i] = (1/finite_diff_step_-zeta_)*optimality_vec_[i] - optimality_vec_2_[i]/finite_diff_step_;
+    for (int i=0; i<dim_solution_; i++) {
+        b_vec[i] = (1/finite_diff_step_ - zeta_) * optimality_vec_[i] - optimality_vec_2_[i]/finite_diff_step_;
     }
 }
 
 
 inline void ContinuationGMRES::axFunc(const double time_param, const double* state_vec, const double* current_solution_vec, const double* direction_vec, double* ax_vec)
 {
-    for(int i=0; i<dim_solution_; i++){
-        incremented_solution_vec_[i] = current_solution_vec[i] + finite_diff_step_*direction_vec[i];
+    for (int i=0; i<dim_solution_; i++) {
+        incremented_solution_vec_[i] = current_solution_vec[i] + finite_diff_step_ * direction_vec[i];
     }
     computeOptimalityError(incremented_time_, incremented_state_vec_, incremented_solution_vec_, optimality_vec_2_);
 
-    for(int i=0; i<dim_solution_; i++){
+    for (int i=0; i<dim_solution_; i++) {
         ax_vec[i] = (optimality_vec_2_[i] - optimality_vec_1_[i])/finite_diff_step_;
     }
 }

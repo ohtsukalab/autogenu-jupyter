@@ -20,7 +20,7 @@ public:
     ~InitCGMRES();
 
     // Calls the forwardDifferenceGMRES, solves the GMRES, and obtains the solution of the initialization for the C/GMRES method.
-    void solve0stepNOCP(const double initial_time, const double* initial_state_vec, const double* initial_guess_vec, const double convergence_radius, const int max_iteration, double* solution_vec);
+    void solveOCPForInit(const double initial_time, const double* initial_state_vec, const double* initial_guess_vec, const double convergence_radius, const int max_iteration, double* solution_vec);
 
     // Returns the optimality error vector under current_solution_vec.
     void getOptimalityErrorVec(const double initial_time, const double* initial_state_vec, const double* current_solution_vec, double* error_vec);

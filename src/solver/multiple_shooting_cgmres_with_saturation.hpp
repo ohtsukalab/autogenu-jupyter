@@ -18,7 +18,7 @@
 class MultipleShootingCGMRESWithSaturation final : virtual public MatrixFreeGMRES{
 public:
     // Sets parameters and allocates vectors and matrices.
-    MultipleShootingCGMRESWithSaturation(const ControlInputSaturationSequence saturation_seq, const double horizon_max_length, const double alpha, const int horizon_division_num, const double finite_diff_step, const double zeta, const int dim_krylov);
+    MultipleShootingCGMRESWithSaturation(const ControlInputSaturationSequence saturation_seq, const double T_f, const double alpha, const int horizon_division_num, const double finite_diff_step, const double zeta, const int dim_krylov);
 
     // Free vectors and matrices.
     ~MultipleShootingCGMRESWithSaturation();

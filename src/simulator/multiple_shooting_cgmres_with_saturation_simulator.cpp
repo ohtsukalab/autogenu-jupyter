@@ -9,7 +9,7 @@ void nmpcsim::simulation(MultipleShootingCGMRESWithSaturation& nmpc_solver, cons
     std::chrono::system_clock::time_point start_clock, end_clock;
 
     std::string save_dir_name("../simulation_result");
-    makeSaveDir(save_dir_name);
+    makeSaveDirForUnix(save_dir_name);
     std::ofstream state_data(save_dir_name + "/" + savefile_name + "_state.dat");
     std::ofstream control_input_data(save_dir_name + "/" + savefile_name + "_control_input.dat");
     std::ofstream error_data(save_dir_name + "/" + savefile_name + "_error.dat");

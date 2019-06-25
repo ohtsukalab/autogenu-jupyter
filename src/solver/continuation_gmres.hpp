@@ -16,7 +16,7 @@
 class ContinuationGMRES final : virtual public MatrixFreeGMRES{
 public:
     // Sets parameters and allocates vectors and matrices.
-    ContinuationGMRES(const double horizon_max_length, const double alpha, const int horizon_division_num, const double finite_diff_step, const double zeta, const int kmax);
+    ContinuationGMRES(const double T_f, const double alpha, const int horizon_division_num, const double finite_diff_step, const double zeta, const int kmax);
 
     // Free vectors and matrices.
     ~ContinuationGMRES();
@@ -53,5 +53,6 @@ private:
     // Generates a vector corresponding to Ax in Ax=b with using the forward difference approximation.
     void axFunc(const double time_param, const double* state_vec, const double* current_solution_vec, const double* direction_vec, double* ax_vec) override;
 };
+
 
 #endif

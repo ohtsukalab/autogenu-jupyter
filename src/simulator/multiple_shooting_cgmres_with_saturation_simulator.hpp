@@ -12,6 +12,7 @@
 #include "nmpc_model.hpp"
 #include "numerical_integrator.hpp"
 #include "save_simulation_data.hpp"
+#include "make_save_dir_for_unix.hpp"
 #include "multiple_shooting_cgmres_with_saturation.hpp"
 
 

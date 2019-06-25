@@ -10,7 +10,6 @@ void NumericalIntegrator::euler(const double current_time, const double* current
 {
     double dx_vec_[model_.dimState()];
     model_.stateFunc(current_time, current_state_vec, control_input_vec, dx_vec_);
-
     for(int i=0; i<model_.dimState(); i++){
         integrated_state[i] = current_state_vec[i] + integration_length*dx_vec_[i];
     }
