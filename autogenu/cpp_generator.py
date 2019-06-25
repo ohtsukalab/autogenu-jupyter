@@ -158,24 +158,46 @@ def generate_main(
     f_main = open('models/'+str(model_name)+'/main.cpp', 'w')
     f_main.write('#include "nmpc_model.hpp"\n')
     if solver_index == 1:
-        f_main.write(
-            '#include "continuation_gmres.hpp"\n'
-            '#include "cgmres_simulator.hpp"\n'
-            '\n'
-        )
+        if platform.system() == 'Windows':
+            f_main.write(
+                '#include "continuation_gmres.hpp"\n'
+                '#include "cgmres_simulator_for_win.hpp"\n'
+                '\n'
+            )
+        else:
+            f_main.write(
+                '#include "continuation_gmres.hpp"\n'
+                '#include "cgmres_simulator.hpp"\n'
+                '\n'
+            )
     elif solver_index == 2:
-        f_main.write(
-            '#include "multiple_shooting_cgmres.hpp"\n'
-            '#include "multiple_shooting_cgmres_simulator.hpp"\n'
-            '\n'
-        )
+        if platform.system() == 'Windows':
+            f_main.write(
+                '#include "multiple_shooting_cgmres.hpp"\n'
+                '#include "multiple_shooting_cgmres_simulator_for_win.hpp"\n'
+                '\n'
+            )
+        else:
+            f_main.write(
+                '#include "multiple_shooting_cgmres.hpp"\n'
+                '#include "multiple_shooting_cgmres_simulator.hpp"\n'
+                '\n'
+            )
     else:
-        f_main.write(
-            '#include "control_input_saturation_sequence.hpp"\n'
-            '#include "multiple_shooting_cgmres_with_saturation.hpp"\n'
-            '#include "multiple_shooting_cgmres_with_saturation_simulator.hpp"\n'
-            '\n'
-        )
+        if platform.system() == 'Windows':
+            f_main.write(
+                '#include "control_input_saturation_sequence.hpp"\n'
+                '#include "multiple_shooting_cgmres_with_saturation.hpp"\n'
+                '#include "multiple_shooting_cgmres_with_saturation_simulator_for_win.hpp"\n'
+                '\n'
+            )
+        else:
+            f_main.write(
+                '#include "control_input_saturation_sequence.hpp"\n'
+                '#include "multiple_shooting_cgmres_with_saturation.hpp"\n'
+                '#include "multiple_shooting_cgmres_with_saturation_simulator.hpp"\n'
+                '\n'
+            )
     f_main.write(
         'int main()\n'
         '{\n'
