@@ -1,11 +1,13 @@
+import linecache
+import subprocess
+import platform
+
+import sympy
+
 from autogenu import solver_params as slpr
 from autogenu import initialization_params as inipr 
 from autogenu import simulation_params as simpr
 from autogenu import cpp_executor as cppexe
-import sympy
-import linecache
-import subprocess
-import platform
 
 
 def make_model_dir(model_name):
@@ -352,12 +354,14 @@ def generate_cmake(solver_index, model_name):
         )
         if platform.system() == 'Windows':
             f_cmake.write(
-                '    ${SIMULATOR_DIR}/save_simulation_data_for_windows.cpp\n'
+                '    ${SIMULATOR_DIR}/make_save_dir_for_win.cpp\n'
+                '    ${SIMULATOR_DIR}/save_simulation_data.cpp\n'
                 '    ${SIMULATOR_DIR}/numerical_integrator.cpp\n'
-                '    ${SIMULATOR_DIR}/cgmres_simulator_for_windows.cpp\n'
+                '    ${SIMULATOR_DIR}/cgmres_simulator_for_win.cpp\n'
             )
         else:
             f_cmake.write(
+                '    ${SIMULATOR_DIR}/make_save_dir_for_unix.cpp\n'
                 '    ${SIMULATOR_DIR}/save_simulation_data.cpp\n'
                 '    ${SIMULATOR_DIR}/numerical_integrator.cpp\n'
                 '    ${SIMULATOR_DIR}/cgmres_simulator.cpp\n'
@@ -395,13 +399,15 @@ def generate_cmake(solver_index, model_name):
         )
         if platform.system() == 'Windows':
             f_cmake.write(
-                '    ${SIMULATOR_DIR}/save_simulation_data_for_windows.cpp\n'
+                '    ${SIMULATOR_DIR}/make_save_dir_for_win.cpp\n'
+                '    ${SIMULATOR_DIR}/save_simulation_data.cpp\n'
                 '    ${SIMULATOR_DIR}/numerical_integrator.cpp\n'
                 '    ${SIMULATOR_DIR}/multiple_shooting_cgmres_simulator_'
-                'for_windows.cpp\n'
+                'for_win.cpp\n'
             )
         else:
             f_cmake.write(
+                '    ${SIMULATOR_DIR}/make_save_dir_for_unix.cpp\n'
                 '    ${SIMULATOR_DIR}/save_simulation_data.cpp\n'
                 '    ${SIMULATOR_DIR}/numerical_integrator.cpp\n'
                 '    ${SIMULATOR_DIR}/multiple_shooting_cgmres_simulator.cpp\n'
@@ -441,14 +447,16 @@ def generate_cmake(solver_index, model_name):
         )
         if platform.system() == 'Windows':
             f_cmake.write(
-                '    ${SIMULATOR_DIR}/save_simulation_data_for_windows.cpp\n'
+                '    ${SIMULATOR_DIR}/make_save_dir_for_win.cpp\n'
+                '    ${SIMULATOR_DIR}/save_simulation_data.cpp\n'
                 '    ${SIMULATOR_DIR}/numerical_integrator.cpp\n'
                 '    ${SIMULATOR_DIR}/'
                 'multiple_shooting_cgmres_with_saturation_simulator_'
-                'for_windows.cpp\n'
+                'for_win.cpp\n'
             )
         else:
             f_cmake.write(
+                '    ${SIMULATOR_DIR}/make_save_dir_for_unix.cpp\n'
                 '    ${SIMULATOR_DIR}/save_simulation_data.cpp\n'
                 '    ${SIMULATOR_DIR}/numerical_integrator.cpp\n'
                 '    ${SIMULATOR_DIR}/'

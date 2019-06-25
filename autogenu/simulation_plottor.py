@@ -1,7 +1,8 @@
-from autogenu import simulation_conditions as simcon
 import numpy as np
 import matplotlib.pylab as plt
 import seaborn as sns
+
+from autogenu import simulation_conditions as simcon
 
 
 class SimulationPlottor(object):
