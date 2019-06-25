@@ -5,7 +5,6 @@
 #ifndef NUMERICAL_INTEGRATOR_H
 #define NUMERICAL_INTEGRATOR_H
 
-
 #include "nmpc_model.hpp"
 
 

@@ -103,6 +103,13 @@ def make_and_run(model_name):
             stderr=subprocess.PIPE, 
             shell=True
         )
+        subprocess.run(
+            ['mkdir', 'simulation_result'], 
+            cwd='models/'+model_name, 
+            stdout=subprocess.PIPE, 
+            stderr=subprocess.PIPE, 
+            shell=True
+        )
         proc = subprocess.Popen(
             ['main.exe'], 
             cwd='models/'+model_name+'/build', 
@@ -128,6 +135,12 @@ def make_and_run(model_name):
             stdout = subprocess.PIPE, 
             stderr = subprocess.PIPE, 
             shell=True
+        )
+        subprocess.run(
+            ['mkdir', 'sumulation_result'], 
+            cwd='models/'+model_name, 
+            stdout=subprocess.PIPE, 
+            stderr=subprocess.PIPE
         )
         proc = subprocess.Popen(
             ['./a.out'], 

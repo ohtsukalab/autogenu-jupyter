@@ -5,14 +5,13 @@
 #ifndef MULTIPLE_SHOOTING_CGMRES_SIMULATOR_H
 #define MULTIPLE_SHOOTING_CGMRES_SIMULATOR_H
 
-
 #include <iostream>
 #include <fstream>
+#include <string>
 #include <chrono>
 #include "nmpc_model.hpp"
 #include "numerical_integrator.hpp"
 #include "save_simulation_data.hpp"
-#include "make_save_dir_for_unix.hpp"
 #include "multiple_shooting_cgmres.hpp"
 
 
@@ -21,7 +20,7 @@
 // Updates the state using the method in NumericalIntegrator.
 namespace nmpcsim {
 // Perform a numerical simulation for the C/GMRES and the multiple shooting based C/GMRES.
-void simulation(MultipleShootingCGMRES& nmpc_solver, const double* initial_state_vec, const double start_time, const double end_time, const double sampling_period, const std::string savefile_name);
+void simulation(MultipleShootingCGMRES& nmpc_solver, const double* initial_state_vec, const double start_time, const double end_time, const double sampling_period, const std::string save_dir, const std::string savefile_name);
 }
 
 
