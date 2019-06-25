@@ -2,9 +2,9 @@
 This project provides the continuation/GMRES method (C/GMRES method) based solvers for nonlinear model predictive control (NMPC) and an automatic code generator for NMPC, called AutoGenU.
 
 The following C/GMRES based solvers are provided: 
-- `ContinuationGMRES` : The original C/GMRES method (single shooting)
-- `MultipleShootingCGMRES` : The multiple shooting based C/GMRES method
-- `MultipleShootingCGMRESWithSaturation` : The multiple shooting based C/GMRES method with condensing of variables with respect to the constraints on the saturation function on the control input
+- `ContinuationGMRES` : The original C/GMRES method (single shooting).
+- `MultipleShootingCGMRES` : The multiple shooting based C/GMRES method.
+- `MultipleShootingCGMRESWithSaturation` : The multiple shooting based C/GMRES method with condensing of variables with respect to the constraints on the saturation function on the control input.
 
 
 # Requirement
@@ -12,11 +12,11 @@ The following C/GMRES based solvers are provided:
 - CMake
 - Python 3, Jupyter Lab or Jupyter Notebook, SymPy (to generate `nmpc_model.hpp`, `nmpc_model.cpp`, `main.cpp`, and `CMakeLists.txt` by `AutoGenU.ipynb`)
 - Python 3, NumPy, Matplotlib, seaborn (to plot simulation data on `AutoGenU.ipynb`)
-
+- ffmpeg (to generate animations in `pendubot.ipynb`, `cartpole.ipynb`, and `hexacopter.ipynb`)
 
 # Usage
 ## AutoGenU
-`AutoGenU.ipynb` generates following source files under your setting state equation and cost function: 
+`AutoGenU.ipynb` generates following source files under your setting state equation, constraints, cost function, and parameters: 
 - `nmpc_model.hpp`  
 - `nmpc_model.cpp`  
 - `main.cpp`  
