@@ -14,12 +14,12 @@ void nmpcsim::simulation(MultipleShootingCGMRESWithSaturation& nmpc_solver, cons
     std::ofstream conditions_data(save_dir + "/" + savefile_name + "_conditions.dat");
 
     double total_time = 0;
-    for(int i=0; i<model.dimState(); i++){
+    for (int i=0; i<model.dimState(); i++) {
         current_state_vec[i] = initial_state_vec[i];
     }
-    nmpc_solver.getControlInput(control_input_vec);
+    nmpc_solver.initSolution(start_time, current_state_vec, control_input_vec);
     std::cout << "Start simulation" << std::endl;
-    for(double current_time=start_time; current_time<end_time; current_time+= sampling_period){
+    for (double current_time=start_time; current_time<end_time; current_time+= sampling_period) {
         saveData(model.dimState(), model.dimControlInput(), state_data, control_input_data, error_data, current_time, current_state_vec, control_input_vec, nmpc_solver.getError(current_time, current_state_vec));
 
         // Compute the next state vector using the 4th Runge-Kutta-Gill method.
@@ -35,7 +35,7 @@ void nmpcsim::simulation(MultipleShootingCGMRESWithSaturation& nmpc_solver, cons
         step_time *= 1e-06;
         total_time += step_time;
 
-        for(int i=0; i<model.dimState(); i++){
+        for (int i=0; i<model.dimState(); i++) {
             current_state_vec[i] = next_state_vec[i];    
         }
     }

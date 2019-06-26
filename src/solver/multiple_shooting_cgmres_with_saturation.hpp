@@ -23,15 +23,16 @@ public:
     // Free vectors and matrices.
     ~MultipleShootingCGMRESWithSaturation();
 
+    // Sets parameters for initialization of the solution of NMPC.
+    // Args:
+    //     initial_guess_solution: A vector whose dimension is dimu+dimc.
+    //     residual_tolerance: A criteria for the Newton iteration. It terminates when the error is less than this value.
+    //     max_iteration: Maximum number of the Newton iteration.
+    void setInitParams(const double* initial_guess_solution, const double* initial_guess_lagrange_multiplier, const double residual_tolerance, const int max_iteration, const double finite_diff_step, const int kmax);
+
     // Initializes the solution of the multiple shooting based C/GMRES method with condensing of the saturations on the control input
     // with setting all the initial guess Lagrange multipliers of the condensed saturation to 0.
-    void initSolution(const double initial_time, const double* initial_state_vec, const double* initial_guess_input_vec, const double convergence_radius, const int max_iteration);
-
-    // with setting all the initial guess Lagrange multipliers of the condensed saturation to initial_guess_lagrange_multiplier.
-    void initSolution(const double initial_time, const double* initial_state_vec, const double* initial_guess_input_vec, const double initial_guess_lagrange_multiplier, const double convergence_radius, const int max_iteration);
-
-    // with setting the initial guess Lagrange multiplier vector of the condensed saturations to initial_guess_lagrange_multiplier.
-    void initSolution(const double initial_time, const double* initial_state_vec, const double* initial_guess_input_vec, const double* initial_guess_lagrange_multiplier_vec, const double convergence_radius, const int max_iteration);
+    void initSolution(const double initial_time, const double* initial_state_vec, double* optimal_control_input_vec);
 
     // Updates the solution by solving the matrix-free GMRES.
     void controlUpdate(const double current_time, const double sampling_period, const double* current_state_vec, double* optimal_control_input_vec);
@@ -46,6 +47,7 @@ public:
 private:
     NMPCModel model_;
     ControlInputSaturationSequence saturation_seq_;
+    InitCGMRESWithSaturation cgmres_initializer_;
 
     int dim_state_, dim_control_input_, dim_constraints_, dim_control_input_and_constraints_, dim_control_input_and_constraints_seq_, dim_saturation_, dim_saturation_seq_, horizon_division_num_, dim_krylov_;
     int *saturation_index;

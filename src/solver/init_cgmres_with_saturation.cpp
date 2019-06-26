@@ -1,13 +1,16 @@
 #include "init_cgmres_with_saturation.hpp"
 
 
-InitCGMRESWithSaturation::InitCGMRESWithSaturation(const ControlInputSaturationSequence saturation_seq, const double finite_diff_step, const int kmax) : MatrixFreeGMRES(), 
+InitCGMRESWithSaturation::InitCGMRESWithSaturation(const ControlInputSaturationSequence saturation_seq) : MatrixFreeGMRES(), 
     model_(), 
     saturation_seq_(saturation_seq), 
+    max_iteration_(0),
+    finite_diff_step_(0),
     dim_control_input_and_constraints_(model_.dimControlInput()+model_.dimConstraints()), 
     dim_saturation_(saturation_seq.dimSaturation()), 
     dim_solution_(model_.dimControlInput()+model_.dimConstraints()+2*saturation_seq.dimSaturation()), 
-    finite_diff_step_(finite_diff_step), 
+    initial_guess_solution_(linearfunc::newVector(dim_solution_)),
+    initial_guess_lagrange_multiplier_(linearfunc::newVector(dim_saturation_)),
     incremented_solution_vec_(linearfunc::newVector(dim_solution_)), 
     solution_update_vec_(linearfunc::newVector(dim_solution_)), 
     lambda_vec_(linearfunc::newVector(model_.dimState())), 
@@ -16,12 +19,14 @@ InitCGMRESWithSaturation::InitCGMRESWithSaturation(const ControlInputSaturationS
     error_vec_2_(linearfunc::newVector(dim_solution_))
 {
     // Set parameters in GMRES.
-    setGMRESParams(dim_solution_, kmax);
+    setGMRESParams(dim_solution_, dim_solution_);
 }
 
 
 InitCGMRESWithSaturation::~InitCGMRESWithSaturation()
 {
+    linearfunc::deleteVector(initial_guess_solution_);
+    linearfunc::deleteVector(initial_guess_lagrange_multiplier_);
     linearfunc::deleteVector(incremented_solution_vec_);
     linearfunc::deleteVector(solution_update_vec_);
     linearfunc::deleteVector(lambda_vec_);
@@ -30,63 +35,54 @@ InitCGMRESWithSaturation::~InitCGMRESWithSaturation()
     linearfunc::deleteVector(error_vec_2_);
 }
 
+ 
+void InitCGMRESWithSaturation::setInitParams(const double* initial_guess_solution, const double* initial_guess_lagrange_multiplier, const double residual_tolerance, const int max_iteration, const double finite_diff_step, const int kmax)
+{
+    for (int i=0; i<dim_solution_; i++) {
+        initial_guess_solution_[i] = initial_guess_solution[i];
+    }
+    for (int i=0; i<dim_saturation_; i++) {
+        initial_guess_lagrange_multiplier_[i] = initial_guess_lagrange_multiplier[i];
+    }
+    residual_tolerance_ = residual_tolerance;
+    max_iteration_ = max_iteration;
+    finite_diff_step_ = finite_diff_step;
+    setGMRESParams(dim_solution_, kmax);
+}
 
-void InitCGMRESWithSaturation::solveOCPForInit(const double initial_time, const double* initial_state_vec, const double* initial_guess_control_input_vec, const double* initial_guess_lagrange_multiplier, const double convergence_radius, const int max_iteration, double* solution_vec)
+
+void InitCGMRESWithSaturation::solveOCPForInit(const double initial_time, const double* initial_state_vec, double* initial_solution_vec, double* control_input_and_constraints_error, double* dummy_input_error, double* control_input_saturation_error)
 {
     // Substitute initial guess solution to solution_vec.
     for (int i=0; i<dim_control_input_and_constraints_; i++) {
-        solution_vec[i] = initial_guess_control_input_vec[i];
+        initial_solution_vec[i] = initial_guess_solution_[i];
     }
     for (int i=0; i<dim_saturation_; i++) {
-        solution_vec[dim_control_input_and_constraints_+i] = std::sqrt((saturation_seq_.max(i)-saturation_seq_.min(i))*(saturation_seq_.max(i)-saturation_seq_.min(i))/4 - (initial_guess_control_input_vec[saturation_seq_.index(i)] - (saturation_seq_.max(i)+saturation_seq_.min(i))/2)*(initial_guess_control_input_vec[saturation_seq_.index(i)] - (saturation_seq_.max(i)+saturation_seq_.min(i))/2));
+        initial_solution_vec[dim_control_input_and_constraints_+i] = std::sqrt((saturation_seq_.max(i)-saturation_seq_.min(i))*(saturation_seq_.max(i)-saturation_seq_.min(i))/4 - (initial_guess_solution_[saturation_seq_.index(i)] - (saturation_seq_.max(i)+saturation_seq_.min(i))/2)*(initial_guess_solution_[saturation_seq_.index(i)] - (saturation_seq_.max(i)+saturation_seq_.min(i))/2));
     }
     for (int i=0; i<dim_saturation_; i++) {
-        solution_vec[dim_control_input_and_constraints_+dim_saturation_+i] = initial_guess_lagrange_multiplier[i];
+        initial_solution_vec[dim_control_input_and_constraints_+dim_saturation_+i] = initial_guess_lagrange_multiplier_[i];
     }
 
     // Solve the 0step nonlinear optimal control problem using Newton GMRES method.
-    computeOptimalityErrors(initial_time, initial_state_vec, solution_vec, error_vec_);
+    computeOptimalityErrors(initial_time, initial_state_vec, initial_solution_vec, error_vec_);
     int i = 0;
-    while (linearfunc::squaredNorm(dim_solution_, error_vec_) > convergence_radius*convergence_radius && i < max_iteration) {
-        forwardDifferenceGMRES(initial_time, initial_state_vec, solution_vec, solution_update_vec_);
+    while (linearfunc::squaredNorm(dim_solution_, error_vec_) > residual_tolerance_*residual_tolerance_ && i < max_iteration_) {
+        forwardDifferenceGMRES(initial_time, initial_state_vec, initial_solution_vec, solution_update_vec_);
         for (int j=0; j<dim_solution_; j++) {
-            solution_vec[j] += solution_update_vec_[j];
+            initial_solution_vec[j] += solution_update_vec_[j];
         }
-        computeOptimalityErrors(initial_time, initial_state_vec, solution_vec, error_vec_);
+        computeOptimalityErrors(initial_time, initial_state_vec, initial_solution_vec, error_vec_);
         i++;
     }
-}
-
-
-void InitCGMRESWithSaturation::getControlInputAndConstraintsError(const double initial_time, const double* initial_state_vec, const double* current_solution_vec, double* control_input_and_constraints_error_vec)
-{
-    double error_vec[dim_solution_];
-
-    computeOptimalityErrors(initial_time, initial_state_vec, current_solution_vec, error_vec);
     for (int i=0; i<dim_control_input_and_constraints_; i++) {
-        control_input_and_constraints_error_vec[i] = error_vec[i];
+        control_input_and_constraints_error[i] = error_vec_[i];
     }
-}
-
-
-void InitCGMRESWithSaturation::getDummyInputError(const double initial_time, const double* initial_state_vec, const double* current_solution_vec, double* dummy_input_error_vec)
-{
-    double error_vec[dim_solution_];
-
-    computeOptimalityErrors(initial_time, initial_state_vec, current_solution_vec, error_vec);
     for (int i=0; i<dim_saturation_; i++) {
-        dummy_input_error_vec[i] = error_vec[dim_control_input_and_constraints_+i];
+        dummy_input_error[i] = error_vec_[dim_control_input_and_constraints_+i];
     }
-}
-
-
-void InitCGMRESWithSaturation::getControlInputSaturationError(const double initial_time, const double* initial_state_vec, const double* current_solution_vec,  double* control_input_saturation_error_vec)
-{
-    double error_vec[dim_solution_];
-
-    computeOptimalityErrors(initial_time, initial_state_vec, current_solution_vec, error_vec);
     for (int i=0; i<dim_saturation_; i++) {
-        control_input_saturation_error_vec[i] = error_vec[dim_control_input_and_constraints_+dim_saturation_+i];
+        control_input_saturation_error[i] = error_vec_[dim_control_input_and_constraints_+dim_saturation_+i];
     }
 }
 

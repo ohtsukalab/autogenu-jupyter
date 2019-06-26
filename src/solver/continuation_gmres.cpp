@@ -3,6 +3,7 @@
 
 ContinuationGMRES::ContinuationGMRES(const double T_f, const double alpha, const int horizon_division_num, const double finite_diff_step, const double zeta, const int kmax) : MatrixFreeGMRES(), 
     model_(), 
+    cgmres_initializer_(),
     dim_state_(model_.dimState()), 
     dim_control_input_(model_.dimControlInput()), 
     dim_constraints_(model_.dimConstraints()), 
@@ -47,13 +48,17 @@ ContinuationGMRES::~ContinuationGMRES()
 }
 
 
-void ContinuationGMRES::initSolution(const double initial_time, const double* initial_state_vec, const double* initial_guess_input_vec, const double convergence_radius, const int max_iteration)
+void ContinuationGMRES::setInitParams(const double* initial_guess_solution, const double residual_tolerance, const int max_iteration, const double finite_diff_step, const int kmax)
+{
+    cgmres_initializer_.setInitParams(initial_guess_solution, residual_tolerance, max_iteration, finite_diff_step, kmax);
+}
+
+
+void ContinuationGMRES::initSolution(const double initial_time, const double* initial_state_vec, double* optimal_control_input_vec)
 {
     double initial_solution_vec[dim_control_input_and_constraints_], initial_error_vec[dim_control_input_and_constraints_];
-    InitCGMRES initializer(finite_diff_step_, kmax_);
     initial_time_ = initial_time;
-    initializer.solveOCPForInit(initial_time, initial_state_vec, initial_guess_input_vec, convergence_radius, max_iteration, initial_solution_vec);
-    initializer.getOptimalityErrorVec(initial_time, initial_state_vec, initial_solution_vec, initial_error_vec);
+    cgmres_initializer_.solveOCPForInit(initial_time, initial_state_vec, initial_solution_vec, initial_error_vec);
     for (int i=0; i<horizon_division_num_; i++) {
         // Intialize the solution_vec_.
         for (int j=0; j<dim_control_input_and_constraints_; j++) {
@@ -63,6 +68,9 @@ void ContinuationGMRES::initSolution(const double initial_time, const double* in
         for (int j=0; j<dim_control_input_and_constraints_; j++) {
             optimality_vec_[i*dim_control_input_and_constraints_+j] = initial_error_vec[j];
         }
+    }
+    for (int i=0; i<dim_control_input_; i++) {
+        optimal_control_input_vec[i] = initial_solution_vec[i];
     }
 }
 
@@ -81,14 +89,6 @@ void ContinuationGMRES::controlUpdate(const double current_time, const double sa
     }
     for (int i=0; i<dim_control_input_; i++) {
         optimal_control_input_vec[i] = solution_vec_[i];
-    }
-}
-
-
-void ContinuationGMRES::getControlInput(double* control_input_vec) const
-{
-    for (int i=0; i<dim_control_input_; i++) {
-        control_input_vec[i] = solution_vec_[i];
     }
 }
 

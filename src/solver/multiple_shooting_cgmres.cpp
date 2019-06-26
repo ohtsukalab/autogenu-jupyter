@@ -3,6 +3,7 @@
 
 MultipleShootingCGMRES::MultipleShootingCGMRES(const double T_f, const double alpha, const int horizon_division_num, const double finite_diff_step, const double zeta, const int kmax) : MatrixFreeGMRES(), 
     model_(), 
+    cgmres_initializer_(),
     dim_state_(model_.dimState()), 
     dim_control_input_(model_.dimControlInput()), 
     dim_constraints_(model_.dimConstraints()), 
@@ -62,18 +63,22 @@ MultipleShootingCGMRES::~MultipleShootingCGMRES()
 }
 
 
-void MultipleShootingCGMRES::initSolution(const double initial_time, const double* initial_state_vec, const double* initial_guess_input_vec, const double convergence_radius, const int max_iteration)
+void MultipleShootingCGMRES::setInitParams(const double* initial_guess_solution, const double residual_tolerance, const int max_iteration, const double finite_diff_step, const int kmax)
 {
-    double initial_control_input_and_constraints_vec[dim_control_input_and_constraints_], initial_control_input_and_constraints_error[dim_control_input_and_constraints_], initial_lambda_vec[dim_state_];
-    InitCGMRES initializer(finite_diff_step_, kmax_);
-    initial_time_ = initial_time;
+    cgmres_initializer_.setInitParams(initial_guess_solution, residual_tolerance, max_iteration, finite_diff_step, kmax);
+}
 
-    // Intialize the solution
-    initializer.solveOCPForInit(initial_time, initial_state_vec, initial_guess_input_vec, convergence_radius, max_iteration, initial_control_input_and_constraints_vec);
+
+void MultipleShootingCGMRES::initSolution(const double initial_time, const double* initial_state_vec, double* optimal_control_input_vec)
+{
+    double initial_solution_vec[dim_control_input_and_constraints_], initial_error_vec[dim_control_input_and_constraints_], initial_lambda_vec[dim_state_];
+
+    initial_time_ = initial_time;
+    cgmres_initializer_.solveOCPForInit(initial_time, initial_state_vec, initial_solution_vec, initial_error_vec);
     model_.phixFunc(initial_time, initial_state_vec, initial_lambda_vec);
     for (int i=0; i<horizon_division_num_; i++) {
         for (int j=0; j<dim_control_input_and_constraints_; j++) {
-            control_input_and_constraints_seq_[i*dim_control_input_and_constraints_+j] = initial_control_input_and_constraints_vec[j];
+            control_input_and_constraints_seq_[i*dim_control_input_and_constraints_+j] = initial_solution_vec[j];
         }
         for (int j=0; j<dim_state_; j++) {
             state_mat_[i][j] = initial_state_vec[j];
@@ -82,13 +87,13 @@ void MultipleShootingCGMRES::initSolution(const double initial_time, const doubl
             lambda_mat_[i][j] = initial_lambda_vec[j];
         }
     }
-
-    // Intialize the optimality error.
-    initializer.getOptimalityErrorVec(initial_time, initial_state_vec, initial_control_input_and_constraints_vec, initial_control_input_and_constraints_error);
     for (int i=0; i<horizon_division_num_; i++) {
         for (int j=0; j<dim_control_input_and_constraints_; j++) {
-            control_input_and_constraints_error_seq_[i*dim_control_input_and_constraints_+j] = initial_control_input_and_constraints_error[j];
+            control_input_and_constraints_error_seq_[i*dim_control_input_and_constraints_+j] = initial_error_vec[j];
         }
+    }
+    for (int i=0; i<dim_control_input_; i++) {
+        optimal_control_input_vec[i] = initial_solution_vec[i];
     }
 }
 
@@ -151,14 +156,6 @@ double MultipleShootingCGMRES::getError(const double current_time, const double*
         squared_error += (linearfunc::squaredNorm(dim_state_, state_error_mat_[i]) + linearfunc::squaredNorm(dim_state_, lambda_error_mat_[i]));
     }
     return std::sqrt(squared_error);
-}
-
-
-void MultipleShootingCGMRES::getControlInput(double* control_input_vec) const
-{
-    for (int i=0; i<dim_control_input_; i++) {
-        control_input_vec[i] = control_input_and_constraints_seq_[i];
-    }
 }
 
 

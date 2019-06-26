@@ -4,6 +4,7 @@
 MultipleShootingCGMRESWithSaturation::MultipleShootingCGMRESWithSaturation(const ControlInputSaturationSequence saturation_seq, const double T_f, const double alpha, const int horizon_division_num, const double finite_diff_step, const double zeta, const int dim_krylov) : MatrixFreeGMRES(), 
     model_(), 
     saturation_seq_(saturation_seq), 
+    cgmres_initializer_(saturation_seq),
     dim_state_(model_.dimState()), 
     dim_control_input_(model_.dimControlInput()), 
     dim_constraints_(model_.dimConstraints()), 
@@ -90,68 +91,19 @@ MultipleShootingCGMRESWithSaturation::~MultipleShootingCGMRESWithSaturation()
 }
 
 
-void MultipleShootingCGMRESWithSaturation::initSolution(const double initial_time, const double* initial_state_vec, const double* initial_guess_input_vec, const double convergence_radius, const int max_iteration)
+void MultipleShootingCGMRESWithSaturation::setInitParams(const double* initial_guess_solution, const double* initial_guess_lagrange_multiplier, const double residual_tolerance, const int max_iteration, const double finite_diff_step, const int kmax)
 {
-    double initial_solution_vec[dim_control_input_and_constraints_+2*dim_saturation_], initial_lambda_vec[dim_state_], initial_guess_lagrange_multiplier_vec[dim_saturation_];
-    InitCGMRESWithSaturation initializer(saturation_seq_, finite_diff_step_, dim_krylov_);
-
-    // Intialize the solution
-    initial_time_ = initial_time;
-    for (int i=0; i<dim_saturation_; i++) { 
-        initial_guess_lagrange_multiplier_vec[i] = 0;
-    }
-    initializer.solveOCPForInit(initial_time, initial_state_vec, initial_guess_input_vec, initial_guess_lagrange_multiplier_vec, convergence_radius, max_iteration, initial_solution_vec);
-
-    model_.phixFunc(initial_time, initial_state_vec, initial_lambda_vec);
-    for (int i=0; i<horizon_division_num_; i++) {
-        for (int j=0; j<dim_control_input_and_constraints_; j++) {
-            control_input_and_constraints_seq_[j] = initial_solution_vec[j];
-        }
-        for (int j=0; j<dim_saturation_; j++) {
-            dummy_input_mat_[i][j] = initial_solution_vec[dim_control_input_and_constraints_+j];
-        }
-        for (int j=0; j<dim_saturation_; j++) {
-            saturation_lagrange_multiplier_mat_[i][j] = initial_solution_vec[dim_control_input_and_constraints_+dim_saturation_+j];
-        }
-        for (int j=0; j<dim_state_; j++) {
-            state_mat_[i][j] = initial_state_vec[j];
-        }
-        for (int j=0; j<dim_state_; j++) {
-            lambda_mat_[i][j] = initial_lambda_vec[j];
-        }
-    }
-    // Intialize the optimality error.
-    double initial_control_input_and_constraints_error[dim_control_input_and_constraints_], initial_dummy_input_error[dim_saturation_], initial_saturation_error[dim_saturation_];
-
-    initializer.getControlInputAndConstraintsError(initial_time, initial_state_vec, initial_solution_vec, initial_control_input_and_constraints_error);
-    initializer.getDummyInputError(initial_time, initial_state_vec, initial_solution_vec, initial_dummy_input_error);
-    initializer.getControlInputSaturationError(initial_time, initial_state_vec, initial_solution_vec, initial_saturation_error);
-    for (int i=0; i<horizon_division_num_; i++) {
-        for (int j=0; j<dim_control_input_and_constraints_; j++) {
-            control_input_and_constraints_error_seq_[i*dim_control_input_and_constraints_+j] = initial_control_input_and_constraints_error[j];
-        }
-        for (int j=0; j<dim_saturation_; j++) {
-            dummy_error_mat_[i][j] = initial_dummy_input_error[j];
-        }
-        for (int j=0; j<dim_saturation_; j++) {
-            saturation_error_mat_[i][j] = initial_saturation_error[j];
-        }
-    }
+    cgmres_initializer_.setInitParams(initial_guess_solution, initial_guess_lagrange_multiplier, residual_tolerance, max_iteration, finite_diff_step, kmax);
 }
 
 
-void MultipleShootingCGMRESWithSaturation::initSolution(const double initial_time, const double* initial_state_vec, const double* initial_guess_input_vec, const double initial_guess_lagrange_multiplier, const double convergence_radius, const int max_iteration)
+void MultipleShootingCGMRESWithSaturation::initSolution(const double initial_time, const double* initial_state_vec, double* optimal_control_input_vec)
 {
-    double initial_solution_vec[dim_control_input_and_constraints_+2*dim_saturation_], initial_lambda_vec[dim_state_], initial_guess_lagrange_multiplier_vec[dim_saturation_];
-    InitCGMRESWithSaturation initializer(saturation_seq_, finite_diff_step_, dim_krylov_);
+    double initial_solution_vec[dim_control_input_and_constraints_+2*dim_saturation_], initial_lambda_vec[dim_state_], initial_control_input_and_constraint_error_vec[dim_control_input_and_constraints_], initial_dummy_error_vec[dim_saturation_], initial_saturation_error_vec[dim_saturation_];
 
     // Intialize the solution
     initial_time_ = initial_time;
-    for (int i=0; i<dim_saturation_; i++) {
-        initial_guess_lagrange_multiplier_vec[i] = initial_guess_lagrange_multiplier;
-    }
-    initializer.solveOCPForInit(initial_time, initial_state_vec, initial_guess_input_vec, initial_guess_lagrange_multiplier_vec, convergence_radius, max_iteration, initial_solution_vec);
-
+    cgmres_initializer_.solveOCPForInit(initial_time, initial_state_vec, initial_solution_vec, initial_control_input_and_constraint_error_vec, initial_dummy_error_vec, initial_saturation_error_vec);
     model_.phixFunc(initial_time, initial_state_vec, initial_lambda_vec);
     for (int i=0; i<horizon_division_num_; i++) {
         for (int j=0; j<dim_control_input_and_constraints_; j++) {
@@ -170,68 +122,19 @@ void MultipleShootingCGMRESWithSaturation::initSolution(const double initial_tim
             lambda_mat_[i][j] = initial_lambda_vec[j];
         }
     }
-    // Intialize the optimality error.
-    double initial_control_input_and_constraints_error[dim_control_input_and_constraints_], initial_dummy_input_error[dim_saturation_], initial_saturation_error[dim_saturation_];
-
-    initializer.getControlInputAndConstraintsError(initial_time, initial_state_vec, initial_solution_vec, initial_control_input_and_constraints_error);
-    initializer.getDummyInputError(initial_time, initial_state_vec, initial_solution_vec, initial_dummy_input_error);
-    initializer.getControlInputSaturationError(initial_time, initial_state_vec, initial_solution_vec, initial_saturation_error);
     for (int i=0; i<horizon_division_num_; i++) {
         for (int j=0; j<dim_control_input_and_constraints_; j++) {
-            control_input_and_constraints_error_seq_[i*dim_control_input_and_constraints_+j] = initial_control_input_and_constraints_error[j];
+            control_input_and_constraints_error_seq_[i*dim_control_input_and_constraints_+j] = initial_control_input_and_constraint_error_vec[j];
         }
         for (int j=0; j<dim_saturation_; j++) {
-            dummy_error_mat_[i][j] = initial_dummy_input_error[j];
+            dummy_error_mat_[i][j] = initial_dummy_error_vec[j];
         }
         for (int j=0; j<dim_saturation_; j++) {
-            saturation_error_mat_[i][j] = initial_saturation_error[j];
+            saturation_error_mat_[i][j] = initial_saturation_error_vec[j];
         }
     }
-}
-
-
-void MultipleShootingCGMRESWithSaturation::initSolution(const double initial_time, const double* initial_state_vec, const double* initial_guess_input_vec, const double* initial_guess_lagrange_multiplier_vec, const double convergence_radius, const int max_iteration)
-{
-    double initial_solution_vec[dim_control_input_and_constraints_+2*dim_saturation_], initial_lambda_vec[dim_state_];
-    InitCGMRESWithSaturation initializer(saturation_seq_, finite_diff_step_, dim_krylov_);
-
-    // Intialize the solution
-    initial_time_ = initial_time;
-    initializer.solveOCPForInit(initial_time, initial_state_vec, initial_guess_input_vec, initial_guess_lagrange_multiplier_vec, convergence_radius, max_iteration, initial_solution_vec);
-    model_.phixFunc(initial_time, initial_state_vec, initial_lambda_vec);
-    for (int i=0; i<horizon_division_num_; i++) {
-        for (int j=0; j<dim_control_input_and_constraints_; j++) {
-            control_input_and_constraints_seq_[j] = initial_solution_vec[j];
-        }
-        for (int j=0; j<dim_saturation_; j++) {
-            dummy_input_mat_[i][j] = initial_solution_vec[dim_control_input_and_constraints_+j];
-        }
-        for (int j=0; j<dim_saturation_; j++) {
-            saturation_lagrange_multiplier_mat_[i][j] = initial_solution_vec[dim_control_input_and_constraints_+dim_saturation_+j];
-        }
-        for (int j=0; j<dim_state_; j++) {
-            state_mat_[i][j] = initial_state_vec[j];
-        }
-        for (int j=0; j<dim_state_; j++) {
-            lambda_mat_[i][j] = initial_lambda_vec[j];
-        }
-    }
-    // Intialize the optimality error.
-    double initial_control_input_and_constraints_error[dim_control_input_and_constraints_], initial_dummy_input_error[dim_saturation_], initial_saturation_error[dim_saturation_];
-
-    initializer.getControlInputAndConstraintsError(initial_time, initial_state_vec, initial_solution_vec, initial_control_input_and_constraints_error);
-    initializer.getDummyInputError(initial_time, initial_state_vec, initial_solution_vec, initial_dummy_input_error);
-    initializer.getControlInputSaturationError(initial_time, initial_state_vec, initial_solution_vec, initial_saturation_error);
-    for (int i=0; i<horizon_division_num_; i++) {
-        for (int j=0; j<dim_control_input_and_constraints_; j++) {
-            control_input_and_constraints_error_seq_[i*dim_control_input_and_constraints_+j] = initial_control_input_and_constraints_error[j];
-        }
-        for (int j=0; j<dim_saturation_; j++) {
-            dummy_error_mat_[i][j] = initial_dummy_input_error[j];
-        }
-        for (int j=0; j<dim_saturation_; j++) {
-            saturation_error_mat_[i][j] = initial_saturation_error[j];
-        }
+    for (int i=0; i<dim_control_input_; i++) {
+        optimal_control_input_vec[i] = initial_solution_vec[i];
     }
 }
 

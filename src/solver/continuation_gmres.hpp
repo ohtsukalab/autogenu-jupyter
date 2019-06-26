@@ -21,14 +21,18 @@ public:
     // Free vectors and matrices.
     ~ContinuationGMRES();
 
+    // Sets parameters for initialization of the solution of NMPC.
+    // Args:
+    //     initial_guess_solution: A vector whose dimension is dimu+dimc.
+    //     residual_tolerance: A criteria for the Newton iteration. It terminates when the error is less than this value.
+    //     max_iteration: Maximum number of the Newton iteration.
+    void setInitParams(const double* initial_guess_solution, const double residual_tolerance, const int max_iteration, const double finite_diff_step, const int kmax);
+
     // Initializes the solution of the C/GMRES method.
-    void initSolution(const double initial_time, const double* initial_state_vec, const double* initial_guess_input_vec, const double convergence_radius, const int max_iteration);
+    void initSolution(const double initial_time, const double* initial_state_vec, double* optimal_control_input_vec);
 
     // Updates the solution by solving the matrix-free GMRES.
     void controlUpdate(const double current_time, const double sampling_period, const double* current_state_vec, double* optimal_control_input_vec);
-
-    // Returns the intial vector of the control input sequence
-    void getControlInput(double* control_input_vec) const;
 
     // Returns the optimality error norm under the current_state_vec and the current solution.
     double getError(const double current_time, const double* current_state_vec);
@@ -36,6 +40,7 @@ public:
 
 private:
     NMPCModel model_;
+    InitCGMRES cgmres_initializer_;
     int dim_state_, dim_control_input_, dim_constraints_, dim_control_input_and_constraints_, dim_solution_, horizon_division_num_, kmax_;
 
     // initial_time_, T_f_, alpha_ : parameters of the length of the horizon

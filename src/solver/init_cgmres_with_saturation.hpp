@@ -14,31 +14,25 @@
 class InitCGMRESWithSaturation final : public MatrixFreeGMRES{
 public:
     // Sets parameters and allocates vectors.
-    InitCGMRESWithSaturation(const ControlInputSaturationSequence saturation_seq, const double finite_diff_step, const int kmax);
+    InitCGMRESWithSaturation(const ControlInputSaturationSequence saturation_seq);
 
     // Free vectors/
     ~InitCGMRESWithSaturation();
 
-    // Calls the forwardDifferenceGMRES, solves the GMRES, and obtains the solution 
-    void solveOCPForInit(const double initial_time, const double* initial_state_vec, const double* initial_guess_control_input_vec, const double* initial_guess_lagrange_multiplier, const double convergence_radius, const int max_iteration, double* solution_vec);
+    // Sets parameters and allocates vectors.
+    void setInitParams(const double* initial_guess_solution, const double* initial_guess_lagrange_multiplier, const double residual_tolerance, const int max_iteration, const double finite_diff_step, const int kmax);
 
-    // Returns the optimality error for the control input and constraints under current_solution_vec.
-    void getControlInputAndConstraintsError(const double initial_time, const double* initial_state_vec, const double* current_solution_vec, double* control_input_and_constraints_error_vec);
-
-    // Returns the optimality error for dummy input under current_solution_vec.
-    void getDummyInputError(const double initial_time, const double* initial_state_vec, const double* current_solution_vec, double* dummy_input_error_vec);
-
-    // Returns the optimality error for saturation under current_solution_vec.
-    void getControlInputSaturationError(const double initial_time, const double* initial_state_vec, const double* current_solution_vec, double* control_input_saturation_error_vec);
+    // Calls the forwardDifferenceGMRES, solves the GMRES, and obtains the solution of the initialization for the C/GMRES method.
+    void solveOCPForInit(const double initial_time, const double* initial_state_vec, double* initial_solution_vec, double* control_input_and_constraints_error, double* dummy_input_error, double* control_input_saturation_error);
 
 
 private:
     NMPCModel model_;
     ControlInputSaturationSequence saturation_seq_;
 
-    int dim_control_input_and_constraints_, dim_saturation_, dim_solution_;
-    double finite_diff_step_;
-    double *incremented_solution_vec_, *solution_update_vec_, *lambda_vec_, *error_vec_, *error_vec_1_, *error_vec_2_;
+    int dim_control_input_and_constraints_, dim_saturation_, dim_solution_, max_iteration_;
+    double finite_diff_step_, residual_tolerance_;
+    double *initial_guess_solution_, *initial_guess_lagrange_multiplier_, *incremented_solution_vec_, *solution_update_vec_, *lambda_vec_, *error_vec_, *error_vec_1_, *error_vec_2_;
 
     // Adds partial derivative of the saturation with respect to the control input
     inline void addHamiltonianDerivativeWithControlInput(const double* control_input_and_constraints_vec, const double* saturation_lagrange_multiplier_vec, double* optimality_for_control_input_and_constraints_vec);
