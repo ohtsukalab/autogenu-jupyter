@@ -282,20 +282,22 @@ def generate_main(
     f_main.write('    // Initialize the solution of the C/GMRES method.\n')
     if solver_index == 3 and init_params.Lag_multiplier is not None:
         f_main.write(
-            '    nmpc_solver.initSolution('
-            +str(sim_params.initial_time)+', '
-            +'initial_state, initial_guess_solution, '
+            '    nmpc_solver.setInitParams('
+            +'initial_guess_solution, '
             +'initial_guess_lagrange_multiplier, '
             +str(init_params.tol_res)+', '
-            +str(init_params.max_itr)+');\n'
+            +str(init_params.max_itr)+', '
+            +str(solver_params.finite_diff_step)+', '
+            +str(solver_params.kmax)+');\n'
         )
     else:
         f_main.write(
-            '    nmpc_solver.initSolution('
-            +str(sim_params.initial_time)+', '
-            +'initial_state, initial_guess_solution, '
+            '    nmpc_solver.setInitParams('
+            +'initial_guess_solution, '
             +str(init_params.tol_res)+', '
-            +str(init_params.max_itr)+');\n'
+            +str(init_params.max_itr)+', '
+            +str(solver_params.finite_diff_step)+', '
+            +str(solver_params.kmax)+');\n'
         )
     f_main.write('\n')
     f_main.write('\n')
@@ -462,8 +464,6 @@ def generate_cmake(solver_index, model_name):
             'add_executable(main ${MODEL_DIR}/main.cpp)\n'
             'target_link_libraries(main\n'
             '    PRIVATE\n'
-            '    \n'
-            ')\n'
         )
         if solver_index == 1:
             f_cmake.write(
