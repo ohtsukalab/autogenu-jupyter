@@ -1,4 +1,4 @@
-class SimulationParams(object):
+class SimulationParameters(object):
     """ Parameters of the numerical simulation of NMPC. Provide these parameters
         to generate main.cpp for the simulation.
         Attributes: 
@@ -10,7 +10,7 @@ class SimulationParams(object):
     """
 
     def __init__(self, initial_time, initial_state, simulation_time, sampling_time):
-        """ Inits SimulationParams. """
+        """ Inits SimulationParameters. """
         self.initial_time = initial_time
         self.initial_state = initial_state
         self.simulation_time = simulation_time
