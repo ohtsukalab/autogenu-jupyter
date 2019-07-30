@@ -43,7 +43,10 @@ class SimulationPlottor(object):
         self.__control_input_data[np.isnan(self.__control_input_data)] = 0
         self.__error_data[np.isnan(self.__error_data)] = 0
         # Set dimensions of the state and the control input.
-        self.__dim_state = self.__state_data.shape[1]
+        if self.__state_data.shape[0] == self.__state_data.size:
+            self.__dim_state= 1
+        else:
+            self.__dim_state = self.__state_data.shape[1]
         if self.__control_input_data.shape[0] == self.__control_input_data.size:
             self.__dim_control_input = 1
         else:
@@ -123,11 +126,22 @@ class SimulationPlottor(object):
             wspace=self.__space_scale/self.__num_plots, 
             hspace=2*self.__space_scale/self.__num_plots
         ) 
-        for i in range(self.__dim_state):
-            plt.subplot(self.__num_plot_y, self.__num_plot_x, i+1)
-            plt.plot(self.__time_sequence, self.__state_data[:, i])
+        if self.__dim_state > 1:
+            for i in range(self.__dim_state):
+                plt.subplot(self.__num_plot_y, self.__num_plot_x, i+1)
+                plt.plot(self.__time_sequence, self.__state_data[:, i])
+                plt.xlabel(r'${\rm Time}$ $[s]$')
+                plt.ylabel(r'$x_{}$'.format(i+1))
+                plt.xlim(0, self.__sim_conditions.simulation_time())
+        else:
+            plt.subplot(
+                self.__num_plot_y, 
+                self.__num_plot_x, 
+                1
+            )
+            plt.plot(self.__time_sequence, self.__state_data)
             plt.xlabel(r'${\rm Time}$ $[s]$')
-            plt.ylabel(r'$x_{}$'.format(i+1))
+            plt.ylabel(r'$x$')
             plt.xlim(0, self.__sim_conditions.simulation_time())
         if self.__dim_control_input > 1:
             for i in range(self.__dim_control_input):
