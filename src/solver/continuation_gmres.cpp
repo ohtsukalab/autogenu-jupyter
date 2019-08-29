@@ -69,13 +69,13 @@ void ContinuationGMRES::initSolution(const double initial_time,
                                       initial_solution_vec, 
                                       initial_errors_in_optimality);
   for (int i=0; i<N_; ++i) {
-    int total_i = i * dim_control_input_and_constraints_;
+    int i_total = i * dim_control_input_and_constraints_;
     for (int j=0; j<dim_control_input_and_constraints_; ++j) {
-      solution_vec_[total_i+j] = initial_solution_vec[j];
+      solution_vec_[i_total+j] = initial_solution_vec[j];
     }
     // Intialize the errors_in_optimality_.
     for (int j=0; j<dim_control_input_and_constraints_; ++j) {
-      errors_in_optimality_[total_i+j] = initial_errors_in_optimality[j];
+      errors_in_optimality_[i_total+j] = initial_errors_in_optimality[j];
     }
   }
   for (int i=0; i<dim_control_input_; ++i) {

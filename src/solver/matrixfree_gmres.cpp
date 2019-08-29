@@ -94,16 +94,16 @@ void MatrixFreeGMRES::solveGMRES(const double time,
     }
     hessenberg_mat_[k][k+1] = std::sqrt(linearalgebra::SquaredNorm(
         dim_solution_, basis_mat_[k+1]));
-    if (hessenberg_mat_[k][k+1]) {
+    if (std::abs(hessenberg_mat_[k][k+1]) < std::numeric_limits<double>::epsilon()) {
+      std::cout << "The modified Gram-Schmidt breakdown at k = " << k 
+                << std::endl;
+      break;
+    }
+    else {
       // basis_mat_[k+1] = basis_mat_[k+1] / hessenberg_mat_[k][k+1];
       for (int i=0; i<dim_solution_; ++i) {
         basis_mat_[k+1][i] = basis_mat_[k+1][i] / hessenberg_mat_[k][k+1];
       }
-    }
-    else {
-      std::cout << "The modified Gram-Schmidt breakdown at k = " << k 
-                << std::endl;
-      break;
     }
     // Givens Rotation for QR factrization of the least squares problem.
     for (int j=0; j<k; ++j) {

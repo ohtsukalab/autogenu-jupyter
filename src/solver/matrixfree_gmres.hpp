@@ -7,6 +7,7 @@
 #define MATRIXFREE_GMRES_H
 
 #include <iostream>
+#include <limits>
 #include "nmpc_model.hpp"
 #include "linear_algebra.hpp"
 

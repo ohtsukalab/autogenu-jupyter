@@ -149,9 +149,9 @@ void MSCGMRESWithSaturation::initSolution(const double initial_time,
     }
   }
   for (int i=0; i<N_; ++i) {
-    int total_i = i * dim_control_input_and_constraints_;
+    int i_total = i * dim_control_input_and_constraints_;
     for (int j=0; j<dim_control_input_and_constraints_; ++j) {
-      control_input_and_constraints_error_seq_[total_i+j] = 
+      control_input_and_constraints_error_seq_[i_total+j] = 
           initial_error_for_control_input_and_constraint[j];
     }
     for (int j=0; j<dim_saturation_; ++j) {
@@ -323,15 +323,15 @@ inline void MSCGMRESWithSaturation::computeErrorsForControlInputAndConstraints(
   );
   double tau = time + delta_tau;
   for (int i=1; i<N_; ++i, tau+=delta_tau) {
-    int total_i = i * dim_control_input_and_constraints_;
+    int i_total = i * dim_control_input_and_constraints_;
     model_.huFunc(tau, state_mat[i-1], 
-                  &(control_input_and_constraints_seq[total_i]), 
+                  &(control_input_and_constraints_seq[i_total]), 
                   lambda_mat[i], 
-                  &(errors_for_control_input_and_constraints[total_i]));
+                  &(errors_for_control_input_and_constraints[i_total]));
     condensingfunctions::addHamiltonianDerivativeWithConstrainedInput(
-        saturation_seq_, &(control_input_and_constraints_seq[total_i]), 
+        saturation_seq_, &(control_input_and_constraints_seq[i_total]), 
         saturation_Lagrange_multiplier_mat[i], 
-        &(errors_for_control_input_and_constraints[total_i])
+        &(errors_for_control_input_and_constraints[i_total])
     );
   }
 }
@@ -352,9 +352,9 @@ inline void MSCGMRESWithSaturation::computeErrorsForStateAndLambda(
   }
   double tau = time + delta_tau;
   for (int i=1; i<N_; ++i, tau+=delta_tau) {
-    int total_i = i * dim_control_input_and_constraints_;
+    int i_total = i * dim_control_input_and_constraints_;
     model_.stateFunc(tau, state_mat[i-1], 
-                     &(control_input_and_constraints_seq[total_i]), dx_vec_);
+                     &(control_input_and_constraints_seq[i_total]), dx_vec_);
     for (int j=0; j<dim_state_; ++j) {
       errors_for_state[i][j] = 
           state_mat[i][j] - state_mat[i-1][j] - delta_tau * dx_vec_[j];
@@ -366,9 +366,9 @@ inline void MSCGMRESWithSaturation::computeErrorsForStateAndLambda(
     errors_for_lambda[N_-1][i] = lambda_mat[N_-1][i] - dx_vec_[i];
   }
   for (int i=N_-1; i>=1; --i, tau-=delta_tau) {
-    int total_i = i * dim_control_input_and_constraints_;
+    int i_total = i * dim_control_input_and_constraints_;
     model_.hxFunc(tau, state_mat[i-1], 
-                  &(control_input_and_constraints_seq[total_i]), 
+                  &(control_input_and_constraints_seq[i_total]), 
                   lambda_mat[i], dx_vec_);
     for (int j=0; j<dim_state_; ++j) {
       errors_for_lambda[i-1][j] = 
@@ -394,9 +394,9 @@ inline void MSCGMRESWithSaturation::computeStateAndLambdaFromErrors(
   }
   double tau = time + delta_tau;
   for (int i=1; i<N_; ++i, tau+=delta_tau) {
-    int total_i = i * dim_control_input_and_constraints_;
+    int i_total = i * dim_control_input_and_constraints_;
     model_.stateFunc(tau, state_mat[i-1], 
-                     &(control_input_and_constraints_seq[total_i]), dx_vec_);
+                     &(control_input_and_constraints_seq[i_total]), dx_vec_);
     for (int j=0; j<dim_state_; ++j) {
       state_mat[i][j] = 
           state_mat[i-1][j] + delta_tau*dx_vec_[j] + errors_for_state[i][j];
@@ -408,9 +408,9 @@ inline void MSCGMRESWithSaturation::computeStateAndLambdaFromErrors(
     lambda_mat[N_-1][i] = dx_vec_[i] + errors_for_lambda[N_-1][i];
   }
   for (int i=N_-1; i>=1; --i, tau-=delta_tau) {
-    int total_i = i * dim_control_input_and_constraints_;
+    int i_total = i * dim_control_input_and_constraints_;
     model_.hxFunc(tau, state_mat[i-1], 
-                  &(control_input_and_constraints_seq[total_i]), 
+                  &(control_input_and_constraints_seq[i_total]), 
                   lambda_mat[i], dx_vec_);
     for (int j=0; j<dim_state_; ++j) {
       lambda_mat[i-1][j] = 
@@ -469,13 +469,13 @@ inline void MSCGMRESWithSaturation::computeErrorsDifferenceForDummyInput(
     const double* control_input_and_constraints_update_seq, 
     double** dummy_difference_mat) {
   for (int i=0; i<N_; ++i) { 
-    int total_i = i * dim_control_input_and_constraints_;
+    int i_total = i * dim_control_input_and_constraints_;
     for (int j=0; j<dim_saturation_; ++j) {
       int index_j = saturation_seq_.index(j);
       dummy_difference_mat[i][j] = 
-          ((2*control_input_and_constraints_seq[total_i+index_j] 
+          ((2*control_input_and_constraints_seq[i_total+index_j] 
               -saturation_seq_.min(j)-saturation_seq_.max(j))
-              *control_input_and_constraints_update_seq[total_i+index_j]) 
+              *control_input_and_constraints_update_seq[i_total+index_j]) 
           / (2*dummy_input_mat[i][j]);
     }
   }
@@ -488,15 +488,15 @@ inline void MSCGMRESWithSaturation::computeErrorsDifferenceForSaturation(
     const double* control_input_and_constraints_update_seq, 
     double** saturation_difference_mat) {
   for (int i=0; i<N_; ++i) {
-    int total_i = i * dim_control_input_and_constraints_;
+    int i_total = i * dim_control_input_and_constraints_;
     for (int j=0; j<dim_saturation_; ++j) {
       int index_j = saturation_seq_.index(j);
       saturation_difference_mat[i][j] = 
           - ((saturation_Lagrange_multiplier_mat[i][j]
                 +saturation_seq_.quadratic_weight(j))
-          *(2*control_input_and_constraints_seq[total_i+index_j]
+          *(2*control_input_and_constraints_seq[i_total+index_j]
                 -saturation_seq_.min(j)-saturation_seq_.max(j))
-          *control_input_and_constraints_update_seq[total_i+index_j]) 
+          *control_input_and_constraints_update_seq[i_total+index_j]) 
           / (2*dummy_input_mat[i][j]*dummy_input_mat[i][j]);
     }
   }

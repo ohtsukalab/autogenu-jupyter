@@ -92,9 +92,9 @@ void MultipleShootingCGMRES::initSolution(const double initial_time,
                                       initial_errors_in_optimality);
   model_.phixFunc(initial_time, initial_state_vec, initial_lambda_vec);
   for (int i=0; i<N_; ++i) {
-    int total_i = i * dim_control_input_and_constraints_;
+    int i_total = i * dim_control_input_and_constraints_;
     for (int j=0; j<dim_control_input_and_constraints_; ++j) {
-      control_input_and_constraints_seq_[total_i+j] = initial_solution_vec[j];
+      control_input_and_constraints_seq_[i_total+j] = initial_solution_vec[j];
     }
     for (int j=0; j<dim_state_; ++j) {
       state_mat_[i][j] = initial_state_vec[j];
@@ -104,9 +104,9 @@ void MultipleShootingCGMRES::initSolution(const double initial_time,
     }
   }
   for (int i=0; i<N_; ++i) {
-    int total_i = i * dim_control_input_and_constraints_;
+    int i_total = i * dim_control_input_and_constraints_;
     for (int j=0; j<dim_control_input_and_constraints_; ++j) {
-      control_input_and_constraints_error_seq_[total_i+j] 
+      control_input_and_constraints_error_seq_[i_total+j] 
           = initial_errors_in_optimality[j];
     }
   }
@@ -214,11 +214,11 @@ inline void MultipleShootingCGMRES::computeErrorsForControlInputAndConstraints(
                 lambda_mat[0], errors_for_control_input_and_constraints);
   double tau = time + delta_tau;
   for (int i=1; i<N_; ++i, tau+=delta_tau) {
-    int total_i = i * dim_control_input_and_constraints_;
+    int i_total = i * dim_control_input_and_constraints_;
     model_.huFunc(tau, state_mat[i-1], 
-                  &(control_input_and_constraints_seq[total_i]), 
+                  &(control_input_and_constraints_seq[i_total]), 
                   lambda_mat[i], 
-                  &(errors_for_control_input_and_constraints[total_i]));
+                  &(errors_for_control_input_and_constraints[i_total]));
   }
 }
 
@@ -238,9 +238,9 @@ inline void MultipleShootingCGMRES::computeErrorsForStateAndLambda(
   }
   double tau = time + delta_tau;
   for (int i=1; i<N_; ++i, tau+=delta_tau) {
-    int total_i = i * dim_control_input_and_constraints_;
+    int i_total = i * dim_control_input_and_constraints_;
     model_.stateFunc(tau, state_mat[i-1], 
-                     &(control_input_and_constraints_seq[total_i]), dx_vec_);
+                     &(control_input_and_constraints_seq[i_total]), dx_vec_);
     for (int j=0; j<dim_state_; ++j) {
       errors_for_state[i][j] = 
           state_mat[i][j] - state_mat[i-1][j] - delta_tau * dx_vec_[j];
@@ -252,9 +252,9 @@ inline void MultipleShootingCGMRES::computeErrorsForStateAndLambda(
     errors_for_lambda[N_-1][i] = lambda_mat[N_-1][i] - dx_vec_[i];
   }
   for (int i=N_-1; i>=1; --i, tau-=delta_tau) {
-    int total_i = i * dim_control_input_and_constraints_;
+    int i_total = i * dim_control_input_and_constraints_;
     model_.hxFunc(tau, state_mat[i-1], 
-                  &(control_input_and_constraints_seq[total_i]), 
+                  &(control_input_and_constraints_seq[i_total]), 
                   lambda_mat[i], dx_vec_);
     for (int j=0; j<dim_state_; ++j) {
       errors_for_lambda[i-1][j] = 
@@ -280,9 +280,9 @@ inline void MultipleShootingCGMRES::computeStateAndLambdaFromErrors(
   }
   double tau = time + delta_tau;
   for (int i=1; i<N_; ++i, tau+=delta_tau) {
-    int total_i = i * dim_control_input_and_constraints_;
+    int i_total = i * dim_control_input_and_constraints_;
     model_.stateFunc(tau, state_mat[i-1], 
-                     &(control_input_and_constraints_seq[total_i]), dx_vec_);
+                     &(control_input_and_constraints_seq[i_total]), dx_vec_);
     for (int j=0; j<dim_state_; ++j) {
       state_mat[i][j] = 
           state_mat[i-1][j] + delta_tau*dx_vec_[j] + errors_for_state[i][j];
@@ -294,9 +294,9 @@ inline void MultipleShootingCGMRES::computeStateAndLambdaFromErrors(
     lambda_mat[N_-1][i] = dx_vec_[i] + errors_for_lambda[N_-1][i];
   }
   for (int i=N_-1; i>=1; --i, tau-=delta_tau) {
-    int total_i = i * dim_control_input_and_constraints_;
+    int i_total = i * dim_control_input_and_constraints_;
     model_.hxFunc(tau, state_mat[i-1], 
-                  &(control_input_and_constraints_seq[total_i]), 
+                  &(control_input_and_constraints_seq[i_total]), 
                   lambda_mat[i], dx_vec_);
     for (int j=0; j<dim_state_; ++j) {
       lambda_mat[i-1][j] = 
