@@ -44,16 +44,12 @@ def make_model_dir(model_name):
         )
 
 
-def generate_cpp(dimx, dimu, dimc, fxu, Cxu, phix, hx, hu, model_name):
+def generate_cpp(fxu, phix, hx, hu, model_name, cse_flag=False):
     """ Generates the C++ source file in which the equations to solve the 
         optimal control problem are described.
 
         Args: 
-            dimx: Dimension of the state.
-            dimu: Dimension of the control input.
-            dimc: Dimenstion of the equality constraints.
             fxu: The state equation.
-            Cxu: The equality constraints.
             phix: The partial derivative of the terminal cost with respect to 
                 the state.
             hx: The partial derivative of the hamiltonina with respect to the 
@@ -61,33 +57,81 @@ def generate_cpp(dimx, dimu, dimc, fxu, Cxu, phix, hx, hu, model_name):
             hu: The partial derivative of the hamiltonina with respect to the 
                 control input.
             model_name: A string representing the name of the simulation model.
+            cse_flag: The flag for common subexpression elimination. If True, 
+                common subexpressions in fxu, phix, hx, and hu are eliminated. 
+                Default is False.
     """
     f_model_cpp = open('models/'+str(model_name)+'/nmpc_model.cpp', 'w')
     cpp_template = 'autogenu/.cpp_templates/nmpc_model.cpp'
+    if cse_flag:
+        fxu = sympy.cse(fxu)
+        phix = sympy.cse(phix)
+        hx = sympy.cse(hx)
+        hu = sympy.cse(hu)
     f_model_cpp.writelines(
         [linecache.getline(cpp_template, i) for i in range(0, 11)]
     )
-    f_model_cpp.writelines(
-        ['    f[%d] = '%i+sympy.ccode(fxu[i])+';\n' for i in range(dimx)]
-    )
+    if cse_flag:
+        for i in range(len(fxu[0])):
+            cse_exp, cse_rhs = fxu[0][i]
+            f_model_cpp.write(
+                '    double '+sympy.ccode(cse_exp)+' = '+sympy.ccode(cse_rhs)+';\n'
+            )
+        f_model_cpp.writelines(
+            ['    f[%d] = '%i+sympy.ccode(fxu[1][i])+';\n' for i in range(len(fxu[1]))]
+        )
+    else:
+        f_model_cpp.writelines(
+            ['    f[%d] = '%i+sympy.ccode(fxu[i])+';\n' for i in range(len(fxu))]
+        )
     f_model_cpp.writelines(
         [linecache.getline(cpp_template, i) for i in range(12, 22)]
     )
-    f_model_cpp.writelines(
-        ['    phix[%d] = '%i+sympy.ccode(phix[i])+';\n' for i in range(dimx)]
-    )
+    if cse_flag:
+        for i in range(len(phix[0])):
+            cse_exp, cse_rhs = phix[0][i]
+            f_model_cpp.write(
+                '    double '+sympy.ccode(cse_exp)+' = '+sympy.ccode(cse_rhs)+';\n'
+            )
+        f_model_cpp.writelines(
+            ['    phix[%d] = '%i+sympy.ccode(phix[1][i])+';\n' for i in range(len(phix[1]))]
+        )
+    else:
+        f_model_cpp.writelines(
+            ['    phix[%d] = '%i+sympy.ccode(phix[i])+';\n' for i in range(len(phix))]
+        )
     f_model_cpp.writelines(
         [linecache.getline(cpp_template, i) for i in range(23, 36)]
     )
-    f_model_cpp.writelines(
-        ['    hx[%d] = '%i+sympy.ccode(hx[i])+';\n' for i in range(dimx)]
-    )
+    if cse_flag:
+        for i in range(len(hx[0])):
+            cse_exp, cse_rhs = hx[0][i]
+            f_model_cpp.write(
+                '    double '+sympy.ccode(cse_exp)+' = '+sympy.ccode(cse_rhs)+';\n'
+            )
+        f_model_cpp.writelines(
+            ['    hx[%d] = '%i+sympy.ccode(hx[1][i])+';\n' for i in range(len(hx[1]))]
+        )
+    else:
+        f_model_cpp.writelines(
+            ['    hx[%d] = '%i+sympy.ccode(hx[i])+';\n' for i in range(len(hx))]
+        )
     f_model_cpp.writelines(
         [linecache.getline(cpp_template, i) for i in range(37, 50)]
     )
-    f_model_cpp.writelines(
-        ['    hu[%d] = '%i+sympy.ccode(hu[i])+';\n' for i in range(dimu+dimc)]
-    )
+    if cse_flag:
+        for i in range(len(hu[0])):
+            cse_exp, cse_rhs = hu[0][i]
+            f_model_cpp.write(
+                '    double '+sympy.ccode(cse_exp)+' = '+sympy.ccode(cse_rhs)+';\n'
+            )
+        f_model_cpp.writelines(
+            ['    hu[%d] = '%i+sympy.ccode(hu[1][i])+';\n' for i in range(len(hu[1]))]
+        )
+    else:
+        f_model_cpp.writelines(
+            ['    hu[%d] = '%i+sympy.ccode(hu[i])+';\n' for i in range(len(hu))]
+        )
     f_model_cpp.write('}')
     f_model_cpp.close()
 
