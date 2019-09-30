@@ -207,19 +207,19 @@ def generate_main(
     if solver_index == 1:
         f_main.write(
             '#include "continuation_gmres.hpp"\n'
-            '#include "cgmres_simulator.hpp"\n'
         )
     elif solver_index == 2:
         f_main.write(
             '#include "multiple_shooting_cgmres.hpp"\n'
-            '#include "multiple_shooting_cgmres_simulator.hpp"\n'
         )
     else:
         f_main.write(
             '#include "control_input_saturation_sequence.hpp"\n'
             '#include "mscgmres_with_saturation.hpp"\n'
-            '#include "mscgmres_with_saturation_simulator.hpp"\n'
         )
+    f_main.write(
+        '#include "cgmres_simulator.hxx"\n'
+    )
     f_main.write('#include <string>\n')
     if platform.system() == 'Windows':
         f_main.write(
@@ -433,20 +433,6 @@ def generate_cmake(solver_index, model_name):
             '    ${SOLVER_DIR}\n'
             ')\n'
             '\n'
-            'add_library(\n'
-            '    cgmres_simulator\n'
-            '    STATIC\n'
-            '    ${SIMULATOR_DIR}/save_simulation_data.cpp\n'
-            '    ${SIMULATOR_DIR}/numerical_integrator.cpp\n'
-            '    ${SIMULATOR_DIR}/cgmres_simulator.cpp\n'
-            ')\n'
-            'target_include_directories(\n'
-            '    cgmres_simulator\n'
-            '    PRIVATE\n'
-            '    ${MODEL_DIR}\n'
-            '    ${SOLVER_DIR}\n'
-            '    ${SIMULATOR_DIR}\n'
-            ')\n'
         )
     elif solver_index == 2:
         f_cmake.write(
@@ -465,20 +451,6 @@ def generate_cmake(solver_index, model_name):
             '    ${SOLVER_DIR}\n'
             ')\n'
             '\n'
-            'add_library(\n'
-            '    multiple_shooting_cgmres_simulator\n'
-            '    STATIC\n'
-            '    ${SIMULATOR_DIR}/save_simulation_data.cpp\n'
-            '    ${SIMULATOR_DIR}/numerical_integrator.cpp\n'
-            '    ${SIMULATOR_DIR}/multiple_shooting_cgmres_simulator.cpp\n'
-            ')\n'
-            'target_include_directories(\n'
-            '    multiple_shooting_cgmres_simulator\n'
-            '    PRIVATE\n'
-            '    ${MODEL_DIR}\n'
-            '    ${SOLVER_DIR}\n'
-            '    ${SIMULATOR_DIR}\n'
-            ')\n'
         )
     elif solver_index == 3:
         f_cmake.write(
@@ -500,43 +472,40 @@ def generate_cmake(solver_index, model_name):
             '    ${SOLVER_DIR}\n'
             ')\n'
             '\n'
-            'add_library(\n'
-            '    mscgmres_with_saturation_simulator\n'
-            '    STATIC\n'
-            '    ${SIMULATOR_DIR}/save_simulation_data.cpp\n'
-            '    ${SIMULATOR_DIR}/numerical_integrator.cpp\n'
-            '    ${SIMULATOR_DIR}/'
-            'mscgmres_with_saturation_simulator.cpp\n'
-            ')\n'
-            'target_include_directories(\n'
-            '    mscgmres_with_saturation_simulator\n'
-            '    PRIVATE\n'
-            '    ${MODEL_DIR}\n'
-            '    ${SOLVER_DIR}\n'
-            '    ${SIMULATOR_DIR}\n'
-            ')\n'
-            '\n'
-            '\n'
         )
+    f_cmake.write(
+        'add_library(\n'
+        '    cgmres_simulator\n'
+        '    STATIC\n'
+        '    ${SIMULATOR_DIR}/save_simulation_data.cpp\n'
+        '    ${SIMULATOR_DIR}/numerical_integrator.cpp\n'
+        '    ${SIMULATOR_DIR}/cgmres_simulator.hxx\n'
+        ')\n'
+        'target_include_directories(\n'
+        '    cgmres_simulator\n'
+        '    PRIVATE\n'
+        '    ${MODEL_DIR}\n'
+        '    ${SOLVER_DIR}\n'
+        '    ${SIMULATOR_DIR}\n'
+        ')\n'
+    )
     if platform.system() == 'Windows':
         f_cmake.write(
             'add_executable(main ${MODEL_DIR}/main.cpp)\n'
             'target_link_libraries(main\n'
             '    PRIVATE\n'
+            '    cgmres_simulator\n'
         )
         if solver_index == 1:
             f_cmake.write(
-                '    cgmres_simulator\n'
                 '    cgmres\n'
             )
         elif solver_index == 2:
             f_cmake.write(
-                '    multiple_shooting_cgmres_simulator\n'
                 '    multiple_shooting_cgmres\n'
             )
         elif solver_index == 3:
             f_cmake.write(
-                '    mscgmres_with_saturation_simulator\n'
                 '    mscgmres_with_saturation\n'
             )
         f_cmake.write(
@@ -554,20 +523,18 @@ def generate_cmake(solver_index, model_name):
             'add_executable(a.out ${MODEL_DIR}/main.cpp)\n'
             'target_link_libraries(a.out\n'
             '    PRIVATE\n'
+            '    cgmres_simulator\n'
         )
         if solver_index == 1:
             f_cmake.write(
-                '    cgmres_simulator\n'
                 '    cgmres\n'
             )
         elif solver_index == 2:
             f_cmake.write(
-                '    multiple_shooting_cgmres_simulator\n'
                 '    multiple_shooting_cgmres\n'
             )
         elif solver_index == 3:
             f_cmake.write(
-                '    mscgmres_with_saturation_simulator\n'
                 '    mscgmres_with_saturation\n'
             )
         f_cmake.write(
