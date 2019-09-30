@@ -1,4 +1,4 @@
-# AutoGenU for jupyter
+# AutoGenU for Jupyter
 
 ## Introduction
 This project provides the continuation/GMRES method (C/GMRES method) based solvers for nonlinear model predictive control (NMPC) and an automatic code generator for NMPC, called AutoGenU.
