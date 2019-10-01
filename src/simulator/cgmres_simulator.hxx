@@ -1,12 +1,11 @@
 #include "cgmres_simulator.hpp"
 
-
-void nmpcsim::simulation(ContinuationGMRES& nmpc_solver, 
-                         const double* initial_state_vec, 
-                         const double start_time, const double end_time, 
-                         const double sampling_period, 
-                         const std::string save_dir, 
-                         const std::string savefile_name) {
+namespace nmpcsim {
+template <class NMPCSolver>
+void simulation(NMPCSolver& nmpc_solver, const double* initial_state_vec, 
+                const double start_time, const double end_time, 
+                const double sampling_period, const std::string save_dir, 
+                const std::string savefile_name) {
   NMPCModel model;
   NumericalIntegrator integrator;
   double current_state_vec[model.dimState()], next_state_vec[model.dimState()],
@@ -80,3 +79,4 @@ void nmpcsim::simulation(ContinuationGMRES& nmpc_solver,
   error_data.close();
   conditions_data.close();
 }
+} // namespace nmpcsim
