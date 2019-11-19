@@ -1,8 +1,8 @@
-#ifndef CONTROL_INPUT_SATURATION_H
-#define CONTROL_INPUT_SATURATION_H
+#ifndef INPUT_SATURATION_H
+#define INPUT_SATURATION_H
 
 // Stores parameters representing the saturation on the control input. 
-// Member variables of ControlInputSaturation:
+// Member variables of InputSaturation:
 // index_: the index of the element of the control input that is constrained.
 // min_: the minimum value of the constrained element of the control input.
 // max_: the maximum value of the constrained element of the control input.
@@ -12,31 +12,40 @@
 // corresponding dummy input in the cost function.
 // Each member variables can be obtained by access functions, e.g., by index(), 
 // min(), max(), dummy_weight(), and quadratic_weight().
-class ControlInputSaturation {
+class InputSaturation {
 public:
-  // Constructs ControlInputSaturation with setting member variables as
+  // Constructs InputSaturation with setting member variables as
   // index_=0, min_=0, max_=0, dummy_weight_=0, and quadratic_weight=0.
-  ControlInputSaturation();
-  // Constructs ControlInputSaturation with setting member variables 
+  InputSaturation();
+  // Constructs InputSaturation with setting member variables 
   // index_, min_, max_, dummy_weight_, and quadratic_weight with values in 
   // arguments.
-  ControlInputSaturation(const int index, const double min, const double max, 
-                         const double dummy_weight, 
-                         const double quadratic_weight);
-  // Constructs ControlInputSaturation with setting member variables 
+  InputSaturation(const int index, const double min, const double max, 
+                  const double dummy_weight, const double quadratic_weight);
+  // Constructs InputSaturation with setting member variables 
   // index_, min_, max_, dummy_weight_, and with values in arguments and 
   // setting quadratic_weight with 0.
-  ControlInputSaturation(const int index, const double min, const double max, 
-                         const double dummy_weight);
+  InputSaturation(const int index, const double min, const double max, 
+                  const double dummy_weight);
+
+  // Copy constructer of InputSaturation. 
+  // Copy all private member variables, index_, min_, max_, dummy_weight_, 
+  // and quadratic_weight_.
+  InputSaturation(const InputSaturation& other);
+  // Copy all private member variables, index_, min_, max_, dummy_weight_, 
+  // and quadratic_weight_.
+  InputSaturation& operator=(const InputSaturation& other);
+
+  bool operator<(const InputSaturation& other) const;
 
   // Sets index_, min_, max_, dummy_weight_, and quadratic_weight with values
   // in arguments.
-  void setParams(const int index, const double min, const double max, 
-                 const double dummy_weight, const double quadratic_weight);
+  void setParameters(const int index, const double min, const double max, 
+                     const double dummy_weight, const double quadratic_weight);
   // Sets index_, min_, max_, and dummy_weight_, with values in arguments and
   // sets quadratic_weight with 0.
-  void setParams(const int index, const double min, const double max, 
-                 const double dummy_weight);
+  void setParameters(const int index, const double min, const double max, 
+                     const double dummy_weight);
 
   // Returns the index of the element of the control input that is constrained.
   inline int index() const {
@@ -66,4 +75,4 @@ private:
   double min_, max_, dummy_weight_, quadratic_weight_;
 };
 
-#endif // CONTROL_INPUT_SATURATION_H
+#endif // INPUT_SATURATION_H

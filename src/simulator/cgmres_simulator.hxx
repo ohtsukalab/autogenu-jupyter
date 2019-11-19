@@ -2,7 +2,7 @@
 
 namespace nmpcsim {
 template <class NMPCSolver>
-void simulation(NMPCSolver& nmpc_solver, const double* initial_state_vec, 
+void simulation(NMPCSolver& nmpc, const double* initial_state_vec, 
                 const double start_time, const double end_time, 
                 const double sampling_period, const std::string save_dir, 
                 const std::string savefile_name) {
@@ -22,7 +22,8 @@ void simulation(NMPCSolver& nmpc_solver, const double* initial_state_vec,
   for (int i=0; i<model.dimState(); i++) {
     current_state_vec[i] = initial_state_vec[i];
   }
-  nmpc_solver.initSolution(start_time, current_state_vec, control_input_vec);
+  nmpc.initializeSolution(start_time, current_state_vec);
+  nmpc.getControlInput(control_input_vec);
 
   std::cout << "Start simulation" << std::endl;
   for (double current_time=start_time; current_time<end_time; 
@@ -31,7 +32,7 @@ void simulation(NMPCSolver& nmpc_solver, const double* initial_state_vec,
     saveData(model.dimState(), model.dimControlInput(), state_data, 
              control_input_data, error_data, current_time, current_state_vec, 
              control_input_vec, 
-             nmpc_solver.getErrorNorm(current_time, current_state_vec));
+             nmpc.getErrorNorm(current_time, current_state_vec));
 
     // Computes the next state vector using the 4th Runge-Kutta-Gill method.
     integrator.rungeKuttaGill(current_time, current_state_vec, 
@@ -40,8 +41,8 @@ void simulation(NMPCSolver& nmpc_solver, const double* initial_state_vec,
 
     // Updates the solution and measure the computational time of the update.
     start_clock = std::chrono::system_clock::now();
-    nmpc_solver.controlUpdate(current_time, sampling_period, 
-                              current_state_vec, control_input_vec);
+    nmpc.controlUpdate(current_time, current_state_vec, 
+                       sampling_period, control_input_vec);
     end_clock = std::chrono::system_clock::now();
 
     // Converts the computational time to seconds.
