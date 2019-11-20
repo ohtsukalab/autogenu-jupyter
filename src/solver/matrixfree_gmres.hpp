@@ -10,14 +10,21 @@
 #include <cmath>
 #include <limits>
 #include "linear_algebra.hpp"
-// #include "matrixfree_gmres.hxx"
 
 // Serves the matrix-free GMRES method, which supports for solving the 
 // nonlinear problem by using the GMRES method that solves a linear problem 
 // Ax = b in a short computational time. This class allocates vectors and 
 // matrices used in matrix-free GMRES and computes the solution of GMRES. 
-// You have to inherit this class and override bFunc() and axFunc() which 
-// generates vectors corresponding to b and Ax in Ax=b, respectively.
+// You have to define MatrixFreeGMRES with template paramter. The first 
+// argment of the template paramters is the LinearProblemGenerator which has
+// bFunc() and AxFunc(). Second and subsequent arguments are corresponds to
+// the argments of bFunc(..., const double* double*) and 
+// AxFunc(..., const double*, double*). For example, if you want to solve
+// the problem provided by class 'Newton' that has 
+// bFunc(const double, const double* const double* const double*)
+// and
+// AxFunc(const double, const double* const double* const double*),
+// you have to define MatrixFreeGMRES<Newton, const double, const double*>.
 template <class LinearProblemGenerator, typename... LinearProblemArgs>
 class MatrixFreeGMRES {
 public:
@@ -91,9 +98,6 @@ public:
 
   // Solves the matrix-free GMRES and generates solution_update_vector, 
   // which is a solution of the matrix-free GMRES.
-  // void solveLinearProblem(LinearProblemGenerator& linear_problem_generator,
-  //                         LinearProblemArgs... linear_problem_args,
-  //                         double* solution_vec);
   void solveLinearProblem(LinearProblemGenerator& linear_problem_generator,
                           LinearProblemArgs... linear_problem_args,
                           double* solution_vec) {

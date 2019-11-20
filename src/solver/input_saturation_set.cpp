@@ -111,6 +111,8 @@ void InputSaturationSet::generateArray(int* index_array, double* min_array,
 }
 
 void InputSaturationSet::print() {
+  std::cout << "index : min : max : dummy_weight : quadratic_weight" 
+      << std::endl;
   for (int i=0; i<input_saturation_set_.size(); ++i) {
     std::cout << index(i) << " ";
     std::cout << min(i) << " ";

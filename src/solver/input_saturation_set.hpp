@@ -23,14 +23,18 @@ class InputSaturationSet {
 public:
   // Constructs InputSaturationSet with empty.
   InputSaturationSet();
+
   // Constructs InputSaturationSet with a InputSaturation.
   InputSaturationSet(const InputSaturation& input_saturation);
+
   // Constructs InputSaturationSet with several 
   // InputSaturations using std::vector.
   InputSaturationSet(const std::vector<InputSaturation>& input_saturation_seq);
+
   // Copy constructs InputSaturationSet. Copies 
   // the private member data whose type is std::vector<InputSaturations>.
   InputSaturationSet(const InputSaturationSet& input_saturation_set);
+
   // Assignment operator copies the private member data whose type is 
   // std::vector<InputSaturations>.
   InputSaturationSet& operator=(const InputSaturationSet& other);
@@ -40,6 +44,7 @@ public:
   // If there is the saturation that has the same index in arguments, 
   // overwrite its min_, max_, dummy_weight_.
   void appendInputSaturation(const InputSaturation& input_saturation);
+
   // Appends a InputSaturation that has parameters in arguments to 
   // input_saturation_set_. If there is the saturation that has the 
   // same index in arguments, overwrite its min_, max_, dummy_weight_, 
@@ -47,6 +52,7 @@ public:
   void appendInputSaturation(const int index, const double min, 
                              const double max, const double dummy_weight, 
                              const double quadratic_weight);
+
   // Appends a InputSaturation that has parameters in arguments to 
   // input_saturation_set_. Note that quadratic_weight_ is set by 0. 
   // If there is the saturation that has the same index in arguments, 
@@ -93,6 +99,7 @@ public:
     return input_saturation_set_[saturation_index].quadratic_weight();
   }
 
+  // Prints all elements of this object.
   void print();
 
 private:

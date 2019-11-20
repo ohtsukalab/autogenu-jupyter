@@ -39,6 +39,5 @@ void inputsaturationfunctions::computeOptimalityResidualForInputSaturation(
         control_input_and_constraint_vec[index_i] * 
         (control_input_and_constraint_vec[index_i]-min_i-max_i)
         + min_i * max_i + dummy_input_vec[i] * dummy_input_vec[i];
-    // std::cout << "saturation error = " << optimality_residual_for_saturation[i] << std::endl;
   }
 }

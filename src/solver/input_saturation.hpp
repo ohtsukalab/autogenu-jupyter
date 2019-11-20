@@ -32,16 +32,19 @@ public:
   // Copy all private member variables, index_, min_, max_, dummy_weight_, 
   // and quadratic_weight_.
   InputSaturation(const InputSaturation& other);
+
   // Copy all private member variables, index_, min_, max_, dummy_weight_, 
   // and quadratic_weight_.
   InputSaturation& operator=(const InputSaturation& other);
 
+  // Operator override for sort.
   bool operator<(const InputSaturation& other) const;
 
   // Sets index_, min_, max_, dummy_weight_, and quadratic_weight with values
   // in arguments.
   void setParameters(const int index, const double min, const double max, 
                      const double dummy_weight, const double quadratic_weight);
+
   // Sets index_, min_, max_, and dummy_weight_, with values in arguments and
   // sets quadratic_weight with 0.
   void setParameters(const int index, const double min, const double max, 

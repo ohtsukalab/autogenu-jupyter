@@ -16,7 +16,7 @@ namespace nmpcsim {
 // Simulates NMPC using the C/GMRES-based methods. Opens file streams and saves 
 // simulation data into them.
 // NMPCSolver: the solver class. Select from ContinuationGMRES, 
-//             MultipleShootingCGMRES, and MSCGMRESWithSaturation.
+//             MultipleShootingCGMRES, and MSCGMRESWithInputSaturation.
 template <class NMPCSolver>
 void simulation(NMPCSolver& nmpc, 
                 const double* initial_state_vec, const double start_time, 
