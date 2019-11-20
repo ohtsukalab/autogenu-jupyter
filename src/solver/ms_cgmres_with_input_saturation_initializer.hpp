@@ -68,10 +68,17 @@ public:
   void setInitialGuessSolution(
       const double* initial_guess_control_input_and_constraints);
 
-  // Solves the optimal control problem with horizon whose length is zero
-  // under initial_time and initial_state_vec.
+  // Sets the initial guess of the Lagrange multiplier with respect to the 
+  // constraints on the control input saturation function. The all elements of 
+  // the multiplier are filled by initial_input_saturation_multiplier.
   void setInitialInputSaturationMultiplier(
       const double initial_input_saturation_multiplier);
+
+  // Sets the initial guess of the Lagrange multiplier with respect to the 
+  // constraints on the control input saturation function. The multiplier 
+  // is set by initial_input_saturation_multiplier.
+  void setInitialInputSaturationMultiplier(
+      const double* initial_input_saturation_multiplier);
 
   // Solves the optimal control problem with horizon whose length is zero
   // under initial_time and initial_state_vec.

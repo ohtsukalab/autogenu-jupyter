@@ -77,6 +77,18 @@ public:
                                       const double newton_residual_tolerance,
                                       const int max_newton_iteration);
 
+  // Sets the initial guess of the Lagrange multiplier with respect to the 
+  // constraints on the control input saturation function. The all elements of 
+  // the multiplier are filled by initial_input_saturation_multiplier.
+  void setInitialInputSaturationMultiplier(
+      const double initial_input_saturation_multiplier);
+
+  // Sets the initial guess of the Lagrange multiplier with respect to the 
+  // constraints on the control input saturation function. The multiplier 
+  // is set by initial_input_saturation_multiplier.
+  void setInitialInputSaturationMultiplier(
+      const double* initial_input_saturation_multiplier);
+
   // Initializes the solution of the C/GMRES method by solving the optimal
   // control problem with the horizon whose length is zero. soltuion_vec_ and 
   // errors_in_optimality_ is fullfilled with the solution of this OCP. The 

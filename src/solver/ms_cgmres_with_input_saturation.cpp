@@ -74,6 +74,18 @@ void MSCGMRESWithInputSaturation::setParametersForInitialization(
     newton_residual_tolerance, max_newton_iteration);
 }
 
+void MSCGMRESWithInputSaturation::setInitialInputSaturationMultiplier(
+    const double initial_input_saturation_multiplier) {
+  solution_initializer_.setInitialInputSaturationMultiplier(
+      initial_input_saturation_multiplier);
+}
+
+void MSCGMRESWithInputSaturation::setInitialInputSaturationMultiplier(
+    const double* initial_input_saturation_multiplier) {
+  solution_initializer_.setInitialInputSaturationMultiplier(
+      initial_input_saturation_multiplier);
+}
+
 void MSCGMRESWithInputSaturation::initializeSolution(
     const double initial_time, const double* initial_state_vec) {
   solution_initializer_.computeInitialSolution(

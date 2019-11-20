@@ -80,6 +80,16 @@ setInitialInputSaturationMultiplier(
   }
 } 
 
+void MSCGMRESWithInputSaturationInitializer::
+setInitialInputSaturationMultiplier(
+    const double* initial_input_saturation_multiplier) {
+  for (int i=0; i<input_saturation_set_.dimSaturation(); ++i) {
+    initial_guess_solution_vec_[dim_control_input_+dim_constraints_
+                                +dim_input_saturation_+i]
+        = initial_input_saturation_multiplier[i];
+  }
+} 
+
 void MSCGMRESWithInputSaturationInitializer::computeInitialSolution(
     const double initial_time, const double* initial_state_vec, 
     double* initial_control_input_and_constraints_vec, 

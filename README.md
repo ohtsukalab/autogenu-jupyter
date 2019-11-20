@@ -6,7 +6,7 @@ This project provides the continuation/GMRES method (C/GMRES method) based solve
 The following C/GMRES based solvers are provided: 
 - `ContinuationGMRES` : The original C/GMRES method (single shooting).
 - `MultipleShootingCGMRES` : The multiple shooting based C/GMRES method with condensing of the state and the Lagragne multipliers with respect to the state equation.
-- `MSCGMRESWithSaturation` : The multiple shooting based C/GMRES method with condensing of the state, the Lagragne multipliers with respect to the state equation, and variables with respect to the constraints on the saturation function on the control input.
+- `MSCGMRESWithInputSaturation` : The multiple shooting based C/GMRES method with condensing of the state, the Lagragne multipliers with respect to the state equation, and variables with respect to the constraints on the saturation function on the control input.
 
 
 ## Requirement
@@ -40,7 +40,7 @@ In addition to these files, you have to write `CMakeLists.txt` to build source f
 Demos are presented in `pendubot.ipynb`, `cartpole.ipynb`, and `hexacopter.ipynb`. You can obtain the following simulation results jusy by runnig these `.ipynb` files. The details of the each models and formulations are described in each `.ipynb` files.
 
 ### Pendubot  
-Inverting a pendubot using `MSCGMRESWithSaturation` solver.
+Inverting a pendubot using `MSCGMRESWithInputSaturation` solver.
 ![pendubot_gif](https://raw.githubusercontent.com/wiki/mayataka/CGMRES/images/pendubot.gif)
 ![pendubot_png](https://raw.github.com/wiki/mayataka/CGMRES/images/pendubot.png)
 
