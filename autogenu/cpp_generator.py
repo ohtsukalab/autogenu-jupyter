@@ -214,8 +214,8 @@ def generate_main(
         )
     else:
         f_main.write(
-            '#include "control_input_saturation_sequence.hpp"\n'
-            '#include "mscgmres_with_saturation.hpp"\n'
+            '#include "input_saturation_set.hpp"\n'
+            '#include "ms_cgmres_with_input_saturation.hpp"\n'
         )
     f_main.write(
         '#include "cgmres_simulator.hxx"\n'
@@ -247,8 +247,8 @@ def generate_main(
             +str(solver_parameters.T_f)+', '
             +str(solver_parameters.alpha)+', '
             +str(solver_parameters.N)+', '
+            +str(solver_parameters.finite_difference_increment)+', '
             +str(solver_parameters.zeta)+', '
-            +str(solver_parameters.finite_difference_step)+', '
             +str(solver_parameters.kmax)+');\n'
         )
     elif solver_index == 2:
@@ -257,19 +257,19 @@ def generate_main(
             +str(solver_parameters.T_f)+', '
             +str(solver_parameters.alpha)+', '
             +str(solver_parameters.N)+', '
+            +str(solver_parameters.finite_difference_increment)+', '
             +str(solver_parameters.zeta)+', '
-            +str(solver_parameters.finite_difference_step)+', '
             +str(solver_parameters.kmax)+');\n'
         )
     else:
         f_main.write(
-            '    ControlInputSaturationSequence '
-            'control_input_saturation_seq;\n'
+            '    InputSaturationSet '
+            'input_saturation_set;\n'
         )
         for i in range(len(saturation_list)):
             f_main.write(
-                '    control_input_saturation_seq.'
-                'appendControlInputSaturation('
+                '    input_saturation_set.'
+                'appendInputSaturation('
                 +str(saturation_list[i][0])+', '
                 +str(saturation_list[i][1])+', '
                 +str(saturation_list[i][2])+', '
@@ -277,13 +277,13 @@ def generate_main(
                 +str(saturation_list[i][4])+');\n'
             )
         f_main.write(
-            '    MSCGMRESWithSaturation '
-            'nmpc_solver(control_input_saturation_seq, '
+            '    MSCGMRESWithInputSaturation '
+            'nmpc_solver(input_saturation_set, '
             +str(solver_parameters.T_f)+', '
             +str(solver_parameters.alpha)+', '
             +str(solver_parameters.N)+', '
+            +str(solver_parameters.finite_difference_increment)+', '
             +str(solver_parameters.zeta)+', '
-            +str(solver_parameters.finite_difference_step)+', '
             +str(solver_parameters.kmax)+');\n'
         )
     f_main.write('\n')
@@ -314,8 +314,18 @@ def generate_main(
         str(initialization_parameters.initial_guess_solution[-1])+'};\n'
     )
     f_main.write('\n')
+    f_main.write('\n')
+    # initialization of the solution of the C/GMRES method
+    f_main.write('    // Initialize the solution of the C/GMRES method.\n')
+    f_main.write(
+        '    nmpc_solver.setParametersForInitialization('
+        +'initial_guess_solution, '
+        +str(initialization_parameters.newton_residual_torelance)+', '
+        +str(initialization_parameters.max_newton_iteration)+');\n'
+    )
+    f_main.write('\n')
     if (solver_index == 3 
-        and initialization_parameters.Lagrange_multiplier is not None):
+        and initialization_parameters.initial_Lagrange_multiplier is not None):
         f_main.write(
             '    // Set the initial guess of the lagrange multiplier '
             'for the condensed constraints with respect to the saturation '
@@ -323,39 +333,20 @@ def generate_main(
             )
         f_main.write(
             '    double initial_guess_lagrange_multiplier['
-            +str(len(initialization_parameters.Lagrange_multiplier))
+            +str(len(initialization_parameters.initial_Lagrange_multiplier))
             +'] = {'
         )
-        for i in range(len(initialization_parameters.Lagrange_multiplier)-1):
+        for i in range(len(initialization_parameters.initial_Lagrange_multiplier)-1):
             f_main.write(
-                str(initialization_parameters.Lagrange_multiplier[i])+', '
+                str(initialization_parameters.initial_Lagrange_multiplier[i])+', '
             )
         f_main.write(
-            str(initialization_parameters.Lagrange_multiplier[-1])+'};\n'
+            str(initialization_parameters.initial_Lagrange_multiplier[-1])+'};\n'
         )
-    f_main.write('\n')
-    f_main.write('\n')
-    # initialization of the solution of the C/GMRES method
-    f_main.write('    // Initialize the solution of the C/GMRES method.\n')
-    if (solver_index == 3 
-        and initialization_parameters.Lagrange_multiplier is not None):
         f_main.write(
-            '    nmpc_solver.setInitParameters('
-            +'initial_guess_solution, '
-            +'initial_guess_lagrange_multiplier, '
-            +str(initialization_parameters.residual_torelance)+', '
-            +str(initialization_parameters.max_iteration)+', '
-            +str(solver_parameters.finite_difference_step)+', '
-            +str(solver_parameters.kmax)+');\n'
-        )
-    else:
-        f_main.write(
-            '    nmpc_solver.setInitParameters('
-            +'initial_guess_solution, '
-            +str(initialization_parameters.residual_torelance)+', '
-            +str(initialization_parameters.max_iteration)+', '
-            +str(solver_parameters.finite_difference_step)+', '
-            +str(solver_parameters.kmax)+');\n'
+            '\n'+'    nmpc_solver.setInitialInputSaturationMultiplier'
+            +'(initial_guess_lagrange_multiplier);'
+            +'\n'
         )
     f_main.write('\n')
     f_main.write('\n')
@@ -422,8 +413,12 @@ def generate_cmake(solver_index, model_name):
             '    cgmres\n'
             '    STATIC\n'
             '    ${SOLVER_DIR}/continuation_gmres.cpp\n'
-            '    ${SOLVER_DIR}/init_cgmres.cpp\n'
-            '    ${SOLVER_DIR}/matrixfree_gmres.cpp\n'
+            '    ${SOLVER_DIR}/single_shooting_continuation.cpp\n'
+            '    ${SOLVER_DIR}/single_shooting_ocp.cpp\n'
+            '    ${SOLVER_DIR}/time_varying_smooth_horizon.cpp\n'
+            '    ${SOLVER_DIR}/cgmres_initializer.cpp\n'
+            '    ${SOLVER_DIR}/zero_horizon_ocp.cpp\n'
+            '    ${SOLVER_DIR}/optimal_control_problem.cpp\n'
             '    ${SOLVER_DIR}/linear_algebra.cpp\n'
             ')\n'
             'target_include_directories(\n'
@@ -440,8 +435,12 @@ def generate_cmake(solver_index, model_name):
             '    multiple_shooting_cgmres\n'
             '    STATIC\n'
             '    ${SOLVER_DIR}/multiple_shooting_cgmres.cpp\n'
-            '    ${SOLVER_DIR}/init_cgmres.cpp\n'
-            '    ${SOLVER_DIR}/matrixfree_gmres.cpp\n'
+            '    ${SOLVER_DIR}/multiple_shooting_continuation.cpp\n'
+            '    ${SOLVER_DIR}/multiple_shooting_ocp.cpp\n'
+            '    ${SOLVER_DIR}/time_varying_smooth_horizon.cpp\n'
+            '    ${SOLVER_DIR}/cgmres_initializer.cpp\n'
+            '    ${SOLVER_DIR}/zero_horizon_ocp.cpp\n'
+            '    ${SOLVER_DIR}/optimal_control_problem.cpp\n'
             '    ${SOLVER_DIR}/linear_algebra.cpp\n'
             ')\n'
             'target_include_directories(\n'
@@ -455,18 +454,22 @@ def generate_cmake(solver_index, model_name):
     elif solver_index == 3:
         f_cmake.write(
                 'add_library(\n'
-            '    mscgmres_with_saturation\n'
+            '    ms_cgmres_with_input_saturation\n'
             '    STATIC\n'
-            '    ${SOLVER_DIR}/mscgmres_with_saturation.cpp\n'
-            '    ${SOLVER_DIR}/init_mscgmres_with_saturation.cpp\n'
-            '    ${SOLVER_DIR}/control_input_saturation.cpp\n'
-            '    ${SOLVER_DIR}/control_input_saturation_sequence.cpp\n'
-            '    ${SOLVER_DIR}/condensing_functions.cpp\n'
-            '    ${SOLVER_DIR}/matrixfree_gmres.cpp\n'
+            '    ${SOLVER_DIR}/ms_cgmres_with_input_saturation.cpp\n'
+            '    ${SOLVER_DIR}/ms_continuation_with_input_saturation.cpp\n'
+            '    ${SOLVER_DIR}/ms_ocp_with_input_saturation.cpp\n'
+            '    ${SOLVER_DIR}/time_varying_smooth_horizon.cpp\n'
+            '    ${SOLVER_DIR}/ms_cgmres_with_input_saturation_initializer.cpp\n'
+            '    ${SOLVER_DIR}/zero_horizon_ocp_with_input_saturation.cpp\n'
+            '    ${SOLVER_DIR}/input_saturation_functions.cpp\n'
+            '    ${SOLVER_DIR}/input_saturation_set.cpp\n'
+            '    ${SOLVER_DIR}/input_saturation.cpp\n'
+            '    ${SOLVER_DIR}/optimal_control_problem.cpp\n'
             '    ${SOLVER_DIR}/linear_algebra.cpp\n'
             ')\n'
             'target_include_directories(\n'
-            '    mscgmres_with_saturation\n'
+            '    ms_cgmres_with_input_saturation\n'
             '    PRIVATE\n'
             '    ${MODEL_DIR}\n'
             '    ${SOLVER_DIR}\n'
@@ -506,7 +509,7 @@ def generate_cmake(solver_index, model_name):
             )
         elif solver_index == 3:
             f_cmake.write(
-                '    mscgmres_with_saturation\n'
+                '    ms_cgmres_with_input_saturation\n'
             )
         f_cmake.write(
             '    nmpcmodel\n'
@@ -535,7 +538,7 @@ def generate_cmake(solver_index, model_name):
             )
         elif solver_index == 3:
             f_cmake.write(
-                '    mscgmres_with_saturation\n'
+                '    ms_cgmres_with_input_saturation\n'
             )
         f_cmake.write(
             '    nmpcmodel\n'

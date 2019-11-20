@@ -8,7 +8,7 @@ class SolverParameters(object):
                 T_f * (1-exp(-alpha*t)).
             N: The number of the grid for the discretization
                 of the horizon of NMPC.
-            finite_difference_step: The small positive value for forward 
+            finite_difference_increment: The small positive value for forward 
                 approximation used in the FD-GMRES. 
             zeta: A stabilization parameter of the C/GMRES method. It may work 
                 well if you set as zeta=1/sampling_period.
@@ -16,11 +16,11 @@ class SolverParameters(object):
                 subspace method for the linear problem. 
     """
 
-    def __init__(self, T_f, alpha, N, zeta, finite_difference_step, kmax):
+    def __init__(self, T_f, alpha, N, finite_difference_increment, zeta, kmax):
         """ Inits SolverParameters. """
         self.T_f = T_f
         self.alpha = alpha
         self.N = N 
+        self.finite_difference_increment = finite_difference_increment
         self.zeta = zeta
-        self.finite_difference_step = finite_difference_step 
         self.kmax = kmax
