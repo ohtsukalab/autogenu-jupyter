@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <vector>
+#include <algorithm>
 #include "input_saturation.hpp"
 
 // Stores parameters representing the saturation on the control input. 
