@@ -2,11 +2,11 @@
 
 OptimalControlProblem::OptimalControlProblem()
   : model_(),
-    dim_state_(model_.dimState()),
-    dim_control_input_(model_.dimControlInput()),
-    dim_constraints_(model_.dimConstraints()),
+    dim_state_(model_.dim_state()),
+    dim_control_input_(model_.dim_control_input()),
+    dim_constraints_(model_.dim_constraints()),
     dim_control_input_and_constraints_(
-        model_.dimControlInput()+model_.dimConstraints()) {
+        model_.dim_control_input()+model_.dim_constraints()) {
 }
 
 int OptimalControlProblem::dim_state() const {

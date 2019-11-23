@@ -5,18 +5,18 @@ MultipleShootingOCP::MultipleShootingOCP(const double T_f, const double alpha,
                                          const int N) 
   : OptimalControlProblem(),
     horizon_(T_f, alpha),
-    dim_solution_(N*(model_.dimControlInput()+model_.dimConstraints())),
+    dim_solution_(N*(model_.dim_control_input()+model_.dim_constraints())),
     N_(N),
-    dx_vec_(linearalgebra::NewVector(model_.dimState())) {
+    dx_vec_(linearalgebra::NewVector(model_.dim_state())) {
 }
 
 MultipleShootingOCP::MultipleShootingOCP(const double T_f, const double alpha, 
                                          const int N, const double initial_time) 
   : OptimalControlProblem(),
     horizon_(T_f, alpha, initial_time),
-    dim_solution_(N*(model_.dimControlInput()+model_.dimConstraints())),
+    dim_solution_(N*(model_.dim_control_input()+model_.dim_constraints())),
     N_(N),
-    dx_vec_(linearalgebra::NewVector(model_.dimState())) {
+    dx_vec_(linearalgebra::NewVector(model_.dim_state())) {
 }
 
 MultipleShootingOCP::~MultipleShootingOCP() {

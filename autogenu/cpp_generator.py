@@ -69,70 +69,72 @@ def generate_cpp(fxu, phix, hx, hu, model_name, cse_flag=False):
         hx = sympy.cse(hx)
         hu = sympy.cse(hu)
     f_model_cpp.writelines(
-        [linecache.getline(cpp_template, i) for i in range(0, 11)]
+        [linecache.getline(cpp_template, i) for i in range(0, 9)]
     )
     if cse_flag:
         for i in range(len(fxu[0])):
             cse_exp, cse_rhs = fxu[0][i]
             f_model_cpp.write(
-                '    double '+sympy.ccode(cse_exp)+' = '+sympy.ccode(cse_rhs)+';\n'
+                '  double '+sympy.ccode(cse_exp)+' = '+sympy.ccode(cse_rhs)+';\n'
             )
         f_model_cpp.writelines(
-            ['    f[%d] = '%i+sympy.ccode(fxu[1][i])+';\n' for i in range(len(fxu[1]))]
+            ['  f[%d] = '%i+sympy.ccode(fxu[1][i])+';\n' for i in range(len(fxu[1]))]
         )
     else:
         f_model_cpp.writelines(
-            ['    f[%d] = '%i+sympy.ccode(fxu[i])+';\n' for i in range(len(fxu))]
+            ['  f[%d] = '%i+sympy.ccode(fxu[i])+';\n' for i in range(len(fxu))]
         )
     f_model_cpp.writelines(
-        [linecache.getline(cpp_template, i) for i in range(12, 22)]
+        [linecache.getline(cpp_template, i) for i in range(10, 18)]
     )
     if cse_flag:
         for i in range(len(phix[0])):
             cse_exp, cse_rhs = phix[0][i]
             f_model_cpp.write(
-                '    double '+sympy.ccode(cse_exp)+' = '+sympy.ccode(cse_rhs)+';\n'
+                '  double '+sympy.ccode(cse_exp)+' = '+sympy.ccode(cse_rhs)+';\n'
             )
         f_model_cpp.writelines(
-            ['    phix[%d] = '%i+sympy.ccode(phix[1][i])+';\n' for i in range(len(phix[1]))]
+            ['  phix[%d] = '%i+sympy.ccode(phix[1][i])+';\n' for i in range(len(phix[1]))]
         )
     else:
         f_model_cpp.writelines(
-            ['    phix[%d] = '%i+sympy.ccode(phix[i])+';\n' for i in range(len(phix))]
+            ['  phix[%d] = '%i+sympy.ccode(phix[i])+';\n' for i in range(len(phix))]
         )
     f_model_cpp.writelines(
-        [linecache.getline(cpp_template, i) for i in range(23, 36)]
+        [linecache.getline(cpp_template, i) for i in range(19, 29)]
     )
     if cse_flag:
         for i in range(len(hx[0])):
             cse_exp, cse_rhs = hx[0][i]
             f_model_cpp.write(
-                '    double '+sympy.ccode(cse_exp)+' = '+sympy.ccode(cse_rhs)+';\n'
+                '  double '+sympy.ccode(cse_exp)+' = '+sympy.ccode(cse_rhs)+';\n'
             )
         f_model_cpp.writelines(
-            ['    hx[%d] = '%i+sympy.ccode(hx[1][i])+';\n' for i in range(len(hx[1]))]
+            ['  hx[%d] = '%i+sympy.ccode(hx[1][i])+';\n' for i in range(len(hx[1]))]
         )
     else:
         f_model_cpp.writelines(
-            ['    hx[%d] = '%i+sympy.ccode(hx[i])+';\n' for i in range(len(hx))]
+            ['  hx[%d] = '%i+sympy.ccode(hx[i])+';\n' for i in range(len(hx))]
         )
     f_model_cpp.writelines(
-        [linecache.getline(cpp_template, i) for i in range(37, 50)]
+        [linecache.getline(cpp_template, i) for i in range(30, 40)]
     )
     if cse_flag:
         for i in range(len(hu[0])):
             cse_exp, cse_rhs = hu[0][i]
             f_model_cpp.write(
-                '    double '+sympy.ccode(cse_exp)+' = '+sympy.ccode(cse_rhs)+';\n'
+                '  double '+sympy.ccode(cse_exp)+' = '+sympy.ccode(cse_rhs)+';\n'
             )
         f_model_cpp.writelines(
-            ['    hu[%d] = '%i+sympy.ccode(hu[1][i])+';\n' for i in range(len(hu[1]))]
+            ['  hu[%d] = '%i+sympy.ccode(hu[1][i])+';\n' for i in range(len(hu[1]))]
         )
     else:
         f_model_cpp.writelines(
-            ['    hu[%d] = '%i+sympy.ccode(hu[i])+';\n' for i in range(len(hu))]
+            ['  hu[%d] = '%i+sympy.ccode(hu[i])+';\n' for i in range(len(hu))]
         )
-    f_model_cpp.write('}')
+    f_model_cpp.writelines(
+        [linecache.getline(cpp_template, i) for i in range(41, 57)]
+    )
     f_model_cpp.close()
 
 
@@ -155,32 +157,32 @@ def generate_hpp(
     f_model_hpp = open('models/'+str(model_name)+'/nmpc_model.hpp', 'w')
     hpp_template = 'autogenu/.cpp_templates/nmpc_model.hpp'
     f_model_hpp.writelines(
-        [linecache.getline(hpp_template, i) for i in range(0, 18)]
+        [linecache.getline(hpp_template, i) for i in range(0, 15)]
     )
     f_model_hpp.write(
-        '    static constexpr int dim_state_ = %d;\n' %dimx
+        '  static constexpr int dim_state_ = %d;\n' %dimx
     )
     f_model_hpp.write(
-        '    static constexpr int dim_control_input_ = %d;\n' %dimu
+        '  static constexpr int dim_control_input_ = %d;\n' %dimu
     )
     f_model_hpp.write(
-        '    static constexpr int dim_constraints_ = %d;\n' %dimc
+        '  static constexpr int dim_constraints_ = %d;\n' %dimc
     )
     f_model_hpp.write('\n')
     f_model_hpp.writelines([
-            '    static constexpr double '+str(scalar_parameters[i][0])
+            '  static constexpr double '+str(scalar_parameters[i][0])
             +' = '+str(scalar_parameters[i][1])+';\n' 
             for i in range(len(scalar_parameters))
     ])
-    f_model_hpp.write('\n\n')
+    f_model_hpp.write('\n')
     f_model_hpp.writelines([
-        '    double '+str(array_parameters[i][0])+'['
+        '  double '+str(array_parameters[i][0])+'['
         +str(array_parameters[i][1])+']'+' = '
         +str(array_parameters[i][2])+';\n' 
         for i in range(len(array_parameters))
     ])
     f_model_hpp.writelines(
-        [linecache.getline(hpp_template, i) for i in range(18, 51)]
+        [linecache.getline(hpp_template, i) for i in range(15, 62)]
     )
     f_model_hpp.close()
 
@@ -218,7 +220,7 @@ def generate_main(
             '#include "ms_cgmres_with_input_saturation.hpp"\n'
         )
     f_main.write(
-        '#include "cgmres_simulator.hxx"\n'
+        '#include "cgmres_simulator.hpp"\n'
     )
     f_main.write('#include <string>\n')
     if platform.system() == 'Windows':
@@ -482,7 +484,7 @@ def generate_cmake(solver_index, model_name):
         '    STATIC\n'
         '    ${SIMULATOR_DIR}/save_simulation_data.cpp\n'
         '    ${SIMULATOR_DIR}/numerical_integrator.cpp\n'
-        '    ${SIMULATOR_DIR}/cgmres_simulator.hxx\n'
+        '    ${SIMULATOR_DIR}/cgmres_simulator.hpp\n'
         ')\n'
         'target_include_directories(\n'
         '    cgmres_simulator\n'

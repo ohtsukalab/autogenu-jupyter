@@ -18,8 +18,8 @@ InputSaturationSet::InputSaturationSet(
 InputSaturationSet::InputSaturationSet(
     const InputSaturationSet& input_saturation_set)
   : input_saturation_set_() {
-  if (input_saturation_set.dimSaturation() > 0) {
-    for (int i=0; i<input_saturation_set.dimSaturation(); ++i) {
+  if (input_saturation_set.dim_saturation() > 0) {
+    for (int i=0; i<input_saturation_set.dim_saturation(); ++i) {
       appendInputSaturation(
           input_saturation_set.getInputSaturation(i));
     }
@@ -31,8 +31,8 @@ InputSaturationSet& InputSaturationSet::operator=(
     const InputSaturationSet& other) {
   if(this!=&other) {
     this->input_saturation_set_.clear();
-    if (other.dimSaturation() > 0) {
-      for (int i=0; i<other.dimSaturation(); ++i) {
+    if (other.dim_saturation() > 0) {
+      for (int i=0; i<other.dim_saturation(); ++i) {
         appendInputSaturation(other.getInputSaturation(i));
       }
     }

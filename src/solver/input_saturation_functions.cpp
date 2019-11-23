@@ -5,7 +5,7 @@ void inputsaturationfunctions::addHamiltonianDerivativeWithSaturatedInput(
     const double* control_input_and_constraints_vec, 
     const double* input_saturation_multiplier_vec, 
     double* optimality_residual_for_control_input_and_constraints_vec) {
-  for (int i=0; i<input_saturation_set.dimSaturation(); ++i) {
+  for (int i=0; i<input_saturation_set.dim_saturation(); ++i) {
     int index_i = input_saturation_set.index(i);
     optimality_residual_for_control_input_and_constraints_vec[index_i] +=
         (2*control_input_and_constraints_vec[index_i] 
@@ -19,7 +19,7 @@ void inputsaturationfunctions::computeOptimalityResidualForDummyInput(
     const double* dummy_input_vec, 
     const double* input_saturation_multiplier_vec, 
     double* optimality_residual_for_dummy_input) {
- for (int i=0; i<input_saturation_set.dimSaturation(); ++i) {
+ for (int i=0; i<input_saturation_set.dim_saturation(); ++i) {
     optimality_residual_for_dummy_input[i] 
         = 2 * (input_saturation_set.quadratic_weight(i)
                   +input_saturation_multiplier_vec[i]) 
@@ -31,7 +31,7 @@ void inputsaturationfunctions::computeOptimalityResidualForInputSaturation(
     InputSaturationSet& input_saturation_set,
     const double* control_input_and_constraint_vec, 
     const double* dummy_input_vec, double* optimality_residual_for_saturation) {
-  for (int i=0; i<input_saturation_set.dimSaturation(); ++i) {
+  for (int i=0; i<input_saturation_set.dim_saturation(); ++i) {
     int index_i = input_saturation_set.index(i);
     double min_i = input_saturation_set.min(i);
     double max_i = input_saturation_set.max(i);

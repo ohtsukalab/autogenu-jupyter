@@ -2,7 +2,7 @@
 
 ZeroHorizonOCP::ZeroHorizonOCP() 
   : OptimalControlProblem(),
-    dim_solution_(model_.dimControlInput()+model_.dimConstraints()),
+    dim_solution_(model_.dim_control_input()+model_.dim_constraints()),
     lambda_vec_(linearalgebra::NewVector(dim_state_)) {
 }
 

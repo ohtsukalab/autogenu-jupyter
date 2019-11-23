@@ -10,7 +10,7 @@ MSCGMRESWithInputSaturationInitializer(
     input_saturation_set_(input_saturation_set),
     dim_control_input_(newton_.dim_control_input()),
     dim_constraints_(newton_.dim_constraints()),
-    dim_input_saturation_(input_saturation_set.dimSaturation()),
+    dim_input_saturation_(input_saturation_set.dim_saturation()),
     dim_solution_(newton_.dim_solution()),
     max_newton_iteration_(max_newton_iteration),
     newton_residual_tolerance_(newton_residual_tolerance),
@@ -28,7 +28,7 @@ MSCGMRESWithInputSaturationInitializer(
     input_saturation_set_(input_saturation_set),
     dim_control_input_(newton_.dim_control_input()),
     dim_constraints_(newton_.dim_constraints()),
-    dim_input_saturation_(input_saturation_set.dimSaturation()),
+    dim_input_saturation_(input_saturation_set.dim_saturation()),
     dim_solution_(newton_.dim_solution()),
     max_newton_iteration_(50),
     newton_residual_tolerance_(1e-08),
@@ -73,7 +73,7 @@ void MSCGMRESWithInputSaturationInitializer::setInitialGuessSolution(
 void MSCGMRESWithInputSaturationInitializer::
 setInitialInputSaturationMultiplier(
     const double initial_input_saturation_multiplier) {
-  for (int i=0; i<input_saturation_set_.dimSaturation(); ++i) {
+  for (int i=0; i<input_saturation_set_.dim_saturation(); ++i) {
     initial_guess_solution_vec_[dim_control_input_+dim_constraints_
                                 +dim_input_saturation_+i]
         = initial_input_saturation_multiplier;
@@ -83,7 +83,7 @@ setInitialInputSaturationMultiplier(
 void MSCGMRESWithInputSaturationInitializer::
 setInitialInputSaturationMultiplier(
     const double* initial_input_saturation_multiplier) {
-  for (int i=0; i<input_saturation_set_.dimSaturation(); ++i) {
+  for (int i=0; i<input_saturation_set_.dim_saturation(); ++i) {
     initial_guess_solution_vec_[dim_control_input_+dim_constraints_
                                 +dim_input_saturation_+i]
         = initial_input_saturation_multiplier[i];

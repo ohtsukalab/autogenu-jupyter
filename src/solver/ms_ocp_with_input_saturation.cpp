@@ -6,10 +6,10 @@ MSOCPWithInputSaturation::MSOCPWithInputSaturation(
   : OptimalControlProblem(),
     horizon_(T_f, alpha),
     input_saturation_set_(input_saturation_set),
-    dim_solution_(N*(model_.dimControlInput()+model_.dimConstraints())),
-    dim_saturation_(input_saturation_set_.dimSaturation()),
+    dim_solution_(N*(model_.dim_control_input()+model_.dim_constraints())),
+    dim_saturation_(input_saturation_set_.dim_saturation()),
     N_(N),
-    dx_vec_(linearalgebra::NewVector(model_.dimState())) {
+    dx_vec_(linearalgebra::NewVector(model_.dim_state())) {
 }
 
 MSOCPWithInputSaturation::MSOCPWithInputSaturation(
@@ -18,10 +18,10 @@ MSOCPWithInputSaturation::MSOCPWithInputSaturation(
   : OptimalControlProblem(),
     horizon_(T_f, alpha, initial_time),
     input_saturation_set_(input_saturation_set),
-    dim_solution_(N*(model_.dimControlInput()+model_.dimConstraints())),
-    dim_saturation_(input_saturation_set_.dimSaturation()),
+    dim_solution_(N*(model_.dim_control_input()+model_.dim_constraints())),
+    dim_saturation_(input_saturation_set_.dim_saturation()),
     N_(N),
-    dx_vec_(linearalgebra::NewVector(model_.dimState())) {
+    dx_vec_(linearalgebra::NewVector(model_.dim_state())) {
 }
 
 MSOCPWithInputSaturation::~MSOCPWithInputSaturation() {

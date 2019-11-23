@@ -69,7 +69,7 @@ public:
 
   // Returns the number of the InputSaturation, that is, the number 
   // of the elements of the control input.
-  inline int dimSaturation() const {
+  inline int dim_saturation() const {
     return input_saturation_set_.size();
   }
   // Returns the index of the element of the control input that is constrained

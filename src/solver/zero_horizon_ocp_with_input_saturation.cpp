@@ -4,10 +4,10 @@ ZeroHorizonOCPWithInputSaturation::ZeroHorizonOCPWithInputSaturation(
     const InputSaturationSet& input_saturation_set)
   : OptimalControlProblem(),
     input_saturation_set_(input_saturation_set),
-    dim_solution_(model_.dimControlInput()+model_.dimConstraints()
-                  +2*input_saturation_set.dimSaturation()),
-    dim_saturation_(input_saturation_set.dimSaturation()),
-    lambda_vec_(linearalgebra::NewVector(model_.dimState())) {
+    dim_solution_(model_.dim_control_input()+model_.dim_constraints()
+                  +2*input_saturation_set.dim_saturation()),
+    dim_saturation_(input_saturation_set.dim_saturation()),
+    lambda_vec_(linearalgebra::NewVector(model_.dim_state())) {
 }
 
 ZeroHorizonOCPWithInputSaturation::~ZeroHorizonOCPWithInputSaturation() {
