@@ -37,7 +37,7 @@ In addition to these files, you have to write `CMakeLists.txt` to build source f
 
 
 ## Demos
-Demos are presented in `pendubot.ipynb`, `cartpole.ipynb`, and `hexacopter.ipynb`. You can obtain the following simulation results jusy by runnig these `.ipynb` files. The details of the each models and formulations are described in each `.ipynb` files.
+Demos are presented in `pendubot.ipynb`, `cartpole.ipynb`, `hexacopter.ipynb`, and `mobilerobot.ipynb`. You can obtain the following simulation results jusy by runnig these `.ipynb` files. The details of the each models and formulations are described in each `.ipynb` files.
 
 ### Pendubot  
 Inverting a pendubot using `MSCGMRESWithInputSaturation` solver.
@@ -53,6 +53,11 @@ Inverting a cartpole using `ContinuationGMRES` solver.
 Trajectory tracking of a hexacopter using `MultipleShootingCGMRES` solver.
 ![hexacopter_gif](https://raw.githubusercontent.com/wiki/mayataka/CGMRES/images/hexacopter.gif)
 ![hexacopter_png](https://raw.github.com/wiki/mayataka/CGMRES/images/hexacopter.png)
+
+### Mobile robot
+Obstacle avoidance of a mobile robot using `MultipleShootingCGMRES` solver with the semi-smooth Fischer-Burmeister method for inequality constraints.
+![mobilerobot_gif](https://raw.githubusercontent.com/wiki/mayataka/CGMRES/images/mobilerobot.gif)
+![mobilerobot_png](https://raw.github.com/wiki/mayataka/CGMRES/images/mobilerobot.png)
 
 
 ## License
