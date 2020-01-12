@@ -1,5 +1,8 @@
 #include "multiple_shooting_cgmres.hpp"
 
+
+namespace cgmres {
+
 MultipleShootingCGMRES::MultipleShootingCGMRES(
     const double T_f, const double alpha, const int N, 
     const double finite_difference_increment, const double zeta, const int kmax)
@@ -91,3 +94,5 @@ double MultipleShootingCGMRES::getErrorNorm(const double time,
       time, state_vec, control_input_and_constraints_seq_,state_mat_, 
       lambda_mat_);
 }
+
+} // namespace cgmres

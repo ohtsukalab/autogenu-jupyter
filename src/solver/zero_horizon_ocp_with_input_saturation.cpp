@@ -1,5 +1,8 @@
 #include "zero_horizon_ocp_with_input_saturation.hpp"
 
+
+namespace cgmres {
+
 ZeroHorizonOCPWithInputSaturation::ZeroHorizonOCPWithInputSaturation(
     const InputSaturationSet& input_saturation_set)
   : OptimalControlProblem(),
@@ -48,3 +51,5 @@ int ZeroHorizonOCPWithInputSaturation::dim_saturation() const {
 int ZeroHorizonOCPWithInputSaturation::dim_solution() const {
   return dim_solution_;
 }
+
+} // namespace cgmres

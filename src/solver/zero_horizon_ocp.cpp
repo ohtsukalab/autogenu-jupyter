@@ -1,5 +1,8 @@
 #include "zero_horizon_ocp.hpp"
 
+
+namespace cgmres {
+
 ZeroHorizonOCP::ZeroHorizonOCP() 
   : OptimalControlProblem(),
     dim_solution_(model_.dim_control_input()+model_.dim_constraints()),
@@ -26,3 +29,5 @@ void ZeroHorizonOCP::computeTerminalCostDerivative(
 int ZeroHorizonOCP::dim_solution() const {
   return dim_solution_;
 }
+
+} // namespace cgmres

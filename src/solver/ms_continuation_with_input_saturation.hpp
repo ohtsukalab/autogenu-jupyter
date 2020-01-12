@@ -10,6 +10,9 @@
 #include "input_saturation_set.hpp"
 #include "ms_ocp_with_input_saturation.hpp"
 
+
+namespace cgmres {
+
 // Linear problem of the continuation transformation for the multiple-shooting 
 // optimal control problem, which is solved in Matrix-free GMRES. This class 
 // is intended for use with MatrixfreeGMRES class. 
@@ -141,5 +144,8 @@ private:
       **dummy_input_difference_mat_,
       **input_saturation_multiplier_difference_mat_;
 };
+
+} // namespace cgmres
+
 
 #endif // MS_CONTINUATION_WITH_INPUT_SATURATION_H

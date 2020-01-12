@@ -11,6 +11,9 @@
 #include <limits>
 #include "linear_algebra.hpp"
 
+
+namespace cgmres {
+
 // Serves the matrix-free GMRES method, which supports for solving the 
 // nonlinear problem by using the GMRES method that solves a linear problem 
 // Ax = b in a short computational time. This class allocates vectors and 
@@ -201,5 +204,8 @@ private:
   column_vec[i_column+1] = tmp2;
 }
 };
+
+} // namespace cgmres
+
 
 #endif // MATRIXFREE_GMRES_H

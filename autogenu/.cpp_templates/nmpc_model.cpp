@@ -1,5 +1,8 @@
 #include "nmpc_model.hpp"
 
+
+namespace cgmres {
+
 // Computes the state equation f(t, x, u).
 // t : time parameter
 // x : state vector
@@ -54,3 +57,5 @@ int NMPCModel::dim_control_input() const {
 int NMPCModel::dim_constraints() const {
   return dim_constraints_;
 }
+
+} // namespace cgmres

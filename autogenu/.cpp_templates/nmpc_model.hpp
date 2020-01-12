@@ -8,6 +8,9 @@
 
 #include <cmath>
 
+
+namespace cgmres {
+
 // This class stores parameters of NMPC and equations of NMPC.
 class NMPCModel {
 private:
@@ -57,5 +60,8 @@ public:
   // Returns the dimension of the constraints.
   int dim_constraints() const;
 };
+
+} // namespace cgmres
+
 
 #endif // NMPC_MODEL_H

@@ -1,5 +1,8 @@
 #include "ms_ocp_with_input_saturation.hpp"
 
+
+namespace cgmres {
+
 MSOCPWithInputSaturation::MSOCPWithInputSaturation(
     const InputSaturationSet& input_saturation_set, const double T_f, 
     const double alpha, const int N)
@@ -264,3 +267,5 @@ int MSOCPWithInputSaturation::dim_saturation() const {
 int MSOCPWithInputSaturation::N() const {
   return N_;
 }
+
+} // namespace cgmres

@@ -1,5 +1,8 @@
 #include "optimal_control_problem.hpp"
 
+
+namespace cgmres {
+
 OptimalControlProblem::OptimalControlProblem()
   : model_(),
     dim_state_(model_.dim_state()),
@@ -20,3 +23,5 @@ int OptimalControlProblem::dim_control_input() const {
 int OptimalControlProblem::dim_constraints() const {
   return dim_constraints_;
 }
+
+} // namespace cgmres

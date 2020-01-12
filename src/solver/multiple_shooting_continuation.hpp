@@ -9,6 +9,9 @@
 #include "linear_algebra.hpp"
 #include "multiple_shooting_ocp.hpp"
 
+
+namespace cgmres {
+
 // Linear problem of the continuation transformation for the multiple-shooting 
 // optimal control problem, which is solved in Matrix-free GMRES. This class 
 // is intended for use with MatrixfreeGMRES class. 
@@ -125,5 +128,8 @@ private:
       **state_residual_mat_, **state_residual_mat_1_, 
       **lambda_residual_mat_, **lambda_residual_mat_1_;
 };
+
+} // namespace cgmres
+
 
 #endif // MULTIPLE_SHOOTING_CONTINUATION_H

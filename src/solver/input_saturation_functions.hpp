@@ -7,7 +7,9 @@
 
 #include "input_saturation_set.hpp"
 
+namespace cgmres {
 namespace inputsaturationfunctions {
+
 // Computes the partial derivative of the product of constraints on the control
 // input saturation that is condensed and the corresponding Lagrange multiplier
 // with respect to the control input vector and adds it to a given errors in 
@@ -33,6 +35,9 @@ void computeOptimalityResidualForInputSaturation(
     InputSaturationSet& input_saturation_set,
     const double* control_input_and_constraint_vec, 
     const double* dummy_input_vec, double* optimality_residual_for_saturation);
-}
+
+} // namespace inputsaturationfunctions
+} // namespace cgmres
+
 
 #endif // INPUT_SATURATION_FUNCTIONS_H

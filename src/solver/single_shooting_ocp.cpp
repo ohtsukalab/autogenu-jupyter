@@ -1,5 +1,8 @@
 #include "single_shooting_ocp.hpp"
 
+
+namespace cgmres {
+
 SingleShootingOCP::SingleShootingOCP(const double T_f, const double alpha, 
                                      const int N) 
   : OptimalControlProblem(),
@@ -102,3 +105,5 @@ int SingleShootingOCP::dim_solution() const {
 int SingleShootingOCP::N() const {
   return N_;
 }
+
+} // namespace cgmres

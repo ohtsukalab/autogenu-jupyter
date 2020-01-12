@@ -6,6 +6,9 @@
 #include <algorithm>
 #include "input_saturation.hpp"
 
+
+namespace cgmres {
+
 // Stores parameters representing the saturation on the control input. 
 // InputSaturationSet is composed of several 
 // InputSaturation, which is a class for representing a saturation
@@ -113,5 +116,8 @@ private:
 
   void sort();
 };
+
+} // namespace cgmres
+
 
 #endif // INPUT_SATURATION_SET_H

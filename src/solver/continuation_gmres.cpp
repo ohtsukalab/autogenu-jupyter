@@ -1,5 +1,8 @@
 #include "continuation_gmres.hpp"
 
+
+namespace cgmres {
+
 ContinuationGMRES::ContinuationGMRES(const double T_f, const double alpha,
                                      const int N, 
                                      const double finite_difference_increment,
@@ -68,3 +71,5 @@ double ContinuationGMRES::getErrorNorm(const double time,
   return continuation_problem_.computeErrorNorm(time, state_vec, 
                                                   solution_vec_);
 }
+
+} // namespace cgmres

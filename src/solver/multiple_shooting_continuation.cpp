@@ -1,5 +1,8 @@
 #include "multiple_shooting_continuation.hpp"
 
+
+namespace cgmres {
+
 MultipleShootingContinuation::MultipleShootingContinuation(
     const double T_f, const double alpha, const int N,
     const double finite_difference_increment, const double zeta)
@@ -290,3 +293,5 @@ int MultipleShootingContinuation::dim_condensed_problem() const {
 int MultipleShootingContinuation::N() const {
   return ocp_.N();
 }
+
+} // namespace cgmres

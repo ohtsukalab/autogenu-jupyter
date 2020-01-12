@@ -11,6 +11,9 @@
 #include "linear_algebra.hpp"
 #include "single_shooting_ocp.hpp"
 
+
+namespace cgmres {
+
 // Linear problem of the continuation transformation for the single-shooting 
 // optimal control problem, which is solved in Matrix-free GMRES. This class 
 // is intended for use with MatrixfreeGMRES class. 
@@ -105,5 +108,8 @@ private:
   double *incremented_state_vec_, *incremented_solution_vec_, 
       *optimality_residual_, *optimality_residual_1_, *optimality_residual_2_;
 };
+
+} // namespace cgmres
+
 
 #endif // SINGLE_SHOOTING_CONTINUATION_H 

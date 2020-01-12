@@ -3,6 +3,9 @@
 
 #include "nmpc_model.hpp"
 
+
+namespace cgmres {
+
 // Supports numerical integration of the state equation of the system described 
 // in nmpc_model.hpp for numerical simnulations.
 class NumericalIntegrator {
@@ -24,5 +27,8 @@ public:
 private:
   NMPCModel model_;
 };
+
+} // namespace cgmres
+
 
 #endif // NUMERICAL_INTEGRATOR_H

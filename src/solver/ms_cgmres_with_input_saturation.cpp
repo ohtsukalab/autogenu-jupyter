@@ -1,5 +1,8 @@
 #include "ms_cgmres_with_input_saturation.hpp"
 
+
+namespace cgmres {
+
 MSCGMRESWithInputSaturation::MSCGMRESWithInputSaturation(
     const InputSaturationSet& input_saturation_set, const double T_f, 
     const double alpha, const int N, const double finite_difference_increment,
@@ -129,3 +132,5 @@ double MSCGMRESWithInputSaturation::getErrorNorm(const double time,
       time, state_vec, control_input_and_constraints_seq_, state_mat_,
       lambda_mat_, dummy_input_mat_, input_saturation_multiplier_mat_);
 }
+
+} // namespace cgmres

@@ -1,5 +1,8 @@
 #include "input_saturation_functions.hpp"
 
+
+namespace cgmres {
+
 void inputsaturationfunctions::addHamiltonianDerivativeWithSaturatedInput(
     InputSaturationSet& input_saturation_set,
     const double* control_input_and_constraints_vec, 
@@ -41,3 +44,5 @@ void inputsaturationfunctions::computeOptimalityResidualForInputSaturation(
         + min_i * max_i + dummy_input_vec[i] * dummy_input_vec[i];
   }
 }
+
+} // namespace cgmres

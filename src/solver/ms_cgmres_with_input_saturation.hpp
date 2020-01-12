@@ -16,6 +16,9 @@
 #include "ms_cgmres_with_input_saturation_initializer.hpp"
 #include "linear_algebra.hpp"
 
+
+namespace cgmres {
+
 // Solver of the nonlinear optimal control problem for NMPC using the 
 // multiple shooting-based C/GMRES method, a fast numerical algorithm of NMPC. 
 // This solver also supports condensing of the state, Lagrange multipliers 
@@ -121,5 +124,8 @@ private:
   double **state_mat_, **lambda_mat_, **dummy_input_mat_,
          **input_saturation_multiplier_mat_;
 };
+
+} // namespace cgmres
+
 
 #endif // MSCGMRES_WITH_INPUT_SATURATION_H

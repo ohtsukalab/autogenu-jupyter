@@ -9,6 +9,9 @@
 #include "optimal_control_problem.hpp"
 #include "linear_algebra.hpp"
 
+
+namespace cgmres {
+
 // Privides the optimal control problem (OCP) with horizon whose length is zero.
 // The OCP also consider the constrains provided by InputSaturationSet.
 class ZeroHorizonOCPWithInputSaturation final : public OptimalControlProblem {
@@ -45,5 +48,8 @@ private:
   int dim_solution_, dim_saturation_;
   double *lambda_vec_;
 };
+
+} // namespace cgmres
+
 
 #endif // ZERO_HORIZON_OCP_WITH_INPUT_SATURATION_H

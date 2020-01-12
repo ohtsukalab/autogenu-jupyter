@@ -1,5 +1,8 @@
 #include "ms_cgmres_with_input_saturation_initializer.hpp"
 
+
+namespace cgmres {
+
 MSCGMRESWithInputSaturationInitializer::
 MSCGMRESWithInputSaturationInitializer(
     const InputSaturationSet& input_saturation_set,
@@ -148,3 +151,5 @@ double MSCGMRESWithInputSaturationInitializer::computeDummyInput(
     return (min_input+max_input) / 2;
   }
 }
+
+} // namespace cgmres

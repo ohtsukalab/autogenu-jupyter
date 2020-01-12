@@ -12,6 +12,9 @@
 #include "single_shooting_continuation.hpp"
 #include "linear_algebra.hpp"
 
+
+namespace cgmres {
+
 // Solver of the nonlinear optimal control problem for NMPC using the 
 // C/GMRES method, a fast numerical algorithm of NMPC. The main method is
 // controlUpdate() that updates the solution of NMPC using the C/GMRES method.
@@ -91,5 +94,8 @@ private:
   const int dim_control_input_, dim_constraints_;
   double *solution_vec_, *solution_update_vec_, *initial_solution_vec_;
 };
+
+} // namespace cgmres
+
 
 #endif // CONTINUATION_GMRES_H

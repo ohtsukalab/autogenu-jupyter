@@ -1,5 +1,8 @@
 #include "time_varying_smooth_horizon.hpp"
 
+
+namespace cgmres {
+
 TimeVaryingSmoothHorizon::TimeVaryingSmoothHorizon(const double T_f, 
                                                    const double alpha, 
                                                    const double initial_time) 
@@ -28,3 +31,5 @@ void TimeVaryingSmoothHorizon::resetLength(const double T_f, const double alpha,
   alpha_ = alpha;
   initial_time_ = initial_time;
 }
+
+} // namespace cgmres

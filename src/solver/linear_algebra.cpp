@@ -1,5 +1,8 @@
 #include "linear_algebra.hpp"
 
+
+namespace cgmres {
+
 double* linearalgebra::NewVector(const int dim) {
   double* vec = new double[dim];
   for (int i=0; i<dim; ++i) {
@@ -38,7 +41,6 @@ double linearalgebra::InnerProduct(const int dim, const double *vec1,
   return ans;
 }
 
-
 double linearalgebra::SquaredNorm(const int dim, const double *vec) {
   double ans = 0;
   for (int i=0; i<dim; ++i) {
@@ -46,3 +48,5 @@ double linearalgebra::SquaredNorm(const int dim, const double *vec) {
   }
   return ans;
 }
+
+} // namespace cgmres

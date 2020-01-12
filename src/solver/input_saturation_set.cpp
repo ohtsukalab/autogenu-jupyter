@@ -1,5 +1,8 @@
 #include "input_saturation_set.hpp"
 
+
+namespace cgmres {
+
 InputSaturationSet::InputSaturationSet()
   : input_saturation_set_() {
 }
@@ -134,3 +137,5 @@ int InputSaturationSet::findSameIndex(const int index) {
 void InputSaturationSet::sort() {
   std::sort(input_saturation_set_.begin(), input_saturation_set_.end());
 }
+
+} // namespace cgmres

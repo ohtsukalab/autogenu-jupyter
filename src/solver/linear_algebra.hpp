@@ -1,6 +1,9 @@
 #ifndef LINEAR_ALGEBRA_H 
 #define LINEAR_ALGEBRA_H 
 
+
+namespace cgmres {
+
 // Functions supporting linear algebra. 
 namespace linearalgebra {
 // Allocates memory for a vector whose dimension is dim and set all components 
@@ -23,6 +26,10 @@ double InnerProduct(const int dim, const double *vec1, const double *vec2);
 
 // Returns squared norm of vec.
 double SquaredNorm(const int dim, const double *vec);
-}
+
+} // namespace linearalgebra
+
+} // namespace cgmres
+
 
 #endif // LINEAR_ALGEBRA

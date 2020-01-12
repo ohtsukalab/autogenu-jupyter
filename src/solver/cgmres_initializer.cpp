@@ -1,5 +1,8 @@
 #include "cgmres_initializer.hpp"
 
+
+namespace cgmres {
+
 CGMRESInitializer::CGMRESInitializer(const double finite_difference_increment,
                                      const int kmax,
                                      const double residual_tolerance, 
@@ -79,3 +82,5 @@ void CGMRESInitializer::getInitialLambda(const double initial_time,
 int CGMRESInitializer::dim_solution() const {
   return dim_solution_;
 }
+
+} // namespace cgmres

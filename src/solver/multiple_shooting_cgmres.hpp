@@ -15,6 +15,9 @@
 #include "cgmres_initializer.hpp"
 #include "linear_algebra.hpp"
 
+
+namespace cgmres {
+
 // Solver of the nonlinear optimal control problem for NMPC using the 
 // multiple shooting-based C/GMRES method, a fast numerical algorithm of NMPC. 
 // This solver also supports condensing of the state and Lagrange multipliers 
@@ -101,5 +104,8 @@ private:
     *initial_control_input_and_constraints_vec_, *initial_lambda_vec_;
   double **state_mat_, **lambda_mat_;
 };
+
+} // namespace cgmres
+
 
 #endif // MULTIPLE_SHOOTING_CGMRES_H

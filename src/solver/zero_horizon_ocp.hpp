@@ -6,6 +6,9 @@
 #include "optimal_control_problem.hpp"
 #include "linear_algebra.hpp"
 
+
+namespace cgmres {
+
 // Privides the optimal control problem (OCP) with horizon whose length is zero.
 class ZeroHorizonOCP final : public OptimalControlProblem {
 public:
@@ -35,5 +38,8 @@ private:
   int dim_solution_;
   double *lambda_vec_;
 };
+
+} // namespace cgmres
+
 
 #endif // ZERO_HORIZON_OCP_H

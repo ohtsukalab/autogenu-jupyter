@@ -69,7 +69,7 @@ def generate_cpp(fxu, phix, hx, hu, model_name, cse_flag=False):
         hx = sympy.cse(hx)
         hu = sympy.cse(hu)
     f_model_cpp.writelines(
-        [linecache.getline(cpp_template, i) for i in range(0, 9)]
+        [linecache.getline(cpp_template, i) for i in range(0, 12)]
     )
     if cse_flag:
         for i in range(len(fxu[0])):
@@ -85,7 +85,7 @@ def generate_cpp(fxu, phix, hx, hu, model_name, cse_flag=False):
             ['  f[%d] = '%i+sympy.ccode(fxu[i])+';\n' for i in range(len(fxu))]
         )
     f_model_cpp.writelines(
-        [linecache.getline(cpp_template, i) for i in range(10, 18)]
+        [linecache.getline(cpp_template, i) for i in range(13, 21)]
     )
     if cse_flag:
         for i in range(len(phix[0])):
@@ -101,7 +101,7 @@ def generate_cpp(fxu, phix, hx, hu, model_name, cse_flag=False):
             ['  phix[%d] = '%i+sympy.ccode(phix[i])+';\n' for i in range(len(phix))]
         )
     f_model_cpp.writelines(
-        [linecache.getline(cpp_template, i) for i in range(19, 29)]
+        [linecache.getline(cpp_template, i) for i in range(22, 32)]
     )
     if cse_flag:
         for i in range(len(hx[0])):
@@ -117,7 +117,7 @@ def generate_cpp(fxu, phix, hx, hu, model_name, cse_flag=False):
             ['  hx[%d] = '%i+sympy.ccode(hx[i])+';\n' for i in range(len(hx))]
         )
     f_model_cpp.writelines(
-        [linecache.getline(cpp_template, i) for i in range(30, 40)]
+        [linecache.getline(cpp_template, i) for i in range(33, 43)]
     )
     if cse_flag:
         for i in range(len(hu[0])):
@@ -133,7 +133,7 @@ def generate_cpp(fxu, phix, hx, hu, model_name, cse_flag=False):
             ['  hu[%d] = '%i+sympy.ccode(hu[i])+';\n' for i in range(len(hu))]
         )
     f_model_cpp.writelines(
-        [linecache.getline(cpp_template, i) for i in range(41, 57)]
+        [linecache.getline(cpp_template, i) for i in range(44, 62)]
     )
     f_model_cpp.close()
 
@@ -157,7 +157,7 @@ def generate_hpp(
     f_model_hpp = open('models/'+str(model_name)+'/nmpc_model.hpp', 'w')
     hpp_template = 'autogenu/.cpp_templates/nmpc_model.hpp'
     f_model_hpp.writelines(
-        [linecache.getline(hpp_template, i) for i in range(0, 15)]
+        [linecache.getline(hpp_template, i) for i in range(0, 18)]
     )
     f_model_hpp.write(
         '  static constexpr int dim_state_ = %d;\n' %dimx
@@ -182,7 +182,7 @@ def generate_hpp(
         for i in range(len(array_parameters))
     ])
     f_model_hpp.writelines(
-        [linecache.getline(hpp_template, i) for i in range(15, 62)]
+        [linecache.getline(hpp_template, i) for i in range(18, 68)]
     )
     f_model_hpp.close()
 
@@ -238,14 +238,14 @@ def generate_main(
         'int main()\n'
         '{\n'
         '    // Define the model in NMPC.\n'
-        '    NMPCModel nmpc_model;\n'
+        '    cgmres::NMPCModel nmpc_model;\n'
         '\n'
     )
     # define solver
     f_main.write('    // Define the solver.\n')
     if solver_index == 1:
         f_main.write(
-            '    ContinuationGMRES nmpc_solver('
+            '    cgmres::ContinuationGMRES nmpc_solver('
             +str(solver_parameters.T_f)+', '
             +str(solver_parameters.alpha)+', '
             +str(solver_parameters.N)+', '
@@ -255,7 +255,7 @@ def generate_main(
         )
     elif solver_index == 2:
         f_main.write(
-            '    MultipleShootingCGMRES nmpc_solver('
+            '    cgmres::MultipleShootingCGMRES nmpc_solver('
             +str(solver_parameters.T_f)+', '
             +str(solver_parameters.alpha)+', '
             +str(solver_parameters.N)+', '
@@ -265,7 +265,7 @@ def generate_main(
         )
     else:
         f_main.write(
-            '    InputSaturationSet '
+            '    cgmres::InputSaturationSet '
             'input_saturation_set;\n'
         )
         for i in range(len(saturation_list)):
@@ -279,7 +279,7 @@ def generate_main(
                 +str(saturation_list[i][4])+');\n'
             )
         f_main.write(
-            '    MSCGMRESWithInputSaturation '
+            '    cgmres::MSCGMRESWithInputSaturation '
             'nmpc_solver(input_saturation_set, '
             +str(solver_parameters.T_f)+', '
             +str(solver_parameters.alpha)+', '
@@ -369,7 +369,7 @@ def generate_main(
     f_main.write('\n')
     f_main.write(
         '    // Perform a numerical simulation.\n'
-        '    nmpcsim::simulation(nmpc_solver, initial_state, '
+        '    cgmres::simulation(nmpc_solver, initial_state, '
         +str(simulation_parameters.initial_time)+', '
         +str(simulation_parameters.simulation_time)+', '
         +str(simulation_parameters.sampling_time)+', '

@@ -1,5 +1,8 @@
 #include "single_shooting_continuation.hpp"
 
+
+namespace cgmres {
+
 SingleShootingContinuation::SingleShootingContinuation(
     const double T_f, const double alpha, const int N,
     const double finite_difference_increment, const double zeta) 
@@ -136,3 +139,5 @@ int SingleShootingContinuation::dim_solution() const {
 int SingleShootingContinuation::N() const {
   return ocp_.N();
 }
+
+} // namespace cgmres

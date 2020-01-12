@@ -1,6 +1,8 @@
 #include "multiple_shooting_ocp.hpp"
 
 
+namespace cgmres {
+
 MultipleShootingOCP::MultipleShootingOCP(const double T_f, const double alpha, 
                                          const int N) 
   : OptimalControlProblem(),
@@ -161,3 +163,5 @@ int MultipleShootingOCP::dim_solution() const {
 int MultipleShootingOCP::N() const {
   return N_;
 }
+
+} // namespace cgmres

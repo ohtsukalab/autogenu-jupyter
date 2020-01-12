@@ -1,5 +1,8 @@
 #include "input_saturation.hpp"
 
+
+namespace cgmres {
+
 InputSaturation::InputSaturation() 
   : index_(0), 
     min_(0), 
@@ -63,3 +66,5 @@ void InputSaturation::setParameters(const int index, const double min,
   dummy_weight_ = dummy_weight;
   quadratic_weight_ = 0;
 }
+
+} // namespace cgmres

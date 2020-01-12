@@ -1,5 +1,8 @@
 #include "ms_continuation_with_input_saturation.hpp"
 
+
+namespace cgmres {
+
 MSContinuationWithInputSaturation::MSContinuationWithInputSaturation(
     const InputSaturationSet& input_saturation_set, 
     const double T_f, const double alpha, const int N,
@@ -435,3 +438,5 @@ int MSContinuationWithInputSaturation::dim_condensed_problem() const {
 int MSContinuationWithInputSaturation::N() const {
   return ocp_.N();
 }
+
+} // namespace cgmres

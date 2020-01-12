@@ -10,6 +10,9 @@
 #include <cmath>
 #include "linear_algebra.hpp"
 
+
+namespace cgmres {
+
 // The Newton GMRES method, which supportes solving the nonlienar problem, for 
 // optimal control problems. This class is intended to be called with 
 // MatrixFreeGMRES. Use as 
@@ -123,5 +126,8 @@ private:
   double *incremented_solution_vec_, *optimality_residual_, 
       *optimality_residual_1_;
 };
+
+} // namespace cgmres
+
 
 #endif // NEWTON_GMRES_FOR_OCP_H

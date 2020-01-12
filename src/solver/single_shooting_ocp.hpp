@@ -8,6 +8,9 @@
 #include "time_varying_smooth_horizon.hpp"
 #include "linear_algebra.hpp"
 
+
+namespace cgmres {
+
 // Provides the single-shooting two-point boundary-value problem of the 
 // finite-horizon optimal control problem.
 class SingleShootingOCP final : public OptimalControlProblem {
@@ -70,5 +73,8 @@ private:
   int dim_solution_, N_;
   double *dx_vec_, **state_mat_, **lambda_mat_;
 };
+
+} // namespace cgmres
+
 
 #endif // SINGLE_SHOOTING_OCP_H

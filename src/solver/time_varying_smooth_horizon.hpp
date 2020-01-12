@@ -5,6 +5,9 @@
 
 #include <cmath>
 
+
+namespace cgmres {
+
 // Provides time varying smooth horizon. The length of the horizon is given by
 // T_f_ * (1.0-std::exp(-alpha_*(time-initial_time_))).
 class TimeVaryingSmoothHorizon {
@@ -37,5 +40,8 @@ public:
 private:
   double T_f_, alpha_, initial_time_;
 };
+
+} // namespace cgmres
+
 
 #endif // TIME_VARYING_SMOOTH_HORIZON_H

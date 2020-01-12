@@ -6,6 +6,9 @@
 
 #include "nmpc_model.hpp"
 
+
+namespace cgmres {
+
 // Abstruct class for optimal control problems. This class loads model of NMPC
 // and define dimensions.
 class OptimalControlProblem {
@@ -35,5 +38,8 @@ protected:
   int dim_state_, dim_control_input_, dim_constraints_, 
       dim_control_input_and_constraints_;
 };
+
+} // namespace cgmres
+
 
 #endif // OPTIMAL_CONTROL_PROBLEM_H

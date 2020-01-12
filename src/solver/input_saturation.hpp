@@ -1,6 +1,9 @@
 #ifndef INPUT_SATURATION_H
 #define INPUT_SATURATION_H
 
+
+namespace cgmres {
+
 // Stores parameters representing the saturation on the control input. 
 // Member variables of InputSaturation:
 // index_: the index of the element of the control input that is constrained.
@@ -77,5 +80,8 @@ private:
   int index_;
   double min_, max_, dummy_weight_, quadratic_weight_;
 };
+
+} // namespace cgmres
+
 
 #endif // INPUT_SATURATION_H

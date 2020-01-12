@@ -9,7 +9,8 @@
 #include "numerical_integrator.hpp"
 #include "save_simulation_data.hpp"
 
-namespace nmpcsim {
+
+namespace cgmres {
 
 // Simulates NMPC using the C/GMRES-based methods. Opens file streams and saves 
 // simulation data into them.
@@ -95,6 +96,6 @@ void simulation(NMPCSolver& nmpc, const double* initial_state_vec,
   conditions_data.close();
 }
 
-} // namespace nmpcsim
+} // namespace cgmres
 
 #endif // CGMRES_SIMULATOR_H

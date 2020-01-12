@@ -1,6 +1,8 @@
 #include "numerical_integrator.hpp"
 
 
+namespace cgmres {
+
 NumericalIntegrator::NumericalIntegrator() 
   : model_() {
 }
@@ -56,3 +58,5 @@ void NumericalIntegrator::rungeKuttaGill(const double current_time,
             +(2+std::sqrt(2))*k3_vec[i]+k4_vec[i]);
   }
 }
+
+} // namespace cgmres

@@ -9,6 +9,9 @@
 #include "time_varying_smooth_horizon.hpp"
 #include "linear_algebra.hpp"
 
+
+namespace cgmres {
+
 // This class provides multiple-shooting two-point boundary-value problem of 
 // the finite-horizon optimal control problem. Functions for condensing of the 
 // solution are also provided.
@@ -98,5 +101,8 @@ private:
   int dim_solution_, N_;
   double *dx_vec_;
 };
+
+} // namespace cgmres
+
 
 #endif // MULTIPLE_SHOOTING_OCP_H

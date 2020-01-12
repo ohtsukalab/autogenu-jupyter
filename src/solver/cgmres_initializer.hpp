@@ -9,6 +9,9 @@
 #include "matrixfree_gmres.hpp"
 #include "linear_algebra.hpp"
 
+
+namespace cgmres {
+
 // Solver of the nonlinear optimal control problem for the initialization 
 // of the solution in the C/GMERS method. The main method is 
 // computeInitialSolution() which computes the solution of the OCP with horizon 
@@ -85,5 +88,7 @@ private:
   double newton_residual_tolerance_;
   double *initial_guess_solution_vec_, *solution_update_vec_;
 };
+
+} // namespace cgmres
 
 #endif // CGMRES_INITIALIZER_H
