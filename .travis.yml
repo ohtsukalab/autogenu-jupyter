@@ -79,7 +79,6 @@ install:
   - pip3 install sympy numpy matplotlib seaborn pytest jupyter
 
 script:
-  - travis_wait 30 script.sh
   - jupyter nbconvert --to python cartpole.ipynb hexacopter.ipynb mobilerobot.ipynb pendubot.ipynb
   - cp .travis/test_notebooks.py .
-  - pytest test_notebooks.py
+  - travis_wait 30 pytest test_notebooks.py
