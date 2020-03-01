@@ -1,0 +1,84 @@
+language: cpp
+
+jobs:
+  include:
+    - os: linux
+      dist: xenial
+      language: python
+      python: 3.6
+      compiler:
+        - g++
+        - clang++
+    - os: linux
+      dist: xenial
+      language: python
+      python: 3.7
+      compiler:
+        - g++
+        - clang++
+    - os: linux
+      dist: xenial
+      language: python
+      python: 3.8
+      compiler:
+        - g++
+        - clang++
+    - os: linux
+      dist: bionic 
+      language: python
+      python: 3.6
+      compiler:
+        - g++
+        - clang++
+    - os: linux
+      dist: bionic
+      language: python
+      python: 3.7
+      compiler:
+        - g++
+        - clang++
+    - os: linux
+      dist: bionic
+      language: python
+      python: 3.8
+      compiler:
+        - g++
+        - clang++
+    - os: osx
+      osx_image: xcode10.1
+      language: generic
+      compiler:
+        - g++
+        - clang++
+    - os: osx
+      osx_image: xcode10.14
+      language: generic
+      compiler:
+        - g++
+        - clang++
+
+sudo: required
+
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+    packages:
+      - cmake
+
+before_install:
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then sudo add-apt-repository -y ppa:jonathonf/ffmpeg-4; fi
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then sudo apt-get update; fi
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then sudo apt-get install -y ffmpeg; fi
+  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then brew update; fi
+  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then brew unlink python@2; fi
+  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then brew upgrade python; fi
+  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then brew install ffmpeg; fi
+
+install:
+  - pip3 install sympy numpy matplotlib seaborn pytest jupyter
+
+script:
+  - jupyter nbconvert --to python cartpole.ipynb hexacopter.ipynb mobilerobot.ipynb pendubot.ipynb
+  - cp .travis/test_notebooks.py .
+  - travis_wait 30 pytest test_notebooks.py
