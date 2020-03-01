@@ -27,3 +27,13 @@ def diff_scalar_func(scalar_func, var):
             vector, Returns Jacobian.
     """
     return [sympy.diff(scalar_func, var[i]) for i in range(len(var))]
+
+
+def simplify_vector_func(vector_func):
+    """ Simplifies a vector-valued function.
+
+        Args:
+            vector_func: A list of SymPy scalar functions.
+    """
+    for i in range(len(vector_func)):
+        vector_func[i] = sympy.simplify(sympy.nsimplify(vector_func[i]))
