@@ -2,13 +2,22 @@ import subprocess
 import platform
 
 
-def set_cmake(model_name, MSYS=False):
+def set_cmake(model_name, generator='Auto', remove_build_dir=False):
     """ Makes a directory for build and generate Makefiles using CMake.
 
         Args: 
             model_name: A string representing the name of the simulation model.
-            MSYS: An optional variable, which should be true when you use 
-                Windows and MSYS is default compiler.
+            generator: An optional variable for Windows user to choose the
+                generator. If 'MSYS', then 'MSYS Makefiles' is used. If 'MinGW',
+                then 'MinGW Makefiles' is used. The default value is 'Auto' and
+                the generator is selected automatically. If sh.exe exists in 
+                your PATH, MSYS is choosed, and otherwise MinGW is used. If 
+                different value from 'MSYS' and 'MinGW', generator is selected
+                automatically.
+            remove_build_dir: If true, the existing build directory is removed 
+                and if False, the build directory is not removed.
+                Need to be set True is you change CMake configuration, e.g., if 
+                you change the generator. The default value is False.
     """
     if platform.system() == 'Windows':
         subprocess.run(
@@ -18,7 +27,7 @@ def set_cmake(model_name, MSYS=False):
             stderr=subprocess.PIPE, 
             shell=True
         )
-        if MSYS:
+        if generator == 'MSYS':
             proc = subprocess.Popen(
                 ['cmake', '../../..', '-G', 'MSYS Makefiles'], 
                 cwd='models/'+model_name+'/build', 
@@ -26,7 +35,10 @@ def set_cmake(model_name, MSYS=False):
                 stderr=subprocess.STDOUT, 
                 shell=True
             )
-        else:
+            for line in iter(proc.stdout.readline, b''):
+                print(line.rstrip().decode("utf8"))
+            print('\n')
+        elif generator == 'MinGW':
             proc = subprocess.Popen(
                 ['cmake', '../../..', '-G', 'MinGW Makefiles'], 
                 cwd='models/'+model_name+'/build', 
@@ -34,9 +46,36 @@ def set_cmake(model_name, MSYS=False):
                 stderr=subprocess.STDOUT, 
                 shell=True
             )
-        for line in iter(proc.stdout.readline, b''):
-            print(line.rstrip().decode("utf8"))
-        print('\n')
+            for line in iter(proc.stdout.readline, b''):
+                print(line.rstrip().decode("utf8"))
+            print('\n')
+        else:
+            proc = subprocess.Popen(
+                ['where', 'sh.exe'], 
+                cwd='C:', 
+                stdout=subprocess.PIPE, 
+                stderr=subprocess.PIPE, 
+                shell=True
+            )
+            if proc.stderr.readline() == b'':
+                proc = subprocess.Popen(
+                    ['cmake', '../../..', '-G', 'MSYS Makefiles'], 
+                    cwd='models/'+model_name+'/build', 
+                    stdout=subprocess.PIPE, 
+                    stderr=subprocess.STDOUT, 
+                    shell=True
+                )
+            else:
+                proc = subprocess.Popen(
+                    ['cmake', '../../..', '-G', 'MinGW Makefiles'], 
+                    cwd='models/'+model_name+'/build', 
+                    stdout=subprocess.PIPE, 
+                    stderr=subprocess.STDOUT, 
+                    shell=True
+                )
+            for line in iter(proc.stdout.readline, b''):
+                print(line.rstrip().decode("utf8"))
+            print('\n')
     else:
         subprocess.run(
             ['mkdir', 'build'], 

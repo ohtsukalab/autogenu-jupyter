@@ -2,55 +2,63 @@ language: cpp
 
 jobs:
   include:
-    - os: linux
+    - name: Python 3.6 on Xenial
+      os: linux
       dist: xenial
       language: python
       python: 3.6
       compiler:
         - g++
         - clang++
-    - os: linux
+    - name: Python 3.7 on Xenial
+      os: linux
       dist: xenial
       language: python
       python: 3.7
       compiler:
         - g++
         - clang++
-    - os: linux
+    - name: Python 3.8 on Xenial
+      os: linux
       dist: xenial
       language: python
       python: 3.8
       compiler:
         - g++
         - clang++
-    - os: linux
+    - name: Python 3.6 on Bionic
+      os: linux
       dist: bionic 
       language: python
       python: 3.6
       compiler:
         - g++
         - clang++
-    - os: linux
+    - name: Python 3.7 on Bionic
+      os: linux
       dist: bionic
       language: python
       python: 3.7
       compiler:
         - g++
         - clang++
-    - os: linux
+    - name: Python 3.8 on Bionic
+      os: linux
       dist: bionic
       language: python
       python: 3.8
       compiler:
         - g++
         - clang++
-    - os: osx
+    - name: OSX High Sierra
+      os: osx
       osx_image: xcode10.1
       language: generic
       compiler:
         - g++
         - clang++
-    - os: osx
+    - name: OSX Mojave
+      os: osx
       osx_image: xcode10.14
       language: generic
       compiler:
