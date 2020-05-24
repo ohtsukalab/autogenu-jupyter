@@ -41,39 +41,39 @@ class AutoGenU(object):
         self.__is_FB_epsilon_set = False
 
     def define_t(self):
-    """ Returns symbolic scalar variable 't'.
-    """
+        """ Returns symbolic scalar variable 't'.
+        """
         return sympy.Symbol('t')
 
     def define_x(self):
-    """ Returns symbolic vector variable 'x' whose size is dimx.
-    """
+        """ Returns symbolic vector variable 'x' whose size is dimx.
+        """
         return sympy.symbols('x[0:%d]' %(self.__dimx))
 
     def define_u(self):
-    """ Returns symbolic vector variable 'u' whose size is dimu.
-    """
+        """ Returns symbolic vector variable 'u' whose size is dimu.
+        """
         return sympy.symbols('u[0:%d]' %(self.__dimu))
 
     def define_scalar_var(self, scalar_var_name):
-    """ Returns symbolic variable whose name is scalar_var_name. The name of the
-        variable is memorized.
+        """ Returns symbolic variable whose name is scalar_var_name. The name of 
+            the variable is memorized.
 
-        Args:
-            scalar_var_name: Name of the scalar variable.
-    """
+            Args:
+                scalar_var_name: Name of the scalar variable.
+        """
         assert isinstance(scalar_var_name, str), 'The input must be strings!'
         scalar_var = sympy.Symbol(scalar_var_name)
         self.__scalar_vars.append([scalar_var, scalar_var_name, 0])
         return scalar_var
 
     def define_scalar_vars(self, *scalar_var_name_list):
-    """ Returns symbolic variables whose names are given by scalar_var_name_list.
-        The names of the variables are memorized.
+        """ Returns symbolic variables whose names are given by 
+            scalar_var_name_list. The names of the variables are memorized.
 
-        Args:
-            scalar_var_name_list: Names of the scalar variables.
-    """
+            Args:
+                scalar_var_name_list: Names of the scalar variables.
+        """
         scalar_vars = []
         for scalar_var_name in scalar_var_name_list:
             assert isinstance(scalar_var_name, str), 'The input must be list of strings!'
@@ -83,13 +83,13 @@ class AutoGenU(object):
         return scalar_vars
 
     def define_array_var(self, array_var_name, dim):
-    """ Returns symbolic vector variable whose names is array_var_name and whose
-        dimension is dim. The names of the variable is memorized.
+        """ Returns symbolic vector variable whose names is array_var_name and 
+            whose dimension is dim. The names of the variable is memorized.
 
-        Args:
-            array_var_name: Name of the array variable.
-            dim: Dimension of the array variable.
-    """
+            Args:
+                array_var_name: Name of the array variable.
+                dim: Dimension of the array variable.
+        """
         assert isinstance(array_var_name, str), 'The first argument must be strings!'
         assert dim > 0, 'The second argument must be positive integer!'
         array_var = sympy.symbols(array_var_name+'[0:%d]' %(dim))
@@ -97,50 +97,50 @@ class AutoGenU(object):
         return array_var
 
     def set_FB_epsilon(self, FB_epsilon):
-    """ Set reguralization term of the semi-smooth Fischer-Burumeister (FB) 
-        method. Set the array whose size is dimension of the inequality 
-        constraints considered by semi-smooth FB method.
+        """ Set reguralization term of the semi-smooth Fischer-Burumeister (FB) 
+            method. Set the array whose size is dimension of the inequality 
+            constraints considered by semi-smooth FB method.
 
-        Args:
-            FB epsilon: Array of the reguralization term. 
-    """
+            Args:
+                FB epsilon: Array of the reguralization term. 
+        """
         for eps in FB_epsilon:
             assert eps >= 0, "FB epsilon must be non-negative!"
         self.__FB_epsilon = FB_epsilon
         self.__is_FB_epsilon_set = True
 
     def set_scalar_var(self, scalar_var_name, scalar_value):
-    """ Set the value of the scalar variable you defied. 
+        """ Set the value of the scalar variable you defied. 
 
-        Args:
-            scalar_var_name: Name of the scalar variable.
-            scalar_value: Value of the scalar variable.
-    """
+            Args:
+                scalar_var_name: Name of the scalar variable.
+                scalar_value: Value of the scalar variable.
+        """
         assert isinstance(scalar_var_name, str), 'The first argument must be strings!'
         for defined_scalar_var in self.__scalar_vars:
             if scalar_var_name[0] == defined_scalar_var[1]:
                 defined_scalar_var[2] = scalar_value
 
     def set_scalar_vars(self, *scalar_var_name_and_value_list):
-    """ Set the values of the scalar variables you defied. 
+        """ Set the values of the scalar variables you defied. 
 
-        Args:
-            scalar_var_name_and_value_lis: A list composed of the name of the 
-                scalar variable and value of the scalar variable.
-    """
+            Args:
+                scalar_var_name_and_value_lis: A list composed of the name of 
+                the scalar variable and value of the scalar variable.
+        """
         for var_name_and_value in scalar_var_name_and_value_list:
             for defined_scalar_var in self.__scalar_vars:
                 if var_name_and_value[0] == defined_scalar_var[1]:
                     defined_scalar_var[2] = var_name_and_value[1]
     
     def set_array_var(self, var_name, values):
-    """ Set the value of the array variable you defied. 
+        """ Set the value of the array variable you defied. 
 
-        Args:
-            var_name: Name of the arrray variable.
-            values: Values of the arry variable. The size must be the dimension
-                of the array variable.
-    """
+            Args:
+                var_name: Name of the arrray variable.
+                values: Values of the arry variable. The size must be the 
+                    dimension of the array variable.
+        """
         assert isinstance(var_name, str), 'The first argument must be strings!'
         for defined_array_var in self.__array_vars:
             if var_name == defined_array_var[1]:
@@ -148,18 +148,18 @@ class AutoGenU(object):
                     defined_array_var[2] = values
 
     def set_functions(self, f, C, h, L, phi):
-    """ Sets functions that defines the optimal control problem.
+        """ Sets functions that defines the optimal control problem.
 
-        Args: 
-            f: The state equation. The dimension must be dimx.
-            C: The equality consrtaints. If there are no equality constraints,
-                set the empty list.
-            h: The inequality consrtaints considered by semi-smooth 
-                Fischer-Burumeister method. If there are no such inequality 
-                constraints, set the empty list.
-            L: The stage cost.
-            phi: The terminal cost.
-    """
+            Args: 
+                f: The state equation. The dimension must be dimx.
+                C: The equality consrtaints. If there are no equality 
+                    constraints, set the empty list.
+                h: The inequality consrtaints considered by semi-smooth 
+                    Fischer-Burumeister method. If there are no such inequality 
+                    constraints, set the empty list.
+                L: The stage cost.
+                phi: The terminal cost.
+        """
         assert len(f) > 0 
         assert len(f) == self.__dimx, "Dimension of f must be dimx!"
         self.__f = f
@@ -181,13 +181,13 @@ class AutoGenU(object):
         self.__is_function_set = True
 
     def set_solver_type(self, solver_type):
-    """ Sets solver types of the C/GMRES methods. 
+        """ Sets solver types of the C/GMRES methods. 
 
-        Args: 
-            solver_type: The solver type. Choose from 
-            SolverType.ContinuationGMRES, SolverType.MultipleShootingCGMRES, and 
-            SolverType.MSCGMRESWithInputSaturation.
-    """
+            Args: 
+                solver_type: The solver type. Choose from 
+                SolverType.ContinuationGMRES, SolverType.MultipleShootingCGMRES, 
+                and SolverType.MSCGMRESWithInputSaturation.
+        """
         assert (
             solver_type == SolverType.ContinuationGMRES or 
             solver_type == SolverType.MultipleShootingCGMRES or
@@ -199,21 +199,21 @@ class AutoGenU(object):
     def set_solver_parameters(
             self, T_f, alpha, N, finite_difference_increment, zeta, kmax
         ):
-    """ Sets parameters of the NMPC solvers based on the C/GMRES method. 
+        """ Sets parameters of the NMPC solvers based on the C/GMRES method. 
 
-        Args: 
-            T_f, alpha: Parameter about the length of the horizon of NMPC.
-                The length of the horzion at time t is given by 
-                T_f * (1-exp(-alpha*t)).
-            N: The number of the grid for the discretization
-                of the horizon of NMPC.
-            finite_difference_increment: The small positive value for forward 
-                approximation used in the FD-GMRES. 
-            zeta: A stabilization parameter of the C/GMRES method. It may work 
-                well if you set as zeta=1/sampling_period.
-            kmax: Maximam number of the iteration of the Krylov 
-                subspace method for the linear problem. 
-    """
+            Args: 
+                T_f, alpha: Parameter about the length of the horizon of NMPC.
+                    The length of the horzion at time t is given by 
+                    T_f * (1-exp(-alpha*t)).
+                N: The number of the grid for the discretization
+                    of the horizon of NMPC.
+                finite_difference_increment: The small positive value for 
+                    finitei difference approximation used in the FD-GMRES. 
+                zeta: A stabilization parameter of the C/GMRES method. It may 
+                    work well if you set as zeta=1/sampling_period.
+                kmax: Maximam number of the iteration of the Krylov 
+                    subspace method for the linear problem. 
+        """
         assert T_f > 0
         assert alpha > 0
         assert N > 0
@@ -232,20 +232,22 @@ class AutoGenU(object):
             self, solution_initial_guess, newton_residual_torelance, 
             max_newton_iteration, initial_Lagrange_multiplier=None
         ):
-    """ Set parameters for the initialization of the C/GMRES solvers. 
+        """ Set parameters for the initialization of the C/GMRES solvers. 
 
-        Args: 
-            solution_initial_guess: The initial guess of the solution of the 
-                initialization. Size must be the dimu + dimensions of C and h.
-            newton_residual_torelance: The residual torelance of the 
-                initialization solved by Newton's method. The Newton iteration 
-                terminates if the optimality error is smaller than this value.
-            max_newton_iteration: The maximum number of the Newton iteration. 
-            initial_Lagranme_multiplier: Optional parameter is you use 
-                MSCGMRESWithInputSaturation. The initial guess of the Lagrange 
-                multiplier with respect to the box constraint on the control
-                input that is condensed.
-    """
+            Args: 
+                solution_initial_guess: The initial guess of the solution of the 
+                    initialization. Size must be the dimu + dimensions of C and 
+                    h.
+                newton_residual_torelance: The residual torelance of the 
+                    initialization solved by Newton's method. The Newton 
+                    iteration terminates if the optimality error is smaller than 
+                    this value.
+                max_newton_iteration: The maximum number of the Newton iteration. 
+                initial_Lagranme_multiplier: Optional parameter is you use 
+                    MSCGMRESWithInputSaturation. The initial guess of the 
+                    Lagrange multiplier with respect to the box constraint on 
+                    the control input that is condensed.
+        """
         dimuch = self.__dimu + self.__dimc + self.__dimh
         assert len(solution_initial_guess) == dimuch
         assert newton_residual_torelance > 0
@@ -260,15 +262,16 @@ class AutoGenU(object):
     def set_simulation_parameters(
             self, initial_time, initial_state, simulation_time, sampling_time
         ):
-    """ Set parameters for numerical simulation. 
+        """ Set parameters for numerical simulation. 
 
-        Args: 
-            initial_time: The time parameter at the beginning of the simulation. 
-            initial_state: The state of the system at the beginning of the 
-                simulation. 
-            simulation_time: The length of the numerical simulation. 
-            sampling_time: The sampling period of the numerical simulation. 
-    """
+            Args: 
+                initial_time: The time parameter at the beginning of the 
+                    simulation. 
+                initial_state: The state of the system at the beginning of the 
+                    simulation. 
+                simulation_time: The length of the numerical simulation. 
+                sampling_time: The sampling period of the numerical simulation. 
+        """
         assert len(initial_state) == self.__dimx, "The dimension of initial_state must be dimx!"
         assert simulation_time > 0
         assert sampling_time > 0
@@ -281,18 +284,18 @@ class AutoGenU(object):
     def add_control_input_saturation(
         self, index, u_min, u_max, dummy_weight, quadratic_weight
         ):
-    """ Adds the bax constraints on the control input that is condensed in 
-        linear problem. 
+        """ Adds the bax constraints on the control input that is condensed in 
+            linear problem. 
 
-        Args: 
-            index: The index of the constrianed control input. 
-            u_min: The minimum value of the constrianed control input. 
-            u_max: The minimum value of the constrianed control input. 
-            dummy_weight: An weight to stabilize the numerical computation.
-            quadratic_weight: Weight on the constrainted control input in the 
-                dummy input in the cost function. The larger this value, the 
-                larger mergin of constraint.
-    """
+            Args: 
+                index: The index of the constrianed control input. 
+                u_min: The minimum value of the constrianed control input. 
+                u_max: The minimum value of the constrianed control input. 
+                dummy_weight: An weight to stabilize the numerical computation.
+                quadratic_weight: Weight on the constrainted control input in 
+                    the dummy input in the cost function. The larger this value, 
+                    the larger mergin of constraint.
+        """
         assert index >= 0
         assert index < self.__dimu
         assert u_min < u_max
@@ -311,16 +314,16 @@ class AutoGenU(object):
             self.__saturation_list.append(saturation)
 
     def generate_source_files(self, use_simplification=False, use_cse=False):
-    """ Generates the C++ source file in which the equations to solve the 
-        optimal control problem are described. Before call this method, 
-        set_functions() must be called.
+        """ Generates the C++ source file in which the equations to solve the 
+            optimal control problem are described. Before call this method, 
+            set_functions() must be called.
 
-        Args: 
-            use_simplification: The flag for simplification. If True, the 
-                Symbolic functions are simplified. Default is False.
-            use_cse: The flag for common subexpression elimination. If True, 
-                common subexpressions are eliminated. Default is False.
-    """
+            Args: 
+                use_simplification: The flag for simplification. If True, the 
+                    Symbolic functions are simplified. Default is False.
+                use_cse: The flag for common subexpression elimination. If True, 
+                    common subexpressions are eliminated. Default is False.
+        """
         assert self.__is_function_set, "Symbolic functions are not set!. Before call this method, call set_functions()"
         if self.__dimh > 0:
             assert self.__is_FB_epsilon_set, "FB epsilons are not set!"
@@ -1020,24 +1023,24 @@ target_compile_options(
                 use_cse: If true, common subexpression elimination is used. If 
                     False, it is not used.
         """
-            if use_cse:
-                func_cse = sympy.cse(function)
-                for i in range(len(func_cse[0])):
-                    cse_exp, cse_rhs = func_cse[0][i]
-                    writable_file.write(
-                        '  double '+sympy.ccode(cse_exp)
-                        +' = '+sympy.ccode(cse_rhs)+';\n'
-                    )
-                for i in range(len(func_cse[1])):
-                    writable_file.write(
-                        '  '+return_value_name+'[%d] = '%i
-                        +sympy.ccode(func_cse[1][i])+';\n'
-                    )
-            else:
-                writable_file.writelines(
-                    ['  '+return_value_name+'[%d] = '%i
-                    +sympy.ccode(function[i])+';\n' for i in range(len(function))]
+        if use_cse:
+            func_cse = sympy.cse(function)
+            for i in range(len(func_cse[0])):
+                cse_exp, cse_rhs = func_cse[0][i]
+                writable_file.write(
+                    '  double '+sympy.ccode(cse_exp)
+                    +' = '+sympy.ccode(cse_rhs)+';\n'
                 )
+            for i in range(len(func_cse[1])):
+                writable_file.write(
+                    '  '+return_value_name+'[%d] = '%i
+                    +sympy.ccode(func_cse[1][i])+';\n'
+                )
+        else:
+            writable_file.writelines(
+                ['  '+return_value_name+'[%d] = '%i
+                +sympy.ccode(function[i])+';\n' for i in range(len(function))]
+            )
 
     def __make_model_dir(self):
         """ Makes a directory where the C source files of OCP models are 
