@@ -3,12 +3,13 @@ platform:
   - x86
 
 environment:
-- CMAKE_PROJECT: MinGW Makefiles
-- PYTHON_VERSION: 3.7
+  - PYTHON=C:\Python36-x64, PYTHON_VERSION=3.6, PYTHON_ARCH=64, PLATFORM=x64
+  - PYTHON=C:\Python37-x64, PYTHON_VERSION=3.7, PYTHON_ARCH=64, PLATFORM=x64
+  - PYTHON=C:\Python38-x64, PYTHON_VERSION=3.8, PYTHON_ARCH=64, PLATFORM=x64
 
 install:
-  - python -m pip install -U sympy matplotlib seaborn jupyter nbconvert
-  - choco install ffmpeg
+  - choco install -y ffmpeg
+  - pip install -U sympy numpy matplotlib seaborn pytest jupyter nbconvert
 
 build: false
 
