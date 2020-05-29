@@ -1,3 +1,6 @@
+platoform:
+  - x64
+
 environment:
   matrix:
     - PYTHON: "C:\\Python36-x64"
@@ -11,12 +14,15 @@ environment:
       PYTHON_ARCH: "64"
 
 install:
-  - choco install -y ffmpeg
-  - "%PYTHON%\\python.exe -m pip install -U sympy numpy matplotlib seaborn pytest jupyter nbconvert"
+  - "choco install -y ffmpeg"
+  - "SET PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%"
+  - "python --version"
+  - "python -m pip install --upgrade pip"
+  - "python -m pip install -U sympy numpy matplotlib seaborn pytest jupyter nbconvert"
 
 build: false
 
 test_script:
-  - jupyter nbconvert --to python cartpole.ipynb hexacopter.ipynb mobilerobot.ipynb pendubot.ipynb
-  - cp ci/test_notebooks.py .
-  - pytest test_notebooks.py
+  - "jupyter nbconvert --to python cartpole.ipynb hexacopter.ipynb mobilerobot.ipynb pendubot.ipynb"
+  - "cp ci/test_notebooks.py ."
+  - "pytest test_notebooks.py"
