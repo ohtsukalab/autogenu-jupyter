@@ -1,0 +1,18 @@
+platform:
+  - x64
+  - x86
+
+environment:
+- CMAKE_PROJECT: MinGW Makefiles
+- PYTHON_VERSION: 3.7
+
+install:
+  - python -m pip install -U sympy matplotlib seaborn jupyter nbconvert
+  - choco install ffmpeg
+
+build: false
+
+test_script:
+  - jupyter nbconvert --to python cartpole.ipynb hexacopter.ipynb mobilerobot.ipynb pendubot.ipynb
+  - cp ci/test_notebooks.py .
+  - pytest test_notebooks.py
