@@ -27,8 +27,6 @@ install:
   - "python -m pip install -U sympy numpy matplotlib seaborn pytest jupyter nbconvert"
   - "set PATH=C:\msys64\usr\bin;%PATH%"
   - "set MSYSTEM=MINGW64"
-  - bash -lc ""
-  - bash -lc "pacman --noconfirm --needed -Sy bash pacman pacman-mirrors msys2-runtime msys2-runtime-devel"
 
 build: false
 
