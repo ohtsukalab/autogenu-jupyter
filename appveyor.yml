@@ -12,7 +12,7 @@ environment:
 
 install:
   - choco install -y ffmpeg
-  - "%PYTHON%"\\python.ext -m pip install -U sympy numpy matplotlib seaborn pytest jupyter nbconvert
+  - %PYTHON%\\python.exe -m pip install -U sympy numpy matplotlib seaborn pytest jupyter nbconvert
 
 build: false
 
