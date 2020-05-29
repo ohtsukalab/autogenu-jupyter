@@ -533,16 +533,6 @@ int NMPCModel::dim_constraints() const {
             '#include "cgmres_simulator.hpp"\n'
         )
         f_main.write('#include <string>\n')
-        if platform.system() == 'Windows':
-            f_main.write(
-                '#include <direct.h>\n'
-                '\n'
-            )
-        else:
-            f_main.write(
-                '#include <sys/stat.h>\n'
-                '\n'
-            )
         f_main.write(
             '\n'
             'int main() {\n'
@@ -606,7 +596,6 @@ int NMPCModel::dim_constraints() const {
             f_main.write(str(self.__solution_initial_guess[i])+', ')
         f_main.write(str(self.__solution_initial_guess[-1])+'};\n')
         f_main.write('\n')
-        f_main.write('\n')
         f_main.write('  // Initialize the solution of the C/GMRES method.\n')
         f_main.write(
             '  nmpc_solver.setParametersForInitialization('
@@ -639,20 +628,8 @@ int NMPCModel::dim_constraints() const {
                 +'(initial_guess_lagrange_multiplier);'
                 +'\n'
             )
-        f_main.write('\n\n\n')
-        if platform.system() == 'Windows':
-            f_main.write(
-                '  // Makes a directory for saving simulation results.\n'
-                '  std::string save_dir_name("../simulation_result");\n'
-                '  int mkdir_err = mkdir(save_dir_name.c_str());\n\n'
-            )
-        else:
-            f_main.write(
-                '  // Makes a directory for saving simulation results.\n'
-                '  std::string save_dir_name("../simulation_result");\n'
-                '  int mkdir_err = mkdir(save_dir_name.c_str(), 0755)\n\n;'
-            )
         f_main.write(
+            '  std::string save_dir_name("../simulation_result");\n'
             '  // Perform a numerical simulation.\n'
             '  cgmres::simulation(nmpc_solver, initial_state, '
             +str(self.__initial_time)+', '+str(self.__simulation_time)+', '
@@ -669,7 +646,7 @@ int NMPCModel::dim_constraints() const {
         """ Generates CMakeLists.txt in a directory where your .ipynb files 
             locates.
         """
-        f_cmake = open('CMakeLists.txt', 'w')
+        f_cmake = open('models/'+str(self.__model_name)+'/CMakeLists.txt', 'w')
         f_cmake.writelines([
 """
 cmake_minimum_required(VERSION 3.1)
@@ -678,18 +655,11 @@ project(cgmres_simulator CXX)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_FLAGS "-O3")
 
-"""
-        ])
-        f_cmake.write(
-            'set(MODEL_DIR ${CMAKE_SOURCE_DIR}/models/'
-            +str(self.__model_name)+')'
-        )
-        f_cmake.writelines([
-"""
-set(INCLUDE_DIR ${CMAKE_SOURCE_DIR}/include/cgmres)
-set(SIMULATOR_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/include/cgmres/simulator)
-set(SRC_DIR ${CMAKE_SOURCE_DIR}/src)
-set(SIMULATOR_SRC_DIR ${CMAKE_SOURCE_DIR}/src/simulator)
+set(MODEL_DIR ${PROJECT_SOURCE_DIR})
+set(INCLUDE_DIR ${PROJECT_SOURCE_DIR}/../../include/cgmres)
+set(SIMULATOR_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/../../include/cgmres/simulator)
+set(SRC_DIR ${PROJECT_SOURCE_DIR}/../../src)
+set(SIMULATOR_SRC_DIR ${PROJECT_SOURCE_DIR}/../../src/simulator)
 
 add_library(
     nmpcmodel 
@@ -887,7 +857,7 @@ target_compile_options(
             )
             if generator == 'MSYS':
                 proc = subprocess.Popen(
-                    ['cmake', '../../..', '-G', 'MSYS Makefiles'], 
+                    ['cmake', '..', '-G', 'MSYS Makefiles'], 
                     cwd='models/'+self.__model_name+'/build', 
                     stdout=subprocess.PIPE, 
                     stderr=subprocess.STDOUT, 
@@ -898,7 +868,7 @@ target_compile_options(
                 print('\n')
             elif generator == 'MinGW':
                 proc = subprocess.Popen(
-                    ['cmake', '../../..', '-G', 'MinGW Makefiles'], 
+                    ['cmake', '..', '-G', 'MinGW Makefiles'], 
                     cwd='models/'+self.__model_name+'/build', 
                     stdout=subprocess.PIPE, 
                     stderr=subprocess.STDOUT, 
@@ -917,7 +887,7 @@ target_compile_options(
                 )
                 if proc.stderr.readline() == b'':
                     proc = subprocess.Popen(
-                        ['cmake', '../../..', '-G', 'MSYS Makefiles'], 
+                        ['cmake', '..', '-G', 'MSYS Makefiles'], 
                         cwd='models/'+self.__model_name+'/build', 
                         stdout=subprocess.PIPE, 
                         stderr=subprocess.STDOUT, 
@@ -925,7 +895,7 @@ target_compile_options(
                     )
                 else:
                     proc = subprocess.Popen(
-                        ['cmake', '../../..', '-G', 'MinGW Makefiles'], 
+                        ['cmake', '..', '-G', 'MinGW Makefiles'], 
                         cwd='models/'+self.__model_name+'/build', 
                         stdout=subprocess.PIPE, 
                         stderr=subprocess.STDOUT, 
@@ -953,7 +923,7 @@ target_compile_options(
                 stderr=subprocess.PIPE
             )
             proc = subprocess.Popen(
-                ['cmake', '../../..'], 
+                ['cmake', '..'], 
                 cwd='models/'+self.__model_name+'/build', 
                 stdout=subprocess.PIPE, 
                 stderr=subprocess.STDOUT
@@ -982,6 +952,13 @@ target_compile_options(
                 stderr=subprocess.PIPE, 
                 shell=True
             )
+            subprocess.run(
+                ['mkdir', 'simulation_result'], 
+                cwd='models/'+self.__model_name, 
+                stdout=subprocess.PIPE, 
+                stderr=subprocess.PIPE, 
+                shell=True
+            )
             proc = subprocess.Popen(
                 ['main.exe'], 
                 cwd='models/'+self.__model_name+'/build', 
@@ -998,6 +975,12 @@ target_compile_options(
                 stdout = subprocess.PIPE, 
                 stderr = subprocess.PIPE, 
                 shell=True
+            )
+            subprocess.run(
+                ['mkdir', 'simulation_result'], 
+                cwd='models/'+self.__model_name, 
+                stdout=subprocess.PIPE, 
+                stderr=subprocess.PIPE
             )
             proc = subprocess.Popen(
                 ['./a.out'], 

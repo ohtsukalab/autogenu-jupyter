@@ -88,5 +88,5 @@ install:
 
 script:
   - jupyter nbconvert --to python cartpole.ipynb hexacopter.ipynb mobilerobot.ipynb pendubot.ipynb
-  - cp .travis/test_notebooks.py .
+  - cp ci/test_notebooks.py .
   - travis_wait 30 pytest test_notebooks.py
