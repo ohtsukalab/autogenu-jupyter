@@ -38,14 +38,14 @@ public:
 
   ~ZeroHorizonOCPSolver() = default;
 
-  void setControlInput(const Vector<nu>& u) {
+  void set_u(const Vector<nu>& u) {
     uopt_ = u;
     ucopt_.template head<nu>() = u;
     ucopt_.template tail<nc>().setZero();
     setInnerSolution();
   }
 
-  void setSolution(const Vector<nuc>& uc) {
+  void set_uc(const Vector<nuc>& uc) {
     uopt_ = uc.template head<nu>();
     ucopt_ = uc;
     setInnerSolution();

@@ -41,7 +41,7 @@ public:
 
   ~MultipleShootingCGMRESSolver() = default;
 
-  void setControlInput(const Vector<nu>& u) {
+  void set_u(const Vector<nu>& u) {
     for (size_t i=0; i<N; ++i) {
       uopt_[i] = u;
     }
@@ -52,7 +52,7 @@ public:
     setInnerSolution();
   }
 
-  void setSolution(const Vector<nuc>& uc) {
+  void set_uc(const Vector<nuc>& uc) {
     for (size_t i=0; i<N; ++i) {
       uopt_[i] = uc.template head<nu>();
     }
@@ -62,13 +62,13 @@ public:
     setInnerSolution();
   }
 
-  void setState(const Vector<nx>& x) {
+  void set_x(const Vector<nx>& x) {
     for (size_t i=0; i<=N; ++i) {
       xopt_[i] = x;
     }
   }
 
-  void setCostate(const Vector<nx>& lmd) {
+  void set_lmd(const Vector<nx>& lmd) {
     for (size_t i=0; i<=N; ++i) {
       lmdopt_[i] = lmd;
     }

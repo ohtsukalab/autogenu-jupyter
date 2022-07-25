@@ -20,7 +20,7 @@ int main() {
 
   cgmres::Vector<cgmres::CartPoleOCP::nuc> uc0;
   uc0 << 0.01, 10.0, 0.01;
-  initializer.setSolution(uc0);
+  initializer.set_uc(uc0);
 
   const double t = 1.0;
   cgmres::Vector<cgmres::CartPoleOCP::nx> x0;
@@ -30,17 +30,17 @@ int main() {
   // run MPC
   constexpr int kmax = 10;
   cgmres::SingleShootingOCPSolver<cgmres::CartPoleOCP, N, kmax> solver(ocp, horizon, settings);
-  solver.setSolution(initializer.ucopt());
+  solver.set_uc(initializer.ucopt());
   solver.solve(t, x0);
 
   cgmres::SingleShootingCGMRESSolver<cgmres::CartPoleOCP, N, kmax> ss_cgmres(ocp, horizon, settings);
-  ss_cgmres.setSolution(initializer.ucopt());
+  ss_cgmres.set_uc(initializer.ucopt());
   ss_cgmres.update(t, x0);
 
   cgmres::MultipleShootingCGMRESSolver<cgmres::CartPoleOCP, N, kmax> ms_cgmres(ocp, horizon, settings);
-  ms_cgmres.setSolution(initializer.ucopt());
-  ms_cgmres.setState(x0);
-  ms_cgmres.setCostate(initializer.lmdopt());
+  ms_cgmres.set_uc(initializer.ucopt());
+  ms_cgmres.set_x(x0);
+  ms_cgmres.set_lmd(initializer.lmdopt());
   ms_cgmres.update(t, x0);
 
   return 0;

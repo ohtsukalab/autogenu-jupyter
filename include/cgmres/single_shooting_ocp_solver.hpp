@@ -39,7 +39,7 @@ public:
 
   ~SingleShootingOCPSolver() = default;
 
-  void setControlInput(const Vector<nu>& u) {
+  void set_u(const Vector<nu>& u) {
     for (size_t i=0; i<N; ++i) {
       uopt_[i] = u;
     }
@@ -50,7 +50,7 @@ public:
     setInnerSolution();
   }
 
-  void setSolution(const Vector<nuc>& uc) {
+  void set_uc(const Vector<nuc>& uc) {
     for (size_t i=0; i<N; ++i) {
       uopt_[i] = uc.template head<nu>();
     }
