@@ -64,7 +64,7 @@ public:
       const auto gmres_iter 
           = gmres_.template solve<const Scalar, const Vector<nx>&, const Vector<dim>&>(
                 newton_gmres_, t, x, solution_, solution_update_);
-      const auto opt_error = newton_gmres_.OptError();
+      const auto opt_error = newton_gmres_.optError();
 
       // verbose
       if (settings_.verbose_level >= 1) {

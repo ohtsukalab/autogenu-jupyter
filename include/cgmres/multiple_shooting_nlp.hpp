@@ -1,5 +1,5 @@
-#ifndef SINGLE_SHOOTING_NLP_HPP_
-#define SINGLE_SHOOTING_NLP_HPP_
+#ifndef MULTIPLE_SHOOTING_NLP_HPP_
+#define MULTIPLE_SHOOTING_NLP_HPP_
 
 #include <array>
 
@@ -35,7 +35,7 @@ public:
     const Scalar dt = T / N;
     assert(T >= 0);
     // Compute the erros in the first order necessary conditions (FONC)
-    ocp_.eval_hu(t, x.data().data(), solution.template head<nuc>().data(), lmd[0].data(), 
+    ocp_.eval_hu(t, x0.data(), solution.template head<nuc>().data(), lmd[0].data(), 
                  fonc_hu.template head<nuc>().data());
     for (size_t i=1; i<N; ++i) {
       ocp_.eval_hu(t+i*dt, x[i-1].data(), solution.template segment<nuc>(nuc*i).data(),
@@ -45,7 +45,7 @@ public:
 
   void eval_fonc_f(const Scalar t, const Vector<nx>& x0, const Vector<dim>& solution,
                    const std::array<Vector<nx>, N+1>& x, 
-                   std::array<Vector<nx>, N>& fonc_f) {
+                   std::array<Vector<nx>, N+1>& fonc_f) {
     const Scalar T = horizon_.T(t);
     const Scalar dt = T / N;
     assert(T >= 0);
@@ -53,14 +53,14 @@ public:
     ocp_.eval_f(t, x0.data(), solution.template head<nuc>().data(), dx_.data());
     fonc_f[0] = x[0] - x0 - dt * dx_;
     for (size_t i=1; i<N; ++i) {
-      ocp_.eval_f(t+i*dt, x[i-1], solution.template segment<nuc>(nuc*i).data(), dx_.data());
+      ocp_.eval_f(t+i*dt, x[i-1].data(), solution.template segment<nuc>(nuc*i).data(), dx_.data());
       fonc_f[i] = x[i] - x[i-1] - dt * dx_;
     }
   }
 
   void retrive_x(const Scalar t, const Vector<nx>& x0, const Vector<dim>& solution,
                  std::array<Vector<nx>, N+1>& x,
-                 const std::array<Vector<nx>, N>& fonc_f) {
+                 const std::array<Vector<nx>, N+1>& fonc_f) {
     const Scalar T = horizon_.T(t);
     const Scalar dt = T / N;
     assert(T >= 0);
@@ -68,14 +68,14 @@ public:
     ocp_.eval_f(t, x0.data(), solution.template head<nuc>().data(), dx_.data());
     x[0] = x0 + dt * dx_  + fonc_f[0];
     for (size_t i=1; i<N; ++i) {
-      ocp_.eval_f(t+i*dt, x[i-1], solution.template segment<nuc>(nuc*i).data(), dx_.data());
+      ocp_.eval_f(t+i*dt, x[i-1].data(), solution.template segment<nuc>(nuc*i).data(), dx_.data());
       x[i] = x[i-1] + dt * dx_ + fonc_f[i];
     }
   }
 
   void eval_fonc_hx(const Scalar t, const Vector<nx>& x0, const Vector<dim>& solution,
-                    const std::array<Vector<nx>, N>& x, const std::array<Vector<nx>, N>& lmd,
-                    std::array<Vector<nx>, N>& fonc_hx) {
+                    const std::array<Vector<nx>, N+1>& x, const std::array<Vector<nx>, N+1>& lmd,
+                    std::array<Vector<nx>, N+1>& fonc_hx) {
     const Scalar T = horizon_.T(t);
     const Scalar dt = T / N;
     assert(T >= 0);
@@ -83,36 +83,38 @@ public:
     ocp_.eval_phix(t+T, x[N-1].data(), dx_.data());
     fonc_hx[N-1] = lmd[N-1] - dx_;
     for (size_t i=N-1; i>=1; --i) {
-      ocp_.eval_hx(t+i*dt, x[i-1], solution.template segment<nuc>(nuc*i).data(), 
+      ocp_.eval_hx(t+i*dt, x[i-1].data(), solution.template segment<nuc>(nuc*i).data(), 
                    lmd[i].data(), dx_.data());
       fonc_hx[i-1] = lmd[i-1] - lmd[i] - dt * dx_;
     }
   }
 
   void retrive_lmd(const Scalar t, const Vector<nx>& x0, const Vector<dim>& solution,
-                   const std::array<Vector<nx>, N+1>& x, 
-                   std::array<Vector<nx>, N+1>& lmd,
-                   const std::array<Vector<nx>, N>& fonc_hx) {
+                   const std::array<Vector<nx>, N+1>& x, std::array<Vector<nx>, N+1>& lmd,
+                   const std::array<Vector<nx>, N+1>& fonc_hx) {
     const Scalar T = horizon_.T(t);
     const Scalar dt = T / N;
     assert(T >= 0);
     // Compute optimality error for state.
     ocp_.eval_phix(t+T, x[N-1].data(), dx_.data());
-    lmd[N-1] = dx + fonc_hx[N-1];
+    lmd[N-1] = dx_ + fonc_hx[N-1];
     for (size_t i=N-1; i>=1; --i) {
-      ocp_.eval_hx(t+i*dt, x[i-1], solution.template segment<nuc>(nuc*i).data(), 
+      ocp_.eval_hx(t+i*dt, x[i-1].data(), solution.template segment<nuc>(nuc*i).data(), 
                    lmd[i].data(), dx_.data());
       lmd[i-1] = lmd[i] + dt * dx_ + fonc_hx[i-1];
     }
   }
 
+  const OCP& ocp() const { return ocp_; }
+
+  const Horizon& horizon() const { return horizon_; }
+
 private:
   OCP ocp_;
   Horizon horizon_;
   Vector<nx> dx_;
-  std::array<Vector<nx>, N+1> x_, lmd_;
 };
 
 } // namespace cgmres
 
-#endif // SINGLE_SHOOTING_NLP_HPP_
+#endif // MULTIPLE_SHOOTING_NLP_HPP_

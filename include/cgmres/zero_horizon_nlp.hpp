@@ -35,7 +35,7 @@ public:
     ocp_.eval_hu(t, x.data(), solution.data(), lmd_.data(), fonc.data());
   }
 
-  const OCP& ocp() { return ocp_; }
+  const OCP& ocp() const { return ocp_; }
 
 private:
   OCP ocp_;

@@ -2,6 +2,7 @@
 #include "cgmres/zero_horizon_ocp_solver.hpp"
 #include "cgmres/single_shooting_ocp_solver.hpp"
 #include "cgmres/single_shooting_cgmres_solver.hpp"
+#include "cgmres/multiple_shooting_cgmres_solver.hpp"
 
 #include <iostream>
 
@@ -32,9 +33,14 @@ int main() {
   solver.setSolution(initializer.getSolution());
   solver.solve(t, x0);
 
-  cgmres::SingleShootingCGMRESSolver<cgmres::CartPoleOCP, N, kmax> mpc(ocp, horizon, settings);
-  mpc.setSolution(initializer.getSolution());
-  mpc.update(t, x0);
+  cgmres::SingleShootingCGMRESSolver<cgmres::CartPoleOCP, N, kmax> ss_cgmres(ocp, horizon, settings);
+  ss_cgmres.setSolution(initializer.getSolution());
+  ss_cgmres.update(t, x0);
+
+  cgmres::MultipleShootingCGMRESSolver<cgmres::CartPoleOCP, N, kmax> ms_cgmres(ocp, horizon, settings);
+  ms_cgmres.setSolution(initializer.getSolution());
+  ms_cgmres.setState(x0);
+  ms_cgmres.update(t, x0);
 
   return 0;
 }

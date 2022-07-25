@@ -19,11 +19,14 @@ public:
 
   SingleShootingNLP(const OCP& ocp, const Horizon& horizon) 
     : ocp_(ocp),
-      horizon_(horizon) {
+      horizon_(horizon),
+      dx_(Vector<nx>::Zero()) {
     assert(nx > 0);
     assert(nu > 0);
     assert(nc >= 0);
     assert(N > 0);
+    std::fill(x_.begin(), x_.end(), Vector<nx>::Zero());
+    std::fill(lmd_.begin(), lmd_.end(), Vector<nx>::Zero());
   }
 
   ~SingleShootingNLP() = default;
@@ -58,7 +61,9 @@ public:
     }
   }
 
-  const OCP& ocp() { return ocp_; }
+  const OCP& ocp() const { return ocp_; }
+
+  const Horizon& horizon() const { return horizon_; }
 
 private:
   OCP ocp_;

@@ -1,6 +1,8 @@
 #ifndef NEWTON_GMRES_HPP_
 #define NEWTON_GMRES_HPP_
 
+#include <stdexcept>
+
 #include "cgmres/types.hpp"
 #include "cgmres/macros.hpp"
 
@@ -20,12 +22,15 @@ public:
       finite_difference_epsilon_(finite_difference_epsilon),
       updated_solution_(Vector<dim>::Zero()), 
       fonc_(Vector<dim>::Zero()), 
-      fonc1_(Vector<dim>::Zero()) {
+      fonc_1_(Vector<dim>::Zero()) {
+    if (finite_difference_epsilon <= 0.0) {
+      throw std::invalid_argument("[NewtonGMRES]: 'finite_difference_epsilon' must be positive!");
+    }
   }
 
   ~NewtonGMRES() = default;
 
-  Scalar OptError() const {
+  Scalar optError() const {
     return fonc_.template lpNorm<2>();
   }
 
@@ -39,8 +44,8 @@ public:
     assert(b_vec.size() == dim);
     updated_solution_ = solution + finite_difference_epsilon_ * solution_update;
     nlp_.eval(t, x, solution, fonc_);
-    nlp_.eval(t, x, updated_solution_, fonc1_);
-    EIGEN_CONST_CAST(VectorType3, b_vec) = - fonc_ - (fonc1_ - fonc_) / finite_difference_epsilon_;
+    nlp_.eval(t, x, updated_solution_, fonc_1_);
+    EIGEN_CONST_CAST(VectorType3, b_vec) = - fonc_ - (fonc_1_ - fonc_) / finite_difference_epsilon_;
   }
 
   template <typename VectorType1, typename VectorType2, typename VectorType3>
@@ -52,14 +57,14 @@ public:
     assert(solution_update.size() == dim);
     assert(ax_vec.size() == dim);
     updated_solution_ = solution + finite_difference_epsilon_ * solution_update;
-    nlp_.eval(t, x, updated_solution_, fonc1_);
-    EIGEN_CONST_CAST(VectorType3, ax_vec) = (fonc1_ - fonc_) / finite_difference_epsilon_;
+    nlp_.eval(t, x, updated_solution_, fonc_1_);
+    EIGEN_CONST_CAST(VectorType3, ax_vec) = (fonc_1_ - fonc_) / finite_difference_epsilon_;
   }
 
 private:
   NLP nlp_;
   Scalar finite_difference_epsilon_; 
-  Vector<dim> updated_solution_, fonc_, fonc1_;
+  Vector<dim> updated_solution_, fonc_, fonc_1_;
 };
 
 } // namespace cgmres

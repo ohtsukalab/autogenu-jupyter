@@ -1,19 +1,19 @@
-#ifndef SINGLE_SHOOTING_CGMRES_SOLVER_HPP_
-#define SINGLE_SHOOTING_CGMRES_SOLVER_HPP_
+#ifndef MULTIPLE_SHOOTING_CGMRES_SOLVER_HPP_
+#define MULTIPLE_SHOOTING_CGMRES_SOLVER_HPP_
 
 #include <array>
 #include <iostream>
 
 #include "cgmres/types.hpp"
 #include "cgmres/matrixfree_gmres.hpp"
-#include "cgmres/single_shooting_nlp.hpp"
-#include "cgmres/continuation_gmres.hpp"
+#include "cgmres/multiple_shooting_nlp.hpp"
+#include "cgmres/continuation_gmres_condensing.hpp"
 #include "cgmres/solver_settings.hpp"
 
 namespace cgmres {
 
 template <class OCP, int N, int kmax>
-class SingleShootingCGMRESSolver {
+class MultipleShootingCGMRESSolver {
 public:
   static constexpr int nx = OCP::nx;
   static constexpr int nu = OCP::nu;
@@ -21,12 +21,12 @@ public:
   static constexpr int nuc = nu + nc;
   static constexpr int dim = nuc * N;
 
-  using SingleShootingNLP_ = SingleShootingNLP<OCP, N>;
-  using ContinuationGMRES_ = ContinuationGMRES<SingleShootingNLP_>;
+  using MultipleShootingNLP_ = MultipleShootingNLP<OCP, N>;
+  using ContinuationGMRES_ = ContinuationGMRESCondensing<MultipleShootingNLP_>;
   using MatrixFreeGMRES_ = MatrixFreeGMRES<kmax, ContinuationGMRES_>;
 
-  SingleShootingCGMRESSolver(const OCP& ocp, const Horizon& horizon, 
-                             const SolverSettings& settings) 
+  MultipleShootingCGMRESSolver(const OCP& ocp, const Horizon& horizon, 
+                               const SolverSettings& settings) 
     : nlp_(ocp, horizon),
       continuation_gmres_(nlp_, settings.finite_diference_epsilon, settings.zeta),
       gmres_(),
@@ -35,9 +35,11 @@ public:
       solution_update_(Vector<dim>::Zero()) {
     std::fill(uopt_.begin(), uopt_.end(), Vector<nu>::Zero());
     std::fill(ucopt_.begin(), ucopt_.end(), Vector<nuc>::Zero());
+    std::fill(xopt_.begin(), xopt_.end(), Vector<nx>::Zero());
+    std::fill(lmdopt_.begin(), lmdopt_.end(), Vector<nx>::Zero());
   }
 
-  ~SingleShootingCGMRESSolver() = default;
+  ~MultipleShootingCGMRESSolver() = default;
 
   void setControlInput(const Vector<nu>& u) {
     for (size_t i=0; i<N; ++i) {
@@ -60,17 +62,30 @@ public:
     setInnerSolution();
   }
 
-  const std::array<Vector<nu>, N>& getControlInput() const { return uopt_; }
+  void setState(const Vector<nx>& x) {
+    for (size_t i=0; i<=N; ++i) {
+      xopt_[i] = x;
+    }
+  }
 
-  const std::array<Vector<nuc>, N>& getSolution() const { return ucopt_; }
+  void setCostate(const Vector<nx>& lmd) {
+    for (size_t i=0; i<=N; ++i) {
+      lmdopt_[i] = lmd;
+    }
+  }
+
+  const std::array<Vector<nu>, N>& uopt() const { return uopt_; }
+
+  const std::array<Vector<nx>, N+1>& xopt() const { return xopt_; }
 
   void update(const Scalar t, const Vector<nx>& x) {
     if (settings_.verbose_level >= 1) {
       std::cout << "\n======================= update solution with C/GMRES =======================" << std::endl;
     }
     const auto gmres_iter 
-        = gmres_.template solve<const Scalar, const Vector<nx>&, const Vector<dim>&>(
-              continuation_gmres_, t, x, solution_, solution_update_);
+        = gmres_.template solve<const Scalar, const Vector<nx>&, const Vector<dim>&,
+                                const std::array<Vector<nx>, N+1>&, const std::array<Vector<nx>, N+1>&>(
+              continuation_gmres_, t, x, solution_, xopt_, lmdopt_, solution_update_);
     const auto opt_error = continuation_gmres_.optError();
 
     // verbose
@@ -83,18 +98,21 @@ public:
     }
 
     solution_.noalias() += settings_.dt * solution_update_;
+    continuation_gmres_.expansion(t, x, solution_, xopt_, lmdopt_, solution_update_, settings_.dt);
 
     retriveSolution();
   }
 
 private:
-  SingleShootingNLP_ nlp_;
+  MultipleShootingNLP_ nlp_;
   ContinuationGMRES_ continuation_gmres_;
   MatrixFreeGMRES_ gmres_;
   SolverSettings settings_;
 
   std::array<Vector<nu>, N+1> uopt_;
   std::array<Vector<nuc>, N+1> ucopt_;
+  std::array<Vector<nx>, N+1> xopt_;
+  std::array<Vector<nx>, N+1> lmdopt_;
 
   Vector<dim> solution_, solution_update_; 
 
@@ -115,4 +133,4 @@ private:
 
 } // namespace cgmres
 
-#endif // SINGLE_SHOOTING_CGMRES_SOLVER_HPP_
+#endif // MULTIPLE_SHOOTING_CGMRES_SOLVER_HPP_
