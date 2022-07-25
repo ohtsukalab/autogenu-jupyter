@@ -147,6 +147,10 @@ public:
     }
   }
 
+  const decltype(auto) x() const { return nlp_.x(); }
+
+  const decltype(auto) lmd() const { return nlp_.lmd(); }
+
 private:
   NLP nlp_;
   Scalar finite_difference_epsilon_, zeta_; 

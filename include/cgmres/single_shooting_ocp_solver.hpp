@@ -60,9 +60,13 @@ public:
     setInnerSolution();
   }
 
-  const std::array<Vector<nu>, N>& getControlInput() const { return uopt_; }
+  const std::array<Vector<nu>, N>& uopt() const { return uopt_; }
 
-  const std::array<Vector<nuc>, N>& getSolution() const { return ucopt_; }
+  const std::array<Vector<nuc>, N>& ucopt() const { return ucopt_; }
+
+  const std::array<Vector<nx>, N+1>& xopt() const { return newton_gmres_.x(); }
+
+  const std::array<Vector<nx>, N+1>& lmdopt() const { return newton_gmres_.lmd(); }
 
   void solve(const Scalar t, const Vector<nx>& x) {
     if (settings_.verbose_level >= 1) {

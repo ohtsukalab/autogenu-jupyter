@@ -51,9 +51,11 @@ public:
     setInnerSolution();
   }
 
-  const Vector<nu>& getControlInput() const { return uopt_; }
+  const Vector<nu>& uopt() const { return uopt_; }
 
-  const Vector<nuc>& getSolution() const { return ucopt_; }
+  const Vector<nuc>& ucopt() const { return ucopt_; }
+
+  const Vector<nx>& lmdopt() const { return newton_gmres_.lmd(); }
 
   void solve(const Scalar t, const Vector<nx>& x) {
     if (settings_.verbose_level >= 1) {

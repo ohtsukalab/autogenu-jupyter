@@ -65,6 +65,10 @@ public:
 
   const Horizon& horizon() const { return horizon_; }
 
+  const std::array<Vector<nx>, N+1>& x() const { return x_; }
+
+  const std::array<Vector<nx>, N+1>& lmd() const { return lmd_; }
+
 private:
   OCP ocp_;
   Horizon horizon_;

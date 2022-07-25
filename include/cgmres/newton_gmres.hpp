@@ -61,6 +61,10 @@ public:
     EIGEN_CONST_CAST(VectorType3, ax_vec) = (fonc_1_ - fonc_) / finite_difference_epsilon_;
   }
 
+  const decltype(auto) x() const { return nlp_.x(); }
+
+  const decltype(auto) lmd() const { return nlp_.lmd(); }
+
 private:
   NLP nlp_;
   Scalar finite_difference_epsilon_; 

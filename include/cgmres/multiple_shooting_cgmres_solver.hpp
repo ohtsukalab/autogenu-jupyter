@@ -76,7 +76,11 @@ public:
 
   const std::array<Vector<nu>, N>& uopt() const { return uopt_; }
 
+  const std::array<Vector<nuc>, N>& ucopt() const { return ucopt_; }
+
   const std::array<Vector<nx>, N+1>& xopt() const { return xopt_; }
+
+  const std::array<Vector<nx>, N+1>& lmdopt() const { return lmdopt_; }
 
   void update(const Scalar t, const Vector<nx>& x) {
     if (settings_.verbose_level >= 1) {

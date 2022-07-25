@@ -30,16 +30,17 @@ int main() {
   // run MPC
   constexpr int kmax = 10;
   cgmres::SingleShootingOCPSolver<cgmres::CartPoleOCP, N, kmax> solver(ocp, horizon, settings);
-  solver.setSolution(initializer.getSolution());
+  solver.setSolution(initializer.ucopt());
   solver.solve(t, x0);
 
   cgmres::SingleShootingCGMRESSolver<cgmres::CartPoleOCP, N, kmax> ss_cgmres(ocp, horizon, settings);
-  ss_cgmres.setSolution(initializer.getSolution());
+  ss_cgmres.setSolution(initializer.ucopt());
   ss_cgmres.update(t, x0);
 
   cgmres::MultipleShootingCGMRESSolver<cgmres::CartPoleOCP, N, kmax> ms_cgmres(ocp, horizon, settings);
-  ms_cgmres.setSolution(initializer.getSolution());
+  ms_cgmres.setSolution(initializer.ucopt());
   ms_cgmres.setState(x0);
+  ms_cgmres.setCostate(initializer.lmdopt());
   ms_cgmres.update(t, x0);
 
   return 0;

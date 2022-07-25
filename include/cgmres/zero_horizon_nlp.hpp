@@ -37,6 +37,8 @@ public:
 
   const OCP& ocp() const { return ocp_; }
 
+  const Vector<nx>& lmd() const { return lmd_; }
+
 private:
   OCP ocp_;
   Vector<nx> lmd_;
