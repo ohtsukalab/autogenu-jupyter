@@ -2,6 +2,7 @@
 #define ZERO_HORIZON_OCP_SOLVER_HPP_
 
 #include <array>
+#include <stdexcept>
 #include <iostream>
 
 #include "cgmres/types.hpp"
@@ -38,14 +39,22 @@ public:
 
   ~ZeroHorizonOCPSolver() = default;
 
-  void set_u(const Vector<nu>& u) {
+  template <typename VectorType>
+  void set_u(const VectorType& u) {
+    if (u.size() != nu) {
+      throw std::invalid_argument("[ZeroHorizonOCPSolver::set_u] u.size() must be " + std::to_string(nu));
+    }
     uopt_ = u;
     ucopt_.template head<nu>() = u;
     ucopt_.template tail<nc>().setZero();
     setInnerSolution();
   }
 
-  void set_uc(const Vector<nuc>& uc) {
+  template <typename VectorType>
+  void set_uc(const VectorType& uc) {
+    if (uc.size() != nuc) {
+      throw std::invalid_argument("[ZeroHorizonOCPSolver::set_uc] uc.size() must be " + std::to_string(nuc));
+    }
     uopt_ = uc.template head<nu>();
     ucopt_ = uc;
     setInnerSolution();

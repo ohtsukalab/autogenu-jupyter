@@ -2,6 +2,7 @@
 #define SINGLE_SHOOTING_CGMRES_SOLVER_HPP_
 
 #include <array>
+#include <stdexcept>
 #include <iostream>
 
 #include "cgmres/types.hpp"
@@ -40,6 +41,9 @@ public:
   ~SingleShootingCGMRESSolver() = default;
 
   void set_u(const Vector<nu>& u) {
+    if (u.size() != nu) {
+      throw std::invalid_argument("[SingleShootingCGMRESSolver::set_u] u.size() must be " + std::to_string(nu));
+    }
     for (size_t i=0; i<N; ++i) {
       uopt_[i] = u;
     }
@@ -51,6 +55,9 @@ public:
   }
 
   void set_uc(const Vector<nuc>& uc) {
+    if (uc.size() != nuc) {
+      throw std::invalid_argument("[SingleShootingCGMRESSolver::set_uc] uc.size() must be " + std::to_string(nuc));
+    }
     for (size_t i=0; i<N; ++i) {
       uopt_[i] = uc.template head<nu>();
     }

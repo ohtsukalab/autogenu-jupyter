@@ -2,6 +2,7 @@
 #define SINGLE_SHOOTING_OCP_SOLVER_HPP_
 
 #include <array>
+#include <stdexcept>
 #include <iostream>
 
 #include "cgmres/types.hpp"
@@ -39,7 +40,11 @@ public:
 
   ~SingleShootingOCPSolver() = default;
 
-  void set_u(const Vector<nu>& u) {
+  template <typename VectorType>
+  void set_u(const VectorType& u) {
+    if (u.size() != nu) {
+      throw std::invalid_argument("[SingleShootingOCPSolver::set_u] u.size() must be " + std::to_string(nu));
+    }
     for (size_t i=0; i<N; ++i) {
       uopt_[i] = u;
     }
@@ -50,7 +55,11 @@ public:
     setInnerSolution();
   }
 
-  void set_uc(const Vector<nuc>& uc) {
+  template <typename VectorType>
+  void set_uc(const VectorType& uc) {
+    if (uc.size() != nuc) {
+      throw std::invalid_argument("[SingleShootingOCPSolver::set_uc] uc.size() must be " + std::to_string(nuc));
+    }
     for (size_t i=0; i<N; ++i) {
       uopt_[i] = uc.template head<nu>();
     }

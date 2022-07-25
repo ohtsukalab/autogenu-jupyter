@@ -2,6 +2,7 @@
 #define MULTIPLE_SHOOTING_CGMRES_SOLVER_HPP_
 
 #include <array>
+#include <stdexcept>
 #include <iostream>
 
 #include "cgmres/types.hpp"
@@ -42,6 +43,9 @@ public:
   ~MultipleShootingCGMRESSolver() = default;
 
   void set_u(const Vector<nu>& u) {
+    if (u.size() != nu) {
+      throw std::invalid_argument("[MultipleShootingCGMRESSolver::set_u] u.size() must be " + std::to_string(nu));
+    }
     for (size_t i=0; i<N; ++i) {
       uopt_[i] = u;
     }
@@ -53,6 +57,9 @@ public:
   }
 
   void set_uc(const Vector<nuc>& uc) {
+    if (uc.size() != nuc) {
+      throw std::invalid_argument("[MultipleShootingCGMRESSolver::set_uc] uc.size() must be " + std::to_string(nuc));
+    }
     for (size_t i=0; i<N; ++i) {
       uopt_[i] = uc.template head<nu>();
     }
@@ -63,12 +70,18 @@ public:
   }
 
   void set_x(const Vector<nx>& x) {
+    if (x.size() != nx) {
+      throw std::invalid_argument("[MultipleShootingCGMRESSolver::set_x] x.size() must be " + std::to_string(nx));
+    }
     for (size_t i=0; i<=N; ++i) {
       xopt_[i] = x;
     }
   }
 
   void set_lmd(const Vector<nx>& lmd) {
+    if (lmd.size() != nx) {
+      throw std::invalid_argument("[MultipleShootingCGMRESSolver::set_lmd] lmd.size() must be " + std::to_string(nx));
+    }
     for (size_t i=0; i<=N; ++i) {
       lmdopt_[i] = lmd;
     }
