@@ -35,6 +35,8 @@ public:
     ocp_.eval_hu(t, x.data(), solution.data(), lmd_.data(), fonc.data());
   }
 
+  const OCP& ocp() { return ocp_; }
+
 private:
   OCP ocp_;
   Vector<nx> lmd_;

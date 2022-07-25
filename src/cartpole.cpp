@@ -1,6 +1,7 @@
 #include "cgmres/examples/cartpole.hpp"
-#include "cgmres/single_shooting_ocp_solver.hpp"
 #include "cgmres/zero_horizon_ocp_solver.hpp"
+#include "cgmres/single_shooting_ocp_solver.hpp"
+#include "cgmres/single_shooting_cgmres_solver.hpp"
 
 #include <iostream>
 
@@ -30,6 +31,10 @@ int main() {
   cgmres::SingleShootingOCPSolver<cgmres::CartPoleOCP, N, kmax> solver(ocp, horizon, settings);
   solver.setSolution(initializer.getSolution());
   solver.solve(t, x0);
+
+  cgmres::SingleShootingCGMRESSolver<cgmres::CartPoleOCP, N, kmax> mpc(ocp, horizon, settings);
+  mpc.setSolution(initializer.getSolution());
+  mpc.update(t, x0);
 
   return 0;
 }

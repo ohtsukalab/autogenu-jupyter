@@ -58,6 +58,8 @@ public:
     }
   }
 
+  const OCP& ocp() { return ocp_; }
+
 private:
   OCP ocp_;
   Horizon horizon_;
