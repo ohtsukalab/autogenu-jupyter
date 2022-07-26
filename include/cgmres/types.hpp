@@ -1,7 +1,7 @@
 #ifndef TYPES_HPP_
 #define TYPES_HPP_
 
-#include "thirdparty/eigen/Eigen/Core"
+#include "Eigen/Core"
 
 namespace cgmres {
 

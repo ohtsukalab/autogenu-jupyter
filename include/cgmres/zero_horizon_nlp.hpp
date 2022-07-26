@@ -4,7 +4,7 @@
 #include <array>
 
 #include "cgmres/types.hpp"
-#include "horizon.hpp"
+#include "cgmres/horizon.hpp"
 
 namespace cgmres {
 

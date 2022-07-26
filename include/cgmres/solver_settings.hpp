@@ -1,7 +1,7 @@
 #ifndef SOLVER_SETTINGS_HPP_
 #define SOLVER_SETTINGS_HPP_
 
-#include "types.hpp"
+#include "cgmres/types.hpp"
 
 namespace cgmres {
 

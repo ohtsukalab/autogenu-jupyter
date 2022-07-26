@@ -606,6 +606,202 @@ public:
             '}\n'
         )
         f_main.close()
+        f_pybind11 = open('models/'+str(self.__model_name)+'/python/'+str(self.__model_name)+'/ocp.cpp', 'w')
+        f_pybind11.writelines([
+"""
+#include <pybind11/pybind11.h>
+#include <pybind11/stl.h>
+#include <pybind11/eigen.h>
+#include <pybind11/numpy.h>
+
+#include "cgmres/types.hpp"
+#include "cgmres/python/ocp.hpp"
+#include "ocp.hpp"
+
+#include <iostream>
+#include <stdexcept>
+
+namespace cgmres {
+namespace python {
+
+namespace py = pybind11;
+
+""" 
+        ])
+        f_pybind11.write('DEFINE_PYBIND11_MODULE_OCP(OCP_'+str(self.__model_name)+')\n')
+        f_pybind11.writelines([
+"""
+
+} // namespace python
+} // namespace cgmres
+""" 
+        ])
+        f_pybind11.close()
+        f_pybind11 = open('models/'+str(self.__model_name)+'/python/'+str(self.__model_name)+'/zero_horizon_ocp_solver.cpp', 'w')
+        f_pybind11.writelines([
+"""
+#include <pybind11/pybind11.h>
+#include <pybind11/stl.h>
+#include <pybind11/eigen.h>
+#include <pybind11/numpy.h>
+
+#include "cgmres/zero_horizon_ocp_solver.hpp"
+#include "cgmres/python/zero_horizon_ocp_solver.hpp"
+#include "ocp.hpp"
+
+#include <iostream>
+#include <stdexcept>
+
+namespace cgmres {
+namespace python {
+
+namespace py = pybind11;
+
+""" 
+        ])
+        f_pybind11.write('constexpr int kmax_init = '+str(min(self.__kmax, self.__dimc+self.__dimu+self.__dimh))+';\n')
+        f_pybind11.write('DEFINE_PYBIND11_MODULE_ZERO_HORIZON_OCP_SOLVER(OCP_'+str(self.__model_name)+', kmax_init)\n')
+        f_pybind11.writelines([
+"""
+
+} // namespace python
+} // namespace cgmres
+""" 
+        ])
+        f_pybind11.close()
+        f_pybind11 = open('models/'+str(self.__model_name)+'/python/'+str(self.__model_name)+'/single_shooting_cgmres_solver.cpp', 'w')
+        f_pybind11.writelines([
+"""
+#include <pybind11/pybind11.h>
+#include <pybind11/stl.h>
+#include <pybind11/eigen.h>
+#include <pybind11/numpy.h>
+
+#include "cgmres/single_shooting_cgmres_solver.hpp"
+#include "cgmres/python/single_shooting_cgmres_solver.hpp"
+#include "ocp.hpp"
+
+#include <iostream>
+#include <stdexcept>
+
+namespace cgmres {
+namespace python {
+
+namespace py = pybind11;
+
+""" 
+        ])
+        f_pybind11.write('constexpr int N = '+str(self.__N)+';\n')
+        f_pybind11.write('constexpr int kmax = '+str(min(self.__kmax, self.__N*(self.__dimc+self.__dimu+self.__dimh)))+';\n')
+        f_pybind11.write('DEFINE_PYBIND11_MODULE_SINGLE_SHOOTING_CGMRES_SOLVER(OCP_'+str(self.__model_name)+', N, kmax)\n')
+        f_pybind11.writelines([
+"""
+
+} // namespace python
+} // namespace cgmres
+""" 
+        ])
+        f_pybind11.close()
+        f_pybind11 = open('models/'+str(self.__model_name)+'/python/'+str(self.__model_name)+'/multiple_shooting_cgmres_solver.cpp', 'w')
+        f_pybind11.writelines([
+"""
+#include <pybind11/pybind11.h>
+#include <pybind11/stl.h>
+#include <pybind11/eigen.h>
+#include <pybind11/numpy.h>
+
+#include "cgmres/multiple_shooting_cgmres_solver.hpp"
+#include "cgmres/python/multiple_shooting_cgmres_solver.hpp"
+#include "ocp.hpp"
+
+#include <iostream>
+#include <stdexcept>
+
+namespace cgmres {
+namespace python {
+
+namespace py = pybind11;
+
+""" 
+        ])
+        f_pybind11.write('constexpr int N = '+str(self.__N)+';\n')
+        f_pybind11.write('constexpr int kmax = '+str(min(self.__kmax, self.__N*(self.__dimc+self.__dimu+self.__dimh)))+';\n')
+        f_pybind11.write('DEFINE_PYBIND11_MODULE_MULTIPLE_SHOOTING_CGMRES_SOLVER(OCP_'+str(self.__model_name)+', N, kmax)\n')
+        f_pybind11.writelines([
+"""
+
+} // namespace python
+} // namespace cgmres
+""" 
+        ])
+        f_pybind11.close()
+        f_pybind11 = open('models/'+str(self.__model_name)+'/python/'+str(self.__model_name)+'/horizon.cpp', 'w')
+        f_pybind11.writelines([
+"""
+#include <pybind11/pybind11.h>
+#include <pybind11/stl.h>
+#include <pybind11/eigen.h>
+#include <pybind11/numpy.h>
+
+#include "cgmres/types.hpp"
+#include "cgmres/horizon.hpp"
+#include "cgmres/python/horizon.hpp"
+
+#include <iostream>
+#include <stdexcept>
+
+namespace cgmres {
+namespace python {
+
+namespace py = pybind11;
+
+DEFINE_PYBIND11_MODULE_HORIZON()
+
+} // namespace python
+} // namespace cgmres
+""" 
+        ])
+        f_pybind11.close()
+        f_pybind11 = open('models/'+str(self.__model_name)+'/python/'+str(self.__model_name)+'/solver_settings.cpp', 'w')
+        f_pybind11.writelines([
+"""
+#include <pybind11/pybind11.h>
+#include <pybind11/stl.h>
+#include <pybind11/eigen.h>
+#include <pybind11/numpy.h>
+
+#include "cgmres/solver_settings.hpp"
+#include "cgmres/python/solver_settings.hpp"
+
+#include <iostream>
+#include <stdexcept>
+
+
+namespace cgmres {
+namespace python {
+
+namespace py = pybind11;
+
+DEFINE_PYBIND11_MODULE_SOLVER_SETTINGS()
+
+} // namespace python
+} // namespace cgmres
+""" 
+        ])
+        f_pybind11.close()
+        f_pybind11 = open('models/'+str(self.__model_name)+'/python/'+str(self.__model_name)+'/__init__.py', 'w')
+        f_pybind11.writelines([
+"""
+from .ocp import *
+from .zero_horizon_ocp_solver import *
+from .single_shooting_cgmres_solver import *
+from .multiple_shooting_cgmres_solver import *
+from .horizon import *
+from .solver_settings import *
+""" 
+        ])
+        f_pybind11.close()
+
 
     def generate_cmake(self):
         """ Generates CMakeLists.txt in a directory where your .ipynb files 
@@ -624,8 +820,9 @@ cmake_minimum_required(VERSION 3.1)
 set(CMAKE_CXX_STANDARD 17)
 
 option(VECTORIZE "Enable -march=native" OFF)
+option(BUILD_PYTHON_INTERFACE "Build Python interface" OFF)
 
-set(INCLUDE_DIR ${PROJECT_SOURCE_DIR}/../../include)
+set(CGMRES_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/../../include)
 
 add_executable(
     ${PROJECT_NAME}
@@ -634,7 +831,8 @@ add_executable(
 target_include_directories(
     ${PROJECT_NAME}
     PRIVATE
-    ${INCLUDE_DIR}
+    ${CGMRES_INCLUDE_DIR}
+    ${CGMRES_INCLUDE_DIR}/thirdparty/eigen
 )
 if (VECTORIZE)
   target_compile_options(
@@ -643,11 +841,65 @@ if (VECTORIZE)
     -march=native
   )
 endif()
+
+if (BUILD_PYTHON_INTERFACE)
+    add_subdirectory(python/${PROJECT_NAME})
+endif()
 """
             ])
         f_cmake.close()
+        f_cmake_python = open('models/'+self.__model_name+'/python/'+self.__model_name+'/CMakeLists.txt', 'w')
+        f_cmake_python.writelines([
+"""
+macro(pybind11_add_cgmres_module MODULE)
+  pybind11_add_module(
+    ${MODULE} 
+    SHARED 
+    ${MODULE}.cpp
+  )
+  target_include_directories(
+    ${MODULE} 
+    PRIVATE
+    ${CGMRES_INCLUDE_DIR}
+    ${CGMRES_INCLUDE_DIR}/thirdparty/eigen
+    ${PROJECT_SOURCE_DIR}
+  )
+    if (VECTORIZE)
+    target_compile_options(
+        ${MODULE}
+        PRIVATE
+        -march=native
+    )
+    endif()
+endmacro()
 
-    def build(self, generator='Auto', remove_build_dir=False):
+add_subdirectory(${CGMRES_INCLUDE_DIR}/thirdparty/pybind11 ${CMAKE_CURRENT_BINARY_DIR}/thirdparty/pybind11)
+pybind11_add_cgmres_module(ocp)
+pybind11_add_cgmres_module(solver_settings)
+pybind11_add_cgmres_module(zero_horizon_ocp_solver)
+pybind11_add_cgmres_module(horizon)
+pybind11_add_cgmres_module(single_shooting_cgmres_solver)
+pybind11_add_cgmres_module(multiple_shooting_cgmres_solver)
+
+set(CGMRES_PYTHON_VERSION ${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR})
+"""
+            ])
+        f_cmake_python.write(
+            'set(CGMRES_PYTHON_BINDINGS_LIBDIR $ENV{HOME}/python${CGMRES_PYTHON_VERSION}/site-packages/cgmres/'+self.__model_name+')')
+        f_cmake_python.writelines([
+"""
+file(GLOB PYTHON_BINDINGS_${CURRENT_MODULE_DIR} ${CMAKE_CURRENT_BINARY_DIR}/*.cpython*)
+file(GLOB PYTHON_FILES_${CURRENT_MODULE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/*.py)
+install(
+FILES ${PYTHON_FILES_${CURRENT_MODULE_DIR}} ${PYTHON_BINDINGS_${CURRENT_MODULE_DIR}} 
+DESTINATION ${CGMRES_PYTHON_BINDINGS_LIBDIR}/${CURRENT_MODULE_DIR}
+)
+"""
+            ])
+        f_cmake_python.close()
+
+
+    def build(self, generator='Auto', build_python_interface=False, remove_build_dir=False):
         """ Builds execute file to run numerical simulation. 
 
             Args: 
@@ -663,6 +915,9 @@ endif()
                     Need to be set True is you change CMake configuration, e.g., 
                     if you change the generator. The default value is False.
         """
+        build_options = ['-DCMAKE_BUILD_TYPE=Release', '-DVECTORIZE=ON']
+        if build_python_interface:
+            build_options.append('-DBUILD_PYTHON_INTERFACE=ON')
         if platform.system() == 'Windows':
             subprocess.run(
                 ['mkdir', 'build'], 
@@ -673,7 +928,7 @@ endif()
             )
             if generator == 'MSYS':
                 proc = subprocess.Popen(
-                    ['cmake', '..', '-G', 'MSYS Makefiles', '-DCMAKE_BUILD_TYPE=Release', '-DVECTORIZE=ON'], 
+                    ['cmake', '..', '-G', 'MSYS Makefiles', *build_options], 
                     cwd='models/'+self.__model_name+'/build', 
                     stdout=subprocess.PIPE, 
                     stderr=subprocess.STDOUT, 
@@ -684,7 +939,7 @@ endif()
                 print('\n')
             elif generator == 'MinGW':
                 proc = subprocess.Popen(
-                    ['cmake', '..', '-G', 'MinGW Makefiles', '-DCMAKE_BUILD_TYPE=Release', '-DVECTORIZE=ON'], 
+                    ['cmake', '..', '-G', 'MinGW Makefiles', *build_options], 
                     cwd='models/'+self.__model_name+'/build', 
                     stdout=subprocess.PIPE, 
                     stderr=subprocess.STDOUT, 
@@ -703,7 +958,7 @@ endif()
                 )
                 if proc.stderr.readline() == b'':
                     proc = subprocess.Popen(
-                        ['cmake', '..', '-G', 'MSYS Makefiles', '-DCMAKE_BUILD_TYPE=Release', '-DVECTORIZE=ON'], 
+                        ['cmake', '..', '-G', 'MSYS Makefiles', *build_options], 
                         cwd='models/'+self.__model_name+'/build', 
                         stdout=subprocess.PIPE, 
                         stderr=subprocess.STDOUT, 
@@ -711,7 +966,7 @@ endif()
                     )
                 else:
                     proc = subprocess.Popen(
-                        ['cmake', '..', '-G', 'MinGW Makefiles', '-DCMAKE_BUILD_TYPE=Release', '-DVECTORIZE=ON'], 
+                        ['cmake', '..', '-G', 'MinGW Makefiles', *build_options], 
                         cwd='models/'+self.__model_name+'/build', 
                         stdout=subprocess.PIPE, 
                         stderr=subprocess.STDOUT, 
@@ -721,7 +976,7 @@ endif()
                     print(line.rstrip().decode("utf8"))
                 print('\n')
             proc = subprocess.Popen(
-                ['cmake', '--build', '.'], 
+                ['cmake', '--build', '.', '-j4'], 
                 cwd='models/'+self.__model_name+'/build', 
                 stdout=subprocess.PIPE, 
                 stderr=subprocess.STDOUT, 
@@ -738,8 +993,9 @@ endif()
                 stdout=subprocess.PIPE, 
                 stderr=subprocess.PIPE
             )
+            print('build_options:', *build_options)
             proc = subprocess.Popen(
-                ['cmake', '..', '-DCMAKE_BUILD_TYPE=Release', '-DVECTORIZE=ON'], 
+                ['cmake', '..', *build_options], 
                 cwd='models/'+self.__model_name+'/build', 
                 stdout=subprocess.PIPE, 
                 stderr=subprocess.STDOUT
@@ -748,7 +1004,7 @@ endif()
                 print(line.rstrip().decode("utf8"))
             print('\n')
             proc = subprocess.Popen(
-                ['cmake', '--build', '.'], 
+                ['cmake', '--build', '.', '-j4'], 
                 cwd='models/'+self.__model_name+'/build', 
                 stdout = subprocess.PIPE, 
                 stderr = subprocess.STDOUT
@@ -859,6 +1115,13 @@ endif()
                 stderr=subprocess.PIPE, 
                 shell=True
             )
+            subprocess.run(
+                ['mkdir', '-p', 'python/'+self.__model_name], 
+                cwd='models/'+self.__model_name, 
+                stdout=subprocess.PIPE, 
+                stderr=subprocess.PIPE, 
+                shell=True
+            )
         else:
             subprocess.run(
                 ['mkdir', 'models'], 
@@ -868,6 +1131,12 @@ endif()
             subprocess.run(
                 ['mkdir', self.__model_name], 
                 cwd='models',
+                stdout=subprocess.PIPE, 
+                stderr=subprocess.PIPE
+            )
+            subprocess.run(
+                ['mkdir', '-p', 'python/'+self.__model_name], 
+                cwd='models/'+self.__model_name,
                 stdout=subprocess.PIPE, 
                 stderr=subprocess.PIPE
             )

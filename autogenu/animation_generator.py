@@ -100,7 +100,7 @@ class TwoLinkArm(object):
             self.__fig, 
             self.__update_animation, 
             interval=self.__sim_conditions.sampling_period()*1000, 
-            frames=range(self.__total_frames), 
+            frames=self.__total_frames, 
             blit=True
         )
         anime.save(
@@ -228,7 +228,7 @@ class CartPole(object):
             self.__fig, 
             self.__update_animation, 
             interval=self.__sim_conditions.sampling_period()*1000, 
-            frames=range(self.__total_frames), 
+            frames=self.__total_frames, 
             blit=True
         )
         anime.save(
@@ -363,7 +363,7 @@ class Hexacopter(object):
             self.__fig, 
             self.__update_animation, 
             interval=self.__sim_conditions.sampling_period()*1000, 
-            frames=range(self.__total_frames), 
+            frames=self.__total_frames, 
             blit=True
         )
         anime.save(
@@ -547,7 +547,7 @@ class MobileRobot(object):
             self.__fig, 
             self.__update_animation, 
             interval=self.__sim_conditions.sampling_period()*1000, 
-            frames=range(self.__total_frames), 
+            frames=self.__total_frames, 
             blit=True
         )
         anime.save(
