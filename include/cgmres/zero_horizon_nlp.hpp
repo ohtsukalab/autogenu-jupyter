@@ -39,6 +39,8 @@ public:
 
   const Vector<nx>& lmd() const { return lmd_; }
 
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
 private:
   OCP ocp_;
   Vector<nx> lmd_;

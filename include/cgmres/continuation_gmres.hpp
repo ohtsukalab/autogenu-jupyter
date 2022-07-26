@@ -59,7 +59,8 @@ public:
     nlp_.eval(t, x, solution, fonc_);
     nlp_.eval(t1, x_1_, solution, fonc_1_);
     nlp_.eval(t1, x_1_, updated_solution_, fonc_2_);
-    EIGEN_CONST_CAST(VectorType3, b_vec) = - (1.0/finite_difference_epsilon_ - zeta_) * fonc_ 
+
+    EIGEN_CONST_CAST(VectorType3, b_vec) = (1.0/finite_difference_epsilon_ - zeta_) * fonc_ 
                                            - fonc_2_ / finite_difference_epsilon_;
   }
 
@@ -80,6 +81,8 @@ public:
   const decltype(auto) x() const { return nlp_.x(); }
 
   const decltype(auto) lmd() const { return nlp_.lmd(); }
+
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
 private:
   NLP nlp_;

@@ -28,7 +28,7 @@ public:
 
   ZeroHorizonOCPSolver(const OCP& ocp, const SolverSettings& settings) 
     : nlp_(ocp),
-      newton_gmres_(nlp_, settings.finite_diference_epsilon),
+      newton_gmres_(nlp_, settings.finite_difference_epsilon),
       gmres_(),
       settings_(settings),
       uopt_(Vector<nu>::Zero()),
@@ -66,6 +66,8 @@ public:
 
   const Vector<nx>& lmdopt() const { return newton_gmres_.lmd(); }
 
+  Scalar optError() const { return newton_gmres_.optError(); }
+
   void solve(const Scalar t, const Vector<nx>& x) {
     if (settings_.verbose_level >= 1) {
       std::cout << "\n======================= solve zero horizon OCP =======================" << std::endl;
@@ -98,6 +100,8 @@ public:
     }
     retriveSolution();
   }
+
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
 private:
   ZeroHorizonNLP_ nlp_;

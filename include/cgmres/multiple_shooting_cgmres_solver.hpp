@@ -29,7 +29,7 @@ public:
   MultipleShootingCGMRESSolver(const OCP& ocp, const Horizon& horizon, 
                                const SolverSettings& settings) 
     : nlp_(ocp, horizon),
-      continuation_gmres_(nlp_, settings.finite_diference_epsilon, settings.zeta),
+      continuation_gmres_(nlp_, settings.finite_difference_epsilon, settings.zeta),
       gmres_(),
       settings_(settings),
       solution_(Vector<dim>::Zero()),
@@ -95,6 +95,8 @@ public:
 
   const std::array<Vector<nx>, N+1>& lmdopt() const { return lmdopt_; }
 
+  Scalar optError() const { return continuation_gmres_.optError(); }
+
   void update(const Scalar t, const Vector<nx>& x) {
     if (settings_.verbose_level >= 1) {
       std::cout << "\n======================= update solution with C/GMRES =======================" << std::endl;
@@ -120,14 +122,16 @@ public:
     retriveSolution();
   }
 
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
 private:
   MultipleShootingNLP_ nlp_;
   ContinuationGMRES_ continuation_gmres_;
   MatrixFreeGMRES_ gmres_;
   SolverSettings settings_;
 
-  std::array<Vector<nu>, N+1> uopt_;
-  std::array<Vector<nuc>, N+1> ucopt_;
+  std::array<Vector<nu>, N> uopt_;
+  std::array<Vector<nuc>, N> ucopt_;
   std::array<Vector<nx>, N+1> xopt_;
   std::array<Vector<nx>, N+1> lmdopt_;
 

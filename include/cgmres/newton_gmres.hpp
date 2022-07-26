@@ -65,6 +65,8 @@ public:
 
   const decltype(auto) lmd() const { return nlp_.lmd(); }
 
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
 private:
   NLP nlp_;
   Scalar finite_difference_epsilon_; 

@@ -102,6 +102,8 @@ public:
     return k;
   }
 
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
 private:
   Matrix<kmax+1, kmax+1> hessenberg_mat_;
   Matrix<dim, kmax+1> basis_mat_;

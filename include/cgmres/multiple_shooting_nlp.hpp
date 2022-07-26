@@ -109,6 +109,8 @@ public:
 
   const Horizon& horizon() const { return horizon_; }
 
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
 private:
   OCP ocp_;
   Horizon horizon_;

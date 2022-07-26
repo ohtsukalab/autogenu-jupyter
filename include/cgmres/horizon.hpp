@@ -3,6 +3,7 @@
 
 #include <cmath>
 #include <stdexcept>
+#include <cassert>
 
 #include "cgmres/types.hpp"
 
@@ -16,11 +17,15 @@ public:
     if (Tf <= 0.0) {
       throw std::invalid_argument("[Horizon]: 'Tf' must be positive!");
     }
+    if (alpha <= 0.0) {
+      throw std::invalid_argument("[Horizon]: 'alpha' must be positive!");
+    }
   }
 
   ~Horizon() = default;
 
   inline Scalar T(const Scalar t) const {
+    assert(t >= t0);
     return Tf_ * (1.0-std::exp(-alpha_*(t-t0_)));
   }
 

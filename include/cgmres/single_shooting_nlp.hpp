@@ -69,6 +69,8 @@ public:
 
   const std::array<Vector<nx>, N+1>& lmd() const { return lmd_; }
 
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
 private:
   OCP ocp_;
   Horizon horizon_;
