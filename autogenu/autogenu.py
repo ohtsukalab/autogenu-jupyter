@@ -1115,7 +1115,7 @@ install(
                 print(line.rstrip().decode("utf8"))
             print('\n')
 
-    def build_python_interface(self, generator='Auto', install=False):
+    def build_python_interface(self, generator='Auto'):
         build_options = ['-DCMAKE_BUILD_TYPE=Release', '-DVECTORIZE=ON', 
                          '-DBUILD_MAIN=OFF', '-DBUILD_PYTHON_INTERFACE=ON']
         if platform.system() == 'Windows':
@@ -1176,24 +1176,15 @@ install(
                     print(line.rstrip().decode("utf8"))
                 print('\n')
             proc = subprocess.Popen(
-                ['cmake', '--build', '.'], 
+                ['cmake', '--build', '.', '-j8'], 
                 cwd='models/'+self.__model_name+'/build', 
                 stdout=subprocess.PIPE, 
                 stderr=subprocess.STDOUT, 
                 shell=True
             )
-            if install:
-                proc = subprocess.Popen(
-                    ['cmake', '--install', '.'], 
-                    cwd='models/'+self.__model_name+'/build', 
-                    stdout=subprocess.PIPE, 
-                    stderr=subprocess.STDOUT, 
-                    shell=True
-                )
             for line in iter(proc.stdout.readline,b''):
                 print(line.rstrip().decode("utf8"))
             print('\n')
-            
         else:
             subprocess.run(
                 ['mkdir', 'build'], 
@@ -1212,21 +1203,31 @@ install(
                 print(line.rstrip().decode("utf8"))
             print('\n')
             proc = subprocess.Popen(
-                ['cmake', '--build', '.'], 
+                ['cmake', '--build', '.', '-j8'], 
                 cwd='models/'+self.__model_name+'/build', 
                 stdout = subprocess.PIPE, 
                 stderr = subprocess.STDOUT
             )
-            if install:
-                proc = subprocess.Popen(
-                    ['cmake', '--install', '.'], 
-                    cwd='models/'+self.__model_name+'/build', 
-                    stdout = subprocess.PIPE, 
-                    stderr = subprocess.STDOUT
-                )
             for line in iter(proc.stdout.readline, b''):
                 print(line.rstrip().decode("utf8"))
             print('\n')
+
+    def install_python_interface(self, generator='Auto'):
+        proc = subprocess.Popen(
+            ['cmake', '..'], 
+            cwd='models/'+self.__model_name+'/build', 
+            stdout=subprocess.PIPE, 
+            stderr=subprocess.STDOUT
+        )
+        proc = subprocess.Popen(
+            ['cmake', '--install', '.'], 
+            cwd='models/'+self.__model_name+'/build', 
+            stdout = subprocess.PIPE, 
+            stderr = subprocess.STDOUT
+        )
+        for line in iter(proc.stdout.readline, b''):
+            print(line.rstrip().decode("utf8"))
+        print('\n')
 
     def run_simulation(self):
         """ Run numerical simulation. Call after build() succeeded.
