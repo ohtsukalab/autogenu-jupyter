@@ -79,11 +79,11 @@ public:
 
     nlp_.eval_fonc_f(t, x0, solution, x, fonc_f_);
     nlp_.eval_fonc_hx(t, x0, solution, x, lmd, fonc_hx_);
-    for (size_t i=0; i<N; ++i) {
-      fonc_f_1_[i] = (1 - finite_difference_epsilon_*zeta_) * fonc_f_[i];
+    for (size_t i=0; i<=N; ++i) {
+      fonc_f_1_[i] = (1.0 - finite_difference_epsilon_*zeta_) * fonc_f_[i];
     }
-    for (size_t i=0; i<N; ++i) {
-      fonc_hx_1_[i] = (1 - finite_difference_epsilon_*zeta_) * fonc_hx_[i];
+    for (size_t i=0; i<=N; ++i) {
+      fonc_hx_1_[i] = (1.0 - finite_difference_epsilon_*zeta_) * fonc_hx_[i];
     }
     nlp_.retrive_x(t1, x0_1_, solution, x_1_, fonc_f_1_);
     nlp_.retrive_lmd(t1, x0_1_, solution, x_1_, lmd_1_, fonc_hx_1_);
@@ -94,9 +94,9 @@ public:
 
     nlp_.retrive_x(t1, x0_1_, updated_solution_, x_1_, fonc_f_1_);
     nlp_.retrive_lmd(t1, x0_1_, updated_solution_, x_1_, lmd_1_, fonc_hx_1_);
-    nlp_.eval_fonc_hu(t1, x0_1_, solution, x_1_, lmd_1_, fonc_hu_2_);
-    EIGEN_CONST_CAST(VectorType3, b_vec) = - (1.0/finite_difference_epsilon_ - zeta_) * fonc_hu_ 
-                                           - fonc_hu_3_ / finite_difference_epsilon_;
+    nlp_.eval_fonc_hu(t1, x0_1_, updated_solution_, x_1_, lmd_1_, fonc_hu_2_);
+    EIGEN_CONST_CAST(VectorType3, b_vec) = (1.0/finite_difference_epsilon_ - zeta_) * fonc_hu_ 
+                                           - fonc_hu_3_ / finite_difference_epsilon_
                                            - (fonc_hu_2_ - fonc_hu_1_) / finite_difference_epsilon_;
   }
 
@@ -116,7 +116,7 @@ public:
 
     nlp_.retrive_x(t1, x0_1_, updated_solution_, x_1_, fonc_f_1_);
     nlp_.retrive_lmd(t1, x0_1_, updated_solution_, x_1_, lmd_1_, fonc_hx_1_);
-    nlp_.eval_fonc_hu(t1, x0_1_, solution, x_1_, lmd_1_, fonc_hu_2_);
+    nlp_.eval_fonc_hu(t1, x0_1_, updated_solution_, x_1_, lmd_1_, fonc_hu_2_);
     EIGEN_CONST_CAST(VectorType3, ax_vec) = (fonc_hu_2_ - fonc_hu_1_) / finite_difference_epsilon_;
   }
 
@@ -138,11 +138,11 @@ public:
     nlp_.retrive_x(t1, x0_1_, updated_solution_, x_1_, fonc_f_1_);
     nlp_.retrive_lmd(t1, x0_1_, updated_solution_, x_1_, lmd_1_, fonc_hx_1_);  
     for (size_t i=0; i<N+1; ++i) {
-      fonc_f_[i] = fonc_f_1_[i] - x[i];
+      fonc_f_[i] = x_1_[i] - x[i];
       x[i].noalias() += (dt/finite_difference_epsilon_) * fonc_f_[i];
     }
     for (size_t i=0; i<N+1; ++i) {
-      fonc_hx_[i] = fonc_hx_1_[i] - lmd[i];
+      fonc_hx_[i] = lmd_1_[i] - lmd[i];
       lmd[i].noalias() += (dt/finite_difference_epsilon_) * fonc_hx_[i];
     }
   }

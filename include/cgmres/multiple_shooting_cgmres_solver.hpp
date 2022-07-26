@@ -73,7 +73,7 @@ public:
     if (x.size() != nx) {
       throw std::invalid_argument("[MultipleShootingCGMRESSolver::set_x] x.size() must be " + std::to_string(nx));
     }
-    for (size_t i=0; i<=N; ++i) {
+    for (size_t i=1; i<=N; ++i) {
       xopt_[i] = x;
     }
   }
@@ -82,7 +82,7 @@ public:
     if (lmd.size() != nx) {
       throw std::invalid_argument("[MultipleShootingCGMRESSolver::set_lmd] lmd.size() must be " + std::to_string(nx));
     }
-    for (size_t i=0; i<=N; ++i) {
+    for (size_t i=1; i<=N; ++i) {
       lmdopt_[i] = lmd;
     }
   }
@@ -116,8 +116,8 @@ public:
       std::cout << "number of GMRES iter: " << gmres_iter << " (kmax: " << kmax << ")" << std::endl;
     }
 
-    solution_.noalias() += settings_.dt * solution_update_;
     continuation_gmres_.expansion(t, x, solution_, xopt_, lmdopt_, solution_update_, settings_.dt);
+    solution_.noalias() += settings_.dt * solution_update_;
 
     retriveSolution();
   }

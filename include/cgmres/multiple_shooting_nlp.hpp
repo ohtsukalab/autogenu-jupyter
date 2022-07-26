@@ -35,11 +35,11 @@ public:
     const Scalar dt = T / N;
     assert(T >= 0);
     // Compute the erros in the first order necessary conditions (FONC)
-    ocp_.eval_hu(t, x0.data(), solution.template head<nuc>().data(), lmd[0].data(), 
+    ocp_.eval_hu(t, x0.data(), solution.template head<nuc>().data(), lmd[1].data(), 
                  fonc_hu.template head<nuc>().data());
     for (size_t i=1; i<N; ++i) {
-      ocp_.eval_hu(t+i*dt, x[i-1].data(), solution.template segment<nuc>(nuc*i).data(),
-                   lmd[i].data(), fonc_hu.template segment<nuc>(nuc*i).data());
+      ocp_.eval_hu(t+i*dt, x[i].data(), solution.template segment<nuc>(nuc*i).data(),
+                   lmd[i+1].data(), fonc_hu.template segment<nuc>(nuc*i).data());
     }
   }
 
@@ -51,10 +51,10 @@ public:
     assert(T >= 0);
     // Compute optimality error for state.
     ocp_.eval_f(t, x0.data(), solution.template head<nuc>().data(), dx_.data());
-    fonc_f[0] = x[0] - x0 - dt * dx_;
+    fonc_f[0] = x[1] - x0 - dt * dx_;
     for (size_t i=1; i<N; ++i) {
-      ocp_.eval_f(t+i*dt, x[i-1].data(), solution.template segment<nuc>(nuc*i).data(), dx_.data());
-      fonc_f[i] = x[i] - x[i-1] - dt * dx_;
+      ocp_.eval_f(t+i*dt, x[i].data(), solution.template segment<nuc>(nuc*i).data(), dx_.data());
+      fonc_f[i] = x[i+1] - x[i] - dt * dx_;
     }
   }
 
@@ -66,10 +66,10 @@ public:
     assert(T >= 0);
     // Compute optimality error for state.
     ocp_.eval_f(t, x0.data(), solution.template head<nuc>().data(), dx_.data());
-    x[0] = x0 + dt * dx_  + fonc_f[0];
+    x[1] = x0 + dt * dx_  + fonc_f[0];
     for (size_t i=1; i<N; ++i) {
-      ocp_.eval_f(t+i*dt, x[i-1].data(), solution.template segment<nuc>(nuc*i).data(), dx_.data());
-      x[i] = x[i-1] + dt * dx_ + fonc_f[i];
+      ocp_.eval_f(t+i*dt, x[i].data(), solution.template segment<nuc>(nuc*i).data(), dx_.data());
+      x[i+1] = x[i] + dt * dx_ + fonc_f[i];
     }
   }
 
@@ -80,12 +80,12 @@ public:
     const Scalar dt = T / N;
     assert(T >= 0);
     // Compute optimality error for lambda.
-    ocp_.eval_phix(t+T, x[N-1].data(), dx_.data());
-    fonc_hx[N-1] = lmd[N-1] - dx_;
+    ocp_.eval_phix(t+T, x[N].data(), dx_.data());
+    fonc_hx[N] = lmd[N] - dx_;
     for (size_t i=N-1; i>=1; --i) {
-      ocp_.eval_hx(t+i*dt, x[i-1].data(), solution.template segment<nuc>(nuc*i).data(), 
-                   lmd[i].data(), dx_.data());
-      fonc_hx[i-1] = lmd[i-1] - lmd[i] - dt * dx_;
+      ocp_.eval_hx(t+i*dt, x[i].data(), solution.template segment<nuc>(nuc*i).data(), 
+                   lmd[i+1].data(), dx_.data());
+      fonc_hx[i] = lmd[i] - lmd[i+1] - dt * dx_;
     }
   }
 
@@ -96,12 +96,12 @@ public:
     const Scalar dt = T / N;
     assert(T >= 0);
     // Compute optimality error for state.
-    ocp_.eval_phix(t+T, x[N-1].data(), dx_.data());
-    lmd[N-1] = dx_ + fonc_hx[N-1];
+    ocp_.eval_phix(t+T, x[N].data(), dx_.data());
+    lmd[N] = dx_ + fonc_hx[N];
     for (size_t i=N-1; i>=1; --i) {
-      ocp_.eval_hx(t+i*dt, x[i-1].data(), solution.template segment<nuc>(nuc*i).data(), 
-                   lmd[i].data(), dx_.data());
-      lmd[i-1] = lmd[i] + dt * dx_ + fonc_hx[i-1];
+      ocp_.eval_hx(t+i*dt, x[i].data(), solution.template segment<nuc>(nuc*i).data(), 
+                   lmd[i+1].data(), dx_.data());
+      lmd[i] = lmd[i+1] + dt * dx_ + fonc_hx[i];
     }
   }
 
