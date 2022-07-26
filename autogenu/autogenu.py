@@ -1078,7 +1078,7 @@ install(
                     print(line.rstrip().decode("utf8"))
                 print('\n')
             proc = subprocess.Popen(
-                ['cmake', '--build', '.', '-j4'], 
+                ['cmake', '--build', '.'], 
                 cwd='models/'+self.__model_name+'/build', 
                 stdout=subprocess.PIPE, 
                 stderr=subprocess.STDOUT, 
@@ -1106,7 +1106,7 @@ install(
                 print(line.rstrip().decode("utf8"))
             print('\n')
             proc = subprocess.Popen(
-                ['cmake', '--build', '.', '-j4'], 
+                ['cmake', '--build', '.'], 
                 cwd='models/'+self.__model_name+'/build', 
                 stdout = subprocess.PIPE, 
                 stderr = subprocess.STDOUT
@@ -1176,7 +1176,7 @@ install(
                     print(line.rstrip().decode("utf8"))
                 print('\n')
             proc = subprocess.Popen(
-                ['cmake', '--build', '.', '-j4'], 
+                ['cmake', '--build', '.'], 
                 cwd='models/'+self.__model_name+'/build', 
                 stdout=subprocess.PIPE, 
                 stderr=subprocess.STDOUT, 
@@ -1212,7 +1212,7 @@ install(
                 print(line.rstrip().decode("utf8"))
             print('\n')
             proc = subprocess.Popen(
-                ['cmake', '--build', '.', '-j4'], 
+                ['cmake', '--build', '.'], 
                 cwd='models/'+self.__model_name+'/build', 
                 stdout = subprocess.PIPE, 
                 stderr = subprocess.STDOUT
