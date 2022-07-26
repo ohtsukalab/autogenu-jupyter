@@ -81,6 +81,11 @@ public:
 
   Scalar optError() const { return newton_gmres_.optError(); }
 
+  Scalar optError(const Scalar t, const Vector<nx>& x) {
+    newton_gmres_.eval_fonc(t, x, solution_);
+    return optError();
+  }
+
   void solve(const Scalar t, const Vector<nx>& x) {
     if (settings_.verbose_level >= 1) {
       std::cout << "\n======================= solve single-shooting OCP =======================" << std::endl;

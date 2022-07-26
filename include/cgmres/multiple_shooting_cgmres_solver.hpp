@@ -99,6 +99,11 @@ public:
 
   Scalar optError() const { return continuation_gmres_.optError(); }
 
+  Scalar optError(const Scalar t, const Vector<nx>& x) {
+    continuation_gmres_.eval_fonc(t, x, solution_, xopt_, lmdopt_);
+    return optError();
+  }
+
   void update(const Scalar t, const Vector<nx>& x) {
     if (settings_.verbose_level >= 1) {
       std::cout << "\n======================= update solution with C/GMRES =======================" << std::endl;

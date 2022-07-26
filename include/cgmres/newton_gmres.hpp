@@ -36,6 +36,10 @@ public:
     return fonc_.template lpNorm<2>();
   }
 
+  void eval_fonc(const Scalar t, const Vector<nx>& x, const Vector<dim>& solution) {
+    nlp_.eval(t, x, solution, fonc_);
+  }
+
   template <typename VectorType1, typename VectorType2, typename VectorType3>
   void eval_b(const Scalar t, const Vector<nx>& x, 
               const MatrixBase<VectorType1>& solution, 

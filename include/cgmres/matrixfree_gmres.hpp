@@ -112,7 +112,7 @@ private:
 
   template <typename VectorType>
   inline void givensRotation(const MatrixBase<VectorType>& column_vec, 
-                             const int i_column) {
+                             const int i_column) const {
     const Scalar tmp1 = givens_c_vec_.coeff(i_column) * column_vec.coeff(i_column) 
                         - givens_s_vec_.coeff(i_column) * column_vec.coeff(i_column+1);
     const Scalar tmp2 = givens_s_vec_.coeff(i_column) * column_vec.coeff(i_column) 

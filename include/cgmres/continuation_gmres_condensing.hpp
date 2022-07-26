@@ -60,6 +60,13 @@ public:
     return std::sqrt(squared_error);
   }
 
+  void eval_fonc(const Scalar t, const Vector<nx>& x0, const Vector<dim>& solution,
+                 const std::array<Vector<nx>, N+1>& x, const std::array<Vector<nx>, N+1>& lmd) {
+    nlp_.eval(t, x0, solution, fonc_hu_);
+    nlp_.eval_fonc_f(t, x0, solution, x, fonc_f_);
+    nlp_.eval_fonc_hx(t, x0, solution, x, lmd, fonc_hx_);
+  }
+
   template <typename VectorType1, typename VectorType2, typename VectorType3>
   void eval_b(const Scalar t, const Vector<nx>& x0, 
               const MatrixBase<VectorType1>& solution, 
@@ -98,8 +105,7 @@ public:
     nlp_.retrive_lmd(t1, x0_1_, updated_solution_, x_1_, lmd_1_, fonc_hx_1_);
     nlp_.eval_fonc_hu(t1, x0_1_, updated_solution_, x_1_, lmd_1_, fonc_hu_2_);
     CGMRES_EIGEN_CONST_CAST(VectorType3, b_vec) = (1.0/finite_difference_epsilon_ - zeta_) * fonc_hu_ 
-                                           - fonc_hu_3_ / finite_difference_epsilon_
-                                           - (fonc_hu_2_ - fonc_hu_1_) / finite_difference_epsilon_;
+                                                  - (fonc_hu_3_ + fonc_hu_2_ - fonc_hu_1_) / finite_difference_epsilon_;
   }
 
   template <typename VectorType1, typename VectorType2, typename VectorType3>

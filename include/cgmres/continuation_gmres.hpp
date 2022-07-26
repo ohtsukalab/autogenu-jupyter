@@ -44,6 +44,10 @@ public:
     return fonc_.template lpNorm<2>();
   }
 
+  void eval_fonc(const Scalar t, const Vector<nx>& x, const Vector<dim>& solution) {
+    nlp_.eval(t, x, solution, fonc_);
+  }
+
   template <typename VectorType1, typename VectorType2, typename VectorType3>
   void eval_b(const Scalar t, const Vector<nx>& x, 
               const MatrixBase<VectorType1>& solution, 
@@ -62,7 +66,7 @@ public:
     nlp_.eval(t1, x_1_, solution, fonc_1_);
     nlp_.eval(t1, x_1_, updated_solution_, fonc_2_);
 
-    CGMRES_EIGEN_CONST_CAST(VectorType3, b_vec) = (1.0/finite_difference_epsilon_ - zeta_) * fonc_ 
+    CGMRES_EIGEN_CONST_CAST(VectorType3, b_vec) = (1/finite_difference_epsilon_ - zeta_) * fonc_ 
                                                     - fonc_2_ / finite_difference_epsilon_;
   }
 
