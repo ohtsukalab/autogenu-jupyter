@@ -7,23 +7,30 @@
 This project provides the continuation/GMRES method (C/GMRES method) based solvers for nonlinear model predictive control (NMPC) and an automatic code generator for NMPC, called AutoGenU.
 
 The following C/GMRES based solvers are provided: 
-- `ContinuationGMRES` : The original C/GMRES method (single shooting).
-- `MultipleShootingCGMRES` : The multiple shooting based C/GMRES method with condensing of the state and the Lagragne multipliers with respect to the state equation.
-- `MSCGMRESWithInputSaturation` : The multiple shooting based C/GMRES method with condensing of the state, the Lagragne multipliers with respect to the state equation, and variables with respect to the constraints on the saturation function on the control input.
-
+- `SingleShootingCGMRESSolver` : The original C/GMRES method (single shooting).
+- `MultipleShootingCGMRESSolver` : The multiple shooting based C/GMRES method with condensing of the state and the Lagragne multipliers with respect to the state equation.
 
 ## Requirement
-- C++11 (MinGW or MSYS and PATH to either are required for Windows users)
+- C++17 (MinGW or MSYS and PATH to either are required for Windows users)
 - CMake
-- Python 3.6 or later, Jupyter Lab or Jupyter Notebook, SymPy (to generate `nmpc_model.hpp`, `nmpc_model.cpp`, `main.cpp`, and `CMakeLists.txt` by `AutoGenU.ipynb`)
-- Python 3.6 or later, NumPy, Matplotlib, seaborn (to plot simulation data on `AutoGenU.ipynb`)
+- Python 3.8 or later, Jupyter Lab or Jupyter Notebook, SymPy (to generate `nmpc_model.hpp`, `nmpc_model.cpp`, `main.cpp`, and `CMakeLists.txt` by `AutoGenU.ipynb`)
+- Python 3.8 or later, NumPy, Matplotlib, seaborn (to plot simulation data on `AutoGenU.ipynb`)
 - ffmpeg (to generate animations in `pendubot.ipynb`, `cartpole.ipynb`, `hexacopter.ipynb`, and `mobilerobot.ipynb`)
 
 ## Usage
+### Submodules 
+Please confirm that you clone this repository as 
+```
+git clone https://github.com/mayataka/autogenu-jupyter --recursive
+```
+Otherwise, please do the following command:
+```
+git submodule update --init --recursive
+```
+
 ### AutoGenU
 `AutoGenU.ipynb` generates following source files under your setting state equation, constraints, cost function, and parameters: 
-- `nmpc_model.hpp`  
-- `nmpc_model.cpp`  
+- `ocp.hpp`  
 - `main.cpp`  
 - `CMakeLists.txt`
 
@@ -32,9 +39,7 @@ You can also build source files for numerical simulation, execute numerical simu
 
 ### C/GMRES based solvers of NMPC
 The C/GMRES based solvers in `src/solver` directory can be used independently of `AutoGenU.ipynb`. You are then required the following files:
-- `nmpc_model.hpp`: write parameters in your model  
-- `nmpc_model.cpp`: write equations of your model  
-- `main.cpp`: write parameters of solvers  
+- `ocp.hpp`: write the optimal control problem (OCP) in your model  
 
 In addition to these files, you have to write `CMakeLists.txt` to build source files.
 
@@ -43,22 +48,22 @@ In addition to these files, you have to write `CMakeLists.txt` to build source f
 Demos are presented in `pendubot.ipynb`, `cartpole.ipynb`, `hexacopter.ipynb`, and `mobilerobot.ipynb`. You can obtain the following simulation results jusy by runnig these `.ipynb` files. The details of the each models and formulations are described in each `.ipynb` files.
 
 ### Pendubot  
-Inverting a pendubot using `MSCGMRESWithInputSaturation` solver.
+Inverting a pendubot using `MultipleShootingCGMRESSolver` solver.
 ![pendubot_gif](https://raw.githubusercontent.com/wiki/mayataka/CGMRES/images/pendubot.gif)
 ![pendubot_png](https://raw.github.com/wiki/mayataka/CGMRES/images/pendubot.png)
 
 ### Cartpole
-Inverting a cartpole using `ContinuationGMRES` solver.
+Inverting a cartpole using `SingleShootingCGMRESSolver` solver.
 ![cartpole_gif](https://raw.githubusercontent.com/wiki/mayataka/CGMRES/images/cartpole.gif)
 ![cartpole_png](https://raw.github.com/wiki/mayataka/CGMRES/images/cartpole.png)
 
 ### Hexacopter 
-Trajectory tracking of a hexacopter using `MultipleShootingCGMRES` solver.
+Trajectory tracking of a hexacopter using `MultipleShootingCGMRESSolver` .
 ![hexacopter_gif](https://raw.githubusercontent.com/wiki/mayataka/CGMRES/images/hexacopter.gif)
 ![hexacopter_png](https://raw.github.com/wiki/mayataka/CGMRES/images/hexacopter.png)
 
 ### Mobile robot
-Obstacle avoidance of a mobile robot using `MultipleShootingCGMRES` solver with the semi-smooth Fischer-Burmeister method for inequality constraints.
+Obstacle avoidance of a mobile robot using `MultipleShootingCGMRESSolver` solver with the semi-smooth Fischer-Burmeister method for inequality constraints.
 ![mobilerobot_gif](https://raw.githubusercontent.com/wiki/mayataka/CGMRES/images/mobilerobot.gif)
 ![mobilerobot_png](https://raw.github.com/wiki/mayataka/CGMRES/images/mobilerobot.png)
 
