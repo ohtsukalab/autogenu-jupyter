@@ -587,7 +587,6 @@ public:
 #include <pybind11/numpy.h>
 
 #include "cgmres/types.hpp"
-#include "cgmres/python/ocp.hpp"
 #include "ocp.hpp"
 
 #include <iostream>
