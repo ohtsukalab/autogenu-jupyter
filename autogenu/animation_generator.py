@@ -27,8 +27,8 @@ class TwoLinkArm(object):
         # Loads the simulation data.
         self.__model_dir = 'models/' + model_name + '/simulation_result' 
         self.__file_header = self.__model_dir + '/' + model_name
-        self.__state_data = np.genfromtxt(
-            self.__file_header+'_state'+'.dat'
+        self.__x_data = np.genfromtxt(
+            self.__file_header+'_x'+'.log'
         )
         self.__sim_conditions = simcon.SimulationConditions(
             self.__file_header
@@ -36,13 +36,13 @@ class TwoLinkArm(object):
         self.__time_sequence = np.linspace(
             0, 
             self.__sim_conditions.simulation_time(), 
-            self.__state_data.shape[0]
+            self.__x_data.shape[0]
         )
         # Replaces NaN with 0.
-        self.__state_data[np.isnan(self.__state_data)] = 0
+        self.__x_data[np.isnan(self.__x_data)] = 0
         # Checks the dimension of the state.
-        self.__dim_state = self.__state_data.shape[1]
-        if self.__dim_state != 4:
+        self.__dim_x = self.__x_data.shape[1]
+        if self.__dim_x != 4:
             print(
                 'Dimension of the state is not 4!\n'
                 'This may not be data for simulation of a 2link arm\n'
@@ -58,7 +58,7 @@ class TwoLinkArm(object):
         # Sets frames for drawing the animation.
         self.__skip_frames = 1
         self.__total_frames = (int)(
-            self.__state_data.shape[0]/self.__skip_frames
+            self.__x_data.shape[0]/self.__skip_frames
         )
 
     def set_skip_frames(self, skip_frames):
@@ -69,7 +69,7 @@ class TwoLinkArm(object):
         """
         self.__skip_frames = skip_frames
         self.__total_frames = (int)(
-            self.__state_data.shape[0]/skip_frames
+            self.__x_data.shape[0]/skip_frames
         )
 
     def generate_animation(self):
@@ -100,7 +100,7 @@ class TwoLinkArm(object):
             self.__fig, 
             self.__update_animation, 
             interval=self.__sim_conditions.sampling_period()*1000, 
-            frames=self.__total_frames, 
+            frames=range(self.__total_frames), 
             blit=True
         )
         anime.save(
@@ -118,7 +118,7 @@ class TwoLinkArm(object):
 
     def __update_animation(self, i):
         frame = self.__skip_frames * i
-        state = self.__state_data[frame, :]
+        state = self.__x_data[frame, :]
         self.__x1 = self.__length * np.sin(state[0])
         self.__y1 = - self.__length * np.cos(state[0])
         self.__x2 = self.__x1 + self.__length * np.sin(state[0]+state[1])
@@ -147,8 +147,8 @@ class CartPole(object):
         # Loads the simulation data.
         self.__model_dir = 'models/' + model_name + '/simulation_result' 
         self.__file_header = self.__model_dir + '/' + model_name
-        self.__state_data = np.genfromtxt(
-            self.__file_header+'_state'+'.dat'
+        self.__x_data = np.genfromtxt(
+            self.__file_header+'_x'+'.log'
         )
         self.__sim_conditions = simcon.SimulationConditions(
             self.__file_header
@@ -156,13 +156,13 @@ class CartPole(object):
         self.__time_sequence = np.linspace(
             0, 
             self.__sim_conditions.simulation_time(), 
-            self.__state_data.shape[0]
+            self.__x_data.shape[0]
         )
         # Replaces NaN with 0.
-        self.__state_data[np.isnan(self.__state_data)] = 0
+        self.__x_data[np.isnan(self.__x_data)] = 0
         # Checks the dimension of the state.
-        self.__dim_state = self.__state_data.shape[1]
-        if self.__dim_state != 4:
+        self.__dim_x = self.__x_data.shape[1]
+        if self.__dim_x != 4:
             print(
                 'Dimension of the state is not 4!\n'
                 'This may not be data for simulation of a cartpole\n'
@@ -170,8 +170,8 @@ class CartPole(object):
             sys.exit() 
         # Sets the drawing range.
         xabsmax = max(
-            abs(np.amin(self.__state_data[:, 0])), 
-            abs(np.amax(self.__state_data[:, 0]))
+            abs(np.amin(self.__x_data[:, 0])), 
+            abs(np.amax(self.__x_data[:, 0]))
         )
         self.__x_min = - xabsmax - 2.5 
         self.__x_max = xabsmax + 2.5
@@ -183,7 +183,7 @@ class CartPole(object):
         # Sets frames for drawing the animation.
         self.__skip_frames = 1
         self.__total_frames = (int)(
-            self.__state_data.shape[0]/self.__skip_frames
+            self.__x_data.shape[0]/self.__skip_frames
         )
 
     def set_skip_frames(self, skip_frames):
@@ -194,7 +194,7 @@ class CartPole(object):
         """
         self.__skip_frames = skip_frames
         self.__total_frames = (int)(
-            self.__state_data.shape[0]/skip_frames
+            self.__x_data.shape[0]/skip_frames
         )
 
     def generate_animation(self):
@@ -228,7 +228,7 @@ class CartPole(object):
             self.__fig, 
             self.__update_animation, 
             interval=self.__sim_conditions.sampling_period()*1000, 
-            frames=self.__total_frames, 
+            frames=range(self.__total_frames), 
             blit=True
         )
         anime.save(
@@ -246,7 +246,7 @@ class CartPole(object):
 
     def __update_animation(self, i):
         frame = self.__skip_frames * i
-        state = self.__state_data[frame, :]
+        state = self.__x_data[frame, :]
         self.__xc = state[0]
         self.__yc = 0
         self.__xp = self.__xc + self.__pole_length * np.sin(state[1])
@@ -297,8 +297,8 @@ class Hexacopter(object):
         # Loads the simulation data.
         self.__model_dir = 'models/' + model_name + '/simulation_result' 
         self.__file_header = self.__model_dir + '/' + model_name
-        self.__state_data = np.genfromtxt(
-            self.__file_header+'_state'+'.dat'
+        self.__x_data = np.genfromtxt(
+            self.__file_header+'_x'+'.log'
         )
         self.__sim_conditions = simcon.SimulationConditions(
             self.__file_header
@@ -306,13 +306,13 @@ class Hexacopter(object):
         self.__time_sequence = np.linspace(
             0, 
             self.__sim_conditions.simulation_time(), 
-            self.__state_data.shape[0]
+            self.__x_data.shape[0]
         )
         # Replaces NaN with 0.
-        self.__state_data[np.isnan(self.__state_data)] = 0
+        self.__x_data[np.isnan(self.__x_data)] = 0
         # Checks the dimension of the state.
-        self.__dim_state = self.__state_data.shape[1]
-        if self.__dim_state != 12:
+        self.__dim_x = self.__x_data.shape[1]
+        if self.__dim_x != 12:
             print(
                 'Dimension of the state is not 12!\n'
                 'This may not be data for simulation of hexacopter\n'
@@ -322,7 +322,7 @@ class Hexacopter(object):
         # Sets frames for drawing the animation.
         self.__skip_frames = 1
         self.__total_frames = (int)(
-            self.__state_data.shape[0]/self.__skip_frames
+            self.__x_data.shape[0]/self.__skip_frames
         )
 
     def set_skip_frames(self, skip_frames):
@@ -332,7 +332,7 @@ class Hexacopter(object):
                 skip_frames: A number of frames to skip.
         """
         self.__skip_frames = skip_frames
-        self.__total_frames = (int)(self.__state_data.shape[0]/skip_frames)
+        self.__total_frames = (int)(self.__x_data.shape[0]/skip_frames)
 
     def generate_animation(self):
         """ Generates the animation and saves it as a .mp4 file. """
@@ -363,7 +363,7 @@ class Hexacopter(object):
             self.__fig, 
             self.__update_animation, 
             interval=self.__sim_conditions.sampling_period()*1000, 
-            frames=self.__total_frames, 
+            frames=range(self.__total_frames), 
             blit=True
         )
         anime.save(
@@ -381,7 +381,7 @@ class Hexacopter(object):
 
     def __update_animation(self, i):
         frame = self.__skip_frames * i
-        X, Y, Z = self.__hexagon_world(self.__state_data[frame, :])
+        X, Y, Z = self.__hexagon_world(self.__x_data[frame, :])
         self.__line1.set_data((X[0],X[1]), (Y[0],Y[1]))
         self.__line1.set_3d_properties([Z[0],Z[1]])
         self.__line2.set_data((X[1],X[2]), (Y[1],Y[2]))
@@ -453,8 +453,8 @@ class MobileRobot(object):
         # Loads the simulation data.
         self.__model_dir = 'models/' + model_name + '/simulation_result' 
         self.__file_header = self.__model_dir + '/' + model_name
-        self.__state_data = np.genfromtxt(
-            self.__file_header+'_state'+'.dat'
+        self.__x_data = np.genfromtxt(
+            self.__file_header+'_x'+'.log'
         )
         self.__sim_conditions = simcon.SimulationConditions(
             self.__file_header
@@ -462,13 +462,13 @@ class MobileRobot(object):
         self.__time_sequence = np.linspace(
             0, 
             self.__sim_conditions.simulation_time(), 
-            self.__state_data.shape[0]
+            self.__x_data.shape[0]
         )
         # Replaces NaN with 0.
-        self.__state_data[np.isnan(self.__state_data)] = 0
+        self.__x_data[np.isnan(self.__x_data)] = 0
         # Checks the dimension of the state.
-        self.__dim_state = self.__state_data.shape[1]
-        if self.__dim_state != 3:
+        self.__dim_x = self.__x_data.shape[1]
+        if self.__dim_x != 3:
             print(
                 'Dimension of the state is not 3!\n'
                 'This may not be data for simulation of a mobile robot\n'
@@ -480,10 +480,10 @@ class MobileRobot(object):
         hlength = 0.5 * self.__robot_length
         hwidth = 0.5 * self.__robot_width
         margin = np.sqrt(hlength**2 + hwidth**2)
-        self.__x_min = np.min(self.__state_data[:, 0]) - margin
-        self.__x_max = np.max(self.__state_data[:, 0]) + margin
-        self.__y_min = np.min(self.__state_data[:, 1]) - margin
-        self.__y_max = np.max(self.__state_data[:, 1]) + margin
+        self.__x_min = np.min(self.__x_data[:, 0]) - margin
+        self.__x_max = np.max(self.__x_data[:, 0]) + margin
+        self.__y_min = np.min(self.__x_data[:, 1]) - margin
+        self.__y_max = np.max(self.__x_data[:, 1]) + margin
         # Sets reference trajectory.
         self.__vx_ref = vx_ref
         # Sets obstacles.
@@ -492,7 +492,7 @@ class MobileRobot(object):
         # Sets frames for drawing the animation.
         self.__skip_frames = 1
         self.__total_frames = (int)(
-            self.__state_data.shape[0]/self.__skip_frames
+            self.__x_data.shape[0]/self.__skip_frames
         )
 
     def set_skip_frames(self, skip_frames):
@@ -503,7 +503,7 @@ class MobileRobot(object):
         """
         self.__skip_frames = skip_frames
         self.__total_frames = (int)(
-            self.__state_data.shape[0]/skip_frames
+            self.__x_data.shape[0]/skip_frames
         )
 
     def generate_animation(self):
@@ -547,7 +547,7 @@ class MobileRobot(object):
             self.__fig, 
             self.__update_animation, 
             interval=self.__sim_conditions.sampling_period()*1000, 
-            frames=self.__total_frames, 
+            frames=range(self.__total_frames), 
             blit=True
         )
         anime.save(
@@ -565,7 +565,7 @@ class MobileRobot(object):
 
     def __update_animation(self, i):
         frame = self.__skip_frames * i
-        p_fl, p_fr, p_bl, p_br = self.__robot_world(self.__state_data[frame, :])
+        p_fl, p_fr, p_bl, p_br = self.__robot_world(self.__x_data[frame, :])
         self.__line1.set_data((p_fl[0], p_fr[0]), (p_fl[1], p_fr[1]))
         self.__line2.set_data((p_fl[0], p_bl[0]), (p_fl[1], p_bl[1]))
         self.__line3.set_data((p_fr[0], p_br[0]), (p_fr[1], p_br[1]))

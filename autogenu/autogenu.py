@@ -334,12 +334,15 @@ class AutoGenU(object):
             symfunc.simplify(self.__hx)
             symfunc.simplify(self.__hu)
             symfunc.simplify(self.__phix)
-        f_model_h = open('models/'+str(self.__model_name)+'/nmpc_model.hpp', 'w')
+        f_model_h = open('models/'+str(self.__model_name)+'/ocp.hpp', 'w')
+        f_model_h.write(
+            '#ifndef CGMRES_OCP_'+str(self.__model_name)+'__HPP_ \n'
+        )
+        f_model_h.write(
+            '#define CGMRES_OCP_'+str(self.__model_name)+'__HPP_ \n'
+        )
         f_model_h.writelines([
 """ 
-#ifndef NMPC_MODEL_H
-#define NMPC_MODEL_H
-
 #define _USE_MATH_DEFINES
 
 #include <cmath>
@@ -347,23 +350,34 @@ class AutoGenU(object):
 
 namespace cgmres {
 
-// This class stores parameters of NMPC and equations of NMPC.
-class NMPCModel {
-private:
+// This class represents the optimal control problem (OCP)
+""" 
+        ])
+        f_model_h.write(
+            'class OCP_'+str(self.__model_name)+' {\n'
+        )
+
+        f_model_h.writelines([
+""" 
+public:
 """
         ])
         f_model_h.write(
-            '  static constexpr int dim_state_ = '+str(self.__dimx)+';\n'
+            '  static constexpr int nx = '+str(self.__dimx)+';\n'
         )
         f_model_h.write(
-            '  static constexpr int dim_control_input_ = '
+            '  static constexpr int nu = '
             +str(self.__dimu)+';\n'
         )
         f_model_h.write(
-            '  static constexpr int dim_constraints_ = '
+            '  static constexpr int nc = '
             +str(self.__dimc+self.__dimh)+';\n'
         )
+        f_model_h.write(
+            '  static constexpr int nuc = nu + nc;\n'
+        )
         f_model_h.write('\n')
+        f_model_h.write('private: \n')
         f_model_h.writelines([
             '  static constexpr double '+scalar_var[1]+' = '
             +str(scalar_var[2])+';\n' for scalar_var in self.__scalar_vars
@@ -393,15 +407,27 @@ public:
   // x : state vector
   // u : control input vector
   // f : the value of f(t, x, u)
-  void stateFunc(const double t, const double* x, const double* u, 
-                 double* dx) const;
+  void eval_f(const double t, const double* x, const double* u, 
+              double* dx) const {
+""" 
+        ])
+        self.__write_function(f_model_h, self.__f, 'dx', use_cse)
+        f_model_h.writelines([
+""" 
+  }
 
   // Computes the partial derivative of terminal cost with respect to state, 
   // i.e., dphi/dx(t, x).
   // t    : time parameter
   // x    : state vector
   // phix : the value of dphi/dx(t, x)
-  void phixFunc(const double t, const double* x, double* phix) const;
+  void eval_phix(const double t, const double* x, double* phix) const {
+""" 
+        ])
+        self.__write_function(f_model_h, self.__phix, 'phix', use_cse)
+        f_model_h.writelines([
+""" 
+  }
 
   // Computes the partial derivative of the Hamiltonian with respect to state, 
   // i.e., dH/dx(t, x, u, lmd).
@@ -410,8 +436,14 @@ public:
   // u   : control input vector
   // lmd : the Lagrange multiplier for the state equation
   // hx  : the value of dH/dx(t, x, u, lmd)
-  void hxFunc(const double t, const double* x, const double* u, 
-              const double* lmd, double* hx) const;
+  void eval_hx(const double t, const double* x, const double* u, 
+               const double* lmd, double* hx) const {
+""" 
+        ])
+        self.__write_function(f_model_h, self.__hx, 'hx', use_cse)
+        f_model_h.writelines([
+""" 
+  }
 
   // Computes the partial derivative of the Hamiltonian with respect to control 
   // input and the constraints, dH/du(t, x, u, lmd).
@@ -420,86 +452,24 @@ public:
   // u   : control input vector
   // lmd : the Lagrange multiplier for the state equation
   // hu  : the value of dH/du(t, x, u, lmd)
-  void huFunc(const double t, const double* x, const double* u, 
-              const double* lmd, double* hu) const;
-
-  // Returns the dimension of the state.
-  int dim_state() const;
-
-  // Returns the dimension of the contorl input.
-  int dim_control_input() const;
-
-  // Returns the dimension of the constraints.
-  int dim_constraints() const;
+  void eval_hu(const double t, const double* x, const double* u, 
+               const double* lmd, double* hu) const {
+""" 
+        ])
+        self.__write_function(f_model_h, self.__hu, 'hu', use_cse)
+        f_model_h.writelines([
+""" 
+  }
 };
 
 } // namespace cgmres
 
 
-#endif // NMPC_MODEL_H
+#endif // CGMRES_OCP_HPP_
 """ 
         ])
         f_model_h.close()
-        f_model_c = open('models/'+self.__model_name+'/nmpc_model.cpp', 'w')
-        f_model_c.writelines([
-""" 
-#include "nmpc_model.hpp"
 
-
-namespace cgmres {
-
-void NMPCModel::stateFunc(const double t, const double* x, const double* u, 
-                          double* dx) const {
-""" 
-        ])
-        self.__write_function(f_model_c, self.__f, 'dx', use_cse)
-        f_model_c.writelines([
-""" 
-}
-
-void NMPCModel::phixFunc(const double t, const double* x, double* phix) const {
-"""
-        ])
-        self.__write_function(f_model_c, self.__phix, 'phix', use_cse)
-        f_model_c.writelines([
-""" 
-}
-
-void NMPCModel::hxFunc(const double t, const double* x, const double* u, 
-                       const double* lmd, double* hx) const {
-"""
-        ])
-        self.__write_function(f_model_c, self.__hx, 'hx', use_cse)
-        f_model_c.writelines([
-""" 
-}
-
-void NMPCModel::huFunc(const double t, const double* x, const double* u, 
-                       const double* lmd, double* hu) const {
-"""
-        ])
-        self.__write_function(f_model_c, self.__hu, 'hu', use_cse)
-        f_model_c.writelines([
-"""
-}
-
-int NMPCModel::dim_state() const {
-  return dim_state_;
-}
-
-int NMPCModel::dim_control_input() const {
-  return dim_control_input_;
-}
-
-int NMPCModel::dim_constraints() const {
-  return dim_constraints_;
-}
-
-} // namespace cgmres
-
-""" 
-        ])
-        f_model_c.close() 
 
     def generate_main(self):
         """ Generates main.cpp that defines NMPC solver, set parameters for the 
@@ -515,94 +485,74 @@ int NMPCModel::dim_constraints() const {
         """ Makes a directory where the C++ source files are generated.
         """
         f_main = open('models/'+str(self.__model_name)+'/main.cpp', 'w')
-        f_main.write('#include "nmpc_model.hpp"\n')
+        f_main.write('#include "ocp.hpp"\n')
         if self.__solver_type == SolverType.ContinuationGMRES:
             f_main.write(
-                '#include "continuation_gmres.hpp"\n'
+                '#include "cgmres/zero_horizon_ocp_solver.hpp"\n'
+                '#include "cgmres/single_shooting_cgmres_solver.hpp"\n'
             )
         elif self.__solver_type == SolverType.MultipleShootingCGMRES:
             f_main.write(
-                '#include "multiple_shooting_cgmres.hpp"\n'
+                '#include "cgmres/zero_horizon_ocp_solver.hpp"\n'
+                '#include "cgmres/multiple_shooting_cgmres_solver.hpp"\n'
             )
-        elif self.__solver_type == SolverType.MSCGMRESWithInputSaturation:
-            f_main.write(
-                '#include "input_saturation_set.hpp"\n'
-                '#include "ms_cgmres_with_input_saturation.hpp"\n'
-            )
+        else:
+            return NotImplementedError()
         f_main.write(
-            '#include "cgmres_simulator.hpp"\n'
+            '#include "cgmres/simulator/simulator.hpp"\n'
         )
         f_main.write('#include <string>\n')
         f_main.write(
             '\n'
             'int main() {\n'
-            '  // Define the model in NMPC.\n'
-            '  cgmres::NMPCModel nmpc_model;\n'
+            '  // Define the optimal control problem.\n'
+            '  cgmres::OCP_'+str(self.__model_name)+' ocp;\n'
             '\n'
         )
-        f_main.write('  // Define the solver.\n')
-        if self.__solver_type == SolverType.ContinuationGMRES:
-            f_main.write(
-                '  cgmres::ContinuationGMRES nmpc_solver('+str(self.__T_f)+', '
-                +str(self.__alpha)+', '+str(self.__N)+', '
-                +str(self.__finite_difference_increment)+', '+str(self.__zeta)
-                +', ' +str(self.__kmax)+');\n'
-            )
-        elif self.__solver_type == SolverType.MultipleShootingCGMRES:
-            f_main.write(
-                '  cgmres::MultipleShootingCGMRES nmpc_solver('
-                +str(self.__T_f) +', '+str(self.__alpha)+', '+str(self.__N)+', '
-                +str(self.__finite_difference_increment)+', '+str(self.__zeta)
-                +', '+str(self.__kmax)+');\n'
-            )
-        elif self.__solver_type == SolverType.MSCGMRESWithInputSaturation:
-            f_main.write('  cgmres::InputSaturationSet input_saturation_set;\n')
-            for i in range(len(self.__saturation_list)):
-                f_main.write(
-                    '  input_saturation_set.'
-                    'appendInputSaturation('
-                    +str(self.__saturation_list[i][0])+', '
-                    +str(self.__saturation_list[i][1])+', '
-                    +str(self.__saturation_list[i][2])+', '
-                    +str(self.__saturation_list[i][3])+', '
-                    +str(self.__saturation_list[i][4])+');\n'
-                )
-            f_main.write(
-                '  cgmres::MSCGMRESWithInputSaturation '
-                'nmpc_solver(input_saturation_set, '
-                +str(self.__T_f)+', '+str(self.__alpha)+', '+str(self.__N)+', '
-                +str(self.__finite_difference_increment)+', '+str(self.__zeta)
-                +', '+str(self.__kmax)+');\n'
-            )
-        f_main.write('\n\n')
-        f_main.write('  // Set the initial state.\n')
         f_main.write(
-            '  double initial_state['
-            +str(len(self.__initial_state))+
-            '] = {'
+            '  // Define the horizon.\n'
+            '  const double Tf = '+str(self.__T_f)+';\n'
+            '  const double alpha = '+str(self.__alpha)+';\n'
+            '  cgmres::Horizon horizon(Tf, alpha);\n'
+            '\n'
+        )
+        f_main.write(
+            '  // Define the solver settings.\n'
+            '  cgmres::SolverSettings settings;\n'
+            '  settings.dt = '+str(self.__sampling_time)+'; // sampling period \n'
+            '  settings.zeta = '+str(self.__zeta)+';\n'
+            '  settings.finite_difference_epsilon = '+str(self.__finite_difference_increment)+';\n'
+            '  // For initialization.\n'
+            '  settings.max_iter = '+str(self.__max_newton_iteration)+';\n'
+            '  settings.opt_error_tol = '+str(self.__newton_residual_torelance)+';\n'
+            '\n'
+        )
+        f_main.write('  // Define the initial time and initial state.\n')
+        f_main.write('  const double t0 = '+str(self.__initial_time)+';\n')
+        f_main.write(
+            '  cgmres::Vector<'+str(len(self.__initial_state))+'> x0;\n'
+            +'  x0 << '
         )
         for i in range(len(self.__initial_state)-1):
             f_main.write(str(self.__initial_state[i])+', ')
-        f_main.write(str(self.__initial_state[-1])+'};\n')
+        f_main.write(str(self.__initial_state[-1])+';\n')
         f_main.write('\n')
         # initial guess for the initialization of the solution
-        f_main.write('  // Set the initial guess of the solution.\n')
+        f_main.write('  // Initialize the solution of the C/GMRES method.\n')
+        f_main.write('  constexpr int kmax_init = '+str(min(self.__kmax, len(self.__solution_initial_guess)))+';\n')
         f_main.write(
-            '  double solution_initial_guess['
-            +str(len(self.__solution_initial_guess))
-            +'] = {'
+            '  cgmres::ZeroHorizonOCPSolver<cgmres::OCP_'+self.__model_name+', kmax_init> '
+            +'initializer(ocp, settings);\n'
+        )
+        f_main.write(
+            '  cgmres::Vector<' + str(len(self.__solution_initial_guess))+'> uc0;\n'
+            +'  uc0 << '
         )
         for i in range(len(self.__solution_initial_guess)-1):
             f_main.write(str(self.__solution_initial_guess[i])+', ')
-        f_main.write(str(self.__solution_initial_guess[-1])+'};\n')
-        f_main.write('\n')
-        f_main.write('  // Initialize the solution of the C/GMRES method.\n')
-        f_main.write(
-            '  nmpc_solver.setParametersForInitialization('
-            +'solution_initial_guess, '
-            +str(self.__newton_residual_torelance)+', '
-            +str(self.__max_newton_iteration)+');\n'
-        )
+        f_main.write(str(self.__solution_initial_guess[-1])+';\n')
+        f_main.write('  initializer.set_uc(uc0);\n')
+        f_main.write('  initializer.solve(t0, x0);\n')
         f_main.write('\n')
         if (self.__solver_type == SolverType.MSCGMRESWithInputSaturation
             and self.__initial_Lagrange_multiplier is not None):
@@ -624,19 +574,34 @@ int NMPCModel::dim_constraints() const {
                 str(self.__initial_Lagrange_multiplier[-1])+'};\n'
             )
             f_main.write(
-                '\n'+'  nmpc_solver.setInitialInputSaturationMultiplier'
+                '\n'+'  mpc.setInitialInputSaturationMultiplier'
                 +'(initial_guess_lagrange_multiplier);'
                 +'\n'
             )
+
+        f_main.write('  // Define the C/GMRES solver.\n')
+        f_main.write('  constexpr int N = '+str(self.__N)+';\n')
+        f_main.write('  constexpr int kmax = '+str(min(self.__kmax, self.__N*(self.__dimu+self.__dimc)))+';\n')
+        if self.__solver_type == SolverType.ContinuationGMRES:
+            f_main.write(
+                '  cgmres::SingleShootingCGMRESSolver<cgmres::OCP_'+self.__model_name+', N, kmax> mpc(ocp, horizon, settings);\n'
+                '  mpc.set_uc(initializer.ucopt());\n'
+            )
+        elif self.__solver_type == SolverType.MultipleShootingCGMRES:
+            f_main.write(
+                '  cgmres::MultipleShootingCGMRESSolver<cgmres::OCP_'+self.__model_name+', N, kmax> mpc(ocp, horizon, settings);\n'
+                '  mpc.set_uc(initializer.ucopt());\n'
+                '  mpc.set_lmd(initializer.lmdopt());\n'
+                '  mpc.set_x(x0);\n'
+            )
+        f_main.write('\n\n')
         f_main.write(
-            '  std::string save_dir_name("../simulation_result");\n'
             '  // Perform a numerical simulation.\n'
-            '  cgmres::simulation(nmpc_solver, initial_state, '
-            +str(self.__initial_time)+', '+str(self.__simulation_time)+', '
-            +str(self.__sampling_time)+', '+"save_dir_name"+', "'
-            +self.__model_name
-            +'");\n'
-            '\n'
+            '  const double tf = '+str(self.__simulation_time)+';\n'
+            '  const double dt = settings.dt;\n'
+            '  const std::string save_dir_name("../simulation_result");\n'
+            '  cgmres::simulation(ocp, mpc, x0, t0, tf, dt, ' 
+            +"save_dir_name"+', "' +self.__model_name +'");\n\n'
             '  return 0;\n'
             '}\n'
         )
@@ -650,183 +615,34 @@ int NMPCModel::dim_constraints() const {
         f_cmake.writelines([
 """
 cmake_minimum_required(VERSION 3.1)
-project(cgmres_simulator CXX)
-
-set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_CXX_FLAGS "-O3")
-
-set(MODEL_DIR ${PROJECT_SOURCE_DIR})
-set(INCLUDE_DIR ${PROJECT_SOURCE_DIR}/../../include/cgmres)
-set(SIMULATOR_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/../../include/cgmres/simulator)
-set(SRC_DIR ${PROJECT_SOURCE_DIR}/../../src)
-set(SIMULATOR_SRC_DIR ${PROJECT_SOURCE_DIR}/../../src/simulator)
-
-add_library(
-    nmpcmodel 
-    STATIC
-    ${MODEL_DIR}/nmpc_model.cpp
-)
-
-"""
+""" 
         ])
-        if self.__solver_type == SolverType.ContinuationGMRES:
-            f_cmake.writelines([
+        f_cmake.write('project('+str(self.__model_name)+' CXX)')
+        f_cmake.writelines([
 """
-add_library(
-    cgmres
-    STATIC
-    ${SRC_DIR}/continuation_gmres.cpp
-    ${SRC_DIR}/single_shooting_continuation.cpp
-    ${SRC_DIR}/single_shooting_ocp.cpp
-    ${SRC_DIR}/time_varying_smooth_horizon.cpp
-    ${SRC_DIR}/cgmres_initializer.cpp
-    ${SRC_DIR}/zero_horizon_ocp.cpp
-    ${SRC_DIR}/optimal_control_problem.cpp
-    ${SRC_DIR}/linear_algebra.cpp
-)
-target_include_directories(
-    cgmres
-    PRIVATE
-    ${MODEL_DIR}
-    ${INCLUDE_DIR}
-)
-"""
-            ])
-        elif self.__solver_type == SolverType.MultipleShootingCGMRES:
-            f_cmake.writelines([
-"""
-add_library(
-    multiple_shooting_cgmres
-    STATIC
-    ${SRC_DIR}/multiple_shooting_cgmres.cpp
-    ${SRC_DIR}/multiple_shooting_continuation.cpp
-    ${SRC_DIR}/multiple_shooting_ocp.cpp
-    ${SRC_DIR}/time_varying_smooth_horizon.cpp
-    ${SRC_DIR}/cgmres_initializer.cpp
-    ${SRC_DIR}/zero_horizon_ocp.cpp
-    ${SRC_DIR}/optimal_control_problem.cpp
-    ${SRC_DIR}/linear_algebra.cpp
-)
-target_include_directories(
-    multiple_shooting_cgmres
-    PRIVATE
-    ${MODEL_DIR}
-    ${INCLUDE_DIR}
-)
-"""
-            ])
-        elif self.__solver_type == SolverType.MSCGMRESWithInputSaturation:
-            f_cmake.writelines([
-"""
-add_library(
-    ms_cgmres_with_input_saturation
-    STATIC
-    ${SRC_DIR}/ms_cgmres_with_input_saturation.cpp
-    ${SRC_DIR}/ms_continuation_with_input_saturation.cpp
-    ${SRC_DIR}/ms_ocp_with_input_saturation.cpp
-    ${SRC_DIR}/time_varying_smooth_horizon.cpp
-    ${SRC_DIR}/ms_cgmres_with_input_saturation_initializer.cpp
-    ${SRC_DIR}/zero_horizon_ocp_with_input_saturation.cpp
-    ${SRC_DIR}/input_saturation_functions.cpp
-    ${SRC_DIR}/input_saturation_set.cpp
-    ${SRC_DIR}/input_saturation.cpp
-    ${SRC_DIR}/optimal_control_problem.cpp
-    ${SRC_DIR}/linear_algebra.cpp
-)
-target_include_directories(
-    ms_cgmres_with_input_saturation
-    PRIVATE
-    ${MODEL_DIR}
-    ${INCLUDE_DIR}
-)
-"""
-            ])
-        if platform.system() == 'Windows':
-            f_cmake.writelines([
-"""
+
+set(CMAKE_CXX_STANDARD 17)
+
+option(VECTORIZE "Enable -march=native" OFF)
+
+set(INCLUDE_DIR ${PROJECT_SOURCE_DIR}/../../include)
+
 add_executable(
-    main 
-    ${MODEL_DIR}/main.cpp
-    ${SIMULATOR_SRC_DIR}/save_simulation_data.cpp
-    ${SIMULATOR_SRC_DIR}/numerical_integrator.cpp
+    ${PROJECT_NAME}
+    main.cpp
 )
 target_include_directories(
-    main
+    ${PROJECT_NAME}
     PRIVATE
-    ${MODEL_DIR}
     ${INCLUDE_DIR}
-    ${SIMULATOR_INCLUDE_DIR}
 )
-target_link_libraries(
-    main
+if (VECTORIZE)
+  target_compile_options(
+    ${PROJECT_NAME}
     PRIVATE
-"""
-            ])
-            if self.__solver_type == SolverType.ContinuationGMRES:
-                f_cmake.write(
-                    '    cgmres'
-                )
-            elif self.__solver_type == SolverType.MultipleShootingCGMRES:
-                f_cmake.write(
-                    '    multiple_shooting_cgmres'
-                )
-            elif self.__solver_type == SolverType.MSCGMRESWithInputSaturation:
-                f_cmake.write(
-                    '    ms_cgmres_with_input_saturation'
-                )
-            f_cmake.writelines([
-"""
-    nmpcmodel
-)
-target_compile_options(
-    main
-    PRIVATE
-    -O3
-)
-"""
-            ])
-        else:
-            f_cmake.writelines([
-"""
-add_executable(
-    a.out 
-    ${MODEL_DIR}/main.cpp
-    ${SIMULATOR_SRC_DIR}/save_simulation_data.cpp
-    ${SIMULATOR_SRC_DIR}/numerical_integrator.cpp
-)
-target_include_directories(
-    a.out
-    PRIVATE
-    ${MODEL_DIR}
-    ${INCLUDE_DIR}
-    ${SIMULATOR_INCLUDE_DIR}
-)
-target_link_libraries(
-    a.out
-    PRIVATE
-"""
-            ])
-            if self.__solver_type == SolverType.ContinuationGMRES:
-                f_cmake.write(
-                    '    cgmres'
-                )
-            elif self.__solver_type == SolverType.MultipleShootingCGMRES:
-                f_cmake.write(
-                    '    multiple_shooting_cgmres'
-                )
-            elif self.__solver_type == SolverType.MSCGMRESWithInputSaturation:
-                f_cmake.write(
-                    '    ms_cgmres_with_input_saturation'
-                )
-            f_cmake.writelines([
-"""
-    nmpcmodel
-)
-target_compile_options(
-    a.out
-    PRIVATE
-    -O3
-)
+    -march=native
+  )
+endif()
 """
             ])
         f_cmake.close()
@@ -857,7 +673,7 @@ target_compile_options(
             )
             if generator == 'MSYS':
                 proc = subprocess.Popen(
-                    ['cmake', '..', '-G', 'MSYS Makefiles'], 
+                    ['cmake', '..', '-G', 'MSYS Makefiles', '-DCMAKE_BUILD_TYPE=Release', '-DVECTORIZE=ON'], 
                     cwd='models/'+self.__model_name+'/build', 
                     stdout=subprocess.PIPE, 
                     stderr=subprocess.STDOUT, 
@@ -868,7 +684,7 @@ target_compile_options(
                 print('\n')
             elif generator == 'MinGW':
                 proc = subprocess.Popen(
-                    ['cmake', '..', '-G', 'MinGW Makefiles'], 
+                    ['cmake', '..', '-G', 'MinGW Makefiles', '-DCMAKE_BUILD_TYPE=Release', '-DVECTORIZE=ON'], 
                     cwd='models/'+self.__model_name+'/build', 
                     stdout=subprocess.PIPE, 
                     stderr=subprocess.STDOUT, 
@@ -887,7 +703,7 @@ target_compile_options(
                 )
                 if proc.stderr.readline() == b'':
                     proc = subprocess.Popen(
-                        ['cmake', '..', '-G', 'MSYS Makefiles'], 
+                        ['cmake', '..', '-G', 'MSYS Makefiles', '-DCMAKE_BUILD_TYPE=Release', '-DVECTORIZE=ON'], 
                         cwd='models/'+self.__model_name+'/build', 
                         stdout=subprocess.PIPE, 
                         stderr=subprocess.STDOUT, 
@@ -895,7 +711,7 @@ target_compile_options(
                     )
                 else:
                     proc = subprocess.Popen(
-                        ['cmake', '..', '-G', 'MinGW Makefiles'], 
+                        ['cmake', '..', '-G', 'MinGW Makefiles', '-DCMAKE_BUILD_TYPE=Release', '-DVECTORIZE=ON'], 
                         cwd='models/'+self.__model_name+'/build', 
                         stdout=subprocess.PIPE, 
                         stderr=subprocess.STDOUT, 
@@ -923,7 +739,7 @@ target_compile_options(
                 stderr=subprocess.PIPE
             )
             proc = subprocess.Popen(
-                ['cmake', '..'], 
+                ['cmake', '..', '-DCMAKE_BUILD_TYPE=Release', '-DVECTORIZE=ON'], 
                 cwd='models/'+self.__model_name+'/build', 
                 stdout=subprocess.PIPE, 
                 stderr=subprocess.STDOUT
@@ -960,7 +776,7 @@ target_compile_options(
                 shell=True
             )
             proc = subprocess.Popen(
-                ['main.exe'], 
+                [self.__model_name+'.exe'], 
                 cwd='models/'+self.__model_name+'/build', 
                 stdout=subprocess.PIPE, 
                 stderr=subprocess.STDOUT, 
@@ -983,7 +799,7 @@ target_compile_options(
                 stderr=subprocess.PIPE
             )
             proc = subprocess.Popen(
-                ['./a.out'], 
+                ['./'+self.__model_name], 
                 cwd='models/'+self.__model_name+'/build', 
                 stdout=subprocess.PIPE, 
                 stderr=subprocess.STDOUT
