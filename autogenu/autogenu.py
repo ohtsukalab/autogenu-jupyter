@@ -516,7 +516,7 @@ public:
             '  settings.finite_difference_epsilon = '+str(self.__finite_difference_epsilon)+';\n'
             '  // For initialization.\n'
             '  settings.max_iter = '+str(self.__max_newton_iteration)+';\n'
-            '  settings.opt_error_tol = '+str(self.__newton_residual_torelance)+';\n'
+            '  settings.opterr_tol = '+str(self.__newton_residual_torelance)+';\n'
             '\n'
         )
         f_main.write('  // Define the initial time and initial state.\n')
