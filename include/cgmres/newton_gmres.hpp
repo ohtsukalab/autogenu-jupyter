@@ -1,5 +1,5 @@
-#ifndef CONTINUATION_GMRES_HPP_
-#define CONTINUATION_GMRES_HPP_
+#ifndef NEWTON_GMRES_HPP_
+#define NEWTON_GMRES_HPP_
 
 #include <stdexcept>
 
@@ -10,34 +10,27 @@
 namespace cgmres {
 
 template <class NLP>
-class ContinuationGMRES {
+class NewtonGMRES {
 public:
   static constexpr int nx = NLP::nx;
   static constexpr int nu = NLP::nu;
   static constexpr int nc = NLP::nc;
   static constexpr int dim = NLP::dim;
 
-  ContinuationGMRES(const NLP& nlp, const Scalar finite_difference_epsilon, 
-                    const Scalar zeta) 
+  NewtonGMRES(const NLP& nlp, const Scalar finite_difference_epsilon) 
     : nlp_(nlp), 
       finite_difference_epsilon_(finite_difference_epsilon),
-      zeta_(zeta),
       updated_solution_(Vector<dim>::Zero()), 
       fonc_(Vector<dim>::Zero()), 
-      fonc_1_(Vector<dim>::Zero()),
-      fonc_2_(Vector<dim>::Zero()),
-      x_1_(Vector<nx>::Zero()) {
+      fonc_1_(Vector<dim>::Zero()) {
     if (finite_difference_epsilon <= 0.0) {
-      throw std::invalid_argument("[ContinuationGMRES]: 'finite_difference_epsilon' must be positive!");
-    }
-    if (zeta <= 0.0) {
-      throw std::invalid_argument("[ContinuationGMRES]: 'zeta' must be positive!");
+      throw std::invalid_argument("[NewtonGMRES]: 'finite_difference_epsilon' must be positive!");
     }
   }
 
-  ContinuationGMRES() = default;
+  NewtonGMRES() = default;
 
-  ~ContinuationGMRES() = default;
+  ~NewtonGMRES() = default;
 
   Scalar optError() const {
     return fonc_.template lpNorm<2>();
@@ -51,19 +44,10 @@ public:
     assert(solution.size() == dim);
     assert(solution_update.size() == dim);
     assert(b_vec.size() == dim);
-
-    const Scalar t1 = t + finite_difference_epsilon_;
-    nlp_.ocp().eval_f(t, x.data(), solution.derived().data(), x_1_.data());
-    x_1_.array() *= finite_difference_epsilon_; 
-    x_1_.noalias() += x;
     updated_solution_ = solution + finite_difference_epsilon_ * solution_update;
-
     nlp_.eval(t, x, solution, fonc_);
-    nlp_.eval(t1, x_1_, solution, fonc_1_);
-    nlp_.eval(t1, x_1_, updated_solution_, fonc_2_);
-
-    EIGEN_CONST_CAST(VectorType3, b_vec) = (1.0/finite_difference_epsilon_ - zeta_) * fonc_ 
-                                           - fonc_2_ / finite_difference_epsilon_;
+    nlp_.eval(t, x, updated_solution_, fonc_1_);
+    EIGEN_CONST_CAST(VectorType3, b_vec) = - fonc_ - (fonc_1_ - fonc_) / finite_difference_epsilon_;
   }
 
   template <typename VectorType1, typename VectorType2, typename VectorType3>
@@ -74,10 +58,9 @@ public:
     assert(solution.size() == dim);
     assert(solution_update.size() == dim);
     assert(ax_vec.size() == dim);
-    const Scalar t1 = t + finite_difference_epsilon_;
     updated_solution_ = solution + finite_difference_epsilon_ * solution_update;
-    nlp_.eval(t1, x_1_, updated_solution_, fonc_2_);
-    EIGEN_CONST_CAST(VectorType3, ax_vec) = (fonc_2_ - fonc_1_) / finite_difference_epsilon_;
+    nlp_.eval(t, x, updated_solution_, fonc_1_);
+    EIGEN_CONST_CAST(VectorType3, ax_vec) = (fonc_1_ - fonc_) / finite_difference_epsilon_;
   }
 
   const decltype(auto) x() const { return nlp_.x(); }
@@ -88,11 +71,10 @@ public:
 
 private:
   NLP nlp_;
-  Scalar finite_difference_epsilon_, zeta_; 
-  Vector<dim> updated_solution_, fonc_, fonc_1_, fonc_2_;
-  Vector<nx> x_1_;
+  Scalar finite_difference_epsilon_; 
+  Vector<dim> updated_solution_, fonc_, fonc_1_;
 };
 
 } // namespace cgmres
 
-#endif // CONTINUATION_GMRES_HPP_
+#endif // NEWTON_GMRES_HPP_

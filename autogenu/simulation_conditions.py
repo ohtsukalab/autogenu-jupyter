@@ -11,7 +11,7 @@ class SimulationConditions(object):
 
     def __init__(self, model_name):
         """ Inits SimulationConditions with the simulation results. """
-        simulation_conditions = open(model_name + '_conditions' + '.dat')
+        simulation_conditions = open(model_name + '_conditions' + '.log')
         lines = simulation_conditions.readlines()
         if re.search(r'.', lines[1]):
             pattern = r'([0-9]+\.?[0-9]*)' 
@@ -21,10 +21,10 @@ class SimulationConditions(object):
             self.__simulation_time = float(re.findall(pattern, lines[1])[0])
         if re.search(r'.', lines[3]):
             pattern = r'([0-9]+\.?[0-9]*)' 
-            self.__sampling_period = float(re.findall(pattern, lines[3])[0])
+            self.__sampling_period = float(re.findall(pattern, lines[3])[0]) * 0.0001
         else:
             pattern = r'([0-9])' 
-            self.__sampling_period = float(re.findall(pattern, lines[3])[0])
+            self.__sampling_period = float(re.findall(pattern, lines[3])[0]) * 0.0001
 
     def simulation_time(self):
         """ Returns the simulation time.
