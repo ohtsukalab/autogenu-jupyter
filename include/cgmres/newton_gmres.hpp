@@ -63,9 +63,9 @@ public:
     EIGEN_CONST_CAST(VectorType3, ax_vec) = (fonc_1_ - fonc_) / finite_difference_epsilon_;
   }
 
-  const decltype(auto) x() const { return nlp_.x(); }
+  decltype(auto) x() const { return nlp_.x(); }
 
-  const decltype(auto) lmd() const { return nlp_.lmd(); }
+  decltype(auto) lmd() const { return nlp_.lmd(); }
 
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 

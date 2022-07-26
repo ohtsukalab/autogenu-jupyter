@@ -149,9 +149,9 @@ public:
     }
   }
 
-  const decltype(auto) x() const { return nlp_.x(); }
+  decltype(auto) x() const { return nlp_.x(); }
 
-  const decltype(auto) lmd() const { return nlp_.lmd(); }
+  decltype(auto) lmd() const { return nlp_.lmd(); }
 
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
