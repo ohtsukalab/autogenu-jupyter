@@ -1220,6 +1220,12 @@ install(
             stderr=subprocess.STDOUT
         )
         proc = subprocess.Popen(
+            ['cmake', '--build', '.', '-j8'], 
+            cwd='models/'+self.__model_name+'/build', 
+            stdout = subprocess.PIPE, 
+            stderr = subprocess.STDOUT
+        )
+        proc = subprocess.Popen(
             ['cmake', '--install', '.'], 
             cwd='models/'+self.__model_name+'/build', 
             stdout = subprocess.PIPE, 
