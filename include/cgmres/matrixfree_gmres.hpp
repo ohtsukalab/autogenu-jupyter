@@ -1,5 +1,5 @@
-#ifndef MATRIXFREE_GMRES_HPP_
-#define MATRIXFREE_GMRES_HPP_
+#ifndef CGMRES__MATRIXFREE_GMRES_HPP_
+#define CGMRES__MATRIXFREE_GMRES_HPP_
 
 #include <iostream>
 #include <cmath>
@@ -117,8 +117,8 @@ private:
                         - givens_s_vec_.coeff(i_column) * column_vec.coeff(i_column+1);
     const Scalar tmp2 = givens_s_vec_.coeff(i_column) * column_vec.coeff(i_column) 
                         + givens_c_vec_.coeff(i_column) * column_vec.coeff(i_column+1);
-    EIGEN_CONST_CAST(VectorType, column_vec).coeffRef(i_column) = tmp1;
-    EIGEN_CONST_CAST(VectorType, column_vec).coeffRef(i_column+1) = tmp2;
+    CGMRES_EIGEN_CONST_CAST(VectorType, column_vec).coeffRef(i_column) = tmp1;
+    CGMRES_EIGEN_CONST_CAST(VectorType, column_vec).coeffRef(i_column+1) = tmp2;
   }
 
 };
@@ -126,4 +126,4 @@ private:
 } // namespace cgmres
 
 
-#endif // MATRIXFREE_GMRES_HPP_
+#endif // CGMRES__MATRIXFREE_GMRES_HPP_

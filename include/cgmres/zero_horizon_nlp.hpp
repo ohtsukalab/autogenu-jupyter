@@ -1,5 +1,5 @@
-#ifndef ZERO_HORIZON_NLP_HPP_
-#define ZERO_HORIZON_NLP_HPP_
+#ifndef CGMRES__ZERO_HORIZON_NLP_HPP_
+#define CGMRES__ZERO_HORIZON_NLP_HPP_
 
 #include <array>
 
@@ -50,4 +50,4 @@ private:
 
 } // namespace cgmres
 
-#endif // ZERO_HORIZON_NLP_HPP_
+#endif // CGMRES__ZERO_HORIZON_NLP_HPP_

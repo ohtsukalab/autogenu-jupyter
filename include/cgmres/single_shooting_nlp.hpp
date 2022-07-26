@@ -1,5 +1,5 @@
-#ifndef SINGLE_SHOOTING_NLP_HPP_
-#define SINGLE_SHOOTING_NLP_HPP_
+#ifndef CGMRES__SINGLE_SHOOTING_NLP_HPP_
+#define CGMRES__SINGLE_SHOOTING_NLP_HPP_
 
 #include <array>
 
@@ -82,4 +82,4 @@ private:
 
 } // namespace cgmres
 
-#endif // SINGLE_SHOOTING_NLP_HPP_
+#endif // CGMRES__SINGLE_SHOOTING_NLP_HPP_

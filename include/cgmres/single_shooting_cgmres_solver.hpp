@@ -1,5 +1,5 @@
-#ifndef SINGLE_SHOOTING_CGMRES_SOLVER_HPP_
-#define SINGLE_SHOOTING_CGMRES_SOLVER_HPP_
+#ifndef CGMRES__SINGLE_SHOOTING_CGMRES_SOLVER_HPP_
+#define CGMRES__SINGLE_SHOOTING_CGMRES_SOLVER_HPP_
 
 #include <array>
 #include <stdexcept>
@@ -91,7 +91,7 @@ public:
     // verbose
     if (settings_.verbose_level >= 1) {
       std::cout << "opt error: " << opt_error 
-                << " (opt tol: " << settings_.opt_error_tol << ")" <<  std::endl;
+                << " (opt tol: " << settings_.opterr_tol << ")" <<  std::endl;
     }
     if (settings_.verbose_level >= 2) {
       std::cout << "number of GMRES iter: " << gmres_iter << " (kmax: " << kmax << ")" << std::endl;
@@ -132,4 +132,4 @@ private:
 
 } // namespace cgmres
 
-#endif // SINGLE_SHOOTING_CGMRES_SOLVER_HPP_
+#endif // CGMRES__SINGLE_SHOOTING_CGMRES_SOLVER_HPP_

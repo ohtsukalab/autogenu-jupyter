@@ -1,5 +1,5 @@
-#ifndef SOLVER_SETTINGS_HPP_
-#define SOLVER_SETTINGS_HPP_
+#ifndef CGMRES__SOLVER_SETTINGS_HPP_
+#define CGMRES__SOLVER_SETTINGS_HPP_
 
 #include "cgmres/types.hpp"
 
@@ -7,7 +7,7 @@ namespace cgmres {
 
 struct SolverSettings {
   size_t max_iter = 100;
-  Scalar opt_error_tol = 1.0e-04;
+  Scalar opterr_tol = 1.0e-04;
 
   Scalar finite_difference_epsilon = 1.0e-08;
 
@@ -19,4 +19,4 @@ struct SolverSettings {
 
 } // namespace cgmres
 
-#endif // SOLVER_SETTINGS_HPP_
+#endif // CGMRES__SOLVER_SETTINGS_HPP_

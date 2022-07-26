@@ -1,5 +1,5 @@
-#ifndef CONTINUATION_GMRES_CONDENSING_HPP_
-#define CONTINUATION_GMRES_CONDENSING_HPP_
+#ifndef CGMRES__CONTINUATION_GMRES_CONDENSING_HPP_
+#define CGMRES__CONTINUATION_GMRES_CONDENSING_HPP_
 
 #include <stdexcept>
 
@@ -29,7 +29,8 @@ public:
       fonc_hu_1_(Vector<dim>::Zero()), 
       fonc_hu_2_(Vector<dim>::Zero()), 
       fonc_hu_3_(Vector<dim>::Zero()), 
-      x0_1_(Vector<nx>::Zero()) {
+      x0_1_(Vector<nx>::Zero()),
+      dx_(Vector<nx>::Zero()) {
     std::fill(x_1_.begin(), x_1_.end(), Vector<nx>::Zero());
     std::fill(lmd_1_.begin(), lmd_1_.end(), Vector<nx>::Zero());
     std::fill(fonc_f_.begin(), fonc_f_.end(), Vector<nx>::Zero());
@@ -71,9 +72,8 @@ public:
     assert(b_vec.size() == dim);
 
     const Scalar t1 = t + finite_difference_epsilon_;
-    nlp_.ocp().eval_f(t, x0.data(), solution.derived().data(), x0_1_.data());
-    x0_1_.array() *= finite_difference_epsilon_; 
-    x0_1_.noalias() += x0;
+    nlp_.ocp().eval_f(t, x0.data(), solution.derived().data(), dx_.data());
+    x0_1_ = x0 + finite_difference_epsilon_ * dx_; 
     updated_solution_ = solution + finite_difference_epsilon_ * solution_update;
 
     nlp_.eval_fonc_hu(t, x0, solution, x, lmd, fonc_hu_);
@@ -97,7 +97,7 @@ public:
     nlp_.retrive_x(t1, x0_1_, updated_solution_, x_1_, fonc_f_1_);
     nlp_.retrive_lmd(t1, x0_1_, updated_solution_, x_1_, lmd_1_, fonc_hx_1_);
     nlp_.eval_fonc_hu(t1, x0_1_, updated_solution_, x_1_, lmd_1_, fonc_hu_2_);
-    EIGEN_CONST_CAST(VectorType3, b_vec) = (1.0/finite_difference_epsilon_ - zeta_) * fonc_hu_ 
+    CGMRES_EIGEN_CONST_CAST(VectorType3, b_vec) = (1.0/finite_difference_epsilon_ - zeta_) * fonc_hu_ 
                                            - fonc_hu_3_ / finite_difference_epsilon_
                                            - (fonc_hu_2_ - fonc_hu_1_) / finite_difference_epsilon_;
   }
@@ -119,7 +119,7 @@ public:
     nlp_.retrive_x(t1, x0_1_, updated_solution_, x_1_, fonc_f_1_);
     nlp_.retrive_lmd(t1, x0_1_, updated_solution_, x_1_, lmd_1_, fonc_hx_1_);
     nlp_.eval_fonc_hu(t1, x0_1_, updated_solution_, x_1_, lmd_1_, fonc_hu_2_);
-    EIGEN_CONST_CAST(VectorType3, ax_vec) = (fonc_hu_2_ - fonc_hu_1_) / finite_difference_epsilon_;
+    CGMRES_EIGEN_CONST_CAST(VectorType3, ax_vec) = (fonc_hu_2_ - fonc_hu_1_) / finite_difference_epsilon_;
   }
 
   template <typename VectorType1, typename VectorType2>
@@ -160,9 +160,9 @@ private:
   Scalar finite_difference_epsilon_, zeta_; 
   Vector<dim> updated_solution_, fonc_hu_, fonc_hu_1_, fonc_hu_2_, fonc_hu_3_;
   std::array<Vector<nx>, N+1> x_1_, lmd_1_, fonc_f_, fonc_hx_, fonc_f_1_, fonc_hx_1_;
-  Vector<nx> x0_1_;
+  Vector<nx> x0_1_, dx_;
 };
 
 } // namespace cgmres
 
-#endif // CONTINUATION_GMRES_CONDENSING_HPP_
+#endif // CGMRES__CONTINUATION_GMRES_CONDENSING_HPP_

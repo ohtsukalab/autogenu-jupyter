@@ -1,5 +1,5 @@
-#ifndef NEWTON_GMRES_HPP_
-#define NEWTON_GMRES_HPP_
+#ifndef CGMRES__NEWTON_GMRES_HPP_
+#define CGMRES__NEWTON_GMRES_HPP_
 
 #include <stdexcept>
 
@@ -47,7 +47,7 @@ public:
     updated_solution_ = solution + finite_difference_epsilon_ * solution_update;
     nlp_.eval(t, x, solution, fonc_);
     nlp_.eval(t, x, updated_solution_, fonc_1_);
-    EIGEN_CONST_CAST(VectorType3, b_vec) = - fonc_ - (fonc_1_ - fonc_) / finite_difference_epsilon_;
+    CGMRES_EIGEN_CONST_CAST(VectorType3, b_vec) = - fonc_ - (fonc_1_ - fonc_) / finite_difference_epsilon_;
   }
 
   template <typename VectorType1, typename VectorType2, typename VectorType3>
@@ -60,7 +60,7 @@ public:
     assert(ax_vec.size() == dim);
     updated_solution_ = solution + finite_difference_epsilon_ * solution_update;
     nlp_.eval(t, x, updated_solution_, fonc_1_);
-    EIGEN_CONST_CAST(VectorType3, ax_vec) = (fonc_1_ - fonc_) / finite_difference_epsilon_;
+    CGMRES_EIGEN_CONST_CAST(VectorType3, ax_vec) = (fonc_1_ - fonc_) / finite_difference_epsilon_;
   }
 
   decltype(auto) x() const { return nlp_.x(); }
@@ -77,4 +77,4 @@ private:
 
 } // namespace cgmres
 
-#endif // NEWTON_GMRES_HPP_
+#endif // CGMRES__NEWTON_GMRES_HPP_

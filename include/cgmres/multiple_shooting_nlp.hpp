@@ -1,5 +1,5 @@
-#ifndef MULTIPLE_SHOOTING_NLP_HPP_
-#define MULTIPLE_SHOOTING_NLP_HPP_
+#ifndef CGMRES__MULTIPLE_SHOOTING_NLP_HPP_
+#define CGMRES__MULTIPLE_SHOOTING_NLP_HPP_
 
 #include <array>
 
@@ -121,4 +121,4 @@ private:
 
 } // namespace cgmres
 
-#endif // MULTIPLE_SHOOTING_NLP_HPP_
+#endif // CGMRES__MULTIPLE_SHOOTING_NLP_HPP_

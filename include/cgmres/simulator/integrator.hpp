@@ -1,3 +1,6 @@
+#ifndef CGMRES__INTEGRATOR_HPP_
+#define CGMRES__INTEGRATOR_HPP_
+
 #include "cgmres/types.hpp"
 
 namespace cgmres {
@@ -38,4 +41,6 @@ StateVectorType RK4(const OCP& ocp, const Scalar t, const Scalar dt,
   return x1;
 }
 
-} // namespace cgmres
+} // namespace cgmres 
+
+#endif // CGMRES__INTEGRATOR_HPP_

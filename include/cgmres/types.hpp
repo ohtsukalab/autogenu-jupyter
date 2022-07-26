@@ -1,5 +1,5 @@
-#ifndef TYPES_HPP_
-#define TYPES_HPP_
+#ifndef CGMRES__TYPES_HPP_
+#define CGMRES__TYPES_HPP_
 
 #include "Eigen/Core"
 
@@ -22,4 +22,4 @@ using VectorX = Eigen::Matrix<Scalar, Eigen::Dynamic, 1>;
 
 } // namespace cgmres
 
-#endif // TYPES_HPP_
+#endif // CGMRES__TYPES_HPP_

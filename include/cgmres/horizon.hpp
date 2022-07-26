@@ -1,5 +1,5 @@
-#ifndef HORIZON_HPP_
-#define HORIZON_HPP_
+#ifndef CGMRES__HORIZON_HPP_
+#define CGMRES__HORIZON_HPP_
 
 #include <cmath>
 #include <stdexcept>
@@ -41,4 +41,4 @@ private:
 
 } // namespace cgmres
 
-#endif // HORIZON_H
+#endif // CGMRES__HORIZON_H
