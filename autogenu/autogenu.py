@@ -8,10 +8,9 @@ import sympy
 from autogenu import symbolic_functions as symfunc
 
 
-class SolverType(Enum):
-    ContinuationGMRES = auto()
-    MultipleShootingCGMRES = auto()
-    MSCGMRESWithInputSaturation = auto()
+class NLPType(Enum):
+    SingleShooting = auto()
+    MultipleShooting = auto()
 
 class AutoGenU(object):
     """ Automatic C++ code generator for the C/GMRES methods. 
@@ -34,7 +33,7 @@ class AutoGenU(object):
         self.__array_vars = []
         self.__saturation_list = []
         self.__is_function_set = False
-        self.__is_solver_type_set = False
+        self.__is_nlp_type_set = False
         self.__is_solver_paramters_set = False
         self.__is_initialization_set = False
         self.__is_simulation_set = False
@@ -180,50 +179,48 @@ class AutoGenU(object):
         self.__phix = symfunc.diff_scalar_func(phi, x)
         self.__is_function_set = True
 
-    def set_solver_type(self, solver_type):
+    def set_nlp_type(self, nlp_type):
         """ Sets solver types of the C/GMRES methods. 
 
             Args: 
-                solver_type: The solver type. Choose from 
-                SolverType.ContinuationGMRES, SolverType.MultipleShootingCGMRES, 
-                and SolverType.MSCGMRESWithInputSaturation.
+                nlp_type: The solver type. Choose from 
+                NLPType.SingleShooting and NLPType.MultipleShooting, 
         """
         assert (
-            solver_type == SolverType.ContinuationGMRES or 
-            solver_type == SolverType.MultipleShootingCGMRES or
-            solver_type == SolverType.MSCGMRESWithInputSaturation
+            nlp_type == NLPType.SingleShooting or 
+            nlp_type == NLPType.MultipleShooting 
         )
-        self.__solver_type = solver_type
-        self.__is_solver_type_set = True
+        self.__nlp_type = nlp_type
+        self.__is_nlp_type_set = True
 
     def set_solver_parameters(
-            self, T_f, alpha, N, finite_difference_increment, zeta, kmax
+            self, Tf, alpha, N, finite_difference_epsilon, zeta, kmax
         ):
         """ Sets parameters of the NMPC solvers based on the C/GMRES method. 
 
             Args: 
-                T_f, alpha: Parameter about the length of the horizon of NMPC.
+                Tf, alpha: Parameter about the length of the horizon of NMPC.
                     The length of the horzion at time t is given by 
-                    T_f * (1-exp(-alpha*t)).
+                    Tf * (1-exp(-alpha*t)).
                 N: The number of the grid for the discretization
                     of the horizon of NMPC.
-                finite_difference_increment: The small positive value for 
+                finite_difference_epsilon: The small positive value for 
                     finitei difference approximation used in the FD-GMRES. 
                 zeta: A stabilization parameter of the C/GMRES method. It may 
                     work well if you set as zeta=1/sampling_period.
                 kmax: Maximam number of the iteration of the Krylov 
                     subspace method for the linear problem. 
         """
-        assert T_f > 0
+        assert Tf > 0
         assert alpha > 0
         assert N > 0
-        assert finite_difference_increment > 0
+        assert finite_difference_epsilon > 0
         assert zeta > 0
         assert kmax > 0
-        self.__T_f = T_f
+        self.__Tf = Tf
         self.__alpha = alpha
         self.__N = N
-        self.__finite_difference_increment = finite_difference_increment
+        self.__finite_difference_epsilon = finite_difference_epsilon
         self.__zeta = zeta
         self.__kmax = kmax
         self.__is_solver_paramters_set = True
@@ -474,11 +471,11 @@ public:
     def generate_main(self):
         """ Generates main.cpp that defines NMPC solver, set parameters for the 
             solver, and run numerical simulation. Befire call this method,
-            set_solver_type(), set_solver_parameters(), 
+            set_nlp_type(), set_solver_parameters(), 
             set_initialization_parameters(), and set_simulation_parameters(),
             must be called!
         """
-        assert self.__is_solver_type_set, "Solver type is not set! Before call this method, call set_solver_type()"
+        assert self.__is_nlp_type_set, "Solver type is not set! Before call this method, call set_nlp_type()"
         assert self.__is_solver_paramters_set, "Solver parameters are not set! Before call this method, call set_solver_parameters()"
         assert self.__is_initialization_set, "Initialization parameters are not set! Before call this method, call set_initialization_parameters()"
         assert self.__is_simulation_set, "Simulation parameters are not set! Before call this method, call set_simulation_parameters()"
@@ -486,12 +483,12 @@ public:
         """
         f_main = open('models/'+str(self.__model_name)+'/main.cpp', 'w')
         f_main.write('#include "ocp.hpp"\n')
-        if self.__solver_type == SolverType.ContinuationGMRES:
+        if self.__nlp_type == NLPType.SingleShooting:
             f_main.write(
                 '#include "cgmres/zero_horizon_ocp_solver.hpp"\n'
                 '#include "cgmres/single_shooting_cgmres_solver.hpp"\n'
             )
-        elif self.__solver_type == SolverType.MultipleShootingCGMRES:
+        elif self.__nlp_type == NLPType.MultipleShooting:
             f_main.write(
                 '#include "cgmres/zero_horizon_ocp_solver.hpp"\n'
                 '#include "cgmres/multiple_shooting_cgmres_solver.hpp"\n'
@@ -511,7 +508,7 @@ public:
         )
         f_main.write(
             '  // Define the horizon.\n'
-            '  const double Tf = '+str(self.__T_f)+';\n'
+            '  const double Tf = '+str(self.__Tf)+';\n'
             '  const double alpha = '+str(self.__alpha)+';\n'
             '  cgmres::Horizon horizon(Tf, alpha);\n'
             '\n'
@@ -521,7 +518,7 @@ public:
             '  cgmres::SolverSettings settings;\n'
             '  settings.dt = '+str(self.__sampling_time)+'; // sampling period \n'
             '  settings.zeta = '+str(self.__zeta)+';\n'
-            '  settings.finite_difference_epsilon = '+str(self.__finite_difference_increment)+';\n'
+            '  settings.finite_difference_epsilon = '+str(self.__finite_difference_epsilon)+';\n'
             '  // For initialization.\n'
             '  settings.max_iter = '+str(self.__max_newton_iteration)+';\n'
             '  settings.opt_error_tol = '+str(self.__newton_residual_torelance)+';\n'
@@ -554,46 +551,24 @@ public:
         f_main.write('  initializer.set_uc(uc0);\n')
         f_main.write('  initializer.solve(t0, x0);\n')
         f_main.write('\n')
-        if (self.__solver_type == SolverType.MSCGMRESWithInputSaturation
-            and self.__initial_Lagrange_multiplier is not None):
-            f_main.write(
-                '  // Set the initial guess of the lagrange multiplier '
-                'for the condensed constraints with respect to the saturation '
-                'on the function of the control input .\n'
-                )
-            f_main.write(
-                '  double initial_guess_lagrange_multiplier['
-                +str(len(self.__initial_Lagrange_multiplier))
-                +'] = {'
-            )
-            for i in range(len(self.__initial_Lagrange_multiplier)-1):
-                f_main.write(
-                    str(self.__initial_Lagrange_multiplier[i])+', '
-                )
-            f_main.write(
-                str(self.__initial_Lagrange_multiplier[-1])+'};\n'
-            )
-            f_main.write(
-                '\n'+'  mpc.setInitialInputSaturationMultiplier'
-                +'(initial_guess_lagrange_multiplier);'
-                +'\n'
-            )
 
         f_main.write('  // Define the C/GMRES solver.\n')
         f_main.write('  constexpr int N = '+str(self.__N)+';\n')
         f_main.write('  constexpr int kmax = '+str(min(self.__kmax, self.__N*(self.__dimu+self.__dimc)))+';\n')
-        if self.__solver_type == SolverType.ContinuationGMRES:
+        if self.__nlp_type == NLPType.SingleShooting:
             f_main.write(
                 '  cgmres::SingleShootingCGMRESSolver<cgmres::OCP_'+self.__model_name+', N, kmax> mpc(ocp, horizon, settings);\n'
                 '  mpc.set_uc(initializer.ucopt());\n'
             )
-        elif self.__solver_type == SolverType.MultipleShootingCGMRES:
+        elif self.__nlp_type == NLPType.MultipleShooting:
             f_main.write(
                 '  cgmres::MultipleShootingCGMRESSolver<cgmres::OCP_'+self.__model_name+', N, kmax> mpc(ocp, horizon, settings);\n'
                 '  mpc.set_uc(initializer.ucopt());\n'
                 '  mpc.set_lmd(initializer.lmdopt());\n'
                 '  mpc.set_x(x0);\n'
             )
+        else:
+            return NotImplementedError()
         f_main.write('\n\n')
         f_main.write(
             '  // Perform a numerical simulation.\n'
@@ -606,6 +581,8 @@ public:
             '}\n'
         )
         f_main.close()
+
+    def generate_python_bindings(self):
         f_pybind11 = open('models/'+str(self.__model_name)+'/python/'+str(self.__model_name)+'/ocp.cpp', 'w')
         f_pybind11.writelines([
 """
@@ -735,7 +712,7 @@ namespace py = pybind11;
 """ 
         ])
         f_pybind11.close()
-        f_pybind11 = open('models/'+str(self.__model_name)+'/python/'+str(self.__model_name)+'/horizon.cpp', 'w')
+        f_pybind11 = open('models/'+str(self.__model_name)+'/python/common/horizon.cpp', 'w')
         f_pybind11.writelines([
 """
 #include <pybind11/pybind11.h>
@@ -762,7 +739,7 @@ DEFINE_PYBIND11_MODULE_HORIZON()
 """ 
         ])
         f_pybind11.close()
-        f_pybind11 = open('models/'+str(self.__model_name)+'/python/'+str(self.__model_name)+'/solver_settings.cpp', 'w')
+        f_pybind11 = open('models/'+str(self.__model_name)+'/python/common/solver_settings.cpp', 'w')
         f_pybind11.writelines([
 """
 #include <pybind11/pybind11.h>
@@ -796,6 +773,12 @@ from .ocp import *
 from .zero_horizon_ocp_solver import *
 from .single_shooting_cgmres_solver import *
 from .multiple_shooting_cgmres_solver import *
+""" 
+        ])
+        f_pybind11.close()
+        f_pybind11 = open('models/'+str(self.__model_name)+'/python/common/__init__.py', 'w')
+        f_pybind11.writelines([
+"""
 from .horizon import *
 from .solver_settings import *
 """ 
@@ -820,29 +803,33 @@ cmake_minimum_required(VERSION 3.1)
 set(CMAKE_CXX_STANDARD 17)
 
 option(VECTORIZE "Enable -march=native" OFF)
+option(BUILD_MAIN "Build C++ simulation" ON)
 option(BUILD_PYTHON_INTERFACE "Build Python interface" OFF)
 
 set(CGMRES_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/../../include)
 
-add_executable(
-    ${PROJECT_NAME}
-    main.cpp
-)
-target_include_directories(
-    ${PROJECT_NAME}
-    PRIVATE
-    ${CGMRES_INCLUDE_DIR}
-    ${CGMRES_INCLUDE_DIR}/thirdparty/eigen
-)
-if (VECTORIZE)
-  target_compile_options(
-    ${PROJECT_NAME}
-    PRIVATE
-    -march=native
+if (BUILD_MAIN)
+  add_executable(
+      ${PROJECT_NAME}
+      main.cpp
   )
+  target_include_directories(
+      ${PROJECT_NAME}
+      PRIVATE
+      ${CGMRES_INCLUDE_DIR}
+      ${CGMRES_INCLUDE_DIR}/thirdparty/eigen
+  )
+  if (VECTORIZE)
+    target_compile_options(
+      ${PROJECT_NAME}
+      PRIVATE
+      -march=native
+    )
+  endif()
 endif()
 
 if (BUILD_PYTHON_INTERFACE)
+    add_subdirectory(python/common)
     add_subdirectory(python/${PROJECT_NAME})
 endif()
 """
@@ -875,9 +862,7 @@ endmacro()
 
 add_subdirectory(${CGMRES_INCLUDE_DIR}/thirdparty/pybind11 ${CMAKE_CURRENT_BINARY_DIR}/thirdparty/pybind11)
 pybind11_add_cgmres_module(ocp)
-pybind11_add_cgmres_module(solver_settings)
 pybind11_add_cgmres_module(zero_horizon_ocp_solver)
-pybind11_add_cgmres_module(horizon)
 pybind11_add_cgmres_module(single_shooting_cgmres_solver)
 pybind11_add_cgmres_module(multiple_shooting_cgmres_solver)
 
@@ -897,9 +882,54 @@ install(
 """
             ])
         f_cmake_python.close()
+        f_cmake_python = open('models/'+self.__model_name+'/python/common/CMakeLists.txt', 'w')
+        f_cmake_python.writelines([
+"""
+macro(pybind11_add_cgmres_module MODULE)
+  pybind11_add_module(
+    ${MODULE} 
+    SHARED 
+    ${MODULE}.cpp
+  )
+  target_include_directories(
+    ${MODULE} 
+    PRIVATE
+    ${CGMRES_INCLUDE_DIR}
+    ${CGMRES_INCLUDE_DIR}/thirdparty/eigen
+    ${PROJECT_SOURCE_DIR}
+  )
+    if (VECTORIZE)
+    target_compile_options(
+        ${MODULE}
+        PRIVATE
+        -march=native
+    )
+    endif()
+endmacro()
+
+add_subdirectory(${CGMRES_INCLUDE_DIR}/thirdparty/pybind11 ${CMAKE_CURRENT_BINARY_DIR}/thirdparty/pybind11)
+pybind11_add_cgmres_module(solver_settings)
+pybind11_add_cgmres_module(horizon)
+
+set(CGMRES_PYTHON_VERSION ${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR})
+"""
+            ])
+        f_cmake_python.write(
+            'set(CGMRES_PYTHON_BINDINGS_LIBDIR $ENV{HOME}/.local/lib/python${CGMRES_PYTHON_VERSION}/site-packages/cgmres/common)')
+        f_cmake_python.writelines([
+"""
+file(GLOB PYTHON_BINDINGS_${CURRENT_MODULE_DIR} ${CMAKE_CURRENT_BINARY_DIR}/*.cpython*)
+file(GLOB PYTHON_FILES_${CURRENT_MODULE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/*.py)
+install(
+  FILES ${PYTHON_FILES_${CURRENT_MODULE_DIR}} ${PYTHON_BINDINGS_${CURRENT_MODULE_DIR}} 
+  DESTINATION ${CGMRES_PYTHON_BINDINGS_LIBDIR}/${CURRENT_MODULE_DIR}
+)
+"""
+            ])
+        f_cmake_python.close()
 
 
-    def build(self, generator='Auto', build_python_interface=False, install_python_interface=False, remove_build_dir=False):
+    def build(self, generator='Auto', remove_build_dir=False):
         """ Builds execute file to run numerical simulation. 
 
             Args: 
@@ -915,9 +945,8 @@ install(
                     Need to be set True is you change CMake configuration, e.g., 
                     if you change the generator. The default value is False.
         """
-        build_options = ['-DCMAKE_BUILD_TYPE=Release', '-DVECTORIZE=ON']
-        if build_python_interface or install_python_interface:
-            build_options.append('-DBUILD_PYTHON_INTERFACE=ON')
+        build_options = ['-DCMAKE_BUILD_TYPE=Release', '-DVECTORIZE=ON', 
+                         '-DBUILD_MAIN=ON', '-DBUILD_PYTHON_INTERFACE=OFF']
         if platform.system() == 'Windows':
             subprocess.run(
                 ['mkdir', 'build'], 
@@ -982,7 +1011,105 @@ install(
                 stderr=subprocess.STDOUT, 
                 shell=True
             )
-            if install_python_interface:
+            for line in iter(proc.stdout.readline,b''):
+                print(line.rstrip().decode("utf8"))
+            print('\n')
+            
+        else:
+            subprocess.run(
+                ['mkdir', 'build'], 
+                cwd='models/'+self.__model_name, 
+                stdout=subprocess.PIPE, 
+                stderr=subprocess.PIPE
+            )
+            print('build_options:', *build_options)
+            proc = subprocess.Popen(
+                ['cmake', '..', *build_options], 
+                cwd='models/'+self.__model_name+'/build', 
+                stdout=subprocess.PIPE, 
+                stderr=subprocess.STDOUT
+            )
+            for line in iter(proc.stdout.readline, b''):
+                print(line.rstrip().decode("utf8"))
+            print('\n')
+            proc = subprocess.Popen(
+                ['cmake', '--build', '.', '-j4'], 
+                cwd='models/'+self.__model_name+'/build', 
+                stdout = subprocess.PIPE, 
+                stderr = subprocess.STDOUT
+            )
+            for line in iter(proc.stdout.readline, b''):
+                print(line.rstrip().decode("utf8"))
+            print('\n')
+
+    def build_python_interface(self, generator='Auto', install=False):
+        build_options = ['-DCMAKE_BUILD_TYPE=Release', '-DVECTORIZE=ON', 
+                         '-DBUILD_MAIN=OFF', '-DBUILD_PYTHON_INTERFACE=ON']
+        if platform.system() == 'Windows':
+            subprocess.run(
+                ['mkdir', 'build'], 
+                cwd='models/'+self.__model_name, 
+                stdout=subprocess.PIPE, 
+                stderr=subprocess.PIPE, 
+                shell=True
+            )
+            if generator == 'MSYS':
+                proc = subprocess.Popen(
+                    ['cmake', '..', '-G', 'MSYS Makefiles', *build_options], 
+                    cwd='models/'+self.__model_name+'/build', 
+                    stdout=subprocess.PIPE, 
+                    stderr=subprocess.STDOUT, 
+                    shell=True
+                )
+                for line in iter(proc.stdout.readline, b''):
+                    print(line.rstrip().decode("utf8"))
+                print('\n')
+            elif generator == 'MinGW':
+                proc = subprocess.Popen(
+                    ['cmake', '..', '-G', 'MinGW Makefiles', *build_options], 
+                    cwd='models/'+self.__model_name+'/build', 
+                    stdout=subprocess.PIPE, 
+                    stderr=subprocess.STDOUT, 
+                    shell=True
+                )
+                for line in iter(proc.stdout.readline, b''):
+                    print(line.rstrip().decode("utf8"))
+                print('\n')
+            else:
+                proc = subprocess.Popen(
+                    ['where', 'sh.exe'], 
+                    cwd='C:', 
+                    stdout=subprocess.PIPE, 
+                    stderr=subprocess.PIPE, 
+                    shell=True
+                )
+                if proc.stderr.readline() == b'':
+                    proc = subprocess.Popen(
+                        ['cmake', '..', '-G', 'MSYS Makefiles', *build_options], 
+                        cwd='models/'+self.__model_name+'/build', 
+                        stdout=subprocess.PIPE, 
+                        stderr=subprocess.STDOUT, 
+                        shell=True
+                    )
+                else:
+                    proc = subprocess.Popen(
+                        ['cmake', '..', '-G', 'MinGW Makefiles', *build_options], 
+                        cwd='models/'+self.__model_name+'/build', 
+                        stdout=subprocess.PIPE, 
+                        stderr=subprocess.STDOUT, 
+                        shell=True
+                    )
+                for line in iter(proc.stdout.readline, b''):
+                    print(line.rstrip().decode("utf8"))
+                print('\n')
+            proc = subprocess.Popen(
+                ['cmake', '--build', '.', '-j4'], 
+                cwd='models/'+self.__model_name+'/build', 
+                stdout=subprocess.PIPE, 
+                stderr=subprocess.STDOUT, 
+                shell=True
+            )
+            if install:
                 proc = subprocess.Popen(
                     ['cmake', '--install', '.'], 
                     cwd='models/'+self.__model_name+'/build', 
@@ -1017,7 +1144,7 @@ install(
                 stdout = subprocess.PIPE, 
                 stderr = subprocess.STDOUT
             )
-            if install_python_interface:
+            if install:
                 proc = subprocess.Popen(
                     ['cmake', '--install', '.'], 
                     cwd='models/'+self.__model_name+'/build', 
@@ -1137,6 +1264,13 @@ install(
                 stderr=subprocess.PIPE, 
                 shell=True
             )
+            subprocess.run(
+                ['mkdir', '-p', 'python/common'], 
+                cwd='models/'+self.__model_name, 
+                stdout=subprocess.PIPE, 
+                stderr=subprocess.PIPE, 
+                shell=True
+            )
         else:
             subprocess.run(
                 ['mkdir', 'models'], 
@@ -1151,6 +1285,12 @@ install(
             )
             subprocess.run(
                 ['mkdir', '-p', 'python/'+self.__model_name], 
+                cwd='models/'+self.__model_name,
+                stdout=subprocess.PIPE, 
+                stderr=subprocess.PIPE
+            )
+            subprocess.run(
+                ['mkdir', '-p', 'python/common'], 
                 cwd='models/'+self.__model_name,
                 stdout=subprocess.PIPE, 
                 stderr=subprocess.PIPE
