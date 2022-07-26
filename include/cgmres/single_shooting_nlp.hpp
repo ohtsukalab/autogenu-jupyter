@@ -42,7 +42,6 @@ public:
     // Compute the state trajectory over the horizon  
     ocp_.eval_f(t, x_[0].data(), solution.template head<nuc>().data(), dx_.data());
     x_[1] = x_[0] + dt * dx_;
-    Scalar tau = t + dt;
     for (size_t i=1; i<N; ++i) {
       ocp_.eval_f(t+i*dt, x_[i].data(), solution.template segment<nuc>(nuc*i).data(), dx_.data());
       x_[i+1] = x_[i] + dt * dx_;
