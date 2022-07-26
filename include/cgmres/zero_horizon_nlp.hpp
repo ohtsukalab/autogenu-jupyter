@@ -25,6 +25,8 @@ public:
     assert(nc >= 0);
   }
 
+  ZeroHorizonNLP() = default;
+
   ~ZeroHorizonNLP() = default;
 
   void eval(const Scalar t, const Vector<nx>& x, const Vector<dim>& solution,

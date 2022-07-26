@@ -38,6 +38,8 @@ public:
     std::fill(ucopt_.begin(), ucopt_.end(), Vector<nuc>::Zero());
   }
 
+  SingleShootingCGMRESSolver() = default;
+
   ~SingleShootingCGMRESSolver() = default;
 
   void set_u(const Vector<nu>& u) {

@@ -44,6 +44,8 @@ public:
     }
   }
 
+  ContinuationGMRESCondensing() = default;
+
   ~ContinuationGMRESCondensing() = default;
 
   Scalar optError() const {

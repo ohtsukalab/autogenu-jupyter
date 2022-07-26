@@ -35,6 +35,8 @@ public:
     }
   }
 
+  ContinuationGMRES() = default;
+
   ~ContinuationGMRES() = default;
 
   Scalar optError() const {

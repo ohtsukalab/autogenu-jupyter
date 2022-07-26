@@ -40,6 +40,8 @@ public:
     std::fill(lmdopt_.begin(), lmdopt_.end(), Vector<nx>::Zero());
   }
 
+  MultipleShootingCGMRESSolver() = default;
+
   ~MultipleShootingCGMRESSolver() = default;
 
   void set_u(const Vector<nu>& u) {

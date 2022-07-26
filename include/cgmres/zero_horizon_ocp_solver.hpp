@@ -37,6 +37,8 @@ public:
       solution_update_(Vector<dim>::Zero()) {
   }
 
+  ZeroHorizonOCPSolver() = default;
+
   ~ZeroHorizonOCPSolver() = default;
 
   template <typename VectorType>

@@ -22,6 +22,8 @@ public:
     }
   }
 
+  Horizon() = default;
+
   ~Horizon() = default;
 
   inline Scalar T(const Scalar t) const {

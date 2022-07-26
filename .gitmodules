@@ -1,3 +1,6 @@
 [submodule "include/thirdparty/eigen"]
 	path = include/thirdparty/eigen
 	url = https://gitlab.com/libeigen/eigen.git
+[submodule "include/thirdparty/pybind11"]
+	path = include/thirdparty/pybind11
+	url = https://github.com/pybind/pybind11

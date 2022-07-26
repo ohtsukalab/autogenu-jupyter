@@ -29,6 +29,8 @@ public:
     std::fill(lmd_.begin(), lmd_.end(), Vector<nx>::Zero());
   }
 
+  SingleShootingNLP() = default;
+
   ~SingleShootingNLP() = default;
 
   void eval(const Scalar t, const Vector<nx>& x, const Vector<dim>& solution,

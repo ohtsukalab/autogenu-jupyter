@@ -26,6 +26,8 @@ public:
     assert(N > 0);
   }
 
+  MultipleShootingNLP() = default;
+
   ~MultipleShootingNLP() = default;
 
   void eval_fonc_hu(const Scalar t, const Vector<nx>& x0, const Vector<dim>& solution,

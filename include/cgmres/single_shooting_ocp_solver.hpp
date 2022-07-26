@@ -38,6 +38,8 @@ public:
     std::fill(ucopt_.begin(), ucopt_.end(), Vector<nuc>::Zero());
   }
 
+  SingleShootingOCPSolver() = default;
+
   ~SingleShootingOCPSolver() = default;
 
   template <typename VectorType>

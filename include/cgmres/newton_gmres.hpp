@@ -28,6 +28,8 @@ public:
     }
   }
 
+  NewtonGMRES() = default;
+
   ~NewtonGMRES() = default;
 
   Scalar optError() const {
