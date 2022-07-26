@@ -56,5 +56,9 @@ PYBIND11_MODULE(ocp, m) { \
           throw std::invalid_argument("[OCP]: 'hx.size()' must be "+std::to_string(OCP::nuc)); \ 
         } \
         self.eval_hu(t, x.data(), u.data(), lmd.data(), hu.data()); \
-     }, py::arg("t"), py::arg("x"), py::arg("u"), py::arg("lmd"), py::arg("hu")); \
+     }, py::arg("t"), py::arg("x"), py::arg("u"), py::arg("lmd"), py::arg("hu")) \
+    .def_static("nx", []() { return OCP::nx; }) \
+    .def_static("nu", []() { return OCP::nu; }) \
+    .def_static("nc", []() { return OCP::nc; }) \
+    .def_static("nuc", []() { return OCP::nuc; }); \
 }

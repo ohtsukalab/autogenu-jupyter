@@ -885,21 +885,21 @@ set(CGMRES_PYTHON_VERSION ${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR})
 """
             ])
         f_cmake_python.write(
-            'set(CGMRES_PYTHON_BINDINGS_LIBDIR $ENV{HOME}/python${CGMRES_PYTHON_VERSION}/site-packages/cgmres/'+self.__model_name+')')
+            'set(CGMRES_PYTHON_BINDINGS_LIBDIR $ENV{HOME}/.local/lib/python${CGMRES_PYTHON_VERSION}/site-packages/cgmres/'+self.__model_name+')')
         f_cmake_python.writelines([
 """
 file(GLOB PYTHON_BINDINGS_${CURRENT_MODULE_DIR} ${CMAKE_CURRENT_BINARY_DIR}/*.cpython*)
 file(GLOB PYTHON_FILES_${CURRENT_MODULE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/*.py)
 install(
-FILES ${PYTHON_FILES_${CURRENT_MODULE_DIR}} ${PYTHON_BINDINGS_${CURRENT_MODULE_DIR}} 
-DESTINATION ${CGMRES_PYTHON_BINDINGS_LIBDIR}/${CURRENT_MODULE_DIR}
+  FILES ${PYTHON_FILES_${CURRENT_MODULE_DIR}} ${PYTHON_BINDINGS_${CURRENT_MODULE_DIR}} 
+  DESTINATION ${CGMRES_PYTHON_BINDINGS_LIBDIR}/${CURRENT_MODULE_DIR}
 )
 """
             ])
         f_cmake_python.close()
 
 
-    def build(self, generator='Auto', build_python_interface=False, remove_build_dir=False):
+    def build(self, generator='Auto', build_python_interface=False, install_python_interface=False, remove_build_dir=False):
         """ Builds execute file to run numerical simulation. 
 
             Args: 
@@ -916,7 +916,7 @@ DESTINATION ${CGMRES_PYTHON_BINDINGS_LIBDIR}/${CURRENT_MODULE_DIR}
                     if you change the generator. The default value is False.
         """
         build_options = ['-DCMAKE_BUILD_TYPE=Release', '-DVECTORIZE=ON']
-        if build_python_interface:
+        if build_python_interface or install_python_interface:
             build_options.append('-DBUILD_PYTHON_INTERFACE=ON')
         if platform.system() == 'Windows':
             subprocess.run(
@@ -982,6 +982,14 @@ DESTINATION ${CGMRES_PYTHON_BINDINGS_LIBDIR}/${CURRENT_MODULE_DIR}
                 stderr=subprocess.STDOUT, 
                 shell=True
             )
+            if install_python_interface:
+                proc = subprocess.Popen(
+                    ['cmake', '--install', '.'], 
+                    cwd='models/'+self.__model_name+'/build', 
+                    stdout=subprocess.PIPE, 
+                    stderr=subprocess.STDOUT, 
+                    shell=True
+                )
             for line in iter(proc.stdout.readline,b''):
                 print(line.rstrip().decode("utf8"))
             print('\n')
@@ -1009,6 +1017,13 @@ DESTINATION ${CGMRES_PYTHON_BINDINGS_LIBDIR}/${CURRENT_MODULE_DIR}
                 stdout = subprocess.PIPE, 
                 stderr = subprocess.STDOUT
             )
+            if install_python_interface:
+                proc = subprocess.Popen(
+                    ['cmake', '--install', '.'], 
+                    cwd='models/'+self.__model_name+'/build', 
+                    stdout = subprocess.PIPE, 
+                    stderr = subprocess.STDOUT
+                )
             for line in iter(proc.stdout.readline, b''):
                 print(line.rstrip().decode("utf8"))
             print('\n')

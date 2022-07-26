@@ -1,6 +1,6 @@
 #define DEFINE_PYBIND11_MODULE_MULTIPLE_SHOOTING_CGMRES_SOLVER(OCP, N, KMAX) \
 using MultipleShootingCGMRESSolver_ = MultipleShootingCGMRESSolver<OCP, N, KMAX>; \
-PYBIND11_MODULE(single_shooting_cgmres_solver, m) { \
+PYBIND11_MODULE(multiple_shooting_cgmres_solver, m) { \
   py::class_<MultipleShootingCGMRESSolver_>(m, "MultipleShootingCGMRESSolver") \
     .def(py::init<OCP, Horizon, SolverSettings>(), \ 
           py::arg("ocp"), py::arg("horizon"), py::arg("settings")) \
