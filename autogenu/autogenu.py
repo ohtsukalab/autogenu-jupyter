@@ -351,9 +351,8 @@ namespace cgmres {
 """ 
         ])
         f_model_h.write(
-            'class OCP_'+str(self.__model_name)+' {\n'
+            'class OCP_'+str(self.__model_name)+' {'
         )
-
         f_model_h.writelines([
 """ 
 public:
@@ -374,9 +373,8 @@ public:
             '  static constexpr int nuc = nu + nc;\n'
         )
         f_model_h.write('\n')
-        f_model_h.write('private: \n')
         f_model_h.writelines([
-            '  static constexpr double '+scalar_var[1]+' = '
+            '  double '+scalar_var[1]+' = '
             +str(scalar_var[2])+';\n' for scalar_var in self.__scalar_vars
         ])
         f_model_h.write('\n')
@@ -396,9 +394,6 @@ public:
             f_model_h.write(str(self.__FB_epsilon[self.__dimh-1])+'};\n')
         f_model_h.writelines([
 """
-
-public:
-
   // Computes the state equation f(t, x, u).
   // t : time parameter
   // x : state vector
@@ -605,9 +600,88 @@ namespace py = pybind11;
 
 """ 
         ])
-        f_pybind11.write('DEFINE_PYBIND11_MODULE_OCP(OCP_'+str(self.__model_name)+')\n')
+        f_pybind11.write('using OCP = OCP_'+str(self.__model_name)+';\n')
         f_pybind11.writelines([
 """
+PYBIND11_MODULE(ocp, m) { 
+  py::class_<OCP>(m, "OCP")
+    .def(py::init<>())  
+    .def("eval_f", [](const OCP& self, const Scalar t,  
+                      const VectorX& x, const VectorX& u, VectorX& dx) { 
+        if (x.size() != OCP::nx) {
+          throw std::invalid_argument("[OCP]: 'x.size()' must be "+std::to_string(OCP::nx));
+        }
+        if (u.size() != OCP::nu) { 
+          throw std::invalid_argument("[OCP]: 'u.size()' must be "+std::to_string(OCP::nu)); 
+        } 
+        if (dx.size() != OCP::nx) {
+          throw std::invalid_argument("[OCP]: 'dx.size()' must be "+std::to_string(OCP::nx));
+        }
+        self.eval_f(t, x.data(), u.data(), dx.data()); 
+     }, py::arg("t"), py::arg("x"), py::arg("u"), py::arg("dx"))
+    .def("eval_phix", [](const OCP& self, const Scalar t,
+                      const VectorX& x, VectorX& phix) {
+        if (x.size() != OCP::nx) {
+          throw std::invalid_argument("[OCP]: 'x.size()' must be "+std::to_string(OCP::nx));
+        } 
+        if (phix.size() != OCP::nx) {
+          throw std::invalid_argument("[OCP]: 'phix.size()' must be "+std::to_string(OCP::nx));
+        }
+        self.eval_phix(t, x.data(), phix.data());
+     }, py::arg("t"), py::arg("x"), py::arg("phix"))
+    .def("eval_hx", [](const OCP& self, const Scalar t, 
+                       const VectorX& x, const VectorX& u, const VectorX& lmd, VectorX& hx) {
+        if (x.size() != OCP::nx) {
+          throw std::invalid_argument("[OCP]: 'x.size()' must be "+std::to_string(OCP::nx));
+        }
+        if (u.size() != OCP::nuc) {
+          throw std::invalid_argument("[OCP]: 'u.size()' must be "+std::to_string(OCP::nuc));
+        }
+        if (lmd.size() != OCP::nx) {
+          throw std::invalid_argument("[OCP]: 'lmd.size()' must be "+std::to_string(OCP::nx));
+        }
+        if (hx.size() != OCP::nx) {
+          throw std::invalid_argument("[OCP]: 'hx.size()' must be "+std::to_string(OCP::nx));
+        }
+        self.eval_hx(t, x.data(), u.data(), lmd.data(), hx.data());
+     }, py::arg("t"), py::arg("x"), py::arg("u"), py::arg("lmd"), py::arg("hx"))
+    .def("eval_hu", [](const OCP& self, const Scalar t,
+                       const VectorX& x, const VectorX& u, const VectorX& lmd, VectorX& hu) {
+        if (x.size() != OCP::nx) {
+          throw std::invalid_argument("[OCP]: 'x.size()' must be "+std::to_string(OCP::nx));
+        }
+        if (u.size() != OCP::nuc) {
+          throw std::invalid_argument("[OCP]: 'u.size()' must be "+std::to_string(OCP::nuc));
+        }
+        if (lmd.size() != OCP::nx) {
+          throw std::invalid_argument("[OCP]: 'lmd.size()' must be "+std::to_string(OCP::nx));
+        }
+        if (hu.size() != OCP::nuc) {
+          throw std::invalid_argument("[OCP]: 'hx.size()' must be "+std::to_string(OCP::nuc)); 
+        }
+        self.eval_hu(t, x.data(), u.data(), lmd.data(), hu.data());
+     }, py::arg("t"), py::arg("x"), py::arg("u"), py::arg("lmd"), py::arg("hu"))
+""" 
+        ])
+        for scalar_var in self.__scalar_vars:
+            name = scalar_var[1]
+            f_pybind11.write('    .def_readwrite("'+name+' ", &OCP::'+name+')\n')
+        for array_var in self.__array_vars:
+            name = array_var[1]
+            size = len(array_var[2])
+            f_pybind11.write('    .def_property("'+name+'", \n')
+            f_pybind11.write('      [](const OCP& self) { return Eigen::Map<const Vector<'+str(size)+'>>(self.'+name+'); },\n')
+            f_pybind11.write('      [](OCP& self, const Eigen::VectorXd& v) { \n')
+            f_pybind11.write('        if (v.size() != '+str(size)+') { \n')
+            f_pybind11.write('          throw std::invalid_argument("[OCP]: \''+name+'.size()\' must be "+std::to_string('+str(size)+')); \n')
+            f_pybind11.write('        } Eigen::Map<Vector<'+str(size)+'>>(self.'+name+') = v; })\n')
+        f_pybind11.writelines([
+"""
+    .def_static("nx", []() { return OCP::nx; })
+    .def_static("nu", []() { return OCP::nu; })
+    .def_static("nc", []() { return OCP::nc; })
+    .def_static("nuc", []() { return OCP::nuc; });
+}
 
 } // namespace python
 } // namespace cgmres
