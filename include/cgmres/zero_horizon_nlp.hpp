@@ -5,6 +5,7 @@
 
 #include "cgmres/types.hpp"
 #include "cgmres/horizon.hpp"
+#include "cgmres/control_input_bounds.hpp"
 
 namespace cgmres {
 
@@ -15,7 +16,8 @@ public:
   static constexpr int nu = OCP::nu;
   static constexpr int nc = OCP::nc;
   static constexpr int nuc = nu + nc;
-  static constexpr int dim = nuc;
+  static constexpr int nub = OCP::nub;
+  static constexpr int dim = nuc + 2 * nub;
 
   ZeroHorizonNLP(const OCP& ocp) 
     : ocp_(ocp),
@@ -35,6 +37,18 @@ public:
     ocp_.eval_phix(t, x.data(), lmd_.data());
     // Compute the erros in the first order necessary conditions (FONC)
     ocp_.eval_hu(t, x.data(), solution.data(), lmd_.data(), fonc_hu.data());
+
+    if constexpr(nub > 0) {
+      const auto uc = solution.template head<nuc>();
+      const auto dummy = solution.template segment<nub>(nu);
+      const auto mu = solution.template segment<nub>(nuc+nub);
+      auto hu = fonc_hu.template head<nuc>();
+      auto hdummy = fonc_hu.template segment<nub>(nuc);
+      auto hmu = fonc_hu.template segment<nub>(nuc+nub);
+      ubounds::eval_hu(ocp_, uc, dummy, mu, hu);
+      ubounds::eval_hdummy(ocp_, uc, dummy, mu, hdummy);
+      ubounds::eval_hmu(ocp_, uc, dummy, mu, hmu);
+    }
   }
 
   const OCP& ocp() const { return ocp_; }

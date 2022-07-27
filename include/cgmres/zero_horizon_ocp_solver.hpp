@@ -20,7 +20,8 @@ public:
   static constexpr int nu = OCP::nu;
   static constexpr int nc = OCP::nc;
   static constexpr int nuc = nu + nc;
-  static constexpr int dim = nuc;
+  static constexpr int nub = OCP::nub;
+  static constexpr int dim = nuc + 2 * nub;
 
   using ZeroHorizonNLP_ = ZeroHorizonNLP<OCP>;
   using NewtonGMRES_ = NewtonGMRES<ZeroHorizonNLP_>;
@@ -71,7 +72,7 @@ public:
   Scalar optError() const { return newton_gmres_.optError(); }
 
   Scalar optError(const Scalar t, const Vector<nx>& x) {
-    newton_gmres_.eval_fonc_hu(t, x, solution_);
+    newton_gmres_.eval_fonc(t, x, solution_);
     return optError();
   }
 
@@ -118,16 +119,19 @@ private:
 
   Vector<nu> uopt_;
   Vector<nuc> ucopt_;
+  Vector<nub> dummyopt_, muopt_;
 
   Vector<dim> solution_, solution_update_; 
 
   void setInnerSolution() {
-    solution_ = ucopt_;
+    solution_.template head<nuc>() = ucopt_;
   }
 
   void retriveSolution() {
     uopt_ = solution_.template head<nu>();
-    ucopt_ = solution_;
+    ucopt_ = solution_.template head<nuc>();
+    dummyopt_ = solution_.template segment<nub>(nuc);
+    muopt_ = solution_.template segment<nub>(nuc+nub);
   }
 
 };
