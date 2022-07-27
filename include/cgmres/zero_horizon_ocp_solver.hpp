@@ -71,7 +71,7 @@ public:
   Scalar optError() const { return newton_gmres_.optError(); }
 
   Scalar optError(const Scalar t, const Vector<nx>& x) {
-    newton_gmres_.eval_fonc(t, x, solution_);
+    newton_gmres_.eval_fonc_hu(t, x, solution_);
     return optError();
   }
 

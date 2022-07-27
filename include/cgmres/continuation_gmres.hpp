@@ -45,7 +45,7 @@ public:
   }
 
   void eval_fonc(const Scalar t, const Vector<nx>& x, const Vector<dim>& solution) {
-    nlp_.eval(t, x, solution, fonc_);
+    nlp_.eval_fonc_hu(t, x, solution, fonc_);
   }
 
   template <typename VectorType1, typename VectorType2, typename VectorType3>
@@ -62,9 +62,9 @@ public:
     x_1_ = x + finite_difference_epsilon_ * dx_;
     updated_solution_ = solution + finite_difference_epsilon_ * solution_update;
 
-    nlp_.eval(t, x, solution, fonc_);
-    nlp_.eval(t1, x_1_, solution, fonc_1_);
-    nlp_.eval(t1, x_1_, updated_solution_, fonc_2_);
+    nlp_.eval_fonc_hu(t, x, solution, fonc_);
+    nlp_.eval_fonc_hu(t1, x_1_, solution, fonc_1_);
+    nlp_.eval_fonc_hu(t1, x_1_, updated_solution_, fonc_2_);
 
     CGMRES_EIGEN_CONST_CAST(VectorType3, b_vec) = (1/finite_difference_epsilon_ - zeta_) * fonc_ 
                                                     - fonc_2_ / finite_difference_epsilon_;
@@ -80,7 +80,7 @@ public:
     assert(ax_vec.size() == dim);
     const Scalar t1 = t + finite_difference_epsilon_;
     updated_solution_ = solution + finite_difference_epsilon_ * solution_update;
-    nlp_.eval(t1, x_1_, updated_solution_, fonc_2_);
+    nlp_.eval_fonc_hu(t1, x_1_, updated_solution_, fonc_2_);
     CGMRES_EIGEN_CONST_CAST(VectorType3, ax_vec) = (fonc_2_ - fonc_1_) / finite_difference_epsilon_;
   }
 

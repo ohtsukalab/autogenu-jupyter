@@ -33,8 +33,8 @@ public:
 
   ~SingleShootingNLP() = default;
 
-  void eval(const Scalar t, const Vector<nx>& x, const Vector<dim>& solution,
-            Vector<dim>& fonc) {
+  void eval_fonc_hu(const Scalar t, const Vector<nx>& x, const Vector<dim>& solution,
+                    Vector<dim>& fonc_hu) {
     const Scalar T = horizon_.T(t);
     const Scalar dt = T / N;
     assert(T >= 0);
@@ -55,10 +55,10 @@ public:
     }
     // Compute the erros in the first order necessary conditions (FONC)
     ocp_.eval_hu(t, x_[0].data(), solution.template head<nuc>().data(), lmd_[1].data(), 
-                 fonc.template head<nuc>().data());
+                 fonc_hu.template head<nuc>().data());
     for (size_t i=1; i<N; ++i) {
       ocp_.eval_hu(t+i*dt, x_[i].data(), solution.template segment<nuc>(nuc*i).data(),
-                   lmd_[i+1].data(), fonc.template segment<nuc>(nuc*i).data());
+                   lmd_[i+1].data(), fonc_hu.template segment<nuc>(nuc*i).data());
     }
   }
 

@@ -29,12 +29,12 @@ public:
 
   ~ZeroHorizonNLP() = default;
 
-  void eval(const Scalar t, const Vector<nx>& x, const Vector<dim>& solution,
-            Vector<dim>& fonc) {
+  void eval_fonc_hu(const Scalar t, const Vector<nx>& x, const Vector<dim>& solution,
+                    Vector<dim>& fonc_hu) {
     // Compute the Lagrange multiplier over the horizon  
     ocp_.eval_phix(t, x.data(), lmd_.data());
     // Compute the erros in the first order necessary conditions (FONC)
-    ocp_.eval_hu(t, x.data(), solution.data(), lmd_.data(), fonc.data());
+    ocp_.eval_hu(t, x.data(), solution.data(), lmd_.data(), fonc_hu.data());
   }
 
   const OCP& ocp() const { return ocp_; }

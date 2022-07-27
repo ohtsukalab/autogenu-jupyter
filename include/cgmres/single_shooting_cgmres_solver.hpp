@@ -83,8 +83,8 @@ public:
 
   Scalar optError(const Scalar t, const Vector<nx>& x) {
     Vector<dim> fonc;
-    nlp_.eval(t, x, solution_, fonc);
-    return fonc.template lpNorm<2>();
+    continuation_gmres_.eval_fonc(t, x, solution_);
+    return optError();
   }
 
   void update(const Scalar t, const Vector<nx>& x) {
