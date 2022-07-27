@@ -191,7 +191,8 @@ class AutoGenU(object):
             Args: 
                 Tf, alpha: Parameter about the length of the horizon of NMPC.
                     The length of the horzion at time t is given by 
-                    Tf * (1-exp(-alpha*t)).
+                    Tf * (1-exp(-alpha*t)). If alpha is not positive, the horizon 
+                    length is fixed by Tf.
                 N: The number of the grid for the discretization
                     of the horizon of NMPC.
                 finite_difference_epsilon: The small positive value for 
@@ -202,7 +203,6 @@ class AutoGenU(object):
                     subspace method for the linear problem. 
         """
         assert Tf > 0
-        assert alpha > 0
         assert N > 0
         assert finite_difference_epsilon > 0
         assert zeta > 0
