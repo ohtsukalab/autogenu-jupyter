@@ -9,9 +9,9 @@ class SimulationConditions(object):
             sampling_period(): Returns the sampling period.
     """
 
-    def __init__(self, model_name):
+    def __init__(self, ocp_name):
         """ Inits SimulationConditions with the simulation results. """
-        simulation_conditions = open(model_name + '_conditions' + '.log')
+        simulation_conditions = open(ocp_name + '_conditions' + '.log')
         lines = simulation_conditions.readlines()
         if re.search(r'.', lines[1]):
             pattern = r'([0-9]+\.?[0-9]*)' 

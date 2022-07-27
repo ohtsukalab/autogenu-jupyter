@@ -16,11 +16,11 @@ class SimulationPlottor(object):
                 file.
     """
 
-    def __init__(self, model_name):
+    def __init__(self, ocp_name):
         """ Inits SimulationPlotter with loading the simulation results. """
         # Load the data of the simulation results. 
-        self.__save_dir = 'generated/' + model_name + '/simulation_result/'
-        self.__file_header = self.__save_dir + model_name
+        self.__save_dir = 'generated/' + ocp_name + '/simulation_result/'
+        self.__file_header = self.__save_dir + ocp_name
         self.__x_data = np.genfromtxt(
             self.__file_header+'_x'+'.log'
         )

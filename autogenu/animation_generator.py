@@ -22,11 +22,11 @@ class TwoLinkArm(object):
                 and saves it as a .mp4 files.
     """
 
-    def __init__(self, model_name):
+    def __init__(self, ocp_name):
         """ Inits TwoLinkArm with loading the simulation results. """
         # Loads the simulation data.
-        self.__model_dir = 'generated/' + model_name + '/simulation_result' 
-        self.__file_header = self.__model_dir + '/' + model_name
+        self.__model_dir = 'generated/' + ocp_name + '/simulation_result' 
+        self.__file_header = self.__model_dir + '/' + ocp_name
         self.__x_data = np.genfromtxt(
             self.__file_header+'_x'+'.log'
         )
@@ -142,11 +142,11 @@ class CartPole(object):
                 and saves it as a .mp4 files.
     """
 
-    def __init__(self, model_name):
+    def __init__(self, ocp_name):
         """ Inits CartPole with loading the simulation results. """
         # Loads the simulation data.
-        self.__model_dir = 'generated/' + model_name + '/simulation_result' 
-        self.__file_header = self.__model_dir + '/' + model_name
+        self.__model_dir = 'generated/' + ocp_name + '/simulation_result' 
+        self.__file_header = self.__model_dir + '/' + ocp_name
         self.__x_data = np.genfromtxt(
             self.__file_header+'_x'+'.log'
         )
@@ -292,11 +292,11 @@ class Hexacopter(object):
                 and saves it as a .mp4 files.
     """
 
-    def __init__(self, model_name):
+    def __init__(self, ocp_name):
         """ Inits Hexacopter with loading the simulation results. """
         # Loads the simulation data.
-        self.__model_dir = 'generated/' + model_name + '/simulation_result' 
-        self.__file_header = self.__model_dir + '/' + model_name
+        self.__model_dir = 'generated/' + ocp_name + '/simulation_result' 
+        self.__file_header = self.__model_dir + '/' + ocp_name
         self.__x_data = np.genfromtxt(
             self.__file_header+'_x'+'.log'
         )
@@ -448,11 +448,11 @@ class MobileRobot(object):
                 and saves it as a .mp4 files.
     """
 
-    def __init__(self, model_name, vx_ref, X1, Y1, R1, X2, Y2, R2):
+    def __init__(self, ocp_name, vx_ref, X1, Y1, R1, X2, Y2, R2):
         """ Inits CartPole with loading the simulation results. """
         # Loads the simulation data.
-        self.__model_dir = 'generated/' + model_name + '/simulation_result' 
-        self.__file_header = self.__model_dir + '/' + model_name
+        self.__model_dir = 'generated/' + ocp_name + '/simulation_result' 
+        self.__file_header = self.__model_dir + '/' + ocp_name
         self.__x_data = np.genfromtxt(
             self.__file_header+'_x'+'.log'
         )
