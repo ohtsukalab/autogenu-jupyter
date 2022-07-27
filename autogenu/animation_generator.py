@@ -25,7 +25,7 @@ class TwoLinkArm(object):
     def __init__(self, model_name):
         """ Inits TwoLinkArm with loading the simulation results. """
         # Loads the simulation data.
-        self.__model_dir = 'models/' + model_name + '/simulation_result' 
+        self.__model_dir = 'generated/' + model_name + '/simulation_result' 
         self.__file_header = self.__model_dir + '/' + model_name
         self.__x_data = np.genfromtxt(
             self.__file_header+'_x'+'.log'
@@ -145,7 +145,7 @@ class CartPole(object):
     def __init__(self, model_name):
         """ Inits CartPole with loading the simulation results. """
         # Loads the simulation data.
-        self.__model_dir = 'models/' + model_name + '/simulation_result' 
+        self.__model_dir = 'generated/' + model_name + '/simulation_result' 
         self.__file_header = self.__model_dir + '/' + model_name
         self.__x_data = np.genfromtxt(
             self.__file_header+'_x'+'.log'
@@ -295,7 +295,7 @@ class Hexacopter(object):
     def __init__(self, model_name):
         """ Inits Hexacopter with loading the simulation results. """
         # Loads the simulation data.
-        self.__model_dir = 'models/' + model_name + '/simulation_result' 
+        self.__model_dir = 'generated/' + model_name + '/simulation_result' 
         self.__file_header = self.__model_dir + '/' + model_name
         self.__x_data = np.genfromtxt(
             self.__file_header+'_x'+'.log'
@@ -451,7 +451,7 @@ class MobileRobot(object):
     def __init__(self, model_name, vx_ref, X1, Y1, R1, X2, Y2, R2):
         """ Inits CartPole with loading the simulation results. """
         # Loads the simulation data.
-        self.__model_dir = 'models/' + model_name + '/simulation_result' 
+        self.__model_dir = 'generated/' + model_name + '/simulation_result' 
         self.__file_header = self.__model_dir + '/' + model_name
         self.__x_data = np.genfromtxt(
             self.__file_header+'_x'+'.log'

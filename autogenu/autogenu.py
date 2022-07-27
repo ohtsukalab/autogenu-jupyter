@@ -331,7 +331,7 @@ class AutoGenU(object):
             symfunc.simplify(self.__hx)
             symfunc.simplify(self.__hu)
             symfunc.simplify(self.__phix)
-        f_model_h = open('models/'+str(self.__model_name)+'/ocp.hpp', 'w')
+        f_model_h = open('generated/'+str(self.__model_name)+'/ocp.hpp', 'w')
         f_model_h.write(
             '#ifndef CGMRES_OCP_'+str(self.__model_name)+'__HPP_ \n'
         )
@@ -476,7 +476,7 @@ public:
         assert self.__is_simulation_set, "Simulation parameters are not set! Before call this method, call set_simulation_parameters()"
         """ Makes a directory where the C++ source files are generated.
         """
-        f_main = open('models/'+str(self.__model_name)+'/main.cpp', 'w')
+        f_main = open('generated/'+str(self.__model_name)+'/main.cpp', 'w')
         f_main.write('#include "ocp.hpp"\n')
         if self.__nlp_type == NLPType.SingleShooting:
             f_main.write(
@@ -578,7 +578,7 @@ public:
         f_main.close()
 
     def generate_python_bindings(self):
-        f_pybind11 = open('models/'+str(self.__model_name)+'/python/'+str(self.__model_name)+'/ocp.cpp', 'w')
+        f_pybind11 = open('generated/'+str(self.__model_name)+'/python/'+str(self.__model_name)+'/ocp.cpp', 'w')
         f_pybind11.writelines([
 """
 #include <pybind11/pybind11.h>
@@ -691,7 +691,7 @@ PYBIND11_MODULE(ocp, m) {
 """ 
         ])
         f_pybind11.close()
-        f_pybind11 = open('models/'+str(self.__model_name)+'/python/'+str(self.__model_name)+'/zero_horizon_ocp_solver.cpp', 'w')
+        f_pybind11 = open('generated/'+str(self.__model_name)+'/python/'+str(self.__model_name)+'/zero_horizon_ocp_solver.cpp', 'w')
         f_pybind11.writelines([
 """
 #include <pybind11/pybind11.h>
@@ -723,7 +723,7 @@ namespace py = pybind11;
 """ 
         ])
         f_pybind11.close()
-        f_pybind11 = open('models/'+str(self.__model_name)+'/python/'+str(self.__model_name)+'/single_shooting_cgmres_solver.cpp', 'w')
+        f_pybind11 = open('generated/'+str(self.__model_name)+'/python/'+str(self.__model_name)+'/single_shooting_cgmres_solver.cpp', 'w')
         f_pybind11.writelines([
 """
 #include <pybind11/pybind11.h>
@@ -756,7 +756,7 @@ namespace py = pybind11;
 """ 
         ])
         f_pybind11.close()
-        f_pybind11 = open('models/'+str(self.__model_name)+'/python/'+str(self.__model_name)+'/multiple_shooting_cgmres_solver.cpp', 'w')
+        f_pybind11 = open('generated/'+str(self.__model_name)+'/python/'+str(self.__model_name)+'/multiple_shooting_cgmres_solver.cpp', 'w')
         f_pybind11.writelines([
 """
 #include <pybind11/pybind11.h>
@@ -789,7 +789,7 @@ namespace py = pybind11;
 """ 
         ])
         f_pybind11.close()
-        f_pybind11 = open('models/'+str(self.__model_name)+'/python/common/horizon.cpp', 'w')
+        f_pybind11 = open('generated/'+str(self.__model_name)+'/python/common/horizon.cpp', 'w')
         f_pybind11.writelines([
 """
 #include <pybind11/pybind11.h>
@@ -816,7 +816,7 @@ DEFINE_PYBIND11_MODULE_HORIZON()
 """ 
         ])
         f_pybind11.close()
-        f_pybind11 = open('models/'+str(self.__model_name)+'/python/common/solver_settings.cpp', 'w')
+        f_pybind11 = open('generated/'+str(self.__model_name)+'/python/common/solver_settings.cpp', 'w')
         f_pybind11.writelines([
 """
 #include <pybind11/pybind11.h>
@@ -843,7 +843,7 @@ DEFINE_PYBIND11_MODULE_SOLVER_SETTINGS()
 """ 
         ])
         f_pybind11.close()
-        f_pybind11 = open('models/'+str(self.__model_name)+'/python/'+str(self.__model_name)+'/__init__.py', 'w')
+        f_pybind11 = open('generated/'+str(self.__model_name)+'/python/'+str(self.__model_name)+'/__init__.py', 'w')
         f_pybind11.writelines([
 """
 from .ocp import *
@@ -853,7 +853,7 @@ from .multiple_shooting_cgmres_solver import *
 """ 
         ])
         f_pybind11.close()
-        f_pybind11 = open('models/'+str(self.__model_name)+'/python/common/__init__.py', 'w')
+        f_pybind11 = open('generated/'+str(self.__model_name)+'/python/common/__init__.py', 'w')
         f_pybind11.writelines([
 """
 from .horizon import *
@@ -867,7 +867,7 @@ from .solver_settings import *
         """ Generates CMakeLists.txt in a directory where your .ipynb files 
             locates.
         """
-        f_cmake = open('models/'+str(self.__model_name)+'/CMakeLists.txt', 'w')
+        f_cmake = open('generated/'+str(self.__model_name)+'/CMakeLists.txt', 'w')
         f_cmake.writelines([
 """
 cmake_minimum_required(VERSION 3.1)
@@ -912,7 +912,7 @@ endif()
 """
             ])
         f_cmake.close()
-        f_cmake_python = open('models/'+self.__model_name+'/python/'+self.__model_name+'/CMakeLists.txt', 'w')
+        f_cmake_python = open('generated/'+self.__model_name+'/python/'+self.__model_name+'/CMakeLists.txt', 'w')
         f_cmake_python.writelines([
 """
 macro(pybind11_add_cgmres_module MODULE)
@@ -959,7 +959,7 @@ install(
 """
             ])
         f_cmake_python.close()
-        f_cmake_python = open('models/'+self.__model_name+'/python/common/CMakeLists.txt', 'w')
+        f_cmake_python = open('generated/'+self.__model_name+'/python/common/CMakeLists.txt', 'w')
         f_cmake_python.writelines([
 """
 macro(pybind11_add_cgmres_module MODULE)
@@ -1027,7 +1027,7 @@ install(
         if platform.system() == 'Windows':
             subprocess.run(
                 ['mkdir', 'build'], 
-                cwd='models/'+self.__model_name, 
+                cwd='generated/'+self.__model_name, 
                 stdout=subprocess.PIPE, 
                 stderr=subprocess.PIPE, 
                 shell=True
@@ -1035,7 +1035,7 @@ install(
             if generator == 'MSYS':
                 proc = subprocess.Popen(
                     ['cmake', '..', '-G', 'MSYS Makefiles', *build_options], 
-                    cwd='models/'+self.__model_name+'/build', 
+                    cwd='generated/'+self.__model_name+'/build', 
                     stdout=subprocess.PIPE, 
                     stderr=subprocess.STDOUT, 
                     shell=True
@@ -1046,7 +1046,7 @@ install(
             elif generator == 'MinGW':
                 proc = subprocess.Popen(
                     ['cmake', '..', '-G', 'MinGW Makefiles', *build_options], 
-                    cwd='models/'+self.__model_name+'/build', 
+                    cwd='generated/'+self.__model_name+'/build', 
                     stdout=subprocess.PIPE, 
                     stderr=subprocess.STDOUT, 
                     shell=True
@@ -1065,7 +1065,7 @@ install(
                 if proc.stderr.readline() == b'':
                     proc = subprocess.Popen(
                         ['cmake', '..', '-G', 'MSYS Makefiles', *build_options], 
-                        cwd='models/'+self.__model_name+'/build', 
+                        cwd='generated/'+self.__model_name+'/build', 
                         stdout=subprocess.PIPE, 
                         stderr=subprocess.STDOUT, 
                         shell=True
@@ -1073,7 +1073,7 @@ install(
                 else:
                     proc = subprocess.Popen(
                         ['cmake', '..', '-G', 'MinGW Makefiles', *build_options], 
-                        cwd='models/'+self.__model_name+'/build', 
+                        cwd='generated/'+self.__model_name+'/build', 
                         stdout=subprocess.PIPE, 
                         stderr=subprocess.STDOUT, 
                         shell=True
@@ -1083,7 +1083,7 @@ install(
                 print('\n')
             proc = subprocess.Popen(
                 ['cmake', '--build', '.'], 
-                cwd='models/'+self.__model_name+'/build', 
+                cwd='generated/'+self.__model_name+'/build', 
                 stdout=subprocess.PIPE, 
                 stderr=subprocess.STDOUT, 
                 shell=True
@@ -1095,14 +1095,14 @@ install(
         else:
             subprocess.run(
                 ['mkdir', 'build'], 
-                cwd='models/'+self.__model_name, 
+                cwd='generated/'+self.__model_name, 
                 stdout=subprocess.PIPE, 
                 stderr=subprocess.PIPE
             )
             print('build_options:', *build_options)
             proc = subprocess.Popen(
                 ['cmake', '..', *build_options], 
-                cwd='models/'+self.__model_name+'/build', 
+                cwd='generated/'+self.__model_name+'/build', 
                 stdout=subprocess.PIPE, 
                 stderr=subprocess.STDOUT
             )
@@ -1111,7 +1111,7 @@ install(
             print('\n')
             proc = subprocess.Popen(
                 ['cmake', '--build', '.'], 
-                cwd='models/'+self.__model_name+'/build', 
+                cwd='generated/'+self.__model_name+'/build', 
                 stdout = subprocess.PIPE, 
                 stderr = subprocess.STDOUT
             )
@@ -1125,7 +1125,7 @@ install(
         if platform.system() == 'Windows':
             subprocess.run(
                 ['mkdir', 'build'], 
-                cwd='models/'+self.__model_name, 
+                cwd='generated/'+self.__model_name, 
                 stdout=subprocess.PIPE, 
                 stderr=subprocess.PIPE, 
                 shell=True
@@ -1133,7 +1133,7 @@ install(
             if generator == 'MSYS':
                 proc = subprocess.Popen(
                     ['cmake', '..', '-G', 'MSYS Makefiles', *build_options], 
-                    cwd='models/'+self.__model_name+'/build', 
+                    cwd='generated/'+self.__model_name+'/build', 
                     stdout=subprocess.PIPE, 
                     stderr=subprocess.STDOUT, 
                     shell=True
@@ -1144,7 +1144,7 @@ install(
             elif generator == 'MinGW':
                 proc = subprocess.Popen(
                     ['cmake', '..', '-G', 'MinGW Makefiles', *build_options], 
-                    cwd='models/'+self.__model_name+'/build', 
+                    cwd='generated/'+self.__model_name+'/build', 
                     stdout=subprocess.PIPE, 
                     stderr=subprocess.STDOUT, 
                     shell=True
@@ -1163,7 +1163,7 @@ install(
                 if proc.stderr.readline() == b'':
                     proc = subprocess.Popen(
                         ['cmake', '..', '-G', 'MSYS Makefiles', *build_options], 
-                        cwd='models/'+self.__model_name+'/build', 
+                        cwd='generated/'+self.__model_name+'/build', 
                         stdout=subprocess.PIPE, 
                         stderr=subprocess.STDOUT, 
                         shell=True
@@ -1171,7 +1171,7 @@ install(
                 else:
                     proc = subprocess.Popen(
                         ['cmake', '..', '-G', 'MinGW Makefiles', *build_options], 
-                        cwd='models/'+self.__model_name+'/build', 
+                        cwd='generated/'+self.__model_name+'/build', 
                         stdout=subprocess.PIPE, 
                         stderr=subprocess.STDOUT, 
                         shell=True
@@ -1181,7 +1181,7 @@ install(
                 print('\n')
             proc = subprocess.Popen(
                 ['cmake', '--build', '.', '-j8'], 
-                cwd='models/'+self.__model_name+'/build', 
+                cwd='generated/'+self.__model_name+'/build', 
                 stdout=subprocess.PIPE, 
                 stderr=subprocess.STDOUT, 
                 shell=True
@@ -1192,14 +1192,14 @@ install(
         else:
             subprocess.run(
                 ['mkdir', 'build'], 
-                cwd='models/'+self.__model_name, 
+                cwd='generated/'+self.__model_name, 
                 stdout=subprocess.PIPE, 
                 stderr=subprocess.PIPE
             )
             print('build_options:', *build_options)
             proc = subprocess.Popen(
                 ['cmake', '..', *build_options], 
-                cwd='models/'+self.__model_name+'/build', 
+                cwd='generated/'+self.__model_name+'/build', 
                 stdout=subprocess.PIPE, 
                 stderr=subprocess.STDOUT
             )
@@ -1208,7 +1208,7 @@ install(
             print('\n')
             proc = subprocess.Popen(
                 ['cmake', '--build', '.', '-j8'], 
-                cwd='models/'+self.__model_name+'/build', 
+                cwd='generated/'+self.__model_name+'/build', 
                 stdout = subprocess.PIPE, 
                 stderr = subprocess.STDOUT
             )
@@ -1219,19 +1219,19 @@ install(
     def install_python_interface(self, generator='Auto'):
         proc = subprocess.Popen(
             ['cmake', '..'], 
-            cwd='models/'+self.__model_name+'/build', 
+            cwd='generated/'+self.__model_name+'/build', 
             stdout=subprocess.PIPE, 
             stderr=subprocess.STDOUT
         )
         proc = subprocess.Popen(
             ['cmake', '--build', '.', '-j8'], 
-            cwd='models/'+self.__model_name+'/build', 
+            cwd='generated/'+self.__model_name+'/build', 
             stdout = subprocess.PIPE, 
             stderr = subprocess.STDOUT
         )
         proc = subprocess.Popen(
             ['cmake', '--install', '.'], 
-            cwd='models/'+self.__model_name+'/build', 
+            cwd='generated/'+self.__model_name+'/build', 
             stdout = subprocess.PIPE, 
             stderr = subprocess.STDOUT
         )
@@ -1245,21 +1245,21 @@ install(
         if platform.system() == 'Windows':
             subprocess.run(
                 ['rmdir', '/q', '/s', 'simulation_result'], 
-                cwd='models/'+self.__model_name, 
+                cwd='generated/'+self.__model_name, 
                 stdout=subprocess.PIPE, 
                 stderr=subprocess.PIPE, 
                 shell=True
             )
             subprocess.run(
                 ['mkdir', 'simulation_result'], 
-                cwd='models/'+self.__model_name, 
+                cwd='generated/'+self.__model_name, 
                 stdout=subprocess.PIPE, 
                 stderr=subprocess.PIPE, 
                 shell=True
             )
             proc = subprocess.Popen(
                 [self.__model_name+'.exe'], 
-                cwd='models/'+self.__model_name+'/build', 
+                cwd='generated/'+self.__model_name+'/build', 
                 stdout=subprocess.PIPE, 
                 stderr=subprocess.STDOUT, 
                 shell=True
@@ -1269,20 +1269,20 @@ install(
         else:
             subprocess.run(
                 ['rm', '-rf', 'simulation_result'], 
-                cwd='models/'+self.__model_name, 
+                cwd='generated/'+self.__model_name, 
                 stdout = subprocess.PIPE, 
                 stderr = subprocess.PIPE, 
                 shell=True
             )
             subprocess.run(
                 ['mkdir', 'simulation_result'], 
-                cwd='models/'+self.__model_name, 
+                cwd='generated/'+self.__model_name, 
                 stdout=subprocess.PIPE, 
                 stderr=subprocess.PIPE
             )
             proc = subprocess.Popen(
                 ['./'+self.__model_name], 
-                cwd='models/'+self.__model_name+'/build', 
+                cwd='generated/'+self.__model_name+'/build', 
                 stdout=subprocess.PIPE, 
                 stderr=subprocess.STDOUT
             )
@@ -1324,58 +1324,58 @@ install(
             )
 
     def __make_model_dir(self):
-        """ Makes a directory where the C source files of OCP models are 
+        """ Makes a directory where the C source files of OCP formulations are 
             generated.
         """
         if platform.system() == 'Windows':
             subprocess.run(
-                ['mkdir', 'models'], 
+                ['mkdir', 'generated'], 
                 stdout=subprocess.PIPE, 
                 stderr=subprocess.PIPE, 
                 shell=True
             )
             subprocess.run(
                 ['mkdir', self.__model_name], 
-                cwd='models', 
+                cwd='generated', 
                 stdout=subprocess.PIPE, 
                 stderr=subprocess.PIPE, 
                 shell=True
             )
             subprocess.run(
                 ['mkdir', '-p', 'python/'+self.__model_name], 
-                cwd='models/'+self.__model_name, 
+                cwd='generated/'+self.__model_name, 
                 stdout=subprocess.PIPE, 
                 stderr=subprocess.PIPE, 
                 shell=True
             )
             subprocess.run(
                 ['mkdir', '-p', 'python/common'], 
-                cwd='models/'+self.__model_name, 
+                cwd='generated/'+self.__model_name, 
                 stdout=subprocess.PIPE, 
                 stderr=subprocess.PIPE, 
                 shell=True
             )
         else:
             subprocess.run(
-                ['mkdir', 'models'], 
+                ['mkdir', 'generated'], 
                 stdout=subprocess.PIPE, 
                 stderr=subprocess.PIPE
             )
             subprocess.run(
                 ['mkdir', self.__model_name], 
-                cwd='models',
+                cwd='generated',
                 stdout=subprocess.PIPE, 
                 stderr=subprocess.PIPE
             )
             subprocess.run(
                 ['mkdir', '-p', 'python/'+self.__model_name], 
-                cwd='models/'+self.__model_name,
+                cwd='generated/'+self.__model_name,
                 stdout=subprocess.PIPE, 
                 stderr=subprocess.PIPE
             )
             subprocess.run(
                 ['mkdir', '-p', 'python/common'], 
-                cwd='models/'+self.__model_name,
+                cwd='generated/'+self.__model_name,
                 stdout=subprocess.PIPE, 
                 stderr=subprocess.PIPE
             )
@@ -1387,7 +1387,7 @@ install(
         if platform.system() == 'Windows':
             subprocess.run(
                 ['rmdir', '/q', '/s', 'build'], 
-                cwd='models/'+self.__model_name, 
+                cwd='generated/'+self.__model_name, 
                 stdout=subprocess.PIPE, 
                 stderr=subprocess.PIPE, 
                 shell=True
@@ -1395,7 +1395,7 @@ install(
         else:
             subprocess.run(
                 ['rm', '-r', 'build'],
-                cwd='models/'+self.__model_name, 
+                cwd='generated/'+self.__model_name, 
                 stdout=subprocess.PIPE, 
                 stderr=subprocess.PIPE
             )

@@ -45,7 +45,7 @@ In addition to these files, you have to write `CMakeLists.txt` to build source f
 
 
 ## Demos
-Demos are presented in `pendubot.ipynb`, `cartpole.ipynb`, `hexacopter.ipynb`, and `mobilerobot.ipynb`. You can obtain the following simulation results jusy by runnig these `.ipynb` files. The details of the each models and formulations are described in each `.ipynb` files.
+Demos are presented in `pendubot.ipynb`, `cartpole.ipynb`, `hexacopter.ipynb`, and `mobilerobot.ipynb`. You can obtain the following simulation results jusy by runnig these `.ipynb` files. The details of the each OCP formulations are described in each `.ipynb` files.
 
 ### Pendubot  
 Inverting a pendubot using `MultipleShootingCGMRESSolver` solver.
