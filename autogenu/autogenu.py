@@ -1,11 +1,10 @@
-import linecache
 import subprocess
 import platform
 from enum import Enum, auto
 
 import sympy
 
-from autogenu import symbolic_functions as symfunc
+from autogenu import symfunc 
 
 
 class NLPType(Enum):
@@ -16,28 +15,29 @@ class AutoGenU(object):
     """ Automatic C++ code generator for the C/GMRES methods. 
 
         Args: 
-            ocp_name: The name of the NMPC model. The directory having this 
-                name is made and C++ source files are generated in the 
-                directory.
-            dimx: The dimension of the state of the NMPC model. 
-            dimu: The dimension of the control input of the NMPC model. 
+            ocp_name: The name of the optimal control problem (OCP). 
+                The directory having this name is made and C++ source files 
+                are generated in the directory.
+            nx: The dimension of the state of the system. 
+            nu: The dimension of the control input of the system. 
     """
-    def __init__(self, ocp_name, dimx, dimu):
-        assert isinstance(ocp_name, str), 'The frst argument must be strings!'
-        assert dimx > 0, 'The second argument must be positive integer!'
-        assert dimu > 0, 'The third argument must be positive integer!'
+    def __init__(self, ocp_name: str, nx: int, nu: int):
+        assert nx > 0, 'nx must be positive integer!'
+        assert nu > 0, 'nu must be positive integer!'
         self.__ocp_name = ocp_name
-        self.__dimx = dimx        
-        self.__dimu = dimu        
+        self.__nx = nx        
+        self.__nu = nu        
         self.__scalar_vars = []
         self.__array_vars = []
         self.__saturation_list = []
-        self.__is_function_set = False
-        self.__is_nlp_type_set = False
+        self.__nlp_type = None
+        self.__f = None
+        self.__hx = None
+        self.__hu = None
+        self.__phix = None
         self.__is_solver_paramters_set = False
         self.__is_initialization_set = False
         self.__is_simulation_set = False
-        self.__is_FB_epsilon_set = False
 
     def define_t(self):
         """ Returns symbolic scalar variable 't'.
@@ -45,23 +45,22 @@ class AutoGenU(object):
         return sympy.Symbol('t')
 
     def define_x(self):
-        """ Returns symbolic vector variable 'x' whose size is dimx.
+        """ Returns symbolic vector variable 'x' whose size is nx.
         """
-        return sympy.symbols('x[0:%d]' %(self.__dimx))
+        return sympy.symbols('x[0:%d]' %(self.__nx))
 
     def define_u(self):
-        """ Returns symbolic vector variable 'u' whose size is dimu.
+        """ Returns symbolic vector variable 'u' whose size is nu.
         """
-        return sympy.symbols('u[0:%d]' %(self.__dimu))
+        return sympy.symbols('u[0:%d]' %(self.__nu))
 
-    def define_scalar_var(self, scalar_var_name):
+    def define_scalar_var(self, scalar_var_name: str):
         """ Returns symbolic variable whose name is scalar_var_name. The name of 
             the variable is memorized.
 
             Args:
                 scalar_var_name: Name of the scalar variable.
         """
-        assert isinstance(scalar_var_name, str), 'The input must be strings!'
         scalar_var = sympy.Symbol(scalar_var_name)
         self.__scalar_vars.append([scalar_var, scalar_var_name, 0])
         return scalar_var
@@ -81,17 +80,16 @@ class AutoGenU(object):
             scalar_vars.append(scalar_var)
         return scalar_vars
 
-    def define_array_var(self, array_var_name, dim):
-        """ Returns symbolic vector variable whose names is array_var_name and 
-            whose dimension is dim. The names of the variable is memorized.
+    def define_array_var(self, array_var_name: str, size: int):
+        """ Returns symbolic vector variable whose names is array_var_name. 
+            The names of the variable is memorized.
 
             Args:
                 array_var_name: Name of the array variable.
-                dim: Dimension of the array variable.
+                size: Size of the array variable.
         """
-        assert isinstance(array_var_name, str), 'The first argument must be strings!'
-        assert dim > 0, 'The second argument must be positive integer!'
-        array_var = sympy.symbols(array_var_name+'[0:%d]' %(dim))
+        assert size > 0, 'The second argument must be positive integer!'
+        array_var = sympy.symbols(array_var_name+'[0:%d]' %(size))
         self.__array_vars.append([array_var, array_var_name, []])
         return array_var
 
@@ -106,16 +104,14 @@ class AutoGenU(object):
         for eps in FB_epsilon:
             assert eps >= 0, "FB epsilon must be non-negative!"
         self.__FB_epsilon = FB_epsilon
-        self.__is_FB_epsilon_set = True
 
-    def set_scalar_var(self, scalar_var_name, scalar_value):
+    def set_scalar_var(self, scalar_var_name: str, scalar_value):
         """ Set the value of the scalar variable you defied. 
 
             Args:
                 scalar_var_name: Name of the scalar variable.
                 scalar_value: Value of the scalar variable.
         """
-        assert isinstance(scalar_var_name, str), 'The first argument must be strings!'
         for defined_scalar_var in self.__scalar_vars:
             if scalar_var_name[0] == defined_scalar_var[1]:
                 defined_scalar_var[2] = scalar_value
@@ -132,13 +128,13 @@ class AutoGenU(object):
                 if var_name_and_value[0] == defined_scalar_var[1]:
                     defined_scalar_var[2] = var_name_and_value[1]
     
-    def set_array_var(self, var_name, values):
+    def set_array_var(self, var_name: str, values):
         """ Set the value of the array variable you defied. 
 
             Args:
                 var_name: Name of the arrray variable.
-                values: Values of the arry variable. The size must be the 
-                    dimension of the array variable.
+                values: Values of the arry variable. This size is used as  
+                        the size of the array variable.
         """
         assert isinstance(var_name, str), 'The first argument must be strings!'
         for defined_array_var in self.__array_vars:
@@ -150,7 +146,7 @@ class AutoGenU(object):
         """ Sets functions that defines the optimal control problem.
 
             Args: 
-                f: The state equation. The dimension must be dimx.
+                f: The state equation. The dimension must be nx.
                 C: The equality consrtaints. If there are no equality 
                     constraints, set the empty list.
                 h: The inequality consrtaints considered by semi-smooth 
@@ -160,41 +156,35 @@ class AutoGenU(object):
                 phi: The terminal cost.
         """
         assert len(f) > 0 
-        assert len(f) == self.__dimx, "Dimension of f must be dimx!"
+        assert len(f) == self.__nx, "Dimension of f must be nx!"
         self.__f = f
-        self.__dimc = len(C)
-        self.__dimh = len(h)
-        x = sympy.symbols('x[0:%d]' %(self.__dimx))
-        u = sympy.symbols('u[0:%d]' %(self.__dimu+self.__dimc+self.__dimh))
-        lmd = sympy.symbols('lmd[0:%d]' %(self.__dimx))
-        hamiltonian = L + sum(lmd[i] * f[i] for i in range(self.__dimx))
-        hamiltonian += sum(u[self.__dimu+i] * C[i] for i in range(self.__dimc))
-        dimuc = self.__dimu + self.__dimc
-        hamiltonian += sum(u[dimuc+i] * h[i] for i in range(self.__dimh))
+        self.__nc = len(C)
+        self.__nh = len(h)
+        x = sympy.symbols('x[0:%d]' %(self.__nx))
+        u = sympy.symbols('u[0:%d]' %(self.__nu+self.__nc+self.__nh))
+        lmd = sympy.symbols('lmd[0:%d]' %(self.__nx))
+        hamiltonian = L + sum(lmd[i] * f[i] for i in range(self.__nx))
+        hamiltonian += sum(u[self.__nu+i] * C[i] for i in range(self.__nc))
+        nuc = self.__nu + self.__nc
+        hamiltonian += sum(u[nuc+i] * h[i] for i in range(self.__nh))
         self.__hx = symfunc.diff_scalar_func(hamiltonian, x)
         self.__hu = symfunc.diff_scalar_func(hamiltonian, u)
-        fb_eps = sympy.symbols('fb_eps[0:%d]' %(self.__dimh))
-        for i in range(self.__dimh):
-            self.__hu[dimuc+i] = sympy.sqrt(u[dimuc+i]**2 + h[i]**2 + fb_eps[i]) - (u[dimuc+i] - h[i])
+        fb_eps = sympy.symbols('fb_eps[0:%d]' %(self.__nh))
+        for i in range(self.__nh):
+            self.__hu[nuc+i] = sympy.sqrt(u[nuc+i]**2 + h[i]**2 + fb_eps[i]) - (u[nuc+i] - h[i])
         self.__phix = symfunc.diff_scalar_func(phi, x)
-        self.__is_function_set = True
 
-    def set_nlp_type(self, nlp_type):
+    def set_nlp_type(self, nlp_type: NLPType):
         """ Sets solver types of the C/GMRES methods. 
 
             Args: 
                 nlp_type: The solver type. Choose from 
                 NLPType.SingleShooting and NLPType.MultipleShooting, 
         """
-        assert (
-            nlp_type == NLPType.SingleShooting or 
-            nlp_type == NLPType.MultipleShooting 
-        )
         self.__nlp_type = nlp_type
-        self.__is_nlp_type_set = True
 
-    def set_solver_parameters(
-            self, Tf, alpha, N, finite_difference_epsilon, zeta, kmax
+    def set_solver_settings(
+            self, Tf, alpha, N: int, finite_difference_epsilon, zeta, kmax: int
         ):
         """ Sets parameters of the NMPC solvers based on the C/GMRES method. 
 
@@ -233,7 +223,7 @@ class AutoGenU(object):
 
             Args: 
                 solution_initial_guess: The initial guess of the solution of the 
-                    initialization. Size must be the dimu + dimensions of C and 
+                    initialization. Size must be the nu + dimensions of C and 
                     h.
                 newton_residual_torelance: The residual torelance of the 
                     initialization solved by Newton's method. The Newton 
@@ -245,8 +235,8 @@ class AutoGenU(object):
                     Lagrange multiplier with respect to the box constraint on 
                     the control input that is condensed.
         """
-        dimuch = self.__dimu + self.__dimc + self.__dimh
-        assert len(solution_initial_guess) == dimuch
+        nuch = self.__nu + self.__nc + self.__nh
+        assert len(solution_initial_guess) == nuch
         assert newton_residual_torelance > 0
         assert max_newton_iteration > 0
         self.__solution_initial_guess = solution_initial_guess 
@@ -269,7 +259,7 @@ class AutoGenU(object):
                 simulation_time: The length of the numerical simulation. 
                 sampling_time: The sampling period of the numerical simulation. 
         """
-        assert len(initial_state) == self.__dimx, "The dimension of initial_state must be dimx!"
+        assert len(initial_state) == self.__nx, "The dimension of initial_state must be nx!"
         assert simulation_time > 0
         assert sampling_time > 0
         self.__initial_time = initial_time 
@@ -294,7 +284,7 @@ class AutoGenU(object):
                     the larger mergin of constraint.
         """
         assert index >= 0
-        assert index < self.__dimu
+        assert index < self.__nu
         assert u_min < u_max
         assert dummy_weight >= 0 
         assert quadratic_weight >= 0 
@@ -321,10 +311,9 @@ class AutoGenU(object):
                 use_cse: The flag for common subexpression elimination. If True, 
                     common subexpressions are eliminated. Default is False.
         """
-        assert self.__is_function_set, "Symbolic functions are not set!. Before call this method, call set_functions()"
-        if self.__dimh > 0:
-            assert self.__is_FB_epsilon_set, "FB epsilons are not set!"
-            assert len(self.__FB_epsilon) == self.__dimh
+        assert self.__f is not None and self.__phix is not None and self.__hx is not None and self.__hu is not None, "Symbolic functions are not set!. Before call this method, call set_functions()"
+        if self.__nh > 0:
+            assert len(self.__FB_epsilon) == self.__nh
         self.__make_model_dir()
         if use_simplification:
             symfunc.simplify(self.__f)
@@ -333,17 +322,16 @@ class AutoGenU(object):
             symfunc.simplify(self.__phix)
         f_model_h = open('generated/'+str(self.__ocp_name)+'/ocp.hpp', 'w')
         f_model_h.write(
-            '#ifndef CGMRES_OCP_'+str(self.__ocp_name)+'__HPP_ \n'
+            '#ifndef CGMRES__OCP_'+str(self.__ocp_name).upper()+'_HPP_ \n'
         )
         f_model_h.write(
-            '#define CGMRES_OCP_'+str(self.__ocp_name)+'__HPP_ \n'
+            '#define CGMRES__OCP_'+str(self.__ocp_name).upper()+'_HPP_ \n'
         )
         f_model_h.writelines([
 """ 
 #define _USE_MATH_DEFINES
 
 #include <cmath>
-
 
 namespace cgmres {
 
@@ -359,20 +347,19 @@ public:
 """
         ])
         f_model_h.write(
-            '  static constexpr int nx = '+str(self.__dimx)+';\n'
+            '  static constexpr int nx = '+str(self.__nx)+';\n'
         )
         f_model_h.write(
             '  static constexpr int nu = '
-            +str(self.__dimu)+';\n'
+            +str(self.__nu)+';\n'
         )
         f_model_h.write(
             '  static constexpr int nc = '
-            +str(self.__dimc+self.__dimh)+';\n'
+            +str(self.__nc+self.__nh)+';\n'
         )
         f_model_h.write(
-            '  static constexpr int nuc = nu + nc;\n'
+            '  static constexpr int nuc = nu + nc;\n\n'
         )
-        f_model_h.write('\n')
         f_model_h.writelines([
             '  double '+scalar_var[1]+' = '
             +str(scalar_var[2])+';\n' for scalar_var in self.__scalar_vars
@@ -385,13 +372,13 @@ public:
             for i in range(len(array_var[0])-1):
                 f_model_h.write(str(array_var[2][i])+', ')
             f_model_h.write(str(array_var[2][len(array_var[0])-1])+'};\n')
-        if self.__dimh > 0:
+        if self.__nh > 0:
             f_model_h.write(
-                '  double fb_eps['+str(self.__dimh)+']'+' = {'
+                '  double fb_eps['+str(self.__nh)+']'+' = {'
             )
-            for i in range(self.__dimh-1):
+            for i in range(self.__nh-1):
                 f_model_h.write(str(self.__FB_epsilon[i])+', ')
-            f_model_h.write(str(self.__FB_epsilon[self.__dimh-1])+'};\n')
+            f_model_h.write(str(self.__FB_epsilon[self.__nh-1])+'};\n')
         f_model_h.writelines([
 """
   // Computes the state equation f(t, x, u).
@@ -456,7 +443,6 @@ public:
 
 } // namespace cgmres
 
-
 #endif // CGMRES_OCP_HPP_
 """ 
         ])
@@ -466,12 +452,12 @@ public:
     def generate_main(self):
         """ Generates main.cpp that defines NMPC solver, set parameters for the 
             solver, and run numerical simulation. Befire call this method,
-            set_nlp_type(), set_solver_parameters(), 
+            set_nlp_type(), set_solver_settings(), 
             set_initialization_parameters(), and set_simulation_parameters(),
             must be called!
         """
-        assert self.__is_nlp_type_set, "Solver type is not set! Before call this method, call set_nlp_type()"
-        assert self.__is_solver_paramters_set, "Solver parameters are not set! Before call this method, call set_solver_parameters()"
+        assert self.__nlp_type is not None, "Solver type is not set! Before call this method, call set_nlp_type()"
+        assert self.__is_solver_paramters_set, "Solver parameters are not set! Before call this method, call set_solver_settings()"
         assert self.__is_initialization_set, "Initialization parameters are not set! Before call this method, call set_initialization_parameters()"
         assert self.__is_simulation_set, "Simulation parameters are not set! Before call this method, call set_simulation_parameters()"
         """ Makes a directory where the C++ source files are generated.
@@ -549,7 +535,7 @@ public:
 
         f_main.write('  // Define the C/GMRES solver.\n')
         f_main.write('  constexpr int N = '+str(self.__N)+';\n')
-        f_main.write('  constexpr int kmax = '+str(min(self.__kmax, self.__N*(self.__dimu+self.__dimc)))+';\n')
+        f_main.write('  constexpr int kmax = '+str(min(self.__kmax, self.__N*(self.__nu+self.__nc)))+';\n')
         if self.__nlp_type == NLPType.SingleShooting:
             f_main.write(
                 '  cgmres::SingleShootingCGMRESSolver<cgmres::OCP_'+self.__ocp_name+', N, kmax> mpc(ocp, horizon, settings);\n'
@@ -713,7 +699,7 @@ namespace py = pybind11;
 
 """ 
         ])
-        f_pybind11.write('constexpr int kmax_init = '+str(min(self.__kmax, self.__dimc+self.__dimu+self.__dimh))+';\n')
+        f_pybind11.write('constexpr int kmax_init = '+str(min(self.__kmax, self.__nc+self.__nu+self.__nh))+';\n')
         f_pybind11.write('DEFINE_PYBIND11_MODULE_ZERO_HORIZON_OCP_SOLVER(OCP_'+str(self.__ocp_name)+', kmax_init)\n')
         f_pybind11.writelines([
 """
@@ -746,7 +732,7 @@ namespace py = pybind11;
 """ 
         ])
         f_pybind11.write('constexpr int N = '+str(self.__N)+';\n')
-        f_pybind11.write('constexpr int kmax = '+str(min(self.__kmax, self.__N*(self.__dimc+self.__dimu+self.__dimh)))+';\n')
+        f_pybind11.write('constexpr int kmax = '+str(min(self.__kmax, self.__N*(self.__nc+self.__nu+self.__nh)))+';\n')
         f_pybind11.write('DEFINE_PYBIND11_MODULE_SINGLE_SHOOTING_CGMRES_SOLVER(OCP_'+str(self.__ocp_name)+', N, kmax)\n')
         f_pybind11.writelines([
 """
@@ -779,7 +765,7 @@ namespace py = pybind11;
 """ 
         ])
         f_pybind11.write('constexpr int N = '+str(self.__N)+';\n')
-        f_pybind11.write('constexpr int kmax = '+str(min(self.__kmax, self.__N*(self.__dimc+self.__dimu+self.__dimh)))+';\n')
+        f_pybind11.write('constexpr int kmax = '+str(min(self.__kmax, self.__N*(self.__nc+self.__nu+self.__nh)))+';\n')
         f_pybind11.write('DEFINE_PYBIND11_MODULE_MULTIPLE_SHOOTING_CGMRES_SOLVER(OCP_'+str(self.__ocp_name)+', N, kmax)\n')
         f_pybind11.writelines([
 """
@@ -829,7 +815,6 @@ DEFINE_PYBIND11_MODULE_HORIZON()
 
 #include <iostream>
 #include <stdexcept>
-
 
 namespace cgmres {
 namespace python {
@@ -1022,6 +1007,8 @@ install(
                     Need to be set True is you change CMake configuration, e.g., 
                     if you change the generator. The default value is False.
         """
+        if remove_build_dir:
+            self.__remove_build_dir()
         build_options = ['-DCMAKE_BUILD_TYPE=Release', '-DVECTORIZE=ON', 
                          '-DBUILD_MAIN=ON', '-DBUILD_PYTHON_INTERFACE=OFF']
         if platform.system() == 'Windows':
@@ -1216,13 +1203,21 @@ install(
                 print(line.rstrip().decode("utf8"))
             print('\n')
 
-    def install_python_interface(self, generator='Auto'):
-        proc = subprocess.Popen(
-            ['cmake', '..'], 
-            cwd='generated/'+self.__ocp_name+'/build', 
-            stdout=subprocess.PIPE, 
-            stderr=subprocess.STDOUT
-        )
+    def install_python_interface(self, install_prefix=None):
+        if install_prefix is None:
+            proc = subprocess.Popen(
+                ['cmake', '..'], 
+                cwd='generated/'+self.__ocp_name+'/build', 
+                stdout=subprocess.PIPE, 
+                stderr=subprocess.STDOUT
+            )
+        else:
+            proc = subprocess.Popen(
+                ['cmake', '..', '-DCMAKE_INSTALL_PREFIX='+install_prefix], 
+                cwd='generated/'+self.__ocp_name+'/build', 
+                stdout=subprocess.PIPE, 
+                stderr=subprocess.STDOUT
+            )
         proc = subprocess.Popen(
             ['cmake', '--build', '.', '-j8'], 
             cwd='generated/'+self.__ocp_name+'/build', 
