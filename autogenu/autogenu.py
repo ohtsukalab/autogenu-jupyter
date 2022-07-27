@@ -605,6 +605,10 @@ namespace py = pybind11;
 PYBIND11_MODULE(ocp, m) { 
   py::class_<OCP>(m, "OCP")
     .def(py::init<>())  
+    .def("clone", [](const OCP& self) { 
+       auto copy = self; 
+       return copy; 
+     }) 
     .def("eval_f", [](const OCP& self, const Scalar t,  
                       const VectorX& x, const VectorX& u, VectorX& dx) { 
         if (x.size() != OCP::nx) {

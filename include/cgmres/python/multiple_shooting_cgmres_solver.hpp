@@ -5,6 +5,10 @@ PYBIND11_MODULE(multiple_shooting_cgmres_solver, m) { \
     .def(py::init<OCP, Horizon, SolverSettings>(), \ 
           py::arg("ocp"), py::arg("horizon"), py::arg("settings")) \
     .def(py::init<>()) \ 
+    .def("clone", [](const MultipleShootingCGMRESSolver_& self) { \
+       auto copy = self; \
+       return copy; \
+     }) \
     .def("set_u", [](MultipleShootingCGMRESSolver_& self, const VectorX& u) { \
         if (u.size() != OCP::nu) { \ 
           throw std::invalid_argument("[MultipleShootingCGMRESSolver]: 'u.size()' must be "+std::to_string(OCP::nu)); \ 

@@ -5,6 +5,10 @@ PYBIND11_MODULE(single_shooting_cgmres_solver, m) { \
     .def(py::init<OCP, Horizon, SolverSettings>(), \ 
           py::arg("ocp"), py::arg("horizon"), py::arg("settings")) \
     .def(py::init<>()) \ 
+    .def("clone", [](const SingleShootingCGMRESSolver_& self) { \
+       auto copy = self; \
+       return copy; \
+     }) \
     .def("set_u", [](SingleShootingCGMRESSolver_& self, const VectorX& u) { \
         if (u.size() != OCP::nu) { \ 
           throw std::invalid_argument("[SingleShootingCGMRESSolver]: 'u.size()' must be "+std::to_string(OCP::nu)); \ 

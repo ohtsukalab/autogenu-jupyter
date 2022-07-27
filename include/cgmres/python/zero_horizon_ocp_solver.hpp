@@ -5,6 +5,10 @@ PYBIND11_MODULE(zero_horizon_ocp_solver, m) { \
     .def(py::init<OCP, SolverSettings>(), \ 
           py::arg("ocp"), py::arg("settings")) \
     .def(py::init<>()) \ 
+    .def("clone", [](const ZeroHorizonOCPSolver_& self) { \
+       auto copy = self; \
+       return copy; \
+     }) \
     .def("set_u", [](ZeroHorizonOCPSolver_& self, const VectorX& u) { \
         if (u.size() != OCP::nu) { \ 
           throw std::invalid_argument("[ZeroHorizonOCPSolver]: 'u.size()' must be "+std::to_string(OCP::nu)); \ 
