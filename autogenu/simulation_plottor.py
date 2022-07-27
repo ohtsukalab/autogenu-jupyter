@@ -169,7 +169,7 @@ class SimulationPlottor(object):
             self.__num_plot_x, 
             self.__dim_x+self.__dim_u+1
         )
-        plt.plot(self.__time_sequence, self.__opterr_data)
+        plt.plot(self.__time_sequence, np.log10(self.__opterr_data))
         plt.xlabel(r'${\rm Time}$ $[s]$')
-        plt.ylabel(r'$\| F \|$')
+        plt.ylabel(r'$\log_{10} \| {\rm Opt \; Error} \|$')
         plt.xlim(0, self.__sim_conditions.simulation_time())

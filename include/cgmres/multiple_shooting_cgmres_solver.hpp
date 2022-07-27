@@ -139,6 +139,11 @@ public:
     retriveSolution();
   }
 
+  void initStateCostateTrajectory(const Scalar t, const Vector<nx>& x) {
+    continuation_gmres_.retrive_x(t, x, solution_, xopt_);
+    continuation_gmres_.retrive_lmd(t, x, solution_, xopt_, lmdopt_);
+  }
+
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
 private:

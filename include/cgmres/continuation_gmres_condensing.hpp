@@ -243,6 +243,19 @@ public:
     }
   }
 
+  void retrive_x(const Scalar t, const Vector<nx>& x0, const Vector<dim>& solution, 
+                 std::array<Vector<nx>, N+1>& x) {
+    std::fill(fonc_f_1_.begin(), fonc_f_1_.end(), Vector<nx>::Zero());
+    nlp_.retrive_x(t, x0, solution, x, fonc_f_1_);
+  }
+
+  void retrive_lmd(const Scalar t, const Vector<nx>& x0, const Vector<dim>& solution, 
+                   const std::array<Vector<nx>, N+1>& x,
+                   std::array<Vector<nx>, N+1>& lmd) {
+    std::fill(fonc_hx_1_.begin(), fonc_hx_1_.end(), Vector<nx>::Zero());
+    nlp_.retrive_lmd(t, x0, solution, x, lmd, fonc_hx_1_);
+  }
+
   decltype(auto) x() const { return nlp_.x(); }
 
   decltype(auto) lmd() const { return nlp_.lmd(); }

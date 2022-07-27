@@ -46,8 +46,14 @@ PYBIND11_MODULE(multiple_shooting_cgmres_solver, m) { \
     .def("opt_error", static_cast<Scalar (MultipleShootingCGMRESSolver_::*)() const>(&MultipleShootingCGMRESSolver_::optError)) \
     .def("update", [](MultipleShootingCGMRESSolver_& self, const Scalar t, const VectorX& x) { \
         if (x.size() != OCP::nx) { \
-          throw std::invalid_argument("[ZeroHorizonOCPSolver]: 'x.size()' must be "+std::to_string(OCP::nx)); \
+          throw std::invalid_argument("[MultipleShootingCGMRESSolver]: 'x.size()' must be "+std::to_string(OCP::nx)); \
         } \ 
         self.update(t, x); \
+    }, py::arg("t"), py::arg("x")) \
+    .def("init_state_costate_trajectory", [](MultipleShootingCGMRESSolver_& self, const Scalar t, const VectorX& x) { \
+        if (x.size() != OCP::nx) { \
+          throw std::invalid_argument("[MultipleShootingCGMRESSolver]: 'x.size()' must be "+std::to_string(OCP::nx)); \
+        } \ 
+        self.initStateCostateTrajectory(t, x); \
     }, py::arg("t"), py::arg("x")); \
 }

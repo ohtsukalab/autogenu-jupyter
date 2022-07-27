@@ -551,6 +551,7 @@ public:
                 '  mpc.set_uc(initializer.ucopt());\n'
                 '  mpc.set_lmd(initializer.lmdopt());\n'
                 '  mpc.set_x(x0);\n'
+                '  mpc.init_state_costate_trajectory(t0, x0);\n'
             )
         else:
             return NotImplementedError()
