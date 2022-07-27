@@ -60,7 +60,6 @@ public:
       }
       hessenberg_mat_.coeffRef(k, k+1) = basis_mat_.col(k+1).template lpNorm<2>();
       if (std::abs(hessenberg_mat_.coeff(k, k+1)) < std::numeric_limits<double>::epsilon()) {
-        // std::cout << "The modified Gram-Schmidt breakdown at k = " << k << std::endl;
         break;
       }
       else {
@@ -88,7 +87,7 @@ public:
     for (int i=k-1; i>=0; --i) {
       Scalar tmp = g_vec_.coeff(i);
       for (int j=i+1; j<k; ++j) {
-        tmp -= hessenberg_mat_.coeff(i, j) * givens_c_vec_.coeff(j);
+        tmp -= hessenberg_mat_.coeff(j, i) * givens_c_vec_.coeff(j);
       }
       givens_c_vec_.coeffRef(i) = tmp / hessenberg_mat_.coeff(i, i);
     }
