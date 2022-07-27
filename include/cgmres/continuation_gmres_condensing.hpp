@@ -62,7 +62,7 @@ public:
 
   void eval_fonc(const Scalar t, const Vector<nx>& x0, const Vector<dim>& solution,
                  const std::array<Vector<nx>, N+1>& x, const std::array<Vector<nx>, N+1>& lmd) {
-    nlp_.eval(t, x0, solution, fonc_hu_);
+    nlp_.eval_fonc_hu(t, x0, solution, x, lmd, fonc_hu_);
     nlp_.eval_fonc_f(t, x0, solution, x, fonc_f_);
     nlp_.eval_fonc_hx(t, x0, solution, x, lmd, fonc_hx_);
   }

@@ -20,7 +20,13 @@ PYBIND11_MODULE(zero_horizon_ocp_solver, m) { \
     .def("uopt", &ZeroHorizonOCPSolver_::uopt) \
     .def("ucopt", &ZeroHorizonOCPSolver_::ucopt) \
     .def("lmdopt", &ZeroHorizonOCPSolver_::lmdopt) \
-    .def("opt_error", &ZeroHorizonOCPSolver_::optError) \
+    .def("opt_error", [](ZeroHorizonOCPSolver_& self, const Scalar t, const VectorX& x) { \
+        if (x.size() != OCP::nx) { \
+          throw std::invalid_argument("[ZeroHorizonOCPSolver]: 'x.size()' must be "+std::to_string(OCP::nx)); \
+        } \ 
+        return self.optError(t, x); \
+    }, py::arg("t"), py::arg("x")) \
+    .def("opt_error", static_cast<Scalar (ZeroHorizonOCPSolver_::*)() const>(&ZeroHorizonOCPSolver_::optError)) \
     .def("solve", [](ZeroHorizonOCPSolver_& self, const Scalar t, const VectorX& x) { \
         if (x.size() != OCP::nx) { \
           throw std::invalid_argument("[ZeroHorizonOCPSolver]: 'x.size()' must be "+std::to_string(OCP::nx)); \

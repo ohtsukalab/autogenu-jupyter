@@ -44,7 +44,8 @@ public:
 
   ~MultipleShootingCGMRESSolver() = default;
 
-  void set_u(const Vector<nu>& u) {
+  template <typename VectorType>
+  void set_u(const VectorType& u) {
     if (u.size() != nu) {
       throw std::invalid_argument("[MultipleShootingCGMRESSolver::set_u] u.size() must be " + std::to_string(nu));
     }
@@ -58,7 +59,8 @@ public:
     setInnerSolution();
   }
 
-  void set_uc(const Vector<nuc>& uc) {
+  template <typename VectorType>
+  void set_uc(const VectorType& uc) {
     if (uc.size() != nuc) {
       throw std::invalid_argument("[MultipleShootingCGMRESSolver::set_uc] uc.size() must be " + std::to_string(nuc));
     }
@@ -71,7 +73,8 @@ public:
     setInnerSolution();
   }
 
-  void set_x(const Vector<nx>& x) {
+  template <typename VectorType>
+  void set_x(const VectorType& x) {
     if (x.size() != nx) {
       throw std::invalid_argument("[MultipleShootingCGMRESSolver::set_x] x.size() must be " + std::to_string(nx));
     }
@@ -80,7 +83,8 @@ public:
     }
   }
 
-  void set_lmd(const Vector<nx>& lmd) {
+  template <typename VectorType>
+  void set_lmd(const VectorType& lmd) {
     if (lmd.size() != nx) {
       throw std::invalid_argument("[MultipleShootingCGMRESSolver::set_lmd] lmd.size() must be " + std::to_string(nx));
     }

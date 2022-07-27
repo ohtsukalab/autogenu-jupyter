@@ -42,7 +42,8 @@ public:
 
   ~SingleShootingCGMRESSolver() = default;
 
-  void set_u(const Vector<nu>& u) {
+  template <typename VectorType>
+  void set_u(const VectorType& u) {
     if (u.size() != nu) {
       throw std::invalid_argument("[SingleShootingCGMRESSolver::set_u] u.size() must be " + std::to_string(nu));
     }
@@ -56,7 +57,8 @@ public:
     setInnerSolution();
   }
 
-  void set_uc(const Vector<nuc>& uc) {
+  template <typename VectorType>
+  void set_uc(const VectorType& uc) {
     if (uc.size() != nuc) {
       throw std::invalid_argument("[SingleShootingCGMRESSolver::set_uc] uc.size() must be " + std::to_string(nuc));
     }

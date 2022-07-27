@@ -17,7 +17,7 @@ void simulation(const OCP& ocp, NMPC& nmpc, const VectorType& x0,
                 const Scalar t0, const Scalar tf, const double dt, 
                 const std::string save_dir, 
                 const std::string savefile_name) {
-  VectorType x = x0;
+  VectorX x = x0;
   std::chrono::system_clock::time_point start_clock, end_clock;
 
   std::string savefile_header = save_dir + "/" + savefile_name;
@@ -32,10 +32,10 @@ void simulation(const OCP& ocp, NMPC& nmpc, const VectorType& x0,
     // take logs
     x_log << x.transpose() << '\n';
     u_log << nmpc.uopt()[0].transpose() << '\n';
-    opterr_log << nmpc.optError() << '\n';
+    opterr_log << nmpc.optError(t, x) << '\n';
 
     // Computes the next state vector using the 4th Runge-Kutta method.
-    const auto x1 = RK4(ocp, t, dt, x, nmpc.uopt()[0]);
+    const VectorX x1 = RK4(ocp, t, dt, x, nmpc.uopt()[0]);
 
     // Updates the solution and measure the computational time of the update.
     start_clock = std::chrono::system_clock::now();
