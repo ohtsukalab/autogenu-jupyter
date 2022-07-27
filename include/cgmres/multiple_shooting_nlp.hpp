@@ -120,25 +120,79 @@ public:
     }
   }
 
-  void eval_fonc_hu_dummy(const Vector<dim>& solution,
-                          const std::array<Vector<nub>, N>& dummy, 
-                          const std::array<Vector<nub>, N>& mu,
-                          std::array<Vector<nub>, N>& fonc_hu_dummy) const {
+  void eval_fonc_hdummy(const Vector<dim>& solution,
+                        const std::array<Vector<nub>, N>& dummy, 
+                        const std::array<Vector<nub>, N>& mu,
+                        std::array<Vector<nub>, N>& fonc_hdummy) const {
     // Compute the erros in the first order necessary conditions (FONC)
     for (size_t i=0; i<N; ++i) {
-      ubounds::eval_hu_dummy(ocp_, solution.template segment<nu>(nuc*i), dummy[i], mu[i],
-                             fonc_hu_dummy[i]);
+      ubounds::eval_hdummy(ocp_, solution.template segment<nu>(nuc*i), dummy[i], mu[i],
+                           fonc_hdummy[i]);
     }
   }
 
-  void eval_fonc_hu_bounds(const Vector<dim>& solution,
-                           const std::array<Vector<nub>, N>& dummy, 
-                           const std::array<Vector<nub>, N>& mu,
-                           std::array<Vector<nub>, N>& fonc_hu_bounds) const {
+  void eval_fonc_hmu(const Vector<dim>& solution,
+                     const std::array<Vector<nub>, N>& dummy, 
+                     const std::array<Vector<nub>, N>& mu,
+                     std::array<Vector<nub>, N>& fonc_hmu) const {
     // Compute the erros in the first order necessary conditions (FONC)
     for (size_t i=0; i<N; ++i) {
-      ubounds::eval_hu_bounds(ocp_, solution.template segment<nu>(nuc*i), dummy[i], mu[i],
-                              fonc_hu_bounds[i]);
+      ubounds::eval_hmu(ocp_, solution.template segment<nu>(nuc*i), dummy[i], mu[i],
+                        fonc_hmu[i]);
+    }
+  }
+
+  void eval_fonc_hdummy_inv(const std::array<Vector<nub>, N>& dummy, 
+                           const std::array<Vector<nub>, N>& mu,
+                           const std::array<Vector<nub>, N>& fonc_hdummy,
+                           const std::array<Vector<nub>, N>& fonc_hmu,
+                           std::array<Vector<nub>, N>& fonc_hdummy_inv,
+                           std::array<Vector<nub>, N>& fonc_hmu_inv) const {
+    // Compute the erros in the first order necessary conditions (FONC)
+    for (size_t i=0; i<N; ++i) {
+      ubounds::eval_hdummy_inv(dummy[i], mu[i], fonc_hdummy[i], fonc_hmu[i],
+                               fonc_hdummy_inv[i], fonc_hmu_inv[i]);
+    }
+  }
+
+  void eval_fonc_hmu_inv(const std::array<Vector<nub>, N>& dummy, 
+                         const std::array<Vector<nub>, N>& mu,
+                         const std::array<Vector<nub>, N>& fonc_hdummy,
+                         const std::array<Vector<nub>, N>& fonc_hmu,
+                         std::array<Vector<nub>, N>& fonc_hdummy_inv,
+                         std::array<Vector<nub>, N>& fonc_hmu_inv) const {
+    // Compute the erros in the first order necessary conditions (FONC)
+    for (size_t i=0; i<N; ++i) {
+      ubounds::eval_hmu_inv(dummy[i], mu[i], fonc_hdummy[i], fonc_hmu[i],
+                            fonc_hdummy_inv[i], fonc_hmu_inv[i]);
+    }
+  }
+
+  void retrive_dummy_update(const Vector<dim>& solution,
+                            const std::array<Vector<nub>, N>& dummy, 
+                            const std::array<Vector<nub>, N>& mu,
+                            const Vector<dim>& solution_update,
+                            std::array<Vector<nub>, N>& dummy_update) const {
+    // Compute the erros in the first order necessary conditions (FONC)
+    for (size_t i=0; i<N; ++i) {
+      ubounds::retrive_dummy_update(ocp_, solution.template segment<nu>(nuc*i), 
+                                    dummy[i], mu[i], 
+                                    solution_update.template segment<nu>(nuc*i),
+                                    dummy_update[i]);
+    }
+  }
+
+  void retrive_mu_update(const Vector<dim>& solution,
+                         const std::array<Vector<nub>, N>& dummy, 
+                         const std::array<Vector<nub>, N>& mu,
+                         const Vector<dim>& solution_update,
+                         std::array<Vector<nub>, N>& mu_update) const {
+    // Compute the erros in the first order necessary conditions (FONC)
+    for (size_t i=0; i<N; ++i) {
+      ubounds::retrive_mu_update(ocp_, solution.template segment<nu>(nuc*i), 
+                                 dummy[i], mu[i], 
+                                 solution_update.template segment<nu>(nuc*i),
+                                 mu_update[i]);
     }
   }
 

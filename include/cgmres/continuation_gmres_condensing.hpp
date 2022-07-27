@@ -15,8 +15,10 @@ public:
   static constexpr int nx = NLP::nx;
   static constexpr int nu = NLP::nu;
   static constexpr int nc = NLP::nc;
+  static constexpr int nuc = nu + nc;
+  static constexpr int nub = NLP::nub;
   static constexpr int dim = NLP::dim;
-  static constexpr int N = dim / (nu + nc);
+  static constexpr int N = dim / nuc;
 
   ContinuationGMRESCondensing(const NLP& nlp, 
                               const Scalar finite_difference_epsilon, 
@@ -37,6 +39,17 @@ public:
     std::fill(fonc_hx_.begin(), fonc_hx_.end(), Vector<nx>::Zero());
     std::fill(fonc_f_1_.begin(), fonc_f_1_.end(), Vector<nx>::Zero());
     std::fill(fonc_hx_1_.begin(), fonc_hx_1_.end(), Vector<nx>::Zero());
+    if constexpr (nub > 0) {
+      std::fill(dummy_1_.begin(), dummy_1_.end(), Vector<nub>::Zero());
+      std::fill(mu_1_.begin(), mu_1_.end(), Vector<nub>::Zero());
+      std::fill(fonc_hdummy_.begin(), fonc_hdummy_.end(), Vector<nub>::Zero());
+      std::fill(fonc_hmu_.begin(), fonc_hmu_.end(), Vector<nub>::Zero());
+      std::fill(fonc_hdummy_1_.begin(), fonc_hdummy_1_.end(), Vector<nub>::Zero());
+      std::fill(fonc_hmu_1_.begin(), fonc_hmu_1_.end(), Vector<nub>::Zero());
+      std::fill(dummy_update_.begin(), dummy_update_.end(), Vector<nub>::Zero());
+      std::fill(mu_update_.begin(), mu_update_.end(), Vector<nub>::Zero());
+    }
+
     if (finite_difference_epsilon <= 0.0) {
       throw std::invalid_argument("[ContinuationGMRESCondensing]: 'finite_difference_epsilon' must be positive!");
     }
@@ -51,6 +64,14 @@ public:
 
   Scalar optError() const {
     Scalar squared_error = fonc_hu_.squaredNorm();
+    if constexpr (nub > 0) {
+      for (const auto& e : fonc_hdummy_) {
+        squared_error += e.squaredNorm();
+      }
+      for (const auto& e : fonc_hmu_) {
+        squared_error += e.squaredNorm();
+      }
+    }
     for (const auto& e : fonc_f_) {
       squared_error += e.squaredNorm();
     }
@@ -61,8 +82,14 @@ public:
   }
 
   void eval_fonc(const Scalar t, const Vector<nx>& x0, const Vector<dim>& solution,
-                 const std::array<Vector<nx>, N+1>& x, const std::array<Vector<nx>, N+1>& lmd) {
+                 const std::array<Vector<nx>, N+1>& x, const std::array<Vector<nx>, N+1>& lmd,
+                 const std::array<Vector<nub>, N>& dummy, const std::array<Vector<nub>, N>& mu) {
     nlp_.eval_fonc_hu(t, x0, solution, x, lmd, fonc_hu_);
+    if constexpr (nub > 0) {
+      nlp_.eval_fonc_hu(solution, dummy, mu, fonc_hu_);
+      nlp_.eval_fonc_hdummy(solution, dummy, mu, fonc_hdummy_);
+      nlp_.eval_fonc_hmu(solution, dummy, mu, fonc_hmu_);
+    }
     nlp_.eval_fonc_f(t, x0, solution, x, fonc_f_);
     nlp_.eval_fonc_hx(t, x0, solution, x, lmd, fonc_hx_);
   }
@@ -72,6 +99,8 @@ public:
               const MatrixBase<VectorType1>& solution, 
               const std::array<Vector<nx>, N+1>& x,
               const std::array<Vector<nx>, N+1>& lmd,
+              const std::array<Vector<nub>, N>& dummy,
+              const std::array<Vector<nub>, N>& mu,
               const MatrixBase<VectorType2>& solution_update, 
               const MatrixBase<VectorType3>& b_vec) {
     assert(solution.size() == dim);
@@ -85,7 +114,12 @@ public:
 
     nlp_.eval_fonc_hu(t, x0, solution, x, lmd, fonc_hu_);
     nlp_.eval_fonc_hu(t1, x0_1_, solution, x, lmd, fonc_hu_1_);
+    if constexpr (nub > 0) {
+      nlp_.eval_fonc_hu(solution, dummy, mu, fonc_hu_);
+      nlp_.eval_fonc_hu(solution, dummy, mu, fonc_hu_1_);
+    }
 
+    // condensing of x and lmd
     nlp_.eval_fonc_f(t, x0, solution, x, fonc_f_);
     nlp_.eval_fonc_hx(t, x0, solution, x, lmd, fonc_hx_);
     for (size_t i=0; i<=N; ++i) {
@@ -97,13 +131,43 @@ public:
     nlp_.retrive_x(t1, x0_1_, solution, x_1_, fonc_f_1_);
     nlp_.retrive_lmd(t1, x0_1_, solution, x_1_, lmd_1_, fonc_hx_1_);
 
+    // condensing of dummy and mu
+    if constexpr (nub > 0) {
+      nlp_.eval_fonc_hdummy(solution, dummy, mu, fonc_hdummy_);
+      nlp_.eval_fonc_hmu(solution, dummy, mu, fonc_hmu_);
+      for (size_t i=0; i<N; ++i) {
+        dummy_1_[i] = - zeta_ * fonc_hdummy_[i];
+      }
+      for (size_t i=0; i<N; ++i) {
+        mu_1_[i] = - zeta_ * fonc_hmu_[i];
+      }
+      nlp_.eval_fonc_hdummy_inv(dummy, mu, dummy_1_, mu_1_, fonc_hdummy_1_, fonc_hmu_1_);
+      nlp_.eval_fonc_hmu_inv(dummy, mu, dummy_1_, mu_1_, fonc_hdummy_1_, fonc_hmu_1_);
+      for (size_t i=0; i<N; ++i) {
+        mu_1_[i] = mu[i] + finite_difference_epsilon_ * fonc_hmu_1_[i];
+      }
+    }
+
     nlp_.eval_fonc_hu(t1, x0_1_, solution, x_1_, lmd_1_, fonc_hu_3_);
+    if constexpr (nub > 0) {
+      nlp_.eval_fonc_hu(solution, dummy_1_, mu_1_, fonc_hu_3_);
+    }
     nlp_.eval_fonc_f(t1, x0_1_, solution, x, fonc_f_1_);
     nlp_.eval_fonc_hx(t1, x0_1_, solution, x, lmd, fonc_hx_1_);
 
     nlp_.retrive_x(t1, x0_1_, updated_solution_, x_1_, fonc_f_1_);
     nlp_.retrive_lmd(t1, x0_1_, updated_solution_, x_1_, lmd_1_, fonc_hx_1_);
+    if constexpr (nub > 0) {
+      nlp_.retrive_mu_update(solution, dummy, mu, solution_update, mu_update_);
+      for (size_t i=0; i<N; ++i) {
+        mu_1_[i] = mu[i] + finite_difference_epsilon_ * mu_update_[i];
+      }
+    }
+
     nlp_.eval_fonc_hu(t1, x0_1_, updated_solution_, x_1_, lmd_1_, fonc_hu_2_);
+    if constexpr (nub > 0) {
+      nlp_.eval_fonc_hu(updated_solution_, dummy_1_, mu_1_, fonc_hu_2_);
+    }
     CGMRES_EIGEN_CONST_CAST(VectorType3, b_vec) = (1.0/finite_difference_epsilon_ - zeta_) * fonc_hu_ 
                                                   - (fonc_hu_3_ + fonc_hu_2_ - fonc_hu_1_) / finite_difference_epsilon_;
   }
@@ -113,6 +177,8 @@ public:
                const MatrixBase<VectorType1>& solution, 
                const std::array<Vector<nx>, N+1>& x,
                const std::array<Vector<nx>, N+1>& lmd,
+               const std::array<Vector<nub>, N>& dummy,
+               const std::array<Vector<nub>, N>& mu,
                const MatrixBase<VectorType2>& solution_update, 
                const MatrixBase<VectorType3>& ax_vec) {
     assert(solution.size() == dim);
@@ -124,7 +190,17 @@ public:
 
     nlp_.retrive_x(t1, x0_1_, updated_solution_, x_1_, fonc_f_1_);
     nlp_.retrive_lmd(t1, x0_1_, updated_solution_, x_1_, lmd_1_, fonc_hx_1_);
+    if constexpr (nub > 0) {
+      nlp_.retrive_mu_update(solution, dummy, mu, solution_update, mu_update_);
+      for (size_t i=0; i<N; ++i) {
+        mu_1_[i] = mu[i] + finite_difference_epsilon_ * mu_update_[i];
+      }
+    }
+
     nlp_.eval_fonc_hu(t1, x0_1_, updated_solution_, x_1_, lmd_1_, fonc_hu_2_);
+    if constexpr (nub > 0) {
+      nlp_.eval_fonc_hu(updated_solution_, dummy_1_, mu_1_, fonc_hu_2_);
+    }
     CGMRES_EIGEN_CONST_CAST(VectorType3, ax_vec) = (fonc_hu_2_ - fonc_hu_1_) / finite_difference_epsilon_;
   }
 
@@ -133,6 +209,8 @@ public:
                  const MatrixBase<VectorType1>& solution, 
                  std::array<Vector<nx>, N+1>& x,
                  std::array<Vector<nx>, N+1>& lmd,
+                 std::array<Vector<nub>, N>& dummy,
+                 std::array<Vector<nub>, N>& mu,
                  const MatrixBase<VectorType2>& solution_update, 
                  const Scalar dt) {
     const Scalar t1 = t + finite_difference_epsilon_;
@@ -153,6 +231,16 @@ public:
       fonc_hx_[i] = lmd_1_[i] - lmd[i];
       lmd[i].noalias() += (dt/finite_difference_epsilon_) * fonc_hx_[i];
     }
+    if constexpr (nub > 0) {
+      nlp_.retrive_dummy_update(solution, dummy, mu, solution_update, dummy_update_);
+      nlp_.retrive_mu_update(solution, dummy, mu, solution_update, mu_update_);
+      for (size_t i=0; i<N; ++i) {
+        dummy[i].noalias() += dt * (fonc_hdummy_1_[i] - dummy_update_[i]);
+      }
+      for (size_t i=0; i<N; ++i) {
+        mu[i].noalias() += dt * (fonc_hmu_1_[i] - mu_update_[i]);
+      }
+    }
   }
 
   decltype(auto) x() const { return nlp_.x(); }
@@ -166,6 +254,8 @@ private:
   Scalar finite_difference_epsilon_, zeta_; 
   Vector<dim> updated_solution_, fonc_hu_, fonc_hu_1_, fonc_hu_2_, fonc_hu_3_;
   std::array<Vector<nx>, N+1> x_1_, lmd_1_, fonc_f_, fonc_hx_, fonc_f_1_, fonc_hx_1_;
+  std::array<Vector<nub>, N> dummy_1_, mu_1_, fonc_hdummy_, fonc_hmu_, 
+                             fonc_hdummy_1_, fonc_hmu_1_, dummy_update_, mu_update_;
   Vector<nx> x0_1_, dx_;
 };
 

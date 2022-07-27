@@ -40,8 +40,8 @@ public:
     std::fill(xopt_.begin(), xopt_.end(), Vector<nx>::Zero());
     std::fill(lmdopt_.begin(), lmdopt_.end(), Vector<nx>::Zero());
     if constexpr (nub > 0) {
-      std::fill(dummy_.begin(), dummy_.end(), Vector<nub>::Zero());
-      std::fill(mu_.begin(), mu_.end(), Vector<nub>::Zero());
+      std::fill(dummyopt_.begin(), dummyopt_.end(), Vector<nub>::Zero());
+      std::fill(muopt_.begin(), muopt_.end(), Vector<nub>::Zero());
     }
   }
 
@@ -109,7 +109,7 @@ public:
   Scalar optError() const { return continuation_gmres_.optError(); }
 
   Scalar optError(const Scalar t, const Vector<nx>& x) {
-    continuation_gmres_.eval_fonc(t, x, solution_, xopt_, lmdopt_);
+    continuation_gmres_.eval_fonc(t, x, solution_, xopt_, lmdopt_, dummyopt_, muopt_);
     return optError();
   }
 
@@ -119,8 +119,9 @@ public:
     }
     const auto gmres_iter 
         = gmres_.template solve<const Scalar, const Vector<nx>&, const Vector<dim>&,
-                                const std::array<Vector<nx>, N+1>&, const std::array<Vector<nx>, N+1>&>(
-              continuation_gmres_, t, x, solution_, xopt_, lmdopt_, solution_update_);
+                                const std::array<Vector<nx>, N+1>&, const std::array<Vector<nx>, N+1>&,
+                                const std::array<Vector<nub>, N>&, const std::array<Vector<nub>, N>&>(
+              continuation_gmres_, t, x, solution_, xopt_, lmdopt_, dummyopt_, muopt_, solution_update_);
     const auto opt_error = continuation_gmres_.optError();
 
     // verbose
@@ -132,7 +133,7 @@ public:
       std::cout << "number of GMRES iter: " << gmres_iter << " (kmax: " << kmax << ")" << std::endl;
     }
 
-    continuation_gmres_.expansion(t, x, solution_, xopt_, lmdopt_, solution_update_, settings_.dt);
+    continuation_gmres_.expansion(t, x, solution_, xopt_, lmdopt_, dummyopt_, muopt_, solution_update_, settings_.dt);
     solution_.noalias() += settings_.dt * solution_update_;
 
     retriveSolution();
@@ -150,8 +151,8 @@ private:
   std::array<Vector<nuc>, N> ucopt_;
   std::array<Vector<nx>, N+1> xopt_;
   std::array<Vector<nx>, N+1> lmdopt_;
-  std::array<Vector<nub>, N> dummy_;
-  std::array<Vector<nub>, N> mu_;
+  std::array<Vector<nub>, N> dummyopt_;
+  std::array<Vector<nub>, N> muopt_;
 
   Vector<dim> solution_, solution_update_; 
 
