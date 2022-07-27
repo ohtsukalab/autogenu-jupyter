@@ -24,7 +24,7 @@ public:
 
   using MultipleShootingNLP_ = MultipleShootingNLP<OCP, N>;
   using ContinuationGMRES_ = ContinuationGMRESCondensing<MultipleShootingNLP_>;
-  using MatrixFreeGMRES_ = MatrixFreeGMRES<kmax, ContinuationGMRES_>;
+  using MatrixFreeGMRES_ = MatrixFreeGMRES<ContinuationGMRES_, kmax>;
 
   MultipleShootingCGMRESSolver(const OCP& ocp, const Horizon& horizon, 
                                const SolverSettings& settings) 

@@ -24,7 +24,7 @@ public:
 
   using ZeroHorizonNLP_ = ZeroHorizonNLP<OCP>;
   using NewtonGMRES_ = NewtonGMRES<ZeroHorizonNLP_>;
-  using MatrixFreeGMRES_ = MatrixFreeGMRES<kmax, NewtonGMRES_>;
+  using MatrixFreeGMRES_ = MatrixFreeGMRES<NewtonGMRES_, kmax>;
 
   ZeroHorizonOCPSolver(const OCP& ocp, const SolverSettings& settings) 
     : nlp_(ocp),

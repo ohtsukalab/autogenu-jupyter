@@ -24,7 +24,7 @@ public:
 
   using SingleShootingNLP_ = SingleShootingNLP<OCP, N>;
   using ContinuationGMRES_ = ContinuationGMRES<SingleShootingNLP_>;
-  using MatrixFreeGMRES_ = MatrixFreeGMRES<kmax, ContinuationGMRES_>;
+  using MatrixFreeGMRES_ = MatrixFreeGMRES<ContinuationGMRES_, kmax>;
 
   SingleShootingCGMRESSolver(const OCP& ocp, const Horizon& horizon, 
                              const SolverSettings& settings) 

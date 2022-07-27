@@ -12,7 +12,7 @@
 
 namespace cgmres {
 
-template <int kmax, typename LinearProblem>
+template <typename LinearProblem, int kmax>
 class MatrixFreeGMRES {
 public:
   static constexpr int dim = LinearProblem::dim;
