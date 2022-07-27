@@ -20,6 +20,7 @@ public:
   static constexpr int nu = OCP::nu;
   static constexpr int nc = OCP::nc;
   static constexpr int nuc = nu + nc;
+  static constexpr int nub = OCP::nub;
   static constexpr int dim = nuc * N;
 
   using MultipleShootingNLP_ = MultipleShootingNLP<OCP, N>;
@@ -38,6 +39,10 @@ public:
     std::fill(ucopt_.begin(), ucopt_.end(), Vector<nuc>::Zero());
     std::fill(xopt_.begin(), xopt_.end(), Vector<nx>::Zero());
     std::fill(lmdopt_.begin(), lmdopt_.end(), Vector<nx>::Zero());
+    if constexpr (nub > 0) {
+      std::fill(dummy_.begin(), dummy_.end(), Vector<nub>::Zero());
+      std::fill(mu_.begin(), mu_.end(), Vector<nub>::Zero());
+    }
   }
 
   MultipleShootingCGMRESSolver() = default;
@@ -145,6 +150,8 @@ private:
   std::array<Vector<nuc>, N> ucopt_;
   std::array<Vector<nx>, N+1> xopt_;
   std::array<Vector<nx>, N+1> lmdopt_;
+  std::array<Vector<nub>, N> dummy_;
+  std::array<Vector<nub>, N> mu_;
 
   Vector<dim> solution_, solution_update_; 
 

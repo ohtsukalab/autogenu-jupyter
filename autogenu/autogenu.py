@@ -358,7 +358,11 @@ public:
             +str(self.__nc+self.__nh)+';\n'
         )
         f_model_h.write(
-            '  static constexpr int nuc = nu + nc;\n\n'
+            '  static constexpr int nuc = nu + nc;\n'
+        )
+        f_model_h.write(
+            '  static constexpr int nub = '
+            +str(len(self.__saturation_list))+';\n\n'
         )
         f_model_h.writelines([
             '  double '+scalar_var[1]+' = '
@@ -669,7 +673,8 @@ PYBIND11_MODULE(ocp, m) {
     .def_static("nx", []() { return OCP::nx; })
     .def_static("nu", []() { return OCP::nu; })
     .def_static("nc", []() { return OCP::nc; })
-    .def_static("nuc", []() { return OCP::nuc; });
+    .def_static("nuc", []() { return OCP::nuc; })
+    .def_static("nub", []() { return OCP::nub; });
 }
 
 } // namespace python

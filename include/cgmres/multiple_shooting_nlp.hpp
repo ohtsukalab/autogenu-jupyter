@@ -5,6 +5,7 @@
 
 #include "cgmres/types.hpp"
 #include "cgmres/horizon.hpp"
+#include "cgmres/control_input_bounds.hpp"
 
 namespace cgmres {
 
@@ -15,6 +16,7 @@ public:
   static constexpr int nu = OCP::nu;
   static constexpr int nc = OCP::nc;
   static constexpr int nuc = nu + nc;
+  static constexpr int nub = OCP::nub;
   static constexpr int dim = nuc * N;
 
   MultipleShootingNLP(const OCP& ocp, const Horizon& horizon) 
@@ -104,6 +106,39 @@ public:
       ocp_.eval_hx(t+i*dt, x[i].data(), solution.template segment<nuc>(nuc*i).data(), 
                    lmd[i+1].data(), dx_.data());
       lmd[i] = lmd[i+1] + dt * dx_ + fonc_hx[i];
+    }
+  }
+
+  void eval_fonc_hu(const Vector<dim>& solution,
+                    const std::array<Vector<nub>, N>& dummy, 
+                    const std::array<Vector<nub>, N>& mu,
+                    Vector<dim>& fonc_hu) const {
+    // Compute the erros in the first order necessary conditions (FONC)
+    for (size_t i=0; i<N; ++i) {
+      ubounds::eval_hu(ocp_, solution.template segment<nu>(nuc*i), dummy[i], mu[i],
+                       fonc_hu.template segment<nu>(nuc*i));
+    }
+  }
+
+  void eval_fonc_hu_dummy(const Vector<dim>& solution,
+                          const std::array<Vector<nub>, N>& dummy, 
+                          const std::array<Vector<nub>, N>& mu,
+                          std::array<Vector<nub>, N>& fonc_hu_dummy) const {
+    // Compute the erros in the first order necessary conditions (FONC)
+    for (size_t i=0; i<N; ++i) {
+      ubounds::eval_hu_dummy(ocp_, solution.template segment<nu>(nuc*i), dummy[i], mu[i],
+                             fonc_hu_dummy[i]);
+    }
+  }
+
+  void eval_fonc_hu_bounds(const Vector<dim>& solution,
+                           const std::array<Vector<nub>, N>& dummy, 
+                           const std::array<Vector<nub>, N>& mu,
+                           std::array<Vector<nub>, N>& fonc_hu_bounds) const {
+    // Compute the erros in the first order necessary conditions (FONC)
+    for (size_t i=0; i<N; ++i) {
+      ubounds::eval_hu_bounds(ocp_, solution.template segment<nu>(nuc*i), dummy[i], mu[i],
+                              fonc_hu_bounds[i]);
     }
   }
 
