@@ -27,7 +27,7 @@ public:
 
   inline Scalar T(const Scalar t) const {
     if (time_varying_length_) {
-      assert(t >= t0);
+      assert(t >= t0_);
       return Tf_ * (1.0-std::exp(-alpha_*(t-t0_)));
     }
     else {

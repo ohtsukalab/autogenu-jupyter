@@ -914,7 +914,6 @@ if (BUILD_MAIN)
       ${PROJECT_NAME}
       PRIVATE
       ${CGMRES_INCLUDE_DIR}
-      ${CGMRES_INCLUDE_DIR}/thirdparty/eigen
   )
   if (VECTORIZE)
     target_compile_options(
@@ -945,7 +944,8 @@ macro(pybind11_add_cgmres_module MODULE)
     ${MODULE} 
     PRIVATE
     ${CGMRES_INCLUDE_DIR}
-    ${CGMRES_INCLUDE_DIR}/thirdparty/eigen
+    ${CGMRES_INCLUDE_DIR}/cgmres/thirdparty/eigen
+    ${CGMRES_INCLUDE_DIR}/cgmres/thirdparty/pybind11
     ${PROJECT_SOURCE_DIR}
   )
     if (VECTORIZE)
@@ -957,7 +957,7 @@ macro(pybind11_add_cgmres_module MODULE)
     endif()
 endmacro()
 
-add_subdirectory(${CGMRES_INCLUDE_DIR}/thirdparty/pybind11 ${CMAKE_CURRENT_BINARY_DIR}/thirdparty/pybind11)
+add_subdirectory(${CGMRES_INCLUDE_DIR}/cgmres/thirdparty/pybind11 ${CMAKE_CURRENT_BINARY_DIR}/thirdparty/pybind11)
 pybind11_add_cgmres_module(ocp)
 pybind11_add_cgmres_module(zero_horizon_ocp_solver)
 pybind11_add_cgmres_module(single_shooting_cgmres_solver)
@@ -992,7 +992,8 @@ macro(pybind11_add_cgmres_module MODULE)
     ${MODULE} 
     PRIVATE
     ${CGMRES_INCLUDE_DIR}
-    ${CGMRES_INCLUDE_DIR}/thirdparty/eigen
+    ${CGMRES_INCLUDE_DIR}/cgmres/thirdparty/eigen
+    ${CGMRES_INCLUDE_DIR}/cgmres/thirdparty/pybind11
     ${PROJECT_SOURCE_DIR}
   )
     if (VECTORIZE)
@@ -1004,7 +1005,7 @@ macro(pybind11_add_cgmres_module MODULE)
     endif()
 endmacro()
 
-add_subdirectory(${CGMRES_INCLUDE_DIR}/thirdparty/pybind11 ${CMAKE_CURRENT_BINARY_DIR}/thirdparty/pybind11)
+add_subdirectory(${CGMRES_INCLUDE_DIR}/cgmres/thirdparty/pybind11 ${CMAKE_CURRENT_BINARY_DIR}/thirdparty/pybind11)
 pybind11_add_cgmres_module(solver_settings)
 pybind11_add_cgmres_module(horizon)
 
