@@ -50,7 +50,7 @@ void eval_hmu(const OCP& ocp, const MatrixBase<VectorType1>& u,
   if constexpr (nub > 0) {
     assert(dummy.size() == nub);
     assert(mu.size() == nub);
-    assert(hu_bounds.size() == nub);
+    assert(hmu.size() == nub);
     for (int i=0; i<nub; ++i) {
       const auto ui = OCP::ubound_indices[i];
       CGMRES_EIGEN_CONST_CAST(VectorType4, hmu).coeffRef(i)
