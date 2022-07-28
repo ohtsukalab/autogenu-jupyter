@@ -50,10 +50,15 @@ PYBIND11_MODULE(multiple_shooting_cgmres_solver, m) { \
         } \ 
         self.update(t, x); \
     }, py::arg("t"), py::arg("x")) \
-    .def("init_state_costate_trajectory", [](MultipleShootingCGMRESSolver_& self, const Scalar t, const VectorX& x) { \
+    .def("init_x_lmd", [](MultipleShootingCGMRESSolver_& self, const Scalar t, const VectorX& x) { \
         if (x.size() != OCP::nx) { \
           throw std::invalid_argument("[MultipleShootingCGMRESSolver]: 'x.size()' must be "+std::to_string(OCP::nx)); \
         } \ 
-        self.initStateCostateTrajectory(t, x); \
-    }, py::arg("t"), py::arg("x")); \
+        self.init_x_lmd(t, x); \
+    }, py::arg("t"), py::arg("x")) \
+    .def("__str__", [](const MultipleShootingCGMRESSolver_& self) { \
+        std::stringstream ss; \
+        ss << self; \ 
+        return ss.str(); \
+      }); \
 }

@@ -109,6 +109,18 @@ public:
     retriveSolution();
   }
 
+  void disp(std::ostream& os) const {
+    os << "Zero horizon OCP solver: " << std::endl;
+    os << "  kmax: " << kmax << std::endl;
+    os << nlp_.ocp() << std::endl;
+    os << settings_ << std::flush;
+  }
+
+  friend std::ostream& operator<<(std::ostream& os, const ZeroHorizonOCPSolver& solver) {
+    solver.disp(os);
+    return os;
+  }
+
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
 private:

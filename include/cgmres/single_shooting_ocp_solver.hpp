@@ -118,6 +118,20 @@ public:
     retriveSolution();
   }
 
+  void disp(std::ostream& os) const {
+    os << "Single shooting OCP solver: " << std::endl;
+    os << "  N:    " << N << std::endl;
+    os << "  kmax: " << kmax << std::endl;
+    os << nlp_.ocp() << std::endl;
+    os << nlp_.horizon() << std::endl;
+    os << settings_ << std::flush;
+  }
+
+  friend std::ostream& operator<<(std::ostream& os, const SingleShootingOCPSolver& solver) {
+    solver.disp(os);
+    return os;
+  }
+
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
 private:

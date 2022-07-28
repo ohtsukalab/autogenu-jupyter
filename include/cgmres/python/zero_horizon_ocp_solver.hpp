@@ -36,5 +36,10 @@ PYBIND11_MODULE(zero_horizon_ocp_solver, m) { \
           throw std::invalid_argument("[ZeroHorizonOCPSolver]: 'x.size()' must be "+std::to_string(OCP::nx)); \
         } \ 
         self.solve(t, x); \
-    }, py::arg("t"), py::arg("x")); \
+    }, py::arg("t"), py::arg("x")) \
+    .def("__str__", [](const ZeroHorizonOCPSolver_& self) { \
+        std::stringstream ss; \
+        ss << self; \ 
+        return ss.str(); \
+      }); \
 }

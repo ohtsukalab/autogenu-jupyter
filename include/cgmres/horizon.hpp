@@ -4,6 +4,7 @@
 #include <cmath>
 #include <stdexcept>
 #include <cassert>
+#include <iostream>
 
 #include "cgmres/types.hpp"
 
@@ -36,6 +37,24 @@ public:
 
   void reset(const Scalar t0) {
     t0_ = t0;
+  }
+
+  void disp(std::ostream& os) const {
+    os << "Horizon: "; 
+    if (time_varying_length_) {
+      os << "time-varying length" << std::endl;
+    }
+    else {
+      os << "fixed length" << std::endl;
+    }
+    os << "  Tf:    " << Tf_ << std::endl;
+    os << "  alpha: " << alpha_ << std::endl;
+    os << "  t0:    " << t0_ << std::flush;
+  }
+
+  friend std::ostream& operator<<(std::ostream& os, const Horizon& horizon) {
+    horizon.disp(os);
+    return os;
   }
 
 private:

@@ -139,9 +139,23 @@ public:
     retriveSolution();
   }
 
-  void initStateCostateTrajectory(const Scalar t, const Vector<nx>& x) {
+  void init_x_lmd(const Scalar t, const Vector<nx>& x) {
     continuation_gmres_.retrive_x(t, x, solution_, xopt_);
     continuation_gmres_.retrive_lmd(t, x, solution_, xopt_, lmdopt_);
+  }
+
+  void disp(std::ostream& os) const {
+    os << "Multiple shooting CGMRES solver: " << std::endl;
+    os << "  N:    " << N << std::endl;
+    os << "  kmax: " << kmax << std::endl;
+    os << nlp_.ocp() << std::endl;
+    os << nlp_.horizon() << std::endl;
+    os << settings_ << std::flush;
+  }
+
+  friend std::ostream& operator<<(std::ostream& os, const MultipleShootingCGMRESSolver& solver) {
+    solver.disp(os);
+    return os;
   }
 
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW

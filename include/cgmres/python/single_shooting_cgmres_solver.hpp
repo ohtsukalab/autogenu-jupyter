@@ -37,5 +37,10 @@ PYBIND11_MODULE(single_shooting_cgmres_solver, m) { \
           throw std::invalid_argument("[ZeroHorizonOCPSolver]: 'x.size()' must be "+std::to_string(OCP::nx)); \
         } \ 
         self.update(t, x); \
-    }, py::arg("t"), py::arg("x")); \
+    }, py::arg("t"), py::arg("x")) \
+    .def("__str__", [](const SingleShootingCGMRESSolver_& self) { \
+        std::stringstream ss; \
+        ss << self; \ 
+        return ss.str(); \
+      }); \
 }

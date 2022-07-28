@@ -332,6 +332,8 @@ class AutoGenU(object):
 #define _USE_MATH_DEFINES
 
 #include <cmath>
+#include <iostream>
+#include "cgmres/types.hpp"
 
 namespace cgmres {
 
@@ -383,6 +385,28 @@ public:
             for i in range(self.__nh-1):
                 f_model_h.write(str(self.__FB_epsilon[i])+', ')
             f_model_h.write(str(self.__FB_epsilon[self.__nh-1])+'};\n')
+        f_model_h.write('\n  void disp(std::ostream& os) const {\n')
+        f_model_h.write('    os << "OCP_'+self.__ocp_name+':" << std::endl;\n')
+        f_model_h.write('    os << "  nx:  " << nx << std::endl;\n')
+        f_model_h.write('    os << "  nu:  " << nu << std::endl;\n')
+        f_model_h.write('    os << "  nc:  " << nc << std::endl;\n')
+        f_model_h.write('    os << "  nuc: " << nuc << std::endl;\n')
+        f_model_h.write('    os << std::endl;\n')
+        f_model_h.writelines([
+            '    os << "  '+scalar_var[1]+': " << '+scalar_var[1]+' << std::endl;\n' for scalar_var in self.__scalar_vars
+        ])
+        f_model_h.write('    os << std::endl;\n')
+        f_model_h.write('    Eigen::IOFormat fmt(4, 0, ", ", "", "[", "]");\n')
+        f_model_h.writelines([
+            '    os << "  '+array_var[1]+': " << Map<const VectorX>('+array_var[1]+', '+str(len(array_var[0]))+').transpose().format(fmt) << std::endl;\n' for array_var in self.__array_vars
+        ])
+        if self.__nh > 0:
+            f_model_h.write('    os << "  fb_eps: " << Map<const VectorX>(fb_eps, '+str(self.__nh)+').transpose().format(fmt) << std::endl;\n')
+        f_model_h.write('  }\n\n')
+        f_model_h.write('  friend std::ostream& operator<<(std::ostream& os, const OCP_'+self.__ocp_name+'& ocp) { \n')
+        f_model_h.write('    ocp.disp(os);\n')
+        f_model_h.write('    return os;\n')
+        f_model_h.write('  }\n\n')
         f_model_h.writelines([
 """
   // Computes the state equation f(t, x, u).
@@ -551,7 +575,7 @@ public:
                 '  mpc.set_uc(initializer.ucopt());\n'
                 '  mpc.set_lmd(initializer.lmdopt());\n'
                 '  mpc.set_x(x0);\n'
-                '  mpc.init_state_costate_trajectory(t0, x0);\n'
+                '  mpc.init_x_lmd(t0, x0);\n'
             )
         else:
             return NotImplementedError()
@@ -675,7 +699,12 @@ PYBIND11_MODULE(ocp, m) {
     .def_static("nu", []() { return OCP::nu; })
     .def_static("nc", []() { return OCP::nc; })
     .def_static("nuc", []() { return OCP::nuc; })
-    .def_static("nub", []() { return OCP::nub; });
+    .def_static("nub", []() { return OCP::nub; })
+    .def("__str__", [](const OCP& self) { 
+        std::stringstream ss; 
+        ss << self; 
+        return ss.str(); 
+      }); 
 }
 
 } // namespace python
