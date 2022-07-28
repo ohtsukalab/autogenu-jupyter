@@ -213,7 +213,7 @@ public:
                  std::array<Vector<nub>, N>& dummy,
                  std::array<Vector<nub>, N>& mu,
                  const MatrixBase<VectorType2>& solution_update, 
-                 const Scalar dt) {
+                 const Scalar dt, const Scalar min_dummy) {
     const Scalar t1 = t + finite_difference_epsilon_;
     updated_solution_ = solution + finite_difference_epsilon_ * solution_update;
     for (size_t i=0; i<N+1; ++i) {
@@ -241,6 +241,7 @@ public:
       for (size_t i=0; i<N; ++i) {
         mu[i].noalias() += dt * (fonc_hmu_1_[i] - mu_update_[i]);
       }
+      nlp_.clip_dummy(dummy, min_dummy);
     }
   }
 

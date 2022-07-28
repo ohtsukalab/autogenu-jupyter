@@ -11,6 +11,7 @@ PYBIND11_MODULE(solver_settings, m) { \
     .def_readwrite("finite_difference_epsilon", &SolverSettings::finite_difference_epsilon) \
     .def_readwrite("dt", &SolverSettings::dt) \
     .def_readwrite("zeta", &SolverSettings::zeta) \
+    .def_readwrite("min_dummy", &SolverSettings::min_dummy) \
     .def_readwrite("verbose_level", &SolverSettings::verbose_level) \
     .def("__str__", [](const SolverSettings& self) { \
         std::stringstream ss; \

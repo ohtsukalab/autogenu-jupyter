@@ -15,6 +15,7 @@ struct SolverSettings {
 
   Scalar dt = 0.001; // sampling period
   Scalar zeta = 1000.0; // hint: 1.0/dt 
+  Scalar min_dummy = 1.0e-03;
 
   size_t verbose_level = 0;
 
@@ -25,6 +26,7 @@ struct SolverSettings {
     os << "  finite difference epsilon: " << finite_difference_epsilon << std::endl;
     os << "  dt (sampling period):      " << dt << std::endl;
     os << "  zeta:                      " << zeta << std::endl;
+    os << "  min dummy:                 " << min_dummy << std::endl;
     os << "  verbose level:             " << verbose_level << std::flush;
   }
 

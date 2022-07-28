@@ -157,7 +157,8 @@ public:
       std::cout << "number of GMRES iter: " << gmres_iter << " (kmax: " << kmax << ")" << std::endl;
     }
 
-    continuation_gmres_.expansion(t, x, solution_, xopt_, lmdopt_, dummyopt_, muopt_, solution_update_, settings_.dt);
+    continuation_gmres_.expansion(t, x, solution_, xopt_, lmdopt_, dummyopt_, muopt_, 
+                                  solution_update_, settings_.dt, settings_.min_dummy);
     solution_.noalias() += settings_.dt * solution_update_;
 
     retriveSolution();

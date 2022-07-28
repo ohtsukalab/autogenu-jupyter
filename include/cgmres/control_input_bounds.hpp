@@ -121,6 +121,14 @@ void retrive_mu_update(const OCP& ocp,
   }
 }
 
+template <int nub>
+void clip_dummy(Vector<nub>& dummy, const Scalar min) {
+  assert(min >= 0.0);
+  for (size_t i=0; i<nub; ++i) {
+    dummy.coeffRef(i) = std::max(dummy.coeff(i), min);
+  }
+}
+
 } // namespace ubounds
 } // namespace cgmres
 

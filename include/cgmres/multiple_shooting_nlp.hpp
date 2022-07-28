@@ -166,6 +166,10 @@ public:
     ubounds::retrive_mu_update<OCP, N>(ocp_, solution, dummy, mu, solution_update, mu_update);
   }
 
+  void clip_dummy(std::array<Vector<OCP::nub>, N>& dummy, const Scalar min) {
+    ubounds::clip_dummy<OCP, N>(dummy, min);
+  }
+
   const OCP& ocp() const { return ocp_; }
 
   const Horizon& horizon() const { return horizon_; }
