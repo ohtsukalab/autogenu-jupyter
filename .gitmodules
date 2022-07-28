@@ -1,6 +1,0 @@
-[submodule "include/cgmres/thirdparty/eigen"]
-	path = include/cgmres/thirdparty/eigen
-	url = https://gitlab.com/libeigen/eigen.git
-[submodule "include/cgmres/thirdparty/pybind11"]
-	path = include/cgmres/thirdparty/pybind11
-	url = https://github.com/pybind/pybind11
