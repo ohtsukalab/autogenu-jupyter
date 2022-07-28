@@ -625,30 +625,27 @@ PYBIND11_MODULE(ocp, m) {
        return copy; 
      }) 
     .def("eval_f", [](const OCP& self, const Scalar t,  
-                      const VectorX& x, const VectorX& u, VectorX& dx) { 
+                      const VectorX& x, const VectorX& u) { 
         if (x.size() != OCP::nx) {
           throw std::invalid_argument("[OCP]: 'x.size()' must be "+std::to_string(OCP::nx));
         }
         if (u.size() != OCP::nu) { 
           throw std::invalid_argument("[OCP]: 'u.size()' must be "+std::to_string(OCP::nu)); 
         } 
-        if (dx.size() != OCP::nx) {
-          throw std::invalid_argument("[OCP]: 'dx.size()' must be "+std::to_string(OCP::nx));
-        }
+        Vector<OCP::nx> dx(Vector<OCP::nx>::Zero());
         self.eval_f(t, x.data(), u.data(), dx.data()); 
-     }, py::arg("t"), py::arg("x"), py::arg("u"), py::arg("dx"))
-    .def("eval_phix", [](const OCP& self, const Scalar t,
-                      const VectorX& x, VectorX& phix) {
+        return dx;
+     }, py::arg("t"), py::arg("x"), py::arg("u"))
+    .def("eval_phix", [](const OCP& self, const Scalar t, const VectorX& x) {
         if (x.size() != OCP::nx) {
           throw std::invalid_argument("[OCP]: 'x.size()' must be "+std::to_string(OCP::nx));
         } 
-        if (phix.size() != OCP::nx) {
-          throw std::invalid_argument("[OCP]: 'phix.size()' must be "+std::to_string(OCP::nx));
-        }
+        Vector<OCP::nx> phix(Vector<OCP::nx>::Zero());
         self.eval_phix(t, x.data(), phix.data());
-     }, py::arg("t"), py::arg("x"), py::arg("phix"))
+        return phix;
+     }, py::arg("t"), py::arg("x"))
     .def("eval_hx", [](const OCP& self, const Scalar t, 
-                       const VectorX& x, const VectorX& u, const VectorX& lmd, VectorX& hx) {
+                       const VectorX& x, const VectorX& u, const VectorX& lmd) {
         if (x.size() != OCP::nx) {
           throw std::invalid_argument("[OCP]: 'x.size()' must be "+std::to_string(OCP::nx));
         }
@@ -658,13 +655,12 @@ PYBIND11_MODULE(ocp, m) {
         if (lmd.size() != OCP::nx) {
           throw std::invalid_argument("[OCP]: 'lmd.size()' must be "+std::to_string(OCP::nx));
         }
-        if (hx.size() != OCP::nx) {
-          throw std::invalid_argument("[OCP]: 'hx.size()' must be "+std::to_string(OCP::nx));
-        }
+        Vector<OCP::nx> hx(Vector<OCP::nx>::Zero());
         self.eval_hx(t, x.data(), u.data(), lmd.data(), hx.data());
-     }, py::arg("t"), py::arg("x"), py::arg("u"), py::arg("lmd"), py::arg("hx"))
+        return hx;
+     }, py::arg("t"), py::arg("x"), py::arg("u"), py::arg("lmd"))
     .def("eval_hu", [](const OCP& self, const Scalar t,
-                       const VectorX& x, const VectorX& u, const VectorX& lmd, VectorX& hu) {
+                       const VectorX& x, const VectorX& u, const VectorX& lmd) {
         if (x.size() != OCP::nx) {
           throw std::invalid_argument("[OCP]: 'x.size()' must be "+std::to_string(OCP::nx));
         }
@@ -674,11 +670,10 @@ PYBIND11_MODULE(ocp, m) {
         if (lmd.size() != OCP::nx) {
           throw std::invalid_argument("[OCP]: 'lmd.size()' must be "+std::to_string(OCP::nx));
         }
-        if (hu.size() != OCP::nuc) {
-          throw std::invalid_argument("[OCP]: 'hx.size()' must be "+std::to_string(OCP::nuc)); 
-        }
+        Vector<OCP::nuc> hu(Vector<OCP::nuc>::Zero());
         self.eval_hu(t, x.data(), u.data(), lmd.data(), hu.data());
-     }, py::arg("t"), py::arg("x"), py::arg("u"), py::arg("lmd"), py::arg("hu"))
+        return hu;
+     }, py::arg("t"), py::arg("x"), py::arg("u"), py::arg("lmd"))
 """ 
         ])
         for scalar_var in self.__scalar_vars:
