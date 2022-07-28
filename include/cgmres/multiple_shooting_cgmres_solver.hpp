@@ -170,7 +170,7 @@ public:
   }
 
   void init_dummy_mu() {
-    continuation_gmres_.retrive_dummy(solution_, dummyopt_, muopt_);
+    continuation_gmres_.retrive_dummy(solution_, dummyopt_, muopt_, settings_.min_dummy);
     continuation_gmres_.retrive_mu(solution_, dummyopt_, muopt_);
   }
 

@@ -261,14 +261,15 @@ public:
   void retrive_dummy(const Vector<dim>& solution, 
                      std::array<Vector<nub>, N>& dummy,
                      const std::array<Vector<nub>, N>& mu,
-                     const Scalar reg=1.0e-03) {
+                     const Scalar min_dummy) {
     if constexpr (nub > 0) {
       std::fill(fonc_hmu_1_.begin(), fonc_hmu_1_.end(), Vector<nub>::Zero());
       std::fill(dummy.begin(), dummy.end(), Vector<nub>::Zero());
       nlp_.eval_fonc_hmu(solution, dummy, mu, fonc_hmu_1_);
       for (size_t i=0; i<N; ++i) {
-        dummy[i].array() = fonc_hmu_1_[i].array().abs().sqrt() + reg;
+        dummy[i].array() = fonc_hmu_1_[i].array().abs().sqrt();
       }
+      nlp_.clip_dummy(dummy, min_dummy);
     }
   }
 
