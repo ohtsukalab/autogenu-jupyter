@@ -61,26 +61,25 @@ void eval_hmu(const OCP& ocp, const MatrixBase<VectorType1>& u,
 }
 
 template <typename VectorType1, typename VectorType2, typename VectorType3, 
-          typename VectorType4, typename VectorType5, typename VectorType6>
-void eval_hdummy_inv(const MatrixBase<VectorType1>& dummy, 
-                     const MatrixBase<VectorType2>& mu, 
-                     const MatrixBase<VectorType3>& hdummy, 
-                     const MatrixBase<VectorType4>& hmu, 
-                     const MatrixBase<VectorType5>& hdummy_inv, 
-                     const MatrixBase<VectorType6>& hmu_inv) {
-  CGMRES_EIGEN_CONST_CAST(VectorType5, hdummy_inv).array() = hmu.array() / (2.0 * dummy.array());
+          typename VectorType4, typename VectorType5>
+void multiply_hdummy_inv(const MatrixBase<VectorType1>& dummy, 
+                         const MatrixBase<VectorType2>& mu, 
+                         const MatrixBase<VectorType3>& hdummy, 
+                         const MatrixBase<VectorType4>& hmu, 
+                         const MatrixBase<VectorType5>& hdummy_multiplied) {
+  CGMRES_EIGEN_CONST_CAST(VectorType5, hdummy_multiplied).array() = hmu.array() / (2.0 * dummy.array());
 }
 
 template <typename VectorType1, typename VectorType2, typename VectorType3, 
           typename VectorType4, typename VectorType5, typename VectorType6>
-void eval_hmu_inv(const MatrixBase<VectorType1>& dummy, 
-                  const MatrixBase<VectorType2>& mu, 
-                  const MatrixBase<VectorType3>& hdummy, 
-                  const MatrixBase<VectorType4>& hmu, 
-                  const MatrixBase<VectorType5>& hdummy_inv, 
-                  const MatrixBase<VectorType6>& hmu_inv) {
-  CGMRES_EIGEN_CONST_CAST(VectorType6, hmu_inv).array() = hdummy.array() / (2.0 * dummy.array())
-                                                          - mu.array() * hdummy_inv.array() / dummy.array();
+void multiply_hmu_inv(const MatrixBase<VectorType1>& dummy, 
+                      const MatrixBase<VectorType2>& mu, 
+                      const MatrixBase<VectorType3>& hdummy, 
+                      const MatrixBase<VectorType4>& hmu, 
+                      const MatrixBase<VectorType5>& hdummy_multiplied, 
+                      const MatrixBase<VectorType6>& hmu_multiplied) {
+  CGMRES_EIGEN_CONST_CAST(VectorType6, hmu_multiplied).array() = hdummy.array() / (2.0 * dummy.array())
+                                                                  - mu.array() * hdummy_multiplied.array() / dummy.array();
 }
 
 template <typename OCP, typename VectorType1, typename VectorType2, typename VectorType3, typename VectorType4, typename VectorType5>
@@ -117,7 +116,7 @@ void retrive_mu_update(const OCP& ocp,
       const auto ui = OCP::ubound_indices[i];
       CGMRES_EIGEN_CONST_CAST(VectorType5, mu_udpate).coeffRef(ui) 
           = - mu.coeff(i) * (2.0*u.coeff(ui) - ocp.umin[i] - ocp.umax[i]) * u_update.coeff(ui) 
-                          / (dummy.coeff(i) * dummy.coeff(i));
+                          / (2.0 * dummy.coeff(i) * dummy.coeff(i));
     }
   }
 }
