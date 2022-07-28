@@ -281,7 +281,7 @@ public:
       std::fill(mu.begin(), mu.end(), Vector<nub>::Zero());
       nlp_.eval_fonc_hdummy(solution, dummy, mu, fonc_hdummy_1_);
       for (size_t i=0; i<N; ++i) {
-        mu[i].array() = fonc_hdummy_1_[i].array() / (2.0 * dummy[i].array());
+        mu[i].array() = - fonc_hdummy_1_[i].array() / (2.0 * dummy[i].array());
       }
     }
   }

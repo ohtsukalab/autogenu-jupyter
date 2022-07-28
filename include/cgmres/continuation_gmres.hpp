@@ -84,6 +84,16 @@ public:
     CGMRES_EIGEN_CONST_CAST(VectorType3, ax_vec) = (fonc_2_ - fonc_1_) / finite_difference_epsilon_;
   }
 
+  void retrive_dummy(Vector<dim>& solution, const Scalar min_dummy) {
+    fonc_1_.setZero();
+    nlp_.retrive_dummy(solution, fonc_1_, min_dummy);
+  }
+
+  void retrive_mu(Vector<dim>& solution) {
+    fonc_1_.setZero();
+    nlp_.retrive_mu(solution, fonc_1_);
+  }
+
   decltype(auto) x() const { return nlp_.x(); }
 
   decltype(auto) lmd() const { return nlp_.lmd(); }
