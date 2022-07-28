@@ -5,7 +5,7 @@ import numpy as np
 
 ocp = cgmres.hexacopter.OCP()
 
-horizon = cgmres.common.Horizon(Tf=1.0) # fixed-length length
+horizon = cgmres.common.Horizon(Tf=1.0, alpha=1.0) # time-varying length
 
 settings = cgmres.common.SolverSettings()
 settings.dt = 0.001
@@ -40,7 +40,9 @@ for _ in range(int(tsim/dt)):
     x1 = x + dt * dx
     mpc.update(t, x)
     x = x1
-    print('x: ', x)
+    t = t + dt
+    print('t: ', t, ', x: ', x)
 
-print('\nMPC solver used in this simulation:')
+print('\n\n============================================')
+print('MPC solver used in this simulation:')
 print(mpc)
