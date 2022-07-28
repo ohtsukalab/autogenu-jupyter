@@ -17,7 +17,7 @@ public:
   static constexpr int nc = OCP::nc;
   static constexpr int nuc = nu + nc;
   static constexpr int nub = OCP::nub;
-  static constexpr int dim = nuc;
+  static constexpr int dim = nuc + 2 * nub;
 
   ZeroHorizonNLP(const OCP& ocp) 
     : ocp_(ocp),
@@ -25,6 +25,7 @@ public:
     assert(nx > 0);
     assert(nu > 0);
     assert(nc >= 0);
+    assert(nub >= 0);
   }
 
   ZeroHorizonNLP() = default;
@@ -37,56 +38,42 @@ public:
     ocp_.eval_phix(t, x.data(), lmd_.data());
     // Compute the erros in the first order necessary conditions (FONC)
     ocp_.eval_hu(t, x.data(), solution.data(), lmd_.data(), fonc_hu.data());
+    if constexpr (nub > 0) {
+      const auto uc    = solution.template head<nuc>();
+      const auto dummy = solution.template segment<nub>(nuc);
+      const auto mu    = solution.template segment<nub>(nuc+nub);
+      auto fonc_huc    = fonc_hu.template head<nuc>();
+      auto fonc_hdummy = fonc_hu.template segment<nub>(nuc);
+      auto fonc_hmu    = fonc_hu.template segment<nub>(nuc+nub);
+      ubounds::eval_hu(ocp_, uc, dummy, mu, fonc_huc);
+      ubounds::eval_hdummy(ocp_, uc, dummy, mu, fonc_hdummy);
+      ubounds::eval_hmu(ocp_, uc, dummy, mu, fonc_hmu);
+    }
   }
 
-  void eval_fonc_hu(const Vector<dim>& solution, const Vector<nub>& dummy, 
-                    const Vector<nub>& mu, Vector<dim>& fonc_hu) const {
-    ubounds::eval_hu(ocp_, solution, dummy, mu, fonc_hu);
+  void retrive_dummy(Vector<dim>& solution, Vector<dim>& fonc_hu, const Scalar min_dummy) {
+    if constexpr (nub > 0) {
+      const auto uc    = solution.template head<nuc>();
+      auto dummy = solution.template segment<nub>(nuc);
+      const auto mu    = solution.template segment<nub>(nuc+nub);
+      auto fonc_hmu    = fonc_hu.template segment<nub>(nuc+nub);
+      dummy.setZero();
+      ubounds::eval_hmu(ocp_, uc, dummy, mu, fonc_hmu);
+      ubounds::clip_dummy(dummy, min_dummy);
+      dummy.array() = fonc_hmu.array().abs().sqrt();
+    }
   }
 
-  void eval_fonc_hdummy(const Vector<dim>& solution, Vector<nub>& dummy, 
-                       Vector<nub>& mu, Vector<nub>& fonc_hdummy) const {
-    ubounds::eval_hdummy(ocp_, solution, dummy, mu, fonc_hdummy);
-  }
-
-  void eval_fonc_hmu(const Vector<dim>& solution,
-                     const Vector<nub>& dummy, 
-                     const Vector<nub>& mu,
-                     Vector<nub>& fonc_hmu) const {
-    ubounds::eval_hmu(ocp_, solution, dummy, mu, fonc_hmu);
-  }
-
-  static void multiply_hdummy_inv(const Vector<nub>& dummy, 
-                                  const Vector<nub>& mu,
-                                  const Vector<nub>& fonc_hdummy,
-                                  const Vector<nub>& fonc_hmu,
-                                  Vector<nub>& fonc_hdummy_inv) {
-    ubounds::multiply_hdummy_inv(dummy, mu, fonc_hdummy, fonc_hmu, fonc_hdummy_inv);
-  }
-
-  static void multiply_hmu_inv(const Vector<nub>& dummy, 
-                               const Vector<nub>& mu,
-                               const Vector<nub>& fonc_hdummy,
-                               const Vector<nub>& fonc_hmu,
-                               const Vector<nub>& fonc_hdummy_inv,
-                               Vector<nub>& fonc_hmu_inv) {
-    ubounds::multiply_hmu_inv(dummy, mu, fonc_hdummy, fonc_hmu, fonc_hdummy_inv, fonc_hmu_inv);
-  }
-
-  void retrive_dummy_update(const Vector<OCP::nuc>& solution,
-                            const Vector<OCP::nub>& dummy, 
-                            const Vector<OCP::nub>& mu,
-                            const Vector<OCP::nuc>& solution_update,
-                            Vector<OCP::nub>& dummy_update) {
-    ubounds::retrive_dummy_update(ocp_, solution, dummy, mu, solution_update, dummy_update);
-  }
-
-  void retrive_mu_update(const Vector<OCP::nuc>& solution,
-                         const Vector<OCP::nub>& dummy, 
-                         const Vector<OCP::nub>& mu,
-                         const Vector<OCP::nuc>& solution_update,
-                         Vector<OCP::nub>& mu_update) {
-    ubounds::retrive_mu_update(ocp_, solution, dummy, mu, solution_update, mu_update);
+  void retrive_mu(Vector<dim>& solution, Vector<dim>& fonc_hu) {
+    if constexpr (nub > 0) {
+      const auto uc    = solution.template head<nuc>();
+      const auto dummy = solution.template segment<nub>(nuc);
+      auto mu    = solution.template segment<nub>(nuc+nub);
+      auto fonc_hdummy = fonc_hu.template segment<nub>(nuc);
+      mu.setZero();
+      ubounds::eval_hmu(ocp_, uc, dummy, mu, fonc_hdummy);
+      mu.array() = fonc_hdummy.array() / (2.0 * dummy.array());
+    }
   }
 
   const OCP& ocp() const { return ocp_; }

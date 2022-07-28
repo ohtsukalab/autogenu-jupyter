@@ -121,11 +121,12 @@ void retrive_mu_update(const OCP& ocp,
   }
 }
 
-template <int nub>
-void clip_dummy(Vector<nub>& dummy, const Scalar min) {
+template <typename VectorType>
+void clip_dummy(const MatrixBase<VectorType>& dummy, const Scalar min) {
   assert(min >= 0.0);
+  const size_t nub = dummy.size();
   for (size_t i=0; i<nub; ++i) {
-    dummy.coeffRef(i) = std::max(dummy.coeff(i), min);
+    CGMRES_EIGEN_CONST_CAST(VectorType, dummy).coeffRef(i) = std::max(dummy.coeff(i), min);
   }
 }
 

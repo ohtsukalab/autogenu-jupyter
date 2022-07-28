@@ -117,7 +117,7 @@ template <typename OCP, int N>
 void clip_dummy(std::array<Vector<OCP::nub>, N>& dummy, const Scalar min) {
   if constexpr (OCP::nub > 0) {
     for (size_t i=0; i<N; ++i) {
-      clip_dummy<OCP::nub>(dummy[i], min);
+      clip_dummy(dummy[i], min);
     }
   } 
 }

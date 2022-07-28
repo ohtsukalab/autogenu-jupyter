@@ -13,8 +13,6 @@ template <class NLP>
 class NewtonGMRES {
 public:
   static constexpr int nx = NLP::nx;
-  static constexpr int nu = NLP::nu;
-  static constexpr int nc = NLP::nc;
   static constexpr int dim = NLP::dim;
 
   NewtonGMRES(const NLP& nlp, const Scalar finite_difference_epsilon) 
@@ -65,6 +63,16 @@ public:
     updated_solution_ = solution + finite_difference_epsilon_ * solution_update;
     nlp_.eval_fonc_hu(t, x, updated_solution_, fonc_1_);
     CGMRES_EIGEN_CONST_CAST(VectorType3, ax_vec) = (fonc_1_ - fonc_) / finite_difference_epsilon_;
+  }
+
+  void retrive_dummy(Vector<dim>& solution, const Scalar min_dummy) {
+    fonc_1_.setZero();
+    nlp_.retrive_dummy(solution, fonc_1_, min_dummy);
+  }
+
+  void retrive_mu(Vector<dim>& solution) {
+    fonc_1_.setZero();
+    nlp_.retrive_mu(solution, fonc_1_);
   }
 
   decltype(auto) x() const { return nlp_.x(); }

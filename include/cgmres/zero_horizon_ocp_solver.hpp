@@ -67,6 +67,10 @@ public:
 
   const Vector<nuc>& ucopt() const { return ucopt_; }
 
+  const Vector<nub>& dummyopt() const { return dummyopt_; }
+
+  const Vector<nub>& muopt() const { return muopt_; }
+
   const Vector<nx>& lmdopt() const { return newton_gmres_.lmd(); }
 
   Scalar optError() const { return newton_gmres_.optError(); }
@@ -106,6 +110,12 @@ public:
       }
 
     }
+    retriveSolution();
+  }
+
+  void init_dummy_mu() {
+    newton_gmres_.retrive_dummy(solution_, settings_.min_dummy);
+    newton_gmres_.retrive_mu(solution_);
     retriveSolution();
   }
 
