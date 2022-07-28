@@ -157,17 +157,17 @@ public:
 
     nlp_.retrive_x(t1, x0_1_, updated_solution_, x_1_, fonc_f_1_);
     nlp_.retrive_lmd(t1, x0_1_, updated_solution_, x_1_, lmd_1_, fonc_hx_1_);
-    // if constexpr (nub > 0) {
+    if constexpr (nub > 0) {
       nlp_.retrive_mu_update(solution, dummy, mu, solution_update, mu_update_);
       for (size_t i=0; i<N; ++i) {
         mu_1_[i] = mu[i] + finite_difference_epsilon_ * mu_update_[i];
       }
-    // }
+    }
 
     nlp_.eval_fonc_hu(t1, x0_1_, updated_solution_, x_1_, lmd_1_, fonc_hu_2_);
-    // if constexpr (nub > 0) {
+    if constexpr (nub > 0) {
       nlp_.eval_fonc_hu(updated_solution_, dummy_1_, mu_1_, fonc_hu_2_);
-    // }
+    }
     CGMRES_EIGEN_CONST_CAST(VectorType3, b_vec) = (1.0/finite_difference_epsilon_ - zeta_) * fonc_hu_ 
                                                   - (fonc_hu_3_ + fonc_hu_2_ - fonc_hu_1_) / finite_difference_epsilon_;
   }
