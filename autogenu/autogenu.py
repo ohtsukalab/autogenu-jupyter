@@ -683,7 +683,7 @@ PYBIND11_MODULE(ocp, m) {
         ])
         for scalar_var in self.__scalar_vars:
             name = scalar_var[1]
-            f_pybind11.write('    .def_readwrite("'+name+' ", &OCP::'+name+')\n')
+            f_pybind11.write('    .def_readwrite("'+name+'", &OCP::'+name+')\n')
         for array_var in self.__array_vars:
             name = array_var[1]
             size = len(array_var[2])
@@ -695,11 +695,11 @@ PYBIND11_MODULE(ocp, m) {
             f_pybind11.write('        } Eigen::Map<Vector<'+str(size)+'>>(self.'+name+') = v; })\n')
         f_pybind11.writelines([
 """
-    .def_static("nx", []() { return OCP::nx; })
-    .def_static("nu", []() { return OCP::nu; })
-    .def_static("nc", []() { return OCP::nc; })
-    .def_static("nuc", []() { return OCP::nuc; })
-    .def_static("nub", []() { return OCP::nub; })
+    .def_readonly_static("nx", &OCP::nx)
+    .def_readonly_static("nu", &OCP::nu)
+    .def_readonly_static("nc", &OCP::nc)
+    .def_readonly_static("nuc", &OCP::nuc)
+    .def_readonly_static("nub", &OCP::nub)
     .def("__str__", [](const OCP& self) { 
         std::stringstream ss; 
         ss << self; 
