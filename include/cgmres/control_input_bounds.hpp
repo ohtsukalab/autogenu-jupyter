@@ -45,7 +45,7 @@ template <typename OCP, typename VectorType1, typename VectorType2, typename Vec
 void eval_hmu(const OCP& ocp, const MatrixBase<VectorType1>& u, 
                 const MatrixBase<VectorType2>& dummy, 
                 const MatrixBase<VectorType3>& mu, 
-                const MatrixBase<VectorType4>& hu_bounds) {
+                const MatrixBase<VectorType4>& hmu) {
   constexpr int nub = OCP::nub;
   if constexpr (nub > 0) {
     assert(dummy.size() == nub);
@@ -53,7 +53,7 @@ void eval_hmu(const OCP& ocp, const MatrixBase<VectorType1>& u,
     assert(hu_bounds.size() == nub);
     for (int i=0; i<nub; ++i) {
       const auto ui = OCP::ubound_indices[i];
-      CGMRES_EIGEN_CONST_CAST(VectorType4, hu_bounds).coeffRef(i)
+      CGMRES_EIGEN_CONST_CAST(VectorType4, hmu).coeffRef(i)
           = u.coeff(ui) * (u.coeff(ui) - ocp.umin[i] - ocp.umax[i]) 
               + ocp.umin[i] * ocp.umax[i] + dummy.coeff(i) * dummy.coeff(i);
     }

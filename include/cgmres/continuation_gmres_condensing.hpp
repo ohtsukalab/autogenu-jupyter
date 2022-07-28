@@ -152,6 +152,7 @@ public:
     if constexpr (nub > 0) {
       nlp_.eval_fonc_hu(solution, dummy_1_, mu_1_, fonc_hu_3_);
     }
+
     nlp_.eval_fonc_f(t1, x0_1_, solution, x, fonc_f_1_);
     nlp_.eval_fonc_hx(t1, x0_1_, solution, x, lmd, fonc_hx_1_);
 
@@ -160,7 +161,7 @@ public:
     if constexpr (nub > 0) {
       nlp_.retrive_mu_update(solution, dummy, mu, solution_update, mu_update_);
       for (size_t i=0; i<N; ++i) {
-        mu_1_[i] = mu[i] + finite_difference_epsilon_ * mu_update_[i];
+        mu_1_[i] = mu[i] - finite_difference_epsilon_ * mu_update_[i];
       }
     }
 
@@ -193,7 +194,7 @@ public:
     if constexpr (nub > 0) {
       nlp_.retrive_mu_update(solution, dummy, mu, solution_update, mu_update_);
       for (size_t i=0; i<N; ++i) {
-        mu_1_[i] = mu[i] + finite_difference_epsilon_ * mu_update_[i];
+        mu_1_[i] = mu[i] - finite_difference_epsilon_ * mu_update_[i];
       }
     }
 
@@ -254,6 +255,33 @@ public:
                    std::array<Vector<nx>, N+1>& lmd) {
     std::fill(fonc_hx_1_.begin(), fonc_hx_1_.end(), Vector<nx>::Zero());
     nlp_.retrive_lmd(t, x0, solution, x, lmd, fonc_hx_1_);
+  }
+
+  void retrive_dummy(const Vector<dim>& solution, 
+                     std::array<Vector<nub>, N>& dummy,
+                     const std::array<Vector<nub>, N>& mu,
+                     const Scalar reg=1.0e-03) {
+    if constexpr (nub > 0) {
+      std::fill(fonc_hmu_1_.begin(), fonc_hmu_1_.end(), Vector<nub>::Zero());
+      std::fill(dummy.begin(), dummy.end(), Vector<nub>::Zero());
+      nlp_.eval_fonc_hmu(solution, dummy, mu, fonc_hmu_1_);
+      for (size_t i=0; i<N; ++i) {
+        dummy[i].array() = fonc_hmu_1_[i].array().abs().sqrt() + reg;
+      }
+    }
+  }
+
+  void retrive_mu(const Vector<dim>& solution, 
+                  const std::array<Vector<nub>, N>& dummy,
+                  std::array<Vector<nub>, N>& mu) {
+    if constexpr (nub > 0) {
+      std::fill(fonc_hdummy_1_.begin(), fonc_hdummy_1_.end(), Vector<nub>::Zero());
+      std::fill(mu.begin(), mu.end(), Vector<nub>::Zero());
+      nlp_.eval_fonc_hdummy(solution, dummy, mu, fonc_hdummy_1_);
+      for (size_t i=0; i<N; ++i) {
+        mu[i].array() = fonc_hdummy_1_[i].array() / (2.0 * dummy[i].array());
+      }
+    }
   }
 
   decltype(auto) x() const { return nlp_.x(); }

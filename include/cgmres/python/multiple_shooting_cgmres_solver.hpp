@@ -37,6 +37,8 @@ PYBIND11_MODULE(multiple_shooting_cgmres_solver, m) { \
     .def("ucopt", &MultipleShootingCGMRESSolver_::ucopt) \
     .def("xopt", &MultipleShootingCGMRESSolver_::xopt) \
     .def("lmdopt", &MultipleShootingCGMRESSolver_::lmdopt) \
+    .def("dummyopt", &MultipleShootingCGMRESSolver_::dummyopt) \
+    .def("muopt", &MultipleShootingCGMRESSolver_::muopt) \
     .def("opt_error", [](MultipleShootingCGMRESSolver_& self, const Scalar t, const VectorX& x) { \
         if (x.size() != OCP::nx) { \
           throw std::invalid_argument("[MultipleShootingCGMRESSolver]: 'x.size()' must be "+std::to_string(OCP::nx)); \
@@ -56,6 +58,7 @@ PYBIND11_MODULE(multiple_shooting_cgmres_solver, m) { \
         } \ 
         self.init_x_lmd(t, x); \
     }, py::arg("t"), py::arg("x")) \
+    .def("init_dummy_mu", &MultipleShootingCGMRESSolver_::init_dummy_mu) \
     .def("__str__", [](const MultipleShootingCGMRESSolver_& self) { \
         std::stringstream ss; \
         ss << self; \ 

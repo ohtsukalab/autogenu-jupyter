@@ -20,8 +20,8 @@ public:
   static constexpr int nu = OCP::nu;
   static constexpr int nc = OCP::nc;
   static constexpr int nuc = nu + nc;
-  static constexpr int nub = OCP::nub;
   static constexpr int dim = nuc * N;
+  static constexpr int nub = OCP::nub;
 
   using MultipleShootingNLP_ = MultipleShootingNLP<OCP, N>;
   using ContinuationGMRES_ = ContinuationGMRESCondensing<MultipleShootingNLP_>;
@@ -98,6 +98,26 @@ public:
     }
   }
 
+  template <typename VectorType>
+  void set_dummy(const VectorType& dummy) {
+    if (dummy.size() != nub) {
+      throw std::invalid_argument("[MultipleShootingCGMRESSolver::set_dummy] dummy.size() must be " + std::to_string(nub));
+    }
+    for (size_t i=0; i<N; ++i) {
+      dummyopt_[i] = dummy;
+    }
+  }
+
+  template <typename VectorType>
+  void set_mu(const VectorType& mu) {
+    if (mu.size() != nub) {
+      throw std::invalid_argument("[MultipleShootingCGMRESSolver::set_mu] mu.size() must be " + std::to_string(nub));
+    }
+    for (size_t i=0; i<N; ++i) {
+      muopt_[i] = mu;
+    }
+  }
+
   const std::array<Vector<nu>, N>& uopt() const { return uopt_; }
 
   const std::array<Vector<nuc>, N>& ucopt() const { return ucopt_; }
@@ -105,6 +125,10 @@ public:
   const std::array<Vector<nx>, N+1>& xopt() const { return xopt_; }
 
   const std::array<Vector<nx>, N+1>& lmdopt() const { return lmdopt_; }
+
+  const std::array<Vector<nub>, N>& dummyopt() const { return dummyopt_; }
+
+  const std::array<Vector<nub>, N>& muopt() const { return muopt_; }
 
   Scalar optError() const { return continuation_gmres_.optError(); }
 
@@ -142,6 +166,11 @@ public:
   void init_x_lmd(const Scalar t, const Vector<nx>& x) {
     continuation_gmres_.retrive_x(t, x, solution_, xopt_);
     continuation_gmres_.retrive_lmd(t, x, solution_, xopt_, lmdopt_);
+  }
+
+  void init_dummy_mu() {
+    continuation_gmres_.retrive_dummy(solution_, dummyopt_, muopt_);
+    continuation_gmres_.retrive_mu(solution_, dummyopt_, muopt_);
   }
 
   void disp(std::ostream& os) const {
