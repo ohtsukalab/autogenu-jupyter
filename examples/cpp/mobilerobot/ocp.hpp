@@ -14,9 +14,9 @@ class OCP_mobilerobot {
 public:
   static constexpr int nx = 3;
   static constexpr int nu = 2;
-  static constexpr int nc = 6;
+  static constexpr int nc = 2;
   static constexpr int nuc = nu + nc;
-  static constexpr int nub = 0;
+  static constexpr int nub = 2;
 
   double vx_ref = 0.4;
   double v_min = -0.5;
@@ -33,7 +33,13 @@ public:
   double q[3] = {10, 1, 0.01};
   double r[2] = {0.1, 0.1};
   double x_ref[3] = {0, 0, 0};
-  double fb_eps[6] = {0.01, 0.01, 0.0001, 0.0001, 0.0001, 0.0001};
+
+  static constexpr int ubound_indices[2] = {0, 1};
+  double umin[2] = {-1.0, -1.0};
+  double umax[2] = {1.0, 1.0};
+  double dummy_weight[2] = {0.1, 0.1};
+
+  double fb_eps[2] = {0.01, 0.01};
 
   void disp(std::ostream& os) const {
     os << "OCP_mobilerobot:" << std::endl;
@@ -41,6 +47,7 @@ public:
     os << "  nu:  " << nu << std::endl;
     os << "  nc:  " << nc << std::endl;
     os << "  nuc: " << nuc << std::endl;
+    os << "  nub: " << nub << std::endl;
     os << std::endl;
     os << "  vx_ref: " << vx_ref << std::endl;
     os << "  v_min: " << v_min << std::endl;
@@ -55,10 +62,17 @@ public:
     os << "  R_2: " << R_2 << std::endl;
     os << std::endl;
     Eigen::IOFormat fmt(4, 0, ", ", "", "[", "]");
+    Eigen::IOFormat intfmt(1, 0, ", ", "", "[", "]");
     os << "  q: " << Map<const VectorX>(q, 3).transpose().format(fmt) << std::endl;
     os << "  r: " << Map<const VectorX>(r, 2).transpose().format(fmt) << std::endl;
     os << "  x_ref: " << Map<const VectorX>(x_ref, 3).transpose().format(fmt) << std::endl;
-    os << "  fb_eps: " << Map<const VectorX>(fb_eps, 6).transpose().format(fmt) << std::endl;
+    os << std::endl;
+    os << "  ubound_indices: " << Map<const VectorXi>(ubound_indices, 2).transpose().format(intfmt) << std::endl;
+    os << "  umin: " << Map<const VectorX>(umin, 2).transpose().format(fmt) << std::endl;
+    os << "  umax: " << Map<const VectorX>(umax, 2).transpose().format(fmt) << std::endl;
+    os << "  dummy_weight: " << Map<const VectorX>(dummy_weight, 2).transpose().format(fmt) << std::endl;
+    os << std::endl;
+    os << "  fb_eps: " << Map<const VectorX>(fb_eps, 2).transpose().format(fmt) << std::endl;
   }
 
   friend std::ostream& operator<<(std::ostream& os, const OCP_mobilerobot& ocp) { 
@@ -125,18 +139,10 @@ public:
   double x2 = -x[1];
   double x3 = -pow(R_1, 2) + pow(-X_1 - x1, 2) + pow(-Y_1 - x2, 2);
   double x4 = -pow(R_2, 2) + pow(-X_2 - x1, 2) + pow(-Y_2 - x2, 2);
-  double x5 = u[0] - v_min;
-  double x6 = u[0] - v_max;
-  double x7 = u[1] - w_min;
-  double x8 = u[1] - w_max;
-  hu[0] = lmd[0]*x0 + lmd[1]*sin(x[2]) + r[0]*x0*(u[0]*x0 - vx_ref) - u[4] + u[5];
-  hu[1] = lmd[2] + r[1]*u[1] - u[6] + u[7];
+  hu[0] = lmd[0]*x0 + lmd[1]*sin(x[2]) + r[0]*x0*(u[0]*x0 - vx_ref);
+  hu[1] = lmd[2] + r[1]*u[1];
   hu[2] = -u[2] - x3 + sqrt(fb_eps[0] + pow(u[2], 2) + pow(x3, 2));
   hu[3] = -u[3] - x4 + sqrt(fb_eps[1] + pow(u[3], 2) + pow(x4, 2));
-  hu[4] = -u[4] - x5 + sqrt(fb_eps[2] + pow(u[4], 2) + pow(x5, 2));
-  hu[5] = -u[5] + x6 + sqrt(fb_eps[3] + pow(u[5], 2) + pow(x6, 2));
-  hu[6] = -u[6] - x7 + sqrt(fb_eps[4] + pow(u[6], 2) + pow(x7, 2));
-  hu[7] = -u[7] + x8 + sqrt(fb_eps[5] + pow(u[7], 2) + pow(x8, 2));
  
   }
 };

@@ -10,7 +10,8 @@ int main() {
 
   // Define the horizon.
   const double Tf = 2.0;
-  cgmres::Horizon horizon(Tf); // fixed length
+  const double alpha = 0.0;
+  cgmres::Horizon horizon(Tf, alpha);
 
   // Define the solver settings.
   cgmres::SolverSettings settings;
@@ -28,21 +29,20 @@ int main() {
   x0 << 0, 0, 0, 0;
 
   // Initialize the solution of the C/GMRES method.
-  constexpr int kmax_init = 3;
+  constexpr int kmax_init = 1;
   cgmres::ZeroHorizonOCPSolver<cgmres::OCP_cartpole, kmax_init> initializer(ocp, settings);
-  cgmres::Vector<3> uc0;
-  uc0 << 0.01, 10, 0.01;
+  cgmres::Vector<1> uc0;
+  uc0 << 0.01;
   initializer.set_uc(uc0);
   initializer.solve(t0, x0);
 
   // Define the C/GMRES solver.
   constexpr int N = 100;
-  constexpr int kmax = 6;
+  constexpr int kmax = 5;
   cgmres::MultipleShootingCGMRESSolver<cgmres::OCP_cartpole, N, kmax> mpc(ocp, horizon, settings);
   mpc.set_uc(initializer.ucopt());
-  mpc.set_lmd(initializer.lmdopt());
-  mpc.set_x(x0);
   mpc.init_x_lmd(t0, x0);
+  mpc.init_dummy_mu();
 
 
   // Perform a numerical simulation.
@@ -50,6 +50,9 @@ int main() {
   const double dt = settings.dt;
   const std::string save_dir_name("../simulation_result");
   cgmres::simulation(ocp, mpc, x0, t0, tf, dt, save_dir_name, "cartpole");
+
+  std::cout << "\n======================= MPC used in this simulation: =======================" << std::endl;
+  std::cout << mpc << std::endl;
 
   return 0;
 }

@@ -16,7 +16,7 @@ public:
   static constexpr int nu = 6;
   static constexpr int nc = 0;
   static constexpr int nuc = nu + nc;
-  static constexpr int nub = 0;
+  static constexpr int nub = 6;
 
   double m = 1.44;
   double l = 0.23;
@@ -27,13 +27,15 @@ public:
   double gamma = 0.01;
   double g = 9.80665;
   double z_ref = 5;
-  double u_min = 0.144;
-  double u_max = 6;
-  double epsilon = 0.01;
 
   double q[12] = {1, 1, 1, 0.01, 0.01, 0, 0.01, 0.01, 0.01, 0.1, 0.1, 0.001};
   double q_terminal[12] = {1, 1, 1, 0.01, 0.01, 0, 0.01, 0.01, 0.01, 0.1, 0.1, 0.001};
   double r[6] = {0.01, 0.01, 0.01, 0.01, 0.01, 0.01};
+
+  static constexpr int ubound_indices[6] = {0, 1, 2, 3, 4, 5};
+  double umin[6] = {0.144, 0.144, 0.144, 0.144, 0.144, 0.144};
+  double umax[6] = {6.0, 6.0, 6.0, 6.0, 6.0, 6.0};
+  double dummy_weight[6] = {0.1, 0.1, 0.1, 0.1, 0.1, 0.1};
 
   void disp(std::ostream& os) const {
     os << "OCP_hexacopter:" << std::endl;
@@ -41,6 +43,7 @@ public:
     os << "  nu:  " << nu << std::endl;
     os << "  nc:  " << nc << std::endl;
     os << "  nuc: " << nuc << std::endl;
+    os << "  nub: " << nub << std::endl;
     os << std::endl;
     os << "  m: " << m << std::endl;
     os << "  l: " << l << std::endl;
@@ -51,14 +54,17 @@ public:
     os << "  gamma: " << gamma << std::endl;
     os << "  g: " << g << std::endl;
     os << "  z_ref: " << z_ref << std::endl;
-    os << "  u_min: " << u_min << std::endl;
-    os << "  u_max: " << u_max << std::endl;
-    os << "  epsilon: " << epsilon << std::endl;
     os << std::endl;
     Eigen::IOFormat fmt(4, 0, ", ", "", "[", "]");
+    Eigen::IOFormat intfmt(1, 0, ", ", "", "[", "]");
     os << "  q: " << Map<const VectorX>(q, 12).transpose().format(fmt) << std::endl;
     os << "  q_terminal: " << Map<const VectorX>(q_terminal, 12).transpose().format(fmt) << std::endl;
     os << "  r: " << Map<const VectorX>(r, 6).transpose().format(fmt) << std::endl;
+    os << std::endl;
+    os << "  ubound_indices: " << Map<const VectorXi>(ubound_indices, 6).transpose().format(intfmt) << std::endl;
+    os << "  umin: " << Map<const VectorX>(umin, 6).transpose().format(fmt) << std::endl;
+    os << "  umax: " << Map<const VectorX>(umax, 6).transpose().format(fmt) << std::endl;
+    os << "  dummy_weight: " << Map<const VectorX>(dummy_weight, 6).transpose().format(fmt) << std::endl;
   }
 
   friend std::ostream& operator<<(std::ostream& os, const OCP_hexacopter& ocp) { 
@@ -183,31 +189,29 @@ public:
   // hu  : the value of dH/du(t, x, u, lmd)
   void eval_hu(const double t, const double* x, const double* u, 
                const double* lmd, double* hu) const {
-  double x0 = -u_min;
-  double x1 = -u_max;
-  double x2 = (1.0/3.0)*g*m;
-  double x3 = (1.0/2.0)*sqrt(3)*l*lmd[10]/Iyy;
-  double x4 = -x3;
-  double x5 = l*lmd[9]/Ixx;
-  double x6 = (1.0/2.0)*x5;
-  double x7 = k*lmd[11]/Izz;
-  double x8 = 1.0/m;
-  double x9 = sin(x[3]);
-  double x10 = sin(x[5]);
-  double x11 = cos(x[5]);
-  double x12 = cos(x[3]);
-  double x13 = sin(x[4]);
-  double x14 = lmd[6]*x8*(x10*x9 + x11*x12*x13) + lmd[7]*x8*(x10*x12*x13 - x11*x9) + lmd[8]*x12*x8*cos(x[4]);
-  double x15 = x14 - x7;
-  double x16 = x15 - x6;
-  double x17 = x14 + x7;
-  double x18 = x17 + x6;
-  hu[0] = epsilon*(-1/(u[0] + x0) + 1.0/(-u[0] - x1)) + (1.0/2.0)*r[0]*(2*u[0] - x2) + x16 + x4;
-  hu[1] = epsilon*(-1/(u[1] + x0) + 1.0/(-u[1] - x1)) + (1.0/2.0)*r[1]*(2*u[1] - x2) + x17 - x5;
-  hu[2] = epsilon*(-1/(u[2] + x0) + 1.0/(-u[2] - x1)) + (1.0/2.0)*r[2]*(2*u[2] - x2) + x16 + x3;
-  hu[3] = epsilon*(-1/(u[3] + x0) + 1.0/(-u[3] - x1)) + (1.0/2.0)*r[3]*(2*u[3] - x2) + x18 + x3;
-  hu[4] = epsilon*(-1/(u[4] + x0) + 1.0/(-u[4] - x1)) + (1.0/2.0)*r[4]*(2*u[4] - x2) + x15 + x5;
-  hu[5] = epsilon*(-1/(u[5] + x0) + 1.0/(-u[5] - x1)) + (1.0/2.0)*r[5]*(2*u[5] - x2) + x18 + x4;
+  double x0 = (1.0/3.0)*g*m;
+  double x1 = (1.0/2.0)*sqrt(3)*l*lmd[10]/Iyy;
+  double x2 = -x1;
+  double x3 = l*lmd[9]/Ixx;
+  double x4 = (1.0/2.0)*x3;
+  double x5 = k*lmd[11]/Izz;
+  double x6 = 1.0/m;
+  double x7 = sin(x[3]);
+  double x8 = sin(x[5]);
+  double x9 = cos(x[5]);
+  double x10 = cos(x[3]);
+  double x11 = sin(x[4]);
+  double x12 = lmd[6]*x6*(x10*x11*x9 + x7*x8) + lmd[7]*x6*(x10*x11*x8 - x7*x9) + lmd[8]*x10*x6*cos(x[4]);
+  double x13 = x12 - x5;
+  double x14 = x13 - x4;
+  double x15 = x12 + x5;
+  double x16 = x15 + x4;
+  hu[0] = (1.0/2.0)*r[0]*(2*u[0] - x0) + x14 + x2;
+  hu[1] = (1.0/2.0)*r[1]*(2*u[1] - x0) + x15 - x3;
+  hu[2] = (1.0/2.0)*r[2]*(2*u[2] - x0) + x1 + x14;
+  hu[3] = (1.0/2.0)*r[3]*(2*u[3] - x0) + x1 + x16;
+  hu[4] = (1.0/2.0)*r[4]*(2*u[4] - x0) + x13 + x3;
+  hu[5] = (1.0/2.0)*r[5]*(2*u[5] - x0) + x16 + x2;
  
   }
 };

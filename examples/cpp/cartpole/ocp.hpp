@@ -13,23 +13,25 @@ namespace cgmres {
 class OCP_cartpole { 
 public:
   static constexpr int nx = 4;
-  static constexpr int nu = 2;
-  static constexpr int nc = 1;
+  static constexpr int nu = 1;
+  static constexpr int nc = 0;
   static constexpr int nuc = nu + nc;
-  static constexpr int nub = 0;
+  static constexpr int nub = 1;
 
   double m_c = 2;
   double m_p = 0.2;
   double l = 0.5;
   double g = 9.80665;
-  double u_min = -15;
-  double u_max = 15;
-  double dummy_weight = 0.1;
 
   double q[4] = {2.5, 10, 0.01, 0.01};
   double q_terminal[4] = {2.5, 10, 0.01, 0.01};
   double x_ref[4] = {0, M_PI, 0, 0};
-  double r[2] = {1, 0.01};
+  double r[1] = {1};
+
+  static constexpr int ubound_indices[1] = {0};
+  double umin[1] = {-15.0};
+  double umax[1] = {15.0};
+  double dummy_weight[1] = {0.1};
 
   void disp(std::ostream& os) const {
     os << "OCP_cartpole:" << std::endl;
@@ -37,20 +39,24 @@ public:
     os << "  nu:  " << nu << std::endl;
     os << "  nc:  " << nc << std::endl;
     os << "  nuc: " << nuc << std::endl;
+    os << "  nub: " << nub << std::endl;
     os << std::endl;
     os << "  m_c: " << m_c << std::endl;
     os << "  m_p: " << m_p << std::endl;
     os << "  l: " << l << std::endl;
     os << "  g: " << g << std::endl;
-    os << "  u_min: " << u_min << std::endl;
-    os << "  u_max: " << u_max << std::endl;
-    os << "  dummy_weight: " << dummy_weight << std::endl;
     os << std::endl;
     Eigen::IOFormat fmt(4, 0, ", ", "", "[", "]");
+    Eigen::IOFormat intfmt(1, 0, ", ", "", "[", "]");
     os << "  q: " << Map<const VectorX>(q, 4).transpose().format(fmt) << std::endl;
     os << "  q_terminal: " << Map<const VectorX>(q_terminal, 4).transpose().format(fmt) << std::endl;
     os << "  x_ref: " << Map<const VectorX>(x_ref, 4).transpose().format(fmt) << std::endl;
-    os << "  r: " << Map<const VectorX>(r, 2).transpose().format(fmt) << std::endl;
+    os << "  r: " << Map<const VectorX>(r, 1).transpose().format(fmt) << std::endl;
+    os << std::endl;
+    os << "  ubound_indices: " << Map<const VectorXi>(ubound_indices, 1).transpose().format(intfmt) << std::endl;
+    os << "  umin: " << Map<const VectorX>(umin, 1).transpose().format(fmt) << std::endl;
+    os << "  umax: " << Map<const VectorX>(umax, 1).transpose().format(fmt) << std::endl;
+    os << "  dummy_weight: " << Map<const VectorX>(dummy_weight, 1).transpose().format(fmt) << std::endl;
   }
 
   friend std::ostream& operator<<(std::ostream& os, const OCP_cartpole& ocp) { 
@@ -133,9 +139,7 @@ public:
   void eval_hu(const double t, const double* x, const double* u, 
                const double* lmd, double* hu) const {
   double x0 = 1.0/(m_c + m_p*pow(sin(x[1]), 2));
-  hu[0] = lmd[2]*x0 + r[0]*u[0] + 2*u[0]*u[2] - lmd[3]*x0*cos(x[1])/l;
-  hu[1] = -dummy_weight + 2*u[1]*u[2];
-  hu[2] = pow(u[0], 2) + pow(u[1], 2) - 1.0/4.0*pow(u_max - u_min, 2);
+  hu[0] = lmd[2]*x0 + r[0]*u[0] - lmd[3]*x0*cos(x[1])/l;
  
   }
 };

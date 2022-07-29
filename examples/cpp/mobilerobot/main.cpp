@@ -10,7 +10,8 @@ int main() {
 
   // Define the horizon.
   const double Tf = 1.5;
-  cgmres::Horizon horizon(Tf); // fixed length
+  const double alpha = 1.0;
+  cgmres::Horizon horizon(Tf, alpha);
 
   // Define the solver settings.
   cgmres::SolverSettings settings;
@@ -28,21 +29,20 @@ int main() {
   x0 << 0, 0, 0;
 
   // Initialize the solution of the C/GMRES method.
-  constexpr int kmax_init = 8;
+  constexpr int kmax_init = 4;
   cgmres::ZeroHorizonOCPSolver<cgmres::OCP_mobilerobot, kmax_init> initializer(ocp, settings);
-  cgmres::Vector<8> uc0;
-  uc0 << 0.1, 0.1, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01;
+  cgmres::Vector<4> uc0;
+  uc0 << 0.1, 0.1, 0.01, 0.01;
   initializer.set_uc(uc0);
   initializer.solve(t0, x0);
 
   // Define the C/GMRES solver.
   constexpr int N = 50;
-  constexpr int kmax = 15;
+  constexpr int kmax = 10;
   cgmres::MultipleShootingCGMRESSolver<cgmres::OCP_mobilerobot, N, kmax> mpc(ocp, horizon, settings);
   mpc.set_uc(initializer.ucopt());
-  mpc.set_lmd(initializer.lmdopt());
-  mpc.set_x(x0);
   mpc.init_x_lmd(t0, x0);
+  mpc.init_dummy_mu();
 
 
   // Perform a numerical simulation.
@@ -50,6 +50,9 @@ int main() {
   const double dt = settings.dt;
   const std::string save_dir_name("../simulation_result");
   cgmres::simulation(ocp, mpc, x0, t0, tf, dt, save_dir_name, "mobilerobot");
+
+  std::cout << "\n======================= MPC used in this simulation: =======================" << std::endl;
+  std::cout << mpc << std::endl;
 
   return 0;
 }
