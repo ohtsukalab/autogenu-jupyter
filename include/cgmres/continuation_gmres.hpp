@@ -44,21 +44,22 @@ public:
     return fonc_.template lpNorm<2>();
   }
 
-  void eval_fonc(const Scalar t, const Vector<nx>& x, const Vector<dim>& solution) {
+  template <typename VectorType>
+  void eval_fonc(const Scalar t, const MatrixBase<VectorType>& x, const Vector<dim>& solution) {
     nlp_.eval_fonc_hu(t, x, solution, fonc_);
   }
 
-  template <typename VectorType1, typename VectorType2, typename VectorType3>
-  void eval_b(const Scalar t, const Vector<nx>& x, 
-              const MatrixBase<VectorType1>& solution, 
-              const MatrixBase<VectorType2>& solution_update, 
-              const MatrixBase<VectorType3>& b_vec) {
+  template <typename VectorType1, typename VectorType2, typename VectorType3, typename VectorType4>
+  void eval_b(const Scalar t, const MatrixBase<VectorType1>& x, 
+              const MatrixBase<VectorType2>& solution, 
+              const MatrixBase<VectorType3>& solution_update, 
+              const MatrixBase<VectorType4>& b_vec) {
     assert(solution.size() == dim);
     assert(solution_update.size() == dim);
     assert(b_vec.size() == dim);
 
     const Scalar t1 = t + finite_difference_epsilon_;
-    nlp_.ocp().eval_f(t, x.data(), solution.derived().data(), dx_.data());
+    nlp_.ocp().eval_f(t, x.derived().data(), solution.derived().data(), dx_.data());
     x_1_ = x + finite_difference_epsilon_ * dx_;
     updated_solution_ = solution + finite_difference_epsilon_ * solution_update;
 
@@ -66,22 +67,22 @@ public:
     nlp_.eval_fonc_hu(t1, x_1_, solution, fonc_1_);
     nlp_.eval_fonc_hu(t1, x_1_, updated_solution_, fonc_2_);
 
-    CGMRES_EIGEN_CONST_CAST(VectorType3, b_vec) = (1/finite_difference_epsilon_ - zeta_) * fonc_ 
+    CGMRES_EIGEN_CONST_CAST(VectorType4, b_vec) = (1/finite_difference_epsilon_ - zeta_) * fonc_ 
                                                     - fonc_2_ / finite_difference_epsilon_;
   }
 
-  template <typename VectorType1, typename VectorType2, typename VectorType3>
-  void eval_Ax(const Scalar t, const Vector<nx>& x, 
-               const MatrixBase<VectorType1>& solution, 
-               const MatrixBase<VectorType2>& solution_update, 
-               const MatrixBase<VectorType3>& ax_vec) {
+  template <typename VectorType1, typename VectorType2, typename VectorType3, typename VectorType4>
+  void eval_Ax(const Scalar t, const MatrixBase<VectorType1>& x,
+               const MatrixBase<VectorType2>& solution, 
+               const MatrixBase<VectorType3>& solution_update, 
+               const MatrixBase<VectorType4>& ax_vec) {
     assert(solution.size() == dim);
     assert(solution_update.size() == dim);
     assert(ax_vec.size() == dim);
     const Scalar t1 = t + finite_difference_epsilon_;
     updated_solution_ = solution + finite_difference_epsilon_ * solution_update;
     nlp_.eval_fonc_hu(t1, x_1_, updated_solution_, fonc_2_);
-    CGMRES_EIGEN_CONST_CAST(VectorType3, ax_vec) = (fonc_2_ - fonc_1_) / finite_difference_epsilon_;
+    CGMRES_EIGEN_CONST_CAST(VectorType4, ax_vec) = (fonc_2_ - fonc_1_) / finite_difference_epsilon_;
   }
 
   void retrive_dummy(Vector<dim>& solution, const Scalar min_dummy) {

@@ -32,12 +32,13 @@ public:
 
   ~ZeroHorizonNLP() = default;
 
-  void eval_fonc_hu(const Scalar t, const Vector<nx>& x, const Vector<dim>& solution,
+  template <typename VectorType>
+  void eval_fonc_hu(const Scalar t, const MatrixBase<VectorType>& x, const Vector<dim>& solution,
                     Vector<dim>& fonc_hu) {
     // Compute the Lagrange multiplier over the horizon  
-    ocp_.eval_phix(t, x.data(), lmd_.data());
+    ocp_.eval_phix(t, x.derived().data(), lmd_.data());
     // Compute the erros in the first order necessary conditions (FONC)
-    ocp_.eval_hu(t, x.data(), solution.data(), lmd_.data(), fonc_hu.data());
+    ocp_.eval_hu(t, x.derived().data(), solution.data(), lmd_.data(), fonc_hu.data());
     if constexpr (nub > 0) {
       const auto uc    = solution.template head<nuc>();
       const auto dummy = solution.template segment<nub>(nuc);

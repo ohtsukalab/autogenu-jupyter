@@ -48,7 +48,7 @@ public:
   ~SingleShootingCGMRESSolver() = default;
 
   template <typename VectorType>
-  void set_u(const VectorType& u) {
+  void set_u(const MatrixBase<VectorType>& u) {
     if (u.size() != nu) {
       throw std::invalid_argument("[SingleShootingCGMRESSolver::set_u] u.size() must be " + std::to_string(nu));
     }
@@ -57,13 +57,12 @@ public:
     }
     for (size_t i=0; i<N; ++i) {
       ucopt_[i].template head<nu>() = u;
-      ucopt_[i].template tail<nc>().setZero();
     }
     setInnerSolution();
   }
 
   template <typename VectorType>
-  void set_uc(const VectorType& uc) {
+  void set_uc(const MatrixBase<VectorType>& uc) {
     if (uc.size() != nuc) {
       throw std::invalid_argument("[SingleShootingCGMRESSolver::set_uc] uc.size() must be " + std::to_string(nuc));
     }
@@ -77,7 +76,7 @@ public:
   }
 
   template <typename VectorType>
-  void set_dummy(const VectorType& dummy) {
+  void set_dummy(const MatrixBase<VectorType>& dummy) {
     if (dummy.size() != nub) {
       throw std::invalid_argument("[SingleShootingCGMRESSolver::set_dummy] dummy.size() must be " + std::to_string(nub));
     }
@@ -88,7 +87,7 @@ public:
   }
 
   template <typename VectorType>
-  void set_mu(const VectorType& mu) {
+  void set_mu(const MatrixBase<VectorType>& mu) {
     if (mu.size() != nub) {
       throw std::invalid_argument("[SingleShootingCGMRESSolver::set_mu] mu.size() must be " + std::to_string(nub));
     }
@@ -96,6 +95,70 @@ public:
       muopt_[i] = mu;
     }
     setInnerSolution();
+  }
+
+  template <typename T>
+  void set_u_array(const T& u_array) {
+    if (u_array.size() != N) { 
+      throw std::invalid_argument("[SingleShootingCGMRESSolver::set_u_array]: 'u_array.size()' must be "+std::to_string(N)); 
+    } 
+    for (size_t i=0; i<N; ++i) {
+      if (u_array[i].size() != nu) {
+        throw std::invalid_argument("[SingleShootingCGMRESSolver::set_u_array] u_array[i].size() must be " + std::to_string(nu));
+      }
+      uopt_[i] = u_array[i];
+      ucopt_[i].template head<nu>() = u_array[i];
+    }
+    setInnerSolution();
+  }
+
+  template <typename T>
+  void set_uc_array(const T& uc_array) {
+    if (uc_array.size() != N) { 
+      throw std::invalid_argument("[SingleShootingCGMRESSolver::set_uc_array]: 'uc_array.size()' must be "+std::to_string(N)); 
+    } 
+    for (size_t i=0; i<N; ++i) {
+      if (uc_array[i].size() != nuc) {
+        throw std::invalid_argument("[SingleShootingCGMRESSolver::uc_array] uc_array[i].size() must be " + std::to_string(nuc));
+      }
+      uopt_[i] = uc_array[i].template head<nu>();
+      ucopt_[i] = uc_array[i];
+    }
+    setInnerSolution();
+  }
+
+  template <typename T>
+  void set_dummy_array(const T& dummy_array) {
+    if (dummy_array.size() != N) { 
+      throw std::invalid_argument("[SingleShootingCGMRESSolver::set_dummy_array]: 'dummy_array.size()' must be "+std::to_string(N)); 
+    } 
+    for (size_t i=0; i<N; ++i) {
+      if (dummy_array[i].size() != nub) {
+        throw std::invalid_argument("[SingleShootingCGMRESSolver::set_dummy_array] dummy_array[i].size() must be " + std::to_string(nub));
+      }
+      dummyopt_[i] = dummy_array[i];
+    }
+    setInnerSolution();
+  }
+
+  template <typename T>
+  void set_mu_array(const T& mu_array) {
+    if (mu_array.size() != N) { 
+      throw std::invalid_argument("[SingleShootingCGMRESSolver::set_mu_array]: 'mu_array.size()' must be "+std::to_string(N)); 
+    } 
+    for (size_t i=0; i<N; ++i) {
+      if (mu_array[i].size() != nub) {
+        throw std::invalid_argument("[SingleShootingCGMRESSolver::set_mu_array] mu_array[i].size() must be " + std::to_string(nub));
+      }
+      muopt_[i] = mu_array[i];
+    }
+    setInnerSolution();
+  }
+
+  void init_dummy_mu() {
+    continuation_gmres_.retrive_dummy(solution_, settings_.min_dummy);
+    continuation_gmres_.retrive_mu(solution_);
+    retriveSolution();
   }
 
   const std::array<Vector<nu>, N>& uopt() const { return uopt_; }
@@ -112,19 +175,26 @@ public:
 
   Scalar optError() const { return continuation_gmres_.optError(); }
 
-  Scalar optError(const Scalar t, const Vector<nx>& x) {
-    Vector<dim> fonc;
+  template <typename VectorType>
+  Scalar optError(const Scalar t, const MatrixBase<VectorType>& x) {
+    if (x.size() != nx) {
+      throw std::invalid_argument("[SingleShootingCGMRESSolver::optError] x.size() must be " + std::to_string(nx));
+    }
     continuation_gmres_.eval_fonc(t, x, solution_);
     return optError();
   }
 
-  void update(const Scalar t, const Vector<nx>& x) {
+  template <typename VectorType>
+  void update(const Scalar t, const MatrixBase<VectorType>& x) {
+    if (x.size() != nx) {
+      throw std::invalid_argument("[SingleShootingCGMRESSolver::update] x.size() must be " + std::to_string(nx));
+    }
     if (settings_.verbose_level >= 1) {
       std::cout << "\n======================= update solution with C/GMRES =======================" << std::endl;
     }
     const auto gmres_iter 
-        = gmres_.template solve<const Scalar, const Vector<nx>&, const Vector<dim>&>(
-              continuation_gmres_, t, x, solution_, solution_update_);
+        = gmres_.template solve<const Scalar, const VectorType&, const Vector<dim>&>(
+              continuation_gmres_, t, x.derived(), solution_, solution_update_);
     const auto opt_error = continuation_gmres_.optError();
 
     // verbose
@@ -138,12 +208,6 @@ public:
 
     solution_.noalias() += settings_.dt * solution_update_;
 
-    retriveSolution();
-  }
-
-  void init_dummy_mu() {
-    continuation_gmres_.retrive_dummy(solution_, settings_.min_dummy);
-    continuation_gmres_.retrive_mu(solution_);
     retriveSolution();
   }
 

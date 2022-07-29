@@ -10,31 +10,27 @@ PYBIND11_MODULE(zero_horizon_ocp_solver, m) { \
        return copy; \
      }) \
     .def("set_u", [](ZeroHorizonOCPSolver_& self, const VectorX& u) { \
-        if (u.size() != OCP::nu) { \ 
-          throw std::invalid_argument("[ZeroHorizonOCPSolver]: 'u.size()' must be "+std::to_string(OCP::nu)); \ 
-        } \ 
         self.set_u(u); \ 
      }, py::arg("u")) \
     .def("set_uc", [](ZeroHorizonOCPSolver_& self, const VectorX& uc) { \
-        if (uc.size() != OCP::nuc) { \ 
-          throw std::invalid_argument("[ZeroHorizonOCPSolver]: 'uc.size()' must be "+std::to_string(OCP::nuc)); \ 
-        } \ 
         self.set_uc(uc); \ 
      }, py::arg("uc")) \
+    .def("set_dummy", [](ZeroHorizonOCPSolver_& self, const VectorX& dummy) { \
+        self.set_dummy(dummy); \ 
+     }, py::arg("dummy")) \
+    .def("set_mu", [](ZeroHorizonOCPSolver_& self, const VectorX& mu) { \
+        self.set_mu(mu); \ 
+     }, py::arg("mu")) \
     .def_property_readonly("uopt", &ZeroHorizonOCPSolver_::uopt) \
     .def_property_readonly("ucopt", &ZeroHorizonOCPSolver_::ucopt) \
     .def_property_readonly("lmdopt", &ZeroHorizonOCPSolver_::lmdopt) \
+    .def_property_readonly("dummyopt", &ZeroHorizonOCPSolver_::dummyopt) \
+    .def_property_readonly("muopt", &ZeroHorizonOCPSolver_::muopt) \
     .def("opt_error", [](ZeroHorizonOCPSolver_& self, const Scalar t, const VectorX& x) { \
-        if (x.size() != OCP::nx) { \
-          throw std::invalid_argument("[ZeroHorizonOCPSolver]: 'x.size()' must be "+std::to_string(OCP::nx)); \
-        } \ 
         return self.optError(t, x); \
     }, py::arg("t"), py::arg("x")) \
     .def("opt_error", static_cast<Scalar (ZeroHorizonOCPSolver_::*)() const>(&ZeroHorizonOCPSolver_::optError)) \
     .def("solve", [](ZeroHorizonOCPSolver_& self, const Scalar t, const VectorX& x) { \
-        if (x.size() != OCP::nx) { \
-          throw std::invalid_argument("[ZeroHorizonOCPSolver]: 'x.size()' must be "+std::to_string(OCP::nx)); \
-        } \ 
         self.solve(t, x); \
     }, py::arg("t"), py::arg("x")) \
     .def("__str__", [](const ZeroHorizonOCPSolver_& self) { \

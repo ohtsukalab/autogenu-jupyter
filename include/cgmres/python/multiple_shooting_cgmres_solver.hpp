@@ -46,22 +46,13 @@ PYBIND11_MODULE(multiple_shooting_cgmres_solver, m) { \
     .def_property_readonly("dummyopt", &MultipleShootingCGMRESSolver_::dummyopt) \
     .def_property_readonly("muopt", &MultipleShootingCGMRESSolver_::muopt) \
     .def("opt_error", [](MultipleShootingCGMRESSolver_& self, const Scalar t, const VectorX& x) { \
-        if (x.size() != OCP::nx) { \
-          throw std::invalid_argument("[MultipleShootingCGMRESSolver]: 'x.size()' must be "+std::to_string(OCP::nx)); \
-        } \ 
         return self.optError(t, x); \
     }, py::arg("t"), py::arg("x")) \
     .def("opt_error", static_cast<Scalar (MultipleShootingCGMRESSolver_::*)() const>(&MultipleShootingCGMRESSolver_::optError)) \
     .def("update", [](MultipleShootingCGMRESSolver_& self, const Scalar t, const VectorX& x) { \
-        if (x.size() != OCP::nx) { \
-          throw std::invalid_argument("[MultipleShootingCGMRESSolver]: 'x.size()' must be "+std::to_string(OCP::nx)); \
-        } \ 
         self.update(t, x); \
     }, py::arg("t"), py::arg("x")) \
     .def("init_x_lmd", [](MultipleShootingCGMRESSolver_& self, const Scalar t, const VectorX& x) { \
-        if (x.size() != OCP::nx) { \
-          throw std::invalid_argument("[MultipleShootingCGMRESSolver]: 'x.size()' must be "+std::to_string(OCP::nx)); \
-        } \ 
         self.init_x_lmd(t, x); \
     }, py::arg("t"), py::arg("x")) \
     .def("init_dummy_mu", &MultipleShootingCGMRESSolver_::init_dummy_mu) \

@@ -49,7 +49,6 @@ public:
     }
     uopt_ = u;
     ucopt_.template head<nu>() = u;
-    ucopt_.template tail<nc>().setZero();
     setInnerSolution();
   }
 
@@ -60,6 +59,24 @@ public:
     }
     uopt_ = uc.template head<nu>();
     ucopt_ = uc;
+    setInnerSolution();
+  }
+
+  template <typename VectorType>
+  void set_dummy(const MatrixBase<VectorType>& dummy) {
+    if (dummy.size() != nub) {
+      throw std::invalid_argument("[ZeroHorizonOCPSolver::set_dummy] dummy.size() must be " + std::to_string(nub));
+    }
+    dummyopt_ = dummy;
+    setInnerSolution();
+  }
+
+  template <typename VectorType>
+  void set_mu(const MatrixBase<VectorType>& mu) {
+    if (mu.size() != nub) {
+      throw std::invalid_argument("[ZeroHorizonOCPSolver::set_mu] mu.size() must be " + std::to_string(nub));
+    }
+    muopt_ = mu;
     setInnerSolution();
   }
 
@@ -75,20 +92,28 @@ public:
 
   Scalar optError() const { return newton_gmres_.optError(); }
 
-  Scalar optError(const Scalar t, const Vector<nx>& x) {
+  template <typename VectorType>
+  Scalar optError(const Scalar t, const MatrixBase<VectorType>& x) {
+    if (x.size() != nx) {
+      throw std::invalid_argument("[ZeroHorizonOCPSolver::optError] x.size() must be " + std::to_string(nx));
+    }
     newton_gmres_.eval_fonc(t, x, solution_);
     return optError();
   }
 
-  void solve(const Scalar t, const Vector<nx>& x) {
+  template <typename VectorType>
+  void solve(const Scalar t, const MatrixBase<VectorType>& x) {
+    if (x.size() != nx) {
+      throw std::invalid_argument("[ZeroHorizonOCPSolver::update] x.size() must be " + std::to_string(nx));
+    }
     if (settings_.verbose_level >= 1) {
       std::cout << "\n======================= solve zero horizon OCP =======================" << std::endl;
     }
 
     for (size_t iter=0; iter<settings_.max_iter; ++iter) {
       const auto gmres_iter 
-          = gmres_.template solve<const Scalar, const Vector<nx>&, const Vector<dim>&>(
-                newton_gmres_, t, x, solution_, solution_update_);
+          = gmres_.template solve<const Scalar, const VectorType&, const Vector<dim>&>(
+                newton_gmres_, t, x.derived(), solution_, solution_update_);
       const auto opt_error = newton_gmres_.optError();
 
       // verbose
@@ -147,6 +172,10 @@ private:
 
   void setInnerSolution() {
     solution_.template head<nuc>() = ucopt_;
+    if constexpr (nub > 0) {
+      solution_.template segment<nub>(nuc) = dummyopt_;
+      solution_.template segment<nub>(nuc+nub) = muopt_;
+    }
   }
 
   void retriveSolution() {

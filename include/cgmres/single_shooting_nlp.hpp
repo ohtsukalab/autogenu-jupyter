@@ -37,7 +37,8 @@ public:
 
   ~SingleShootingNLP() = default;
 
-  void eval_fonc_hu(const Scalar t, const Vector<nx>& x, const Vector<dim>& solution,
+  template <typename VectorType>
+  void eval_fonc_hu(const Scalar t, const MatrixBase<VectorType>& x, const Vector<dim>& solution,
                     Vector<dim>& fonc_hu) {
     const Scalar T = horizon_.T(t);
     const Scalar dt = T / N;
