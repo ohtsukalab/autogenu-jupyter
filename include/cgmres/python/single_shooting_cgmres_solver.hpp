@@ -21,10 +21,10 @@ PYBIND11_MODULE(single_shooting_cgmres_solver, m) { \
         } \ 
         self.set_uc(uc); \ 
      }, py::arg("uc")) \
-    .def("uopt", &SingleShootingCGMRESSolver_::uopt) \
-    .def("ucopt", &SingleShootingCGMRESSolver_::ucopt) \
-    .def("xopt", &SingleShootingCGMRESSolver_::xopt) \
-    .def("lmdopt", &SingleShootingCGMRESSolver_::lmdopt) \
+    .def_property_readonly("uopt", &SingleShootingCGMRESSolver_::uopt) \
+    .def_property_readonly("ucopt", &SingleShootingCGMRESSolver_::ucopt) \
+    .def_property_readonly("xopt", &SingleShootingCGMRESSolver_::xopt) \
+    .def_property_readonly("lmdopt", &SingleShootingCGMRESSolver_::lmdopt) \
     .def("opt_error", [](SingleShootingCGMRESSolver_& self, const Scalar t, const VectorX& x) { \
         if (x.size() != OCP::nx) { \
           throw std::invalid_argument("[SingleShootingCGMRESSolver]: 'x.size()' must be "+std::to_string(OCP::nx)); \

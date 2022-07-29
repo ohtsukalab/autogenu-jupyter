@@ -33,14 +33,16 @@ public:
 
   ~MultipleShootingNLP() = default;
 
-  void eval_fonc_hu(const Scalar t, const Vector<nx>& x0, const Vector<dim>& solution,
+  template <typename VectorType>
+  void eval_fonc_hu(const Scalar t, const MatrixBase<VectorType>& x0, const Vector<dim>& solution,
                     const std::array<Vector<nx>, N+1>& x, const std::array<Vector<nx>, N+1>& lmd,
                     Vector<dim>& fonc_hu) {
+    assert(x0.size());
     const Scalar T = horizon_.T(t);
     const Scalar dt = T / N;
     assert(T >= 0);
     // Compute the erros in the first order necessary conditions (FONC)
-    ocp_.eval_hu(t, x0.data(), solution.template head<nuc>().data(), lmd[1].data(), 
+    ocp_.eval_hu(t, x0.derived().data(), solution.template head<nuc>().data(), lmd[1].data(), 
                  fonc_hu.template head<nuc>().data());
     for (size_t i=1; i<N; ++i) {
       ocp_.eval_hu(t+i*dt, x[i].data(), solution.template segment<nuc>(nuc*i).data(),
@@ -48,14 +50,15 @@ public:
     }
   }
 
-  void eval_fonc_f(const Scalar t, const Vector<nx>& x0, const Vector<dim>& solution,
+  template <typename VectorType>
+  void eval_fonc_f(const Scalar t, const MatrixBase<VectorType>& x0, const Vector<dim>& solution,
                    const std::array<Vector<nx>, N+1>& x, 
                    std::array<Vector<nx>, N+1>& fonc_f) {
     const Scalar T = horizon_.T(t);
     const Scalar dt = T / N;
     assert(T >= 0);
     // Compute optimality error for state.
-    ocp_.eval_f(t, x0.data(), solution.template head<nuc>().data(), dx_.data());
+    ocp_.eval_f(t, x0.derived().data(), solution.template head<nuc>().data(), dx_.data());
     fonc_f[0] = x[1] - x0 - dt * dx_;
     for (size_t i=1; i<N; ++i) {
       ocp_.eval_f(t+i*dt, x[i].data(), solution.template segment<nuc>(nuc*i).data(), dx_.data());
@@ -63,14 +66,15 @@ public:
     }
   }
 
-  void retrive_x(const Scalar t, const Vector<nx>& x0, const Vector<dim>& solution,
+  template <typename VectorType>
+  void retrive_x(const Scalar t, const MatrixBase<VectorType>& x0, const Vector<dim>& solution,
                  std::array<Vector<nx>, N+1>& x,
                  const std::array<Vector<nx>, N+1>& fonc_f) {
     const Scalar T = horizon_.T(t);
     const Scalar dt = T / N;
     assert(T >= 0);
     // Compute optimality error for state.
-    ocp_.eval_f(t, x0.data(), solution.template head<nuc>().data(), dx_.data());
+    ocp_.eval_f(t, x0.derived().data(), solution.template head<nuc>().data(), dx_.data());
     x[1] = x0 + dt * dx_  + fonc_f[0];
     for (size_t i=1; i<N; ++i) {
       ocp_.eval_f(t+i*dt, x[i].data(), solution.template segment<nuc>(nuc*i).data(), dx_.data());
@@ -78,7 +82,8 @@ public:
     }
   }
 
-  void eval_fonc_hx(const Scalar t, const Vector<nx>& x0, const Vector<dim>& solution,
+  template <typename VectorType>
+  void eval_fonc_hx(const Scalar t, const MatrixBase<VectorType>& x0, const Vector<dim>& solution,
                     const std::array<Vector<nx>, N+1>& x, const std::array<Vector<nx>, N+1>& lmd,
                     std::array<Vector<nx>, N+1>& fonc_hx) {
     const Scalar T = horizon_.T(t);
@@ -94,7 +99,8 @@ public:
     }
   }
 
-  void retrive_lmd(const Scalar t, const Vector<nx>& x0, const Vector<dim>& solution,
+  template <typename VectorType>
+  void retrive_lmd(const Scalar t, const MatrixBase<VectorType>& x0, const Vector<dim>& solution,
                    const std::array<Vector<nx>, N+1>& x, std::array<Vector<nx>, N+1>& lmd,
                    const std::array<Vector<nx>, N+1>& fonc_hx) {
     const Scalar T = horizon_.T(t);

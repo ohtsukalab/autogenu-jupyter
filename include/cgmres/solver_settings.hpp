@@ -27,7 +27,7 @@ struct SolverSettings {
     os << "  dt (sampling period):      " << dt << std::endl;
     os << "  zeta:                      " << zeta << std::endl;
     os << "  min dummy:                 " << min_dummy << std::endl;
-    os << "  verbose level:             " << verbose_level << std::flush;
+    os << "  verbose level:             " << verbose_level << std::endl;
   }
 
   friend std::ostream& operator<<(std::ostream& os, const SolverSettings& settings) {

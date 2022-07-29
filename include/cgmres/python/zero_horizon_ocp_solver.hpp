@@ -21,9 +21,9 @@ PYBIND11_MODULE(zero_horizon_ocp_solver, m) { \
         } \ 
         self.set_uc(uc); \ 
      }, py::arg("uc")) \
-    .def("uopt", &ZeroHorizonOCPSolver_::uopt) \
-    .def("ucopt", &ZeroHorizonOCPSolver_::ucopt) \
-    .def("lmdopt", &ZeroHorizonOCPSolver_::lmdopt) \
+    .def_property_readonly("uopt", &ZeroHorizonOCPSolver_::uopt) \
+    .def_property_readonly("ucopt", &ZeroHorizonOCPSolver_::ucopt) \
+    .def_property_readonly("lmdopt", &ZeroHorizonOCPSolver_::lmdopt) \
     .def("opt_error", [](ZeroHorizonOCPSolver_& self, const Scalar t, const VectorX& x) { \
         if (x.size() != OCP::nx) { \
           throw std::invalid_argument("[ZeroHorizonOCPSolver]: 'x.size()' must be "+std::to_string(OCP::nx)); \

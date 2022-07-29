@@ -10,35 +10,41 @@ PYBIND11_MODULE(multiple_shooting_cgmres_solver, m) { \
        return copy; \
      }) \
     .def("set_u", [](MultipleShootingCGMRESSolver_& self, const VectorX& u) { \
-        if (u.size() != OCP::nu) { \ 
-          throw std::invalid_argument("[MultipleShootingCGMRESSolver]: 'u.size()' must be "+std::to_string(OCP::nu)); \ 
-        } \ 
         self.set_u(u); \ 
      }, py::arg("u")) \
     .def("set_uc", [](MultipleShootingCGMRESSolver_& self, const VectorX& uc) { \
-        if (uc.size() != OCP::nuc) { \ 
-          throw std::invalid_argument("[MultipleShootingCGMRESSolver]: 'uc.size()' must be "+std::to_string(OCP::nuc)); \ 
-        } \ 
         self.set_uc(uc); \ 
      }, py::arg("uc")) \
     .def("set_x", [](MultipleShootingCGMRESSolver_& self, const VectorX& x) { \
-        if (x.size() != OCP::nx) { \ 
-          throw std::invalid_argument("[MultipleShootingCGMRESSolver]: 'x.size()' must be "+std::to_string(OCP::nx)); \ 
-        } \ 
         self.set_x(x); \ 
      }, py::arg("x")) \
     .def("set_lmd", [](MultipleShootingCGMRESSolver_& self, const VectorX& lmd) { \
-        if (lmd.size() != OCP::nx) { \ 
-          throw std::invalid_argument("[MultipleShootingCGMRESSolver]: 'lmd.size()' must be "+std::to_string(OCP::nx)); \ 
-        } \ 
         self.set_lmd(lmd); \ 
      }, py::arg("lmd")) \
-    .def("uopt", &MultipleShootingCGMRESSolver_::uopt) \
-    .def("ucopt", &MultipleShootingCGMRESSolver_::ucopt) \
-    .def("xopt", &MultipleShootingCGMRESSolver_::xopt) \
-    .def("lmdopt", &MultipleShootingCGMRESSolver_::lmdopt) \
-    .def("dummyopt", &MultipleShootingCGMRESSolver_::dummyopt) \
-    .def("muopt", &MultipleShootingCGMRESSolver_::muopt) \
+    .def("set_u_array", [](MultipleShootingCGMRESSolver_& self, const std::vector<VectorX>& u_array) { \
+        self.set_u_array(u_array); \ 
+     }, py::arg("u_array")) \
+    .def("set_uc_array", [](MultipleShootingCGMRESSolver_& self, const std::vector<VectorX>& uc_array) { \
+        self.set_uc_array(uc_array); \ 
+     }, py::arg("uc_array")) \
+    .def("set_x_array", [](MultipleShootingCGMRESSolver_& self, const std::vector<VectorX>& x_array) { \
+        self.set_x_array(x_array); \ 
+     }, py::arg("x_array")) \
+    .def("set_lmd_array", [](MultipleShootingCGMRESSolver_& self, const std::vector<VectorX>& lmd_array) { \
+        self.set_lmd_array(lmd_array); \ 
+     }, py::arg("lmd_array")) \
+    .def("set_dummy_array", [](MultipleShootingCGMRESSolver_& self, const std::vector<VectorX>& dummy_array) { \
+        self.set_dummy_array(dummy_array); \ 
+     }, py::arg("dummy_array")) \
+    .def("set_mu_array", [](MultipleShootingCGMRESSolver_& self, const std::vector<VectorX>& mu_array) { \
+        self.set_mu_array(mu_array); \ 
+     }, py::arg("mu_array")) \
+    .def_property_readonly("uopt", &MultipleShootingCGMRESSolver_::uopt) \
+    .def_property_readonly("ucopt", &MultipleShootingCGMRESSolver_::ucopt) \
+    .def_property_readonly("xopt", &MultipleShootingCGMRESSolver_::xopt) \
+    .def_property_readonly("lmdopt", &MultipleShootingCGMRESSolver_::lmdopt) \
+    .def_property_readonly("dummyopt", &MultipleShootingCGMRESSolver_::dummyopt) \
+    .def_property_readonly("muopt", &MultipleShootingCGMRESSolver_::muopt) \
     .def("opt_error", [](MultipleShootingCGMRESSolver_& self, const Scalar t, const VectorX& x) { \
         if (x.size() != OCP::nx) { \
           throw std::invalid_argument("[MultipleShootingCGMRESSolver]: 'x.size()' must be "+std::to_string(OCP::nx)); \

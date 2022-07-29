@@ -26,7 +26,7 @@ initializer.solve(t0, x0)
 
 # Create MPC solver and set the initial solution 
 mpc = cgmres.pendubot.MultipleShootingCGMRESSolver(ocp, horizon, settings)
-mpc.set_uc(initializer.ucopt())
+mpc.set_uc(initializer.ucopt)
 mpc.init_x_lmd(t0, x0)
 mpc.init_dummy_mu()
 
@@ -36,7 +36,7 @@ dt = settings.dt
 t = t0
 x = x0.copy()
 for _ in range(int(tsim/dt)):
-    u = mpc.uopt()[0]
+    u = mpc.uopt[0]
     dx = ocp.eval_f(t, x, u)
     x1 = x + dt * dx
     mpc.update(t, x)

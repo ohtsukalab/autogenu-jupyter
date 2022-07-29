@@ -49,7 +49,7 @@ public:
     }
     os << "  Tf:    " << Tf_ << std::endl;
     os << "  alpha: " << alpha_ << std::endl;
-    os << "  t0:    " << t0_ << std::flush;
+    os << "  t0:    " << t0_ << std::endl;
   }
 
   friend std::ostream& operator<<(std::ostream& os, const Horizon& horizon) {

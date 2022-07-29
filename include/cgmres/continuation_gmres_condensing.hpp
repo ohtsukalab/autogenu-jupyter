@@ -81,9 +81,11 @@ public:
     return std::sqrt(squared_error);
   }
 
-  void eval_fonc(const Scalar t, const Vector<nx>& x0, const Vector<dim>& solution,
+  template <typename VectorType>
+  void eval_fonc(const Scalar t, const MatrixBase<VectorType>& x0, const Vector<dim>& solution,
                  const std::array<Vector<nx>, N+1>& x, const std::array<Vector<nx>, N+1>& lmd,
                  const std::array<Vector<nub>, N>& dummy, const std::array<Vector<nub>, N>& mu) {
+    assert(x0.size() == nx);
     nlp_.eval_fonc_hu(t, x0, solution, x, lmd, fonc_hu_);
     if constexpr (nub > 0) {
       nlp_.eval_fonc_hu(solution, dummy, mu, fonc_hu_);
@@ -94,21 +96,22 @@ public:
     nlp_.eval_fonc_hx(t, x0, solution, x, lmd, fonc_hx_);
   }
 
-  template <typename VectorType1, typename VectorType2, typename VectorType3>
-  void eval_b(const Scalar t, const Vector<nx>& x0, 
-              const MatrixBase<VectorType1>& solution, 
+  template <typename VectorType1, typename VectorType2, typename VectorType3, typename VectorType4>
+  void eval_b(const Scalar t, const MatrixBase<VectorType1>& x0, 
+              const MatrixBase<VectorType2>& solution, 
               const std::array<Vector<nx>, N+1>& x,
               const std::array<Vector<nx>, N+1>& lmd,
               const std::array<Vector<nub>, N>& dummy,
               const std::array<Vector<nub>, N>& mu,
-              const MatrixBase<VectorType2>& solution_update, 
-              const MatrixBase<VectorType3>& b_vec) {
+              const MatrixBase<VectorType3>& solution_update, 
+              const MatrixBase<VectorType4>& b_vec) {
+    assert(x0.size() == nx);
     assert(solution.size() == dim);
     assert(solution_update.size() == dim);
     assert(b_vec.size() == dim);
 
     const Scalar t1 = t + finite_difference_epsilon_;
-    nlp_.ocp().eval_f(t, x0.data(), solution.derived().data(), dx_.data());
+    nlp_.ocp().eval_f(t, x0.derived().data(), solution.derived().data(), dx_.data());
     x0_1_ = x0 + finite_difference_epsilon_ * dx_; 
     updated_solution_ = solution + finite_difference_epsilon_ * solution_update;
 
@@ -169,19 +172,20 @@ public:
     if constexpr (nub > 0) {
       nlp_.eval_fonc_hu(updated_solution_, dummy_1_, mu_1_, fonc_hu_2_);
     }
-    CGMRES_EIGEN_CONST_CAST(VectorType3, b_vec) = (1.0/finite_difference_epsilon_ - zeta_) * fonc_hu_ 
+    CGMRES_EIGEN_CONST_CAST(VectorType4, b_vec) = (1.0/finite_difference_epsilon_ - zeta_) * fonc_hu_ 
                                                   - (fonc_hu_3_ + fonc_hu_2_ - fonc_hu_1_) / finite_difference_epsilon_;
   }
 
-  template <typename VectorType1, typename VectorType2, typename VectorType3>
-  void eval_Ax(const Scalar t, const Vector<nx>& x0, 
-               const MatrixBase<VectorType1>& solution, 
+  template <typename VectorType1, typename VectorType2, typename VectorType3, typename VectorType4>
+  void eval_Ax(const Scalar t, const MatrixBase<VectorType1>& x0, 
+               const MatrixBase<VectorType2>& solution, 
                const std::array<Vector<nx>, N+1>& x,
                const std::array<Vector<nx>, N+1>& lmd,
                const std::array<Vector<nub>, N>& dummy,
                const std::array<Vector<nub>, N>& mu,
-               const MatrixBase<VectorType2>& solution_update, 
-               const MatrixBase<VectorType3>& ax_vec) {
+               const MatrixBase<VectorType3>& solution_update, 
+               const MatrixBase<VectorType4>& ax_vec) {
+    assert(x0.size() == nx);
     assert(solution.size() == dim);
     assert(solution_update.size() == dim);
     assert(ax_vec.size() == dim);
@@ -202,18 +206,19 @@ public:
     if constexpr (nub > 0) {
       nlp_.eval_fonc_hu(updated_solution_, dummy_1_, mu_1_, fonc_hu_2_);
     }
-    CGMRES_EIGEN_CONST_CAST(VectorType3, ax_vec) = (fonc_hu_2_ - fonc_hu_1_) / finite_difference_epsilon_;
+    CGMRES_EIGEN_CONST_CAST(VectorType4, ax_vec) = (fonc_hu_2_ - fonc_hu_1_) / finite_difference_epsilon_;
   }
 
-  template <typename VectorType1, typename VectorType2>
-  void expansion(const Scalar t, const Vector<nx>& x0, 
-                 const MatrixBase<VectorType1>& solution, 
+  template <typename VectorType1, typename VectorType2, typename VectorType3>
+  void expansion(const Scalar t, const MatrixBase<VectorType1>& x0, 
+                 const MatrixBase<VectorType2>& solution, 
                  std::array<Vector<nx>, N+1>& x,
                  std::array<Vector<nx>, N+1>& lmd,
                  std::array<Vector<nub>, N>& dummy,
                  std::array<Vector<nub>, N>& mu,
-                 const MatrixBase<VectorType2>& solution_update, 
+                 const MatrixBase<VectorType3>& solution_update, 
                  const Scalar dt, const Scalar min_dummy) {
+    assert(x0.size() == nx);
     const Scalar t1 = t + finite_difference_epsilon_;
     updated_solution_ = solution + finite_difference_epsilon_ * solution_update;
     for (size_t i=0; i<N+1; ++i) {
@@ -245,15 +250,19 @@ public:
     }
   }
 
-  void retrive_x(const Scalar t, const Vector<nx>& x0, const Vector<dim>& solution, 
+  template <typename VectorType>
+  void retrive_x(const Scalar t, const MatrixBase<VectorType>& x0, const Vector<dim>& solution, 
                  std::array<Vector<nx>, N+1>& x) {
+    assert(x0.size() == nx);
     std::fill(fonc_f_1_.begin(), fonc_f_1_.end(), Vector<nx>::Zero());
     nlp_.retrive_x(t, x0, solution, x, fonc_f_1_);
   }
 
-  void retrive_lmd(const Scalar t, const Vector<nx>& x0, const Vector<dim>& solution, 
+  template <typename VectorType>
+  void retrive_lmd(const Scalar t, const MatrixBase<VectorType>& x0, const Vector<dim>& solution, 
                    const std::array<Vector<nx>, N+1>& x,
                    std::array<Vector<nx>, N+1>& lmd) {
+    assert(x0.size() == nx);
     std::fill(fonc_hx_1_.begin(), fonc_hx_1_.end(), Vector<nx>::Zero());
     nlp_.retrive_lmd(t, x0, solution, x, lmd, fonc_hx_1_);
   }
@@ -285,10 +294,6 @@ public:
       }
     }
   }
-
-  decltype(auto) x() const { return nlp_.x(); }
-
-  decltype(auto) lmd() const { return nlp_.lmd(); }
 
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
