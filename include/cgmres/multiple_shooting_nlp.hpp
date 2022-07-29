@@ -23,10 +23,11 @@ public:
   MultipleShootingNLP(const OCP& ocp, const Horizon& horizon) 
     : ocp_(ocp),
       horizon_(horizon) {
-    assert(nx > 0);
-    assert(nu > 0);
-    assert(nc >= 0);
-    assert(N > 0);
+    static_assert(OCP::nx > 0);
+    static_assert(OCP::nu > 0);
+    static_assert(OCP::nc >= 0);
+    static_assert(OCP::nub >= 0);
+    static_assert(N > 0);
   }
 
   MultipleShootingNLP() = default;

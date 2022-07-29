@@ -12,10 +12,11 @@
 
 namespace cgmres {
 
-template <typename LinearProblem, int kmax>
+template <typename LinearProblem, int _kmax>
 class MatrixFreeGMRES {
 public:
   static constexpr int dim = LinearProblem::dim;
+  static constexpr int kmax = std::min(dim, _kmax);
 
   MatrixFreeGMRES()
     : hessenberg_mat_(Matrix<kmax+1, kmax+1>::Zero()), 
@@ -24,15 +25,9 @@ public:
       givens_c_vec_(Vector<kmax+1>::Zero()), 
       givens_s_vec_(Vector<kmax+1>::Zero()), 
       g_vec_(Vector<kmax+1>::Zero()) {
-    if (dim <= 0) {
-      throw std::invalid_argument("[MatrixFreeGMRES]: 'dim' of linear problem must be positive!");
-    }
-    if (kmax <= 0) {
-      throw std::invalid_argument("[MatrixFreeGMRES]: 'kmax' must be positive!");
-    }
-    if (kmax > dim) {
-      throw std::invalid_argument("[MatrixFreeGMRES]: 'kmax' must be not larger than 'dim'!");
-    }
+    static_assert(dim > 0);
+    static_assert(kmax > 0);
+    static_assert(dim >= kmax);
   }
 
   ~MatrixFreeGMRES() = default;

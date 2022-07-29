@@ -22,10 +22,10 @@ public:
   ZeroHorizonNLP(const OCP& ocp) 
     : ocp_(ocp),
       lmd_(Vector<nx>::Zero()) {
-    assert(nx > 0);
-    assert(nu > 0);
-    assert(nc >= 0);
-    assert(nub >= 0);
+    static_assert(OCP::nx > 0);
+    static_assert(OCP::nu > 0);
+    static_assert(OCP::nc >= 0);
+    static_assert(OCP::nub >= 0);
   }
 
   ZeroHorizonNLP() = default;
