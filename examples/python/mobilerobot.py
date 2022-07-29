@@ -20,7 +20,7 @@ x0 = np.zeros(ocp.nx)
 
 # Initialize solution using zero horizon OCP solution
 initializer = cgmres.mobilerobot.ZeroHorizonOCPSolver(ocp, settings)
-uc0 = np.array([0.1, 0.1, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01])
+uc0 = np.array([0.1, 0.1, 0.01, 0.01])
 initializer.set_uc(uc0)
 initializer.solve(t0, x0)
 
@@ -28,6 +28,7 @@ initializer.solve(t0, x0)
 mpc = cgmres.mobilerobot.MultipleShootingCGMRESSolver(ocp, horizon, settings)
 mpc.set_uc(initializer.ucopt())
 mpc.init_x_lmd(t0, x0)
+mpc.init_dummy_mu()
 
 # simple simulation with forward Euler 
 tsim = 10.0
@@ -43,6 +44,5 @@ for _ in range(int(tsim/dt)):
     t = t + dt
     print('t: ', t, ', x: ', x)
 
-print('\n\n============================================')
-print('MPC solver used in this simulation:')
+print("\n======================= MPC used in this simulation: =======================")
 print(mpc)
