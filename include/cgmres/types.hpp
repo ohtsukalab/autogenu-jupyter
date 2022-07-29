@@ -20,6 +20,8 @@ using MatrixX = Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic>;
 
 using VectorX = Eigen::Matrix<Scalar, Eigen::Dynamic, 1>;
 
+using VectorXi = Eigen::Matrix<int, Eigen::Dynamic, 1>;
+
 template <class MatrixType>
 using Map = Eigen::Map<MatrixType>;
 

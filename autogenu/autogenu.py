@@ -29,7 +29,7 @@ class AutoGenU(object):
         self.__nu = nu        
         self.__scalar_vars = []
         self.__array_vars = []
-        self.__saturation_list = []
+        self.__ubounds = []
         self.__nlp_type = None
         self.__f = None
         self.__hx = None
@@ -217,7 +217,7 @@ class AutoGenU(object):
 
     def set_initialization_parameters(
             self, solution_initial_guess, newton_residual_torelance, 
-            max_newton_iteration, initial_Lagrange_multiplier=None
+            max_newton_iteration
         ):
         """ Set parameters for the initialization of the C/GMRES solvers. 
 
@@ -230,10 +230,6 @@ class AutoGenU(object):
                     iteration terminates if the optimality error is smaller than 
                     this value.
                 max_newton_iteration: The maximum number of the Newton iteration. 
-                initial_Lagranme_multiplier: Optional parameter is you use 
-                    MSCGMRESWithInputSaturation. The initial guess of the 
-                    Lagrange multiplier with respect to the box constraint on 
-                    the control input that is condensed.
         """
         nuch = self.__nu + self.__nc + self.__nh
         assert len(solution_initial_guess) == nuch
@@ -242,8 +238,6 @@ class AutoGenU(object):
         self.__solution_initial_guess = solution_initial_guess 
         self.__newton_residual_torelance = newton_residual_torelance 
         self.__max_newton_iteration = max_newton_iteration 
-        if initial_Lagrange_multiplier is not None:
-            self.__initial_Lagrange_multiplier = initial_Lagrange_multiplier 
         self.__is_initialization_set = True
 
     def set_simulation_parameters(
@@ -268,37 +262,32 @@ class AutoGenU(object):
         self.__sampling_time = sampling_time
         self.__is_simulation_set = True
 
-    def add_control_input_saturation(
-        self, index, u_min, u_max, dummy_weight, quadratic_weight
+    def add_control_input_bounds(
+        self, uindex, umin, umax, dummy_weight
         ):
         """ Adds the bax constraints on the control input that is condensed in 
             linear problem. 
 
             Args: 
-                index: The index of the constrianed control input. 
-                u_min: The minimum value of the constrianed control input. 
-                u_max: The minimum value of the constrianed control input. 
+                uindex: The index of the constrianed control input element. 
+                umin: The minimum value of the constrianed control input. 
+                umax: The minimum value of the constrianed control input. 
                 dummy_weight: An weight to stabilize the numerical computation.
-                quadratic_weight: Weight on the constrainted control input in 
-                    the dummy input in the cost function. The larger this value, 
-                    the larger mergin of constraint.
         """
-        assert index >= 0
-        assert index < self.__nu
-        assert u_min < u_max
+        assert uindex >= 0
+        assert uindex < self.__nu
+        assert umin < umax
         assert dummy_weight >= 0 
-        assert quadratic_weight >= 0 
         find_same_index = False
-        for saturation in self.__saturation_list:
-            if saturation[0] == index:
+        for ub in self.__ubounds:
+            if ub[0] == uindex:
                 find_same_index = True
-                saturation[1] = u_min
-                saturation[2] = u_max
-                saturation[3] = dummy_weight
-                saturation[4] = quadratic_weight
+                ub[1] = umin
+                ub[2] = umax
+                ub[3] = dummy_weight
         if not find_same_index:
-            saturation = [index, u_min, u_max, dummy_weight, quadratic_weight]
-            self.__saturation_list.append(saturation)
+            ub = [uindex, umin, umax, dummy_weight]
+            self.__ubounds.append(ub)
 
     def generate_source_files(self, use_simplification=False, use_cse=False):
         """ Generates the C++ source file in which the equations to solve the 
@@ -364,7 +353,7 @@ public:
         )
         f_model_h.write(
             '  static constexpr int nub = '
-            +str(len(self.__saturation_list))+';\n\n'
+            +str(len(self.__ubounds))+';\n\n'
         )
         f_model_h.writelines([
             '  double '+scalar_var[1]+' = '
@@ -378,10 +367,26 @@ public:
             for i in range(len(array_var[0])-1):
                 f_model_h.write(str(array_var[2][i])+', ')
             f_model_h.write(str(array_var[2][len(array_var[0])-1])+'};\n')
+        if len(self.__ubounds) > 0:
+            nub = len(self.__ubounds)
+            f_model_h.write('\n  static constexpr int ubound_indices['+str(nub)+']'+' = {')
+            for i in range(nub-1):
+                f_model_h.write(str(self.__ubounds[i][0])+', ')
+            f_model_h.write(str(self.__ubounds[nub-1][0])+'};\n')
+            f_model_h.write('  double umin['+str(nub)+']'+' = {')
+            for i in range(nub-1):
+                f_model_h.write(str(self.__ubounds[i][1])+', ')
+            f_model_h.write(str(self.__ubounds[nub-1][1])+'};\n')
+            f_model_h.write('  double umax['+str(nub)+']'+' = {')
+            for i in range(nub-1):
+                f_model_h.write(str(self.__ubounds[i][2])+', ')
+            f_model_h.write(str(self.__ubounds[nub-1][2])+'};\n')
+            f_model_h.write('  double dummy_weight['+str(nub)+']'+' = {')
+            for i in range(nub-1):
+                f_model_h.write(str(self.__ubounds[i][3])+', ')
+            f_model_h.write(str(self.__ubounds[nub-1][3])+'};\n')
         if self.__nh > 0:
-            f_model_h.write(
-                '  double fb_eps['+str(self.__nh)+']'+' = {'
-            )
+            f_model_h.write('\n  double fb_eps['+str(self.__nh)+']'+' = {')
             for i in range(self.__nh-1):
                 f_model_h.write(str(self.__FB_epsilon[i])+', ')
             f_model_h.write(str(self.__FB_epsilon[self.__nh-1])+'};\n')
@@ -391,16 +396,27 @@ public:
         f_model_h.write('    os << "  nu:  " << nu << std::endl;\n')
         f_model_h.write('    os << "  nc:  " << nc << std::endl;\n')
         f_model_h.write('    os << "  nuc: " << nuc << std::endl;\n')
+        f_model_h.write('    os << "  nub: " << nub << std::endl;\n')
         f_model_h.write('    os << std::endl;\n')
         f_model_h.writelines([
             '    os << "  '+scalar_var[1]+': " << '+scalar_var[1]+' << std::endl;\n' for scalar_var in self.__scalar_vars
         ])
         f_model_h.write('    os << std::endl;\n')
         f_model_h.write('    Eigen::IOFormat fmt(4, 0, ", ", "", "[", "]");\n')
+        f_model_h.write('    Eigen::IOFormat intfmt(1, 0, ", ", "", "[", "]");\n')
         f_model_h.writelines([
             '    os << "  '+array_var[1]+': " << Map<const VectorX>('+array_var[1]+', '+str(len(array_var[0]))+').transpose().format(fmt) << std::endl;\n' for array_var in self.__array_vars
         ])
+        if len(self.__ubounds) > 0:
+            nub = len(self.__ubounds)
+            f_model_h.write('    os << std::endl;\n')
+            f_model_h.write('    os << "  ubound_indices: " << Map<const VectorXi>(ubound_indices, '+str(nub)+').transpose().format(intfmt) << std::endl;\n')
+            f_model_h.write('    os << "  umin: " << Map<const VectorX>(umin, '+str(nub)+').transpose().format(fmt) << std::endl;\n')
+            f_model_h.write('    os << "  umax: " << Map<const VectorX>(umax, '+str(nub)+').transpose().format(fmt) << std::endl;\n')
+            f_model_h.write('    os << "  dummy_weight: " << Map<const VectorX>(dummy_weight, '+str(nub)+').transpose().format(fmt) << std::endl;\n')
+
         if self.__nh > 0:
+            f_model_h.write('    os << std::endl;\n')
             f_model_h.write('    os << "  fb_eps: " << Map<const VectorX>(fb_eps, '+str(self.__nh)+').transpose().format(fmt) << std::endl;\n')
         f_model_h.write('  }\n\n')
         f_model_h.write('  friend std::ostream& operator<<(std::ostream& os, const OCP_'+self.__ocp_name+'& ocp) { \n')
@@ -568,14 +584,14 @@ public:
             f_main.write(
                 '  cgmres::SingleShootingCGMRESSolver<cgmres::OCP_'+self.__ocp_name+', N, kmax> mpc(ocp, horizon, settings);\n'
                 '  mpc.set_uc(initializer.ucopt());\n'
+                '  mpc.init_dummy_mu();\n'
             )
         elif self.__nlp_type == NLPType.MultipleShooting:
             f_main.write(
                 '  cgmres::MultipleShootingCGMRESSolver<cgmres::OCP_'+self.__ocp_name+', N, kmax> mpc(ocp, horizon, settings);\n'
                 '  mpc.set_uc(initializer.ucopt());\n'
-                '  mpc.set_lmd(initializer.lmdopt());\n'
-                '  mpc.set_x(x0);\n'
                 '  mpc.init_x_lmd(t0, x0);\n'
+                '  mpc.init_dummy_mu();\n'
             )
         else:
             return NotImplementedError()
