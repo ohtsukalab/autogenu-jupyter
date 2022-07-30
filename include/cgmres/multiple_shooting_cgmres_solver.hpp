@@ -201,6 +201,22 @@ public:
   }
 
   template <typename VectorType>
+  void init_x(const Scalar t, const MatrixBase<VectorType>& x) {
+    if (x.size() != nx) {
+      throw std::invalid_argument("[MultipleShootingCGMRESSolver::init_x] x.size() must be " + std::to_string(nx));
+    }
+    continuation_gmres_.retrive_x(t, x, solution_, xopt_);
+  }
+
+  template <typename VectorType>
+  void init_lmd(const Scalar t, const MatrixBase<VectorType>& x) {
+    if (x.size() != nx) {
+      throw std::invalid_argument("[MultipleShootingCGMRESSolver::init_lmd] x.size() must be " + std::to_string(nx));
+    }
+    continuation_gmres_.retrive_lmd(t, x, solution_, xopt_, lmdopt_);
+  }
+
+  template <typename VectorType>
   void init_x_lmd(const Scalar t, const MatrixBase<VectorType>& x) {
     if (x.size() != nx) {
       throw std::invalid_argument("[MultipleShootingCGMRESSolver::init_x_lmd] x.size() must be " + std::to_string(nx));

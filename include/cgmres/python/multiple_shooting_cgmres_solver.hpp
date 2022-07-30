@@ -52,6 +52,12 @@ PYBIND11_MODULE(multiple_shooting_cgmres_solver, m) { \
     .def("update", [](MultipleShootingCGMRESSolver_& self, const Scalar t, const VectorX& x) { \
         self.update(t, x); \
     }, py::arg("t"), py::arg("x")) \
+    .def("init_x", [](MultipleShootingCGMRESSolver_& self, const Scalar t, const VectorX& x) { \
+        self.init_x(t, x); \
+    }, py::arg("t"), py::arg("x")) \
+    .def("init_lmd", [](MultipleShootingCGMRESSolver_& self, const Scalar t, const VectorX& x) { \
+        self.init_lmd(t, x); \
+    }, py::arg("t"), py::arg("x")) \
     .def("init_x_lmd", [](MultipleShootingCGMRESSolver_& self, const Scalar t, const VectorX& x) { \
         self.init_x_lmd(t, x); \
     }, py::arg("t"), py::arg("x")) \
