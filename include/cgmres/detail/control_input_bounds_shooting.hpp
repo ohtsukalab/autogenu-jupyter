@@ -4,7 +4,7 @@
 #include <array>
 
 #include "cgmres/types.hpp"
-#include "cgmres/macros.hpp"
+#include "cgmres/detail/macros.hpp"
 #include "cgmres/control_input_bounds_shooting.hpp"
 
 namespace cgmres {

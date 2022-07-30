@@ -6,10 +6,11 @@
 #include <iostream>
 
 #include "cgmres/types.hpp"
-#include "cgmres/matrixfree_gmres.hpp"
-#include "cgmres/newton_gmres.hpp"
-#include "cgmres/zero_horizon_nlp.hpp"
 #include "cgmres/solver_settings.hpp"
+
+#include "cgmres/detail/matrixfree_gmres.hpp"
+#include "cgmres/detail/zero_horizon_nlp.hpp"
+#include "cgmres/detail/newton_gmres.hpp"
 
 namespace cgmres {
 

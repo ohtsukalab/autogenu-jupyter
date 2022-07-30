@@ -6,10 +6,11 @@
 #include <iostream>
 
 #include "cgmres/types.hpp"
-#include "cgmres/matrixfree_gmres.hpp"
-#include "cgmres/multiple_shooting_nlp.hpp"
-#include "cgmres/continuation_gmres_condensing.hpp"
 #include "cgmres/solver_settings.hpp"
+
+#include "cgmres/detail/matrixfree_gmres.hpp"
+#include "cgmres/detail/multiple_shooting_nlp.hpp"
+#include "cgmres/detail/continuation_gmres_condensing.hpp"
 
 namespace cgmres {
 

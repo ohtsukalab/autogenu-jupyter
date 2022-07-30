@@ -7,7 +7,7 @@
 #include <stdexcept>
 
 #include "cgmres/types.hpp"
-#include "cgmres/macros.hpp"
+#include "cgmres/detail/macros.hpp"
 
 
 namespace cgmres {
