@@ -4,8 +4,9 @@
 #include <array>
 
 #include "cgmres/types.hpp"
+
 #include "cgmres/detail/macros.hpp"
-#include "cgmres/control_input_bounds_shooting.hpp"
+#include "cgmres/detail/control_input_bounds.hpp"
 
 namespace cgmres {
 namespace ubounds {

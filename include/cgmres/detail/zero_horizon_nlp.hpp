@@ -5,7 +5,8 @@
 
 #include "cgmres/types.hpp"
 #include "cgmres/horizon.hpp"
-#include "cgmres/control_input_bounds.hpp"
+
+#include "cgmres/detail/control_input_bounds.hpp"
 
 namespace cgmres {
 
