@@ -5,7 +5,7 @@ import numpy as np
 
 ocp = cgmres.pendubot.OCP()
 
-horizon = cgmres.common.Horizon(Tf=1.0, alpha=1.0) # time-varying length
+horizon = cgmres.common.Horizon(Tf=1.0) # fixed length
 
 settings = cgmres.common.SolverSettings()
 settings.dt = 0.001
@@ -24,7 +24,7 @@ uc0 = np.array([0.01])
 initializer.set_uc(uc0)
 initializer.solve(t0, x0)
 
-# Create MPC solver and set the initial solution 
+# Create MPC solVer and set the initial solution 
 mpc = cgmres.pendubot.MultipleShootingCGMRESSolver(ocp, horizon, settings)
 mpc.set_uc(initializer.ucopt)
 mpc.init_x_lmd(t0, x0)
