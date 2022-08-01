@@ -4,7 +4,9 @@
 #define _USE_MATH_DEFINES
 
 #include <cmath>
+#include <array>
 #include <iostream>
+
 #include "cgmres/types.hpp"
 
 namespace cgmres {
@@ -15,6 +17,7 @@ public:
   static constexpr int nx = 12;
   static constexpr int nu = 6;
   static constexpr int nc = 0;
+  static constexpr int nh = 0;
   static constexpr int nuc = nu + nc;
   static constexpr int nub = 6;
 
@@ -28,20 +31,21 @@ public:
   double g = 9.80665;
   double z_ref = 5;
 
-  double q[12] = {1, 1, 1, 0.01, 0.01, 0, 0.01, 0.01, 0.01, 0.1, 0.1, 0.001};
-  double q_terminal[12] = {1, 1, 1, 0.01, 0.01, 0, 0.01, 0.01, 0.01, 0.1, 0.1, 0.001};
-  double r[6] = {0.01, 0.01, 0.01, 0.01, 0.01, 0.01};
+  std::array<double, 12> q = {1, 1, 1, 0.01, 0.01, 0, 0.01, 0.01, 0.01, 0.1, 0.1, 0.001};
+  std::array<double, 12> q_terminal = {1, 1, 1, 0.01, 0.01, 0, 0.01, 0.01, 0.01, 0.1, 0.1, 0.001};
+  std::array<double, 6> r = {0.01, 0.01, 0.01, 0.01, 0.01, 0.01};
 
-  static constexpr int ubound_indices[6] = {0, 1, 2, 3, 4, 5};
-  double umin[6] = {0.144, 0.144, 0.144, 0.144, 0.144, 0.144};
-  double umax[6] = {6.0, 6.0, 6.0, 6.0, 6.0, 6.0};
-  double dummy_weight[6] = {0.1, 0.1, 0.1, 0.1, 0.1, 0.1};
+  static constexpr std::array<int, nub> ubound_indices = {0, 1, 2, 3, 4, 5};
+  std::array<double, nub> umin = {0.144, 0.144, 0.144, 0.144, 0.144, 0.144};
+  std::array<double, nub> umax = {6.0, 6.0, 6.0, 6.0, 6.0, 6.0};
+  std::array<double, nub> dummy_weight = {0.1, 0.1, 0.1, 0.1, 0.1, 0.1};
 
   void disp(std::ostream& os) const {
     os << "OCP_hexacopter:" << std::endl;
     os << "  nx:  " << nx << std::endl;
     os << "  nu:  " << nu << std::endl;
     os << "  nc:  " << nc << std::endl;
+    os << "  nh:  " << nh << std::endl;
     os << "  nuc: " << nuc << std::endl;
     os << "  nub: " << nub << std::endl;
     os << std::endl;
@@ -57,14 +61,14 @@ public:
     os << std::endl;
     Eigen::IOFormat fmt(4, 0, ", ", "", "[", "]");
     Eigen::IOFormat intfmt(1, 0, ", ", "", "[", "]");
-    os << "  q: " << Map<const VectorX>(q, 12).transpose().format(fmt) << std::endl;
-    os << "  q_terminal: " << Map<const VectorX>(q_terminal, 12).transpose().format(fmt) << std::endl;
-    os << "  r: " << Map<const VectorX>(r, 6).transpose().format(fmt) << std::endl;
+    os << "  q: " << Map<const VectorX>(q.data(), q.size()).transpose().format(fmt) << std::endl;
+    os << "  q_terminal: " << Map<const VectorX>(q_terminal.data(), q_terminal.size()).transpose().format(fmt) << std::endl;
+    os << "  r: " << Map<const VectorX>(r.data(), r.size()).transpose().format(fmt) << std::endl;
     os << std::endl;
-    os << "  ubound_indices: " << Map<const VectorXi>(ubound_indices, 6).transpose().format(intfmt) << std::endl;
-    os << "  umin: " << Map<const VectorX>(umin, 6).transpose().format(fmt) << std::endl;
-    os << "  umax: " << Map<const VectorX>(umax, 6).transpose().format(fmt) << std::endl;
-    os << "  dummy_weight: " << Map<const VectorX>(dummy_weight, 6).transpose().format(fmt) << std::endl;
+    os << "  ubound_indices: " << Map<const VectorXi>(ubound_indices.data(), ubound_indices.size()).transpose().format(intfmt) << std::endl;
+    os << "  umin: " << Map<const VectorX>(umin.data(), umin.size()).transpose().format(fmt) << std::endl;
+    os << "  umax: " << Map<const VectorX>(umax.data(), umax.size()).transpose().format(fmt) << std::endl;
+    os << "  dummy_weight: " << Map<const VectorX>(dummy_weight.data(), dummy_weight.size()).transpose().format(fmt) << std::endl;
   }
 
   friend std::ostream& operator<<(std::ostream& os, const OCP_hexacopter& ocp) { 

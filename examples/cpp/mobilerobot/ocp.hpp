@@ -4,7 +4,9 @@
 #define _USE_MATH_DEFINES
 
 #include <cmath>
+#include <array>
 #include <iostream>
+
 #include "cgmres/types.hpp"
 
 namespace cgmres {
@@ -15,6 +17,7 @@ public:
   static constexpr int nx = 3;
   static constexpr int nu = 2;
   static constexpr int nc = 2;
+  static constexpr int nh = 2;
   static constexpr int nuc = nu + nc;
   static constexpr int nub = 2;
 
@@ -30,22 +33,23 @@ public:
   double Y_2 = -0.25;
   double R_2 = 0.5;
 
-  double q[3] = {10, 1, 0.01};
-  double r[2] = {0.1, 0.1};
-  double x_ref[3] = {0, 0, 0};
+  std::array<double, 3> q = {10, 1, 0.01};
+  std::array<double, 2> r = {0.1, 0.1};
+  std::array<double, 3> x_ref = {0, 0, 0};
 
-  static constexpr int ubound_indices[2] = {0, 1};
-  double umin[2] = {-1.0, -1.0};
-  double umax[2] = {1.0, 1.0};
-  double dummy_weight[2] = {0.1, 0.1};
+  static constexpr std::array<int, nub> ubound_indices = {0, 1};
+  std::array<double, nub> umin = {-1.0, -1.0};
+  std::array<double, nub> umax = {1.0, 1.0};
+  std::array<double, nub> dummy_weight = {0.1, 0.1};
 
-  double fb_eps[2] = {0.01, 0.01};
+  std::array<double, nh> fb_eps = {0.01, 0.01};
 
   void disp(std::ostream& os) const {
     os << "OCP_mobilerobot:" << std::endl;
     os << "  nx:  " << nx << std::endl;
     os << "  nu:  " << nu << std::endl;
     os << "  nc:  " << nc << std::endl;
+    os << "  nh:  " << nh << std::endl;
     os << "  nuc: " << nuc << std::endl;
     os << "  nub: " << nub << std::endl;
     os << std::endl;
@@ -63,16 +67,16 @@ public:
     os << std::endl;
     Eigen::IOFormat fmt(4, 0, ", ", "", "[", "]");
     Eigen::IOFormat intfmt(1, 0, ", ", "", "[", "]");
-    os << "  q: " << Map<const VectorX>(q, 3).transpose().format(fmt) << std::endl;
-    os << "  r: " << Map<const VectorX>(r, 2).transpose().format(fmt) << std::endl;
-    os << "  x_ref: " << Map<const VectorX>(x_ref, 3).transpose().format(fmt) << std::endl;
+    os << "  q: " << Map<const VectorX>(q.data(), q.size()).transpose().format(fmt) << std::endl;
+    os << "  r: " << Map<const VectorX>(r.data(), r.size()).transpose().format(fmt) << std::endl;
+    os << "  x_ref: " << Map<const VectorX>(x_ref.data(), x_ref.size()).transpose().format(fmt) << std::endl;
     os << std::endl;
-    os << "  ubound_indices: " << Map<const VectorXi>(ubound_indices, 2).transpose().format(intfmt) << std::endl;
-    os << "  umin: " << Map<const VectorX>(umin, 2).transpose().format(fmt) << std::endl;
-    os << "  umax: " << Map<const VectorX>(umax, 2).transpose().format(fmt) << std::endl;
-    os << "  dummy_weight: " << Map<const VectorX>(dummy_weight, 2).transpose().format(fmt) << std::endl;
+    os << "  ubound_indices: " << Map<const VectorXi>(ubound_indices.data(), ubound_indices.size()).transpose().format(intfmt) << std::endl;
+    os << "  umin: " << Map<const VectorX>(umin.data(), umin.size()).transpose().format(fmt) << std::endl;
+    os << "  umax: " << Map<const VectorX>(umax.data(), umax.size()).transpose().format(fmt) << std::endl;
+    os << "  dummy_weight: " << Map<const VectorX>(dummy_weight.data(), dummy_weight.size()).transpose().format(fmt) << std::endl;
     os << std::endl;
-    os << "  fb_eps: " << Map<const VectorX>(fb_eps, 2).transpose().format(fmt) << std::endl;
+    os << "  fb_eps: " << Map<const VectorX>(fb_eps.data(), fb_eps.size()).transpose().format(fmt) << std::endl;
   }
 
   friend std::ostream& operator<<(std::ostream& os, const OCP_mobilerobot& ocp) { 

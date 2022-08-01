@@ -38,7 +38,7 @@ void eval_hdummy(const OCP& ocp, const MatrixBase<VectorType1>& u,
     assert(mu.size() == nub);
     assert(hdummy.size() == nub);
     CGMRES_EIGEN_CONST_CAST(VectorType4, hdummy).array() 
-        = 2.0 * mu.array() * dummy.array() - Map<const Vector<nub>>(ocp.dummy_weight).array();
+        = 2.0 * mu.array() * dummy.array() - Map<const Vector<nub>>(ocp.dummy_weight.data()).array();
   }
 }
 

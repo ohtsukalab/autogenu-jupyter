@@ -321,7 +321,9 @@ class AutoGenU(object):
 #define _USE_MATH_DEFINES
 
 #include <cmath>
+#include <array>
 #include <iostream>
+
 #include "cgmres/types.hpp"
 
 namespace cgmres {
@@ -349,6 +351,10 @@ public:
             +str(self.__nc+self.__nh)+';\n'
         )
         f_model_h.write(
+            '  static constexpr int nh = '
+            +str(self.__nh)+';\n'
+        )
+        f_model_h.write(
             '  static constexpr int nuc = nu + nc;\n'
         )
         f_model_h.write(
@@ -362,31 +368,31 @@ public:
         f_model_h.write('\n')
         for array_var in self.__array_vars:
             f_model_h.write(
-                '  double '+array_var[1]+'['+str(len(array_var[0]))+']'+' = {'
+                '  std::array<double, '+str(len(array_var[0]))+'> '+array_var[1]+' = {'
             )
             for i in range(len(array_var[0])-1):
                 f_model_h.write(str(array_var[2][i])+', ')
             f_model_h.write(str(array_var[2][len(array_var[0])-1])+'};\n')
         if len(self.__ubounds) > 0:
             nub = len(self.__ubounds)
-            f_model_h.write('\n  static constexpr int ubound_indices['+str(nub)+']'+' = {')
+            f_model_h.write('\n  static constexpr std::array<int, nub> ubound_indices = {')
             for i in range(nub-1):
                 f_model_h.write(str(self.__ubounds[i][0])+', ')
             f_model_h.write(str(self.__ubounds[nub-1][0])+'};\n')
-            f_model_h.write('  double umin['+str(nub)+']'+' = {')
+            f_model_h.write('  std::array<double, nub> umin = {')
             for i in range(nub-1):
                 f_model_h.write(str(self.__ubounds[i][1])+', ')
             f_model_h.write(str(self.__ubounds[nub-1][1])+'};\n')
-            f_model_h.write('  double umax['+str(nub)+']'+' = {')
+            f_model_h.write('  std::array<double, nub> umax = {')
             for i in range(nub-1):
                 f_model_h.write(str(self.__ubounds[i][2])+', ')
             f_model_h.write(str(self.__ubounds[nub-1][2])+'};\n')
-            f_model_h.write('  double dummy_weight['+str(nub)+']'+' = {')
+            f_model_h.write('  std::array<double, nub> dummy_weight = {')
             for i in range(nub-1):
                 f_model_h.write(str(self.__ubounds[i][3])+', ')
             f_model_h.write(str(self.__ubounds[nub-1][3])+'};\n')
         if self.__nh > 0:
-            f_model_h.write('\n  double fb_eps['+str(self.__nh)+']'+' = {')
+            f_model_h.write('\n  std::array<double, nh> fb_eps = {')
             for i in range(self.__nh-1):
                 f_model_h.write(str(self.__FB_epsilon[i])+', ')
             f_model_h.write(str(self.__FB_epsilon[self.__nh-1])+'};\n')
@@ -395,6 +401,7 @@ public:
         f_model_h.write('    os << "  nx:  " << nx << std::endl;\n')
         f_model_h.write('    os << "  nu:  " << nu << std::endl;\n')
         f_model_h.write('    os << "  nc:  " << nc << std::endl;\n')
+        f_model_h.write('    os << "  nh:  " << nh << std::endl;\n')
         f_model_h.write('    os << "  nuc: " << nuc << std::endl;\n')
         f_model_h.write('    os << "  nub: " << nub << std::endl;\n')
         f_model_h.write('    os << std::endl;\n')
@@ -405,19 +412,19 @@ public:
         f_model_h.write('    Eigen::IOFormat fmt(4, 0, ", ", "", "[", "]");\n')
         f_model_h.write('    Eigen::IOFormat intfmt(1, 0, ", ", "", "[", "]");\n')
         f_model_h.writelines([
-            '    os << "  '+array_var[1]+': " << Map<const VectorX>('+array_var[1]+', '+str(len(array_var[0]))+').transpose().format(fmt) << std::endl;\n' for array_var in self.__array_vars
+            '    os << "  '+array_var[1]+': " << Map<const VectorX>('+array_var[1]+'.data(), '+array_var[1]+'.size()).transpose().format(fmt) << std::endl;\n' for array_var in self.__array_vars
         ])
         if len(self.__ubounds) > 0:
             nub = len(self.__ubounds)
             f_model_h.write('    os << std::endl;\n')
-            f_model_h.write('    os << "  ubound_indices: " << Map<const VectorXi>(ubound_indices, '+str(nub)+').transpose().format(intfmt) << std::endl;\n')
-            f_model_h.write('    os << "  umin: " << Map<const VectorX>(umin, '+str(nub)+').transpose().format(fmt) << std::endl;\n')
-            f_model_h.write('    os << "  umax: " << Map<const VectorX>(umax, '+str(nub)+').transpose().format(fmt) << std::endl;\n')
-            f_model_h.write('    os << "  dummy_weight: " << Map<const VectorX>(dummy_weight, '+str(nub)+').transpose().format(fmt) << std::endl;\n')
+            f_model_h.write('    os << "  ubound_indices: " << Map<const VectorXi>(ubound_indices.data(), ubound_indices.size()).transpose().format(intfmt) << std::endl;\n')
+            f_model_h.write('    os << "  umin: " << Map<const VectorX>(umin.data(), umin.size()).transpose().format(fmt) << std::endl;\n')
+            f_model_h.write('    os << "  umax: " << Map<const VectorX>(umax.data(), umax.size()).transpose().format(fmt) << std::endl;\n')
+            f_model_h.write('    os << "  dummy_weight: " << Map<const VectorX>(dummy_weight.data(), dummy_weight.size()).transpose().format(fmt) << std::endl;\n')
 
         if self.__nh > 0:
             f_model_h.write('    os << std::endl;\n')
-            f_model_h.write('    os << "  fb_eps: " << Map<const VectorX>(fb_eps, '+str(self.__nh)+').transpose().format(fmt) << std::endl;\n')
+            f_model_h.write('    os << "  fb_eps: " << Map<const VectorX>(fb_eps.data(), fb_eps.size()).transpose().format(fmt) << std::endl;\n')
         f_model_h.write('  }\n\n')
         f_model_h.write('  friend std::ostream& operator<<(std::ostream& os, const OCP_'+self.__ocp_name+'& ocp) { \n')
         f_model_h.write('    ocp.disp(os);\n')
@@ -699,16 +706,51 @@ PYBIND11_MODULE(ocp, m) {
             name = array_var[1]
             size = len(array_var[2])
             f_pybind11.write('    .def_property("'+name+'", \n')
-            f_pybind11.write('      [](const OCP& self) { return Eigen::Map<const Vector<'+str(size)+'>>(self.'+name+'); },\n')
-            f_pybind11.write('      [](OCP& self, const Eigen::VectorXd& v) { \n')
+            f_pybind11.write('      [](const OCP& self) { return Map<const VectorX>(self.'+name+'.data(), self.'+name+'.size()); },\n')
+            f_pybind11.write('      [](OCP& self, const VectorX& v) { \n')
             f_pybind11.write('        if (v.size() != '+str(size)+') { \n')
             f_pybind11.write('          throw std::invalid_argument("[OCP]: \''+name+'.size()\' must be "+std::to_string('+str(size)+')); \n')
-            f_pybind11.write('        } Eigen::Map<Vector<'+str(size)+'>>(self.'+name+') = v; })\n')
+            f_pybind11.write('        } Map<VectorX>(self.'+name+'.data(), self.'+name+'.size()) = v; })\n')
+        if len(self.__ubounds) > 0:
+            f_pybind11.writelines([
+"""
+    .def_property("umin", 
+      [](const OCP& self) { return Map<const VectorX>(self.umin.data(), self.umin.size()); },
+      [](OCP& self, const VectorX& v) { 
+        if (v.size() != self.umin.size()) { 
+          throw std::invalid_argument("[OCP]: 'umin.size()' must be "+std::to_string(self.umin.size()));
+        } Map<VectorX>(self.umin.data(), self.umin.size()) = v; })
+    .def_property("umax", 
+      [](const OCP& self) { return Map<const VectorX>(self.umax.data(), self.umax.size()); },
+      [](OCP& self, const VectorX& v) { 
+        if (v.size() != self.umax.size()) { 
+          throw std::invalid_argument("[OCP]: 'umax.size()' must be "+std::to_string(self.umax.size()));
+        } Map<VectorX>(self.umax.data(), self.umax.size()) = v; })
+    .def_property("dummy_weight", 
+      [](const OCP& self) { return Map<const VectorX>(self.dummy_weight.data(), self.dummy_weight.size()); },
+      [](OCP& self, const VectorX& v) { 
+        if (v.size() != self.dummy_weight.size()) {
+          throw std::invalid_argument("[OCP]: 'dummy_weight.size()' must be "+std::to_string(self.dummy_weight.size()));
+        } Map<VectorX>(self.dummy_weight.data(), self.dummy_weight.size()) = v; })
+""" 
+            ])
+        if self.__nh > 0:
+            f_pybind11.writelines([
+"""
+    .def_property("fb_eps", 
+      [](const OCP& self) { return Map<const VectorX>(self.fb_eps.data(), self.fb_eps.size()); },
+      [](OCP& self, const VectorX& v) { 
+        if (v.size() != self.fb_eps.size()) { 
+          throw std::invalid_argument("[OCP]: 'fb_eps.size()' must be "+std::to_string(self.fb_eps.size()));
+        } Map<VectorX>(self.fb_eps.data(), self.fb_eps.size()) = v; })
+""" 
+            ])
         f_pybind11.writelines([
 """
     .def_readonly_static("nx", &OCP::nx)
     .def_readonly_static("nu", &OCP::nu)
     .def_readonly_static("nc", &OCP::nc)
+    .def_readonly_static("nh", &OCP::nh)
     .def_readonly_static("nuc", &OCP::nuc)
     .def_readonly_static("nub", &OCP::nub)
     .def("__str__", [](const OCP& self) { 

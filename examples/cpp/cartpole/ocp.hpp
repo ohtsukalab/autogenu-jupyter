@@ -4,7 +4,9 @@
 #define _USE_MATH_DEFINES
 
 #include <cmath>
+#include <array>
 #include <iostream>
+
 #include "cgmres/types.hpp"
 
 namespace cgmres {
@@ -15,6 +17,7 @@ public:
   static constexpr int nx = 4;
   static constexpr int nu = 1;
   static constexpr int nc = 0;
+  static constexpr int nh = 0;
   static constexpr int nuc = nu + nc;
   static constexpr int nub = 1;
 
@@ -23,21 +26,22 @@ public:
   double l = 0.5;
   double g = 9.80665;
 
-  double q[4] = {2.5, 10, 0.01, 0.01};
-  double q_terminal[4] = {2.5, 10, 0.01, 0.01};
-  double x_ref[4] = {0, M_PI, 0, 0};
-  double r[1] = {1};
+  std::array<double, 4> q = {2.5, 10, 0.01, 0.01};
+  std::array<double, 4> q_terminal = {2.5, 10, 0.01, 0.01};
+  std::array<double, 4> x_ref = {0, M_PI, 0, 0};
+  std::array<double, 1> r = {1};
 
-  static constexpr int ubound_indices[1] = {0};
-  double umin[1] = {-15.0};
-  double umax[1] = {15.0};
-  double dummy_weight[1] = {0.1};
+  static constexpr std::array<int, nub> ubound_indices = {0};
+  std::array<double, nub> umin = {-15.0};
+  std::array<double, nub> umax = {15.0};
+  std::array<double, nub> dummy_weight = {0.1};
 
   void disp(std::ostream& os) const {
     os << "OCP_cartpole:" << std::endl;
     os << "  nx:  " << nx << std::endl;
     os << "  nu:  " << nu << std::endl;
     os << "  nc:  " << nc << std::endl;
+    os << "  nh:  " << nh << std::endl;
     os << "  nuc: " << nuc << std::endl;
     os << "  nub: " << nub << std::endl;
     os << std::endl;
@@ -48,15 +52,15 @@ public:
     os << std::endl;
     Eigen::IOFormat fmt(4, 0, ", ", "", "[", "]");
     Eigen::IOFormat intfmt(1, 0, ", ", "", "[", "]");
-    os << "  q: " << Map<const VectorX>(q, 4).transpose().format(fmt) << std::endl;
-    os << "  q_terminal: " << Map<const VectorX>(q_terminal, 4).transpose().format(fmt) << std::endl;
-    os << "  x_ref: " << Map<const VectorX>(x_ref, 4).transpose().format(fmt) << std::endl;
-    os << "  r: " << Map<const VectorX>(r, 1).transpose().format(fmt) << std::endl;
+    os << "  q: " << Map<const VectorX>(q.data(), q.size()).transpose().format(fmt) << std::endl;
+    os << "  q_terminal: " << Map<const VectorX>(q_terminal.data(), q_terminal.size()).transpose().format(fmt) << std::endl;
+    os << "  x_ref: " << Map<const VectorX>(x_ref.data(), x_ref.size()).transpose().format(fmt) << std::endl;
+    os << "  r: " << Map<const VectorX>(r.data(), r.size()).transpose().format(fmt) << std::endl;
     os << std::endl;
-    os << "  ubound_indices: " << Map<const VectorXi>(ubound_indices, 1).transpose().format(intfmt) << std::endl;
-    os << "  umin: " << Map<const VectorX>(umin, 1).transpose().format(fmt) << std::endl;
-    os << "  umax: " << Map<const VectorX>(umax, 1).transpose().format(fmt) << std::endl;
-    os << "  dummy_weight: " << Map<const VectorX>(dummy_weight, 1).transpose().format(fmt) << std::endl;
+    os << "  ubound_indices: " << Map<const VectorXi>(ubound_indices.data(), ubound_indices.size()).transpose().format(intfmt) << std::endl;
+    os << "  umin: " << Map<const VectorX>(umin.data(), umin.size()).transpose().format(fmt) << std::endl;
+    os << "  umax: " << Map<const VectorX>(umax.data(), umax.size()).transpose().format(fmt) << std::endl;
+    os << "  dummy_weight: " << Map<const VectorX>(dummy_weight.data(), dummy_weight.size()).transpose().format(fmt) << std::endl;
   }
 
   friend std::ostream& operator<<(std::ostream& os, const OCP_cartpole& ocp) { 

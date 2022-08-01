@@ -10,8 +10,7 @@ int main() {
 
   // Define the horizon.
   const double Tf = 1.5;
-  const double alpha = 1.0;
-  cgmres::Horizon horizon(Tf, alpha);
+  cgmres::Horizon horizon(Tf); // fixed-length
 
   // Define the solver settings.
   cgmres::SolverSettings settings;
