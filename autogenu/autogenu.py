@@ -714,6 +714,7 @@ PYBIND11_MODULE(ocp, m) {
         if len(self.__ubounds) > 0:
             f_pybind11.writelines([
 """
+    .def_readonly_static("ubound_indices", &OCP::ubound_indices)
     .def_property("umin", 
       [](const OCP& self) { return Map<const VectorX>(self.umin.data(), self.umin.size()); },
       [](OCP& self, const VectorX& v) { 
