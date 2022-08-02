@@ -9,6 +9,7 @@
 #include "cgmres/detail/control_input_bounds.hpp"
 
 namespace cgmres {
+namespace detail {
 namespace ubounds {
 
 template <typename OCP, int N>
@@ -124,6 +125,7 @@ void clip_dummy(std::array<Vector<OCP::nub>, N>& dummy, const Scalar min) {
 }
 
 } // namespace ubounds
+} // namespace detail
 } // namespace cgmres
 
 #endif // CGMRES__CONTROL_INPUT_BOUNDS_SHOOTING_HPP_

@@ -12,6 +12,7 @@
 
 
 namespace cgmres {
+namespace detail {
 
 template <typename LinearProblem, int _kmax>
 class MatrixFreeGMRES {
@@ -118,7 +119,7 @@ private:
 
 };
 
+} // namespace detail
 } // namespace cgmres
-
 
 #endif // CGMRES__MATRIXFREE_GMRES_HPP_

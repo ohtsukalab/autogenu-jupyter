@@ -8,6 +8,7 @@
 
 
 namespace cgmres {
+namespace detail {
 
 template <class NLP>
 class NewtonGMRES {
@@ -88,6 +89,7 @@ private:
   Vector<dim> updated_solution_, fonc_, fonc_1_;
 };
 
+} // namespace detail
 } // namespace cgmres
 
 #endif // CGMRES__NEWTON_GMRES_HPP_

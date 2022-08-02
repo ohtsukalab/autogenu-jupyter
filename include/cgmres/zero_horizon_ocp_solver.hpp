@@ -24,9 +24,9 @@ public:
   static constexpr int nub = OCP::nub;
   static constexpr int dim = nuc + 2 * nub;
 
-  using ZeroHorizonNLP_ = ZeroHorizonNLP<OCP>;
-  using NewtonGMRES_ = NewtonGMRES<ZeroHorizonNLP_>;
-  using MatrixFreeGMRES_ = MatrixFreeGMRES<NewtonGMRES_, kmax>;
+  using ZeroHorizonNLP_ = detail::ZeroHorizonNLP<OCP>;
+  using NewtonGMRES_ = detail::NewtonGMRES<ZeroHorizonNLP_>;
+  using MatrixFreeGMRES_ = detail::MatrixFreeGMRES<NewtonGMRES_, kmax>;
 
   ZeroHorizonOCPSolver(const OCP& ocp, const SolverSettings& settings) 
     : nlp_(ocp),

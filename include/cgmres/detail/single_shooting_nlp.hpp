@@ -10,6 +10,7 @@
 #include "cgmres/detail/control_input_bounds_shooting.hpp"
 
 namespace cgmres {
+namespace detail {
 
 template <class OCP, int N>
 class SingleShootingNLP {
@@ -132,6 +133,7 @@ private:
   std::array<Vector<nx>, N+1> x_, lmd_;
 };
 
+} // namespace detail
 } // namespace cgmres
 
 #endif // CGMRES__SINGLE_SHOOTING_NLP_HPP_

@@ -8,6 +8,7 @@
 #include "cgmres/detail/macros.hpp"
 
 namespace cgmres {
+namespace detail {
 namespace ubounds {
 
 template <typename OCP, typename VectorType1, typename VectorType2, typename VectorType3, typename VectorType4>
@@ -132,6 +133,7 @@ void clip_dummy(const MatrixBase<VectorType>& dummy, const Scalar min) {
 }
 
 } // namespace ubounds
+} // namespace detail
 } // namespace cgmres
 
 #endif // CGMRES__CONTROL_INPUT_BOUNDS_HPP_

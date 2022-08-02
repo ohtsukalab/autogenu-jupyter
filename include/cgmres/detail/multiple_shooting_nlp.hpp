@@ -10,6 +10,7 @@
 #include "cgmres/detail/control_input_bounds_shooting.hpp"
 
 namespace cgmres {
+namespace detail {
 
 template <class OCP, int N>
 class MultipleShootingNLP {
@@ -190,6 +191,7 @@ private:
   Vector<nx> dx_;
 };
 
+} // namespace detail
 } // namespace cgmres
 
 #endif // CGMRES__MULTIPLE_SHOOTING_NLP_HPP_

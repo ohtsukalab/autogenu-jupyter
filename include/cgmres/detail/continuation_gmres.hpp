@@ -4,10 +4,12 @@
 #include <stdexcept>
 
 #include "cgmres/types.hpp"
+
 #include "cgmres/detail/macros.hpp"
 
 
 namespace cgmres {
+namespace detail {
 
 template <class NLP>
 class ContinuationGMRES {
@@ -108,6 +110,7 @@ private:
   Vector<nx> x_1_, dx_;
 };
 
+} // namespace detail
 } // namespace cgmres
 
 #endif // CGMRES__CONTINUATION_GMRES_HPP_

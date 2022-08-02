@@ -9,6 +9,7 @@
 #include "cgmres/detail/control_input_bounds.hpp"
 
 namespace cgmres {
+namespace detail {
 
 template <class OCP>
 class ZeroHorizonNLP {
@@ -89,6 +90,7 @@ private:
   Vector<nx> lmd_;
 };
 
+} // namespace detail
 } // namespace cgmres
 
 #endif // CGMRES__ZERO_HORIZON_NLP_HPP_

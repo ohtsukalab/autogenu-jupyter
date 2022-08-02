@@ -24,9 +24,9 @@ public:
   static constexpr int dim = nuc * N;
   static constexpr int nub = OCP::nub;
 
-  using MultipleShootingNLP_ = MultipleShootingNLP<OCP, N>;
-  using ContinuationGMRES_ = ContinuationGMRESCondensing<MultipleShootingNLP_>;
-  using MatrixFreeGMRES_ = MatrixFreeGMRES<ContinuationGMRES_, kmax>;
+  using MultipleShootingNLP_ = detail::MultipleShootingNLP<OCP, N>;
+  using ContinuationGMRES_ = detail::ContinuationGMRESCondensing<MultipleShootingNLP_>;
+  using MatrixFreeGMRES_ = detail::MatrixFreeGMRES<ContinuationGMRES_, kmax>;
 
   MultipleShootingCGMRESSolver(const OCP& ocp, const Horizon& horizon, 
                                const SolverSettings& settings) 
