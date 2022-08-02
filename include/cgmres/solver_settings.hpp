@@ -7,16 +7,59 @@
 
 namespace cgmres {
 
+///
+/// @class SolverSettings
+/// @brief Settings of solvers. 
+///
 struct SolverSettings {
+  ///
+  /// @brief Maximum number of iterations of the ZeroHorizonOCPSolver method. 
+  /// Has nothing to do with SingleShootingCGMRESSolver or MultipleShootingCGMRESSolver. 
+  /// Default value is 100.
+  ///
   size_t max_iter = 100;
+
+  ///
+  /// @brief Termination criterion of the ZeroHorizonOCPSolver method. 
+  /// Has nothing to do with SingleShootingCGMRESSolver or MultipleShootingCGMRESSolver. 
+  /// Must be non-negative. Default value is 1.0e-04.
+  ///
   Scalar opterr_tol = 1.0e-04;
 
+  ///
+  /// @brief Epsilon of the finite difference approximation. Must be positive.
+  /// Default value is 1.0e-08.
+  ///
   Scalar finite_difference_epsilon = 1.0e-08;
 
-  Scalar dt = 0.001; // sampling period
-  Scalar zeta = 1000.0; // hint: 1.0/dt 
+  ///
+  /// @brief The sampling period of MPC and used in SingleShootingCGMRESSolver
+  /// and MultipleShootingCGMRESSolver. Has nothing to do with ZeroHorizonOCPSolver. 
+  /// Must be positive. Default is 0.001.
+  ///
+  Scalar dt = 0.001; 
+
+  ///
+  /// @brief The stabilization parameter of the continuation method. 
+  /// Typical value is the reciprocal of SolverSettings::dt (sampling period of MPC).
+  /// Used in SingleShootingCGMRESSolver and MultipleShootingCGMRESSolver. 
+  /// Has nothing to do with ZeroHorizonOCPSolver. 
+  /// Must be positive. Default is 1000.0.
+  ///
+  Scalar zeta = 1000.0; 
+
+  ///
+  /// @brief The minimum value of the dummy inputs. 
+  /// Mainly used in MultipleShootingCGMRESSolver. 
+  /// In SingleShootingCGMRESSolver and ZeroHorizonOCPSolver, this value is 
+  /// used only in SingleShootingCGMRESSolver::init_dummy_mu() and 
+  /// ZeroHorizonOCPSolver::init_dummy_mu(). Must be non-negaive. Default is 1.0e-03.
+  ///
   Scalar min_dummy = 1.0e-03;
 
+  ///
+  /// @brief Verbose level. 0: no printings. 1-2: print some things. Default is 0.
+  ///
   size_t verbose_level = 0;
 
   void disp(std::ostream& os) const {

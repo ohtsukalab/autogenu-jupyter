@@ -200,8 +200,7 @@ public:
 
     // verbose
     if (settings_.verbose_level >= 1) {
-      std::cout << "opt error: " << opt_error 
-                << " (opt tol: " << settings_.opterr_tol << ")" <<  std::endl;
+      std::cout << "opt error: " << opt_error << std::endl;
     }
     if (settings_.verbose_level >= 2) {
       std::cout << "number of GMRES iter: " << gmres_iter << " (kmax: " << kmax << ")" << std::endl;
