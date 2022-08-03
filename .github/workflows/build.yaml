@@ -1,0 +1,33 @@
+name: build
+
+on: 
+  push:
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-18.04, ubuntu-20.04, ubuntu-22.04]
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          persist-credentials: false
+      - name: Install build-essential and python moduels
+        run: |
+          sudo apt-get update
+          sudo apt-get install build-essential
+          sudo apt-get install python-pytest
+          pip3 install sympy numpy matplotlib seaborn pytest jupyter
+      - name:  Run notebooks
+        run: |
+          jupyter nbconvert --to python cartpole.ipynb hexacopter.ipynb mobilerobot.ipynb pendubot.ipynb
+          cp .github/workflows/test_cartpole.py .
+          cp .github/workflows/test_hexacopter.py .
+          cp .github/workflows/test_mobilerobot.py .
+          cp .github/workflows/test_pendubot.py .
+          python3 -m pytest test_cartpole.py
+          python3 -m pytest test_hexacopter.py
+          python3 -m pytest test_mobilerobot.py
+          python3 -m pytest test_pendubot.py
