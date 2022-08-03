@@ -17,8 +17,8 @@ jobs:
       - name: Install build-essential and python moduels
         run: |
           sudo apt-get update
+          sudo apt-get upgrade
           sudo apt-get install build-essential
-          sudo apt-get install python-pytest
           python3 -m pip install sympy numpy matplotlib seaborn pytest jupyter
       - name:  Run notebooks
         run: |
