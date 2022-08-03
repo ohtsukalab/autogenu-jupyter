@@ -1,14 +1,11 @@
 # AutoGenU for Jupyter
 
-[![Build Status](https://travis-ci.org/mayataka/autogenu-jupyter.svg?branch=master)](https://travis-ci.org/mayataka/autogenu-jupyter) 
-[![Build status](https://ci.appveyor.com/api/projects/status/s12498n4fd847sqf?svg=true)](https://ci.appveyor.com/project/mayataka/autogenu-jupyter)
-
 ## Introduction
 This project provides the continuation/GMRES method (C/GMRES method) based solvers for nonlinear model predictive control (NMPC) and an automatic code generator for NMPC, called AutoGenU.
 
 The following C/GMRES based solvers are provided: 
-- `SingleShootingCGMRESSolver` : The original C/GMRES method (single shooting).
 - `MultipleShootingCGMRESSolver` : The multiple shooting based C/GMRES method with condensing of the state and the Lagragne multipliers with respect to the state equation.
+- `SingleShootingCGMRESSolver` : The original C/GMRES method (single shooting).
 
 ## Requirement
 - C++17 (MinGW or MSYS and PATH to either are required for Windows users)
@@ -45,31 +42,31 @@ In addition to these files, you have to write `CMakeLists.txt` to build source f
 
 
 ## Demos
-Demos are presented in `pendubot.ipynb`, `cartpole.ipynb`, `hexacopter.ipynb`, and `mobilerobot.ipynb`. You can obtain the following simulation results jusy by runnig these `.ipynb` files. The details of the each OCP formulations are described in each `.ipynb` files.
+Demos are presented in `cartpole.ipynb`, `pendubot.ipynb`, `hexacopter.ipynb`, and `mobilerobot.ipynb`. You can obtain the following simulation results jusy by runnig these `.ipynb` files. The details of the each OCP formulations are described in each `.ipynb` files.
 
-### Pendubot  
-Inverting a pendubot using `MultipleShootingCGMRESSolver` solver.
-![pendubot_gif](https://raw.githubusercontent.com/wiki/mayataka/CGMRES/images/pendubot.gif)
-![pendubot_png](https://raw.github.com/wiki/mayataka/CGMRES/images/pendubot.png)
+<img src="https://raw.githubusercontent.com/wiki/mayataka/CGMRES/images/cartpole.gif" width="300"> &nbsp;
+<img src="https://raw.githubusercontent.com/wiki/mayataka/CGMRES/images/pendubot.gif" width="300"> 
 
-### Cartpole
-Inverting a cartpole using `SingleShootingCGMRESSolver` solver.
-![cartpole_gif](https://raw.githubusercontent.com/wiki/mayataka/CGMRES/images/cartpole.gif)
-![cartpole_png](https://raw.github.com/wiki/mayataka/CGMRES/images/cartpole.png)
+<img src="https://raw.githubusercontent.com/wiki/mayataka/CGMRES/images/hexacopter.gif" width="450">  
 
-### Hexacopter 
-Trajectory tracking of a hexacopter using `MultipleShootingCGMRESSolver` .
-![hexacopter_gif](https://raw.githubusercontent.com/wiki/mayataka/CGMRES/images/hexacopter.gif)
-![hexacopter_png](https://raw.github.com/wiki/mayataka/CGMRES/images/hexacopter.png)
-
-### Mobile robot
-Obstacle avoidance of a mobile robot using `MultipleShootingCGMRESSolver` solver with the semi-smooth Fischer-Burmeister method for inequality constraints.
-![mobilerobot_gif](https://raw.githubusercontent.com/wiki/mayataka/CGMRES/images/mobilerobot.gif)
-![mobilerobot_png](https://raw.github.com/wiki/mayataka/CGMRES/images/mobilerobot.png)
+<img src="https://raw.githubusercontent.com/wiki/mayataka/CGMRES/images/mobilerobot.gif" width="450"> 
 
 
 ## License
 MIT
+
+## Citing autogenu-jupyter
+
+We'd appriciate if you use cite the following conference paper:
+
+```
+@inproceedings{katayama2020autogenu,
+  title={Automatic code generation tool for nonlinear model predictive control with {J}upyter},
+  author={Sotaro Katayama and Toshiyuki Ohtsuka},
+  booktitle={{The 21st IFAC World Congress 2020}},
+  pages={7033-7040},
+  year={2020}}
+```
 
 ## References
 1. [T. Ohtsuka A continuation/GMRES method for fast computation of nonlinear receding horizon control, Automatica, Vol. 40, No. 4, pp. 563-574 (2004)](https://doi.org/10.1016/j.automatica.2003.11.005)
