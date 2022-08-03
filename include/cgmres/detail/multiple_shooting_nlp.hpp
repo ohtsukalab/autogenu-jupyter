@@ -179,6 +179,8 @@ public:
     ubounds::clip_dummy<OCP, N>(dummy, min);
   }
 
+  void synchronize_ocp() { ocp_.synchronize(); }
+
   const OCP& ocp() const { return ocp_; }
 
   const Horizon& horizon() const { return horizon_; }

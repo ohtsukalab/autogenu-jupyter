@@ -412,6 +412,7 @@ public:
     if (settings_.verbose_level >= 1) {
       std::cout << "\n======================= update solution with C/GMRES =======================" << std::endl;
     }
+    continuation_gmres_.synchronize_ocp(); 
     const auto gmres_iter 
         = gmres_.template solve<const Scalar, const MatrixBase<VectorType>&, const Vector<dim>&,
                                 const std::array<Vector<nx>, N+1>&, const std::array<Vector<nx>, N+1>&,

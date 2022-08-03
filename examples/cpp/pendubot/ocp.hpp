@@ -107,6 +107,12 @@ public:
 
 
   ///
+  /// @brief Synchrozies the internal parameters of this OCP with the external references.
+  ///
+  void synchronize() {
+  }
+
+  ///
   /// @brief Computes the state equation dx = f(t, x, u).
   /// @param[in] t Time.
   /// @param[in] x State.
@@ -144,7 +150,7 @@ public:
   }
 
   ///
-  /// Computes the partial derivative of terminal cost with respect to state, 
+  /// @brief Computes the partial derivative of terminal cost with respect to state, 
   /// i.e., phix = dphi/dx(t, x).
   /// @param[in] t Time.
   /// @param[in] x State.
@@ -159,7 +165,7 @@ public:
   }
 
   ///
-  /// Computes the partial derivative of the Hamiltonian with respect to state, 
+  /// @brief Computes the partial derivative of the Hamiltonian with respect to state, 
   /// i.e., hx = dH/dx(t, x, u, lmd).
   /// @param[in] t Time.
   /// @param[in] x State.
@@ -230,7 +236,7 @@ public:
   }
 
   ///
-  /// Computes the partial derivative of the Hamiltonian with respect to control input and the equality constraints, 
+  /// @brief Computes the partial derivative of the Hamiltonian with respect to control input and the equality constraints, 
   /// i.e., hu = dH/du(t, x, u, lmd).
   /// @param[in] t Time.
   /// @param[in] x State.

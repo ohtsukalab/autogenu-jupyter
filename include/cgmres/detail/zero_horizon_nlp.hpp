@@ -79,6 +79,8 @@ public:
     }
   }
 
+  void synchronize_ocp() { ocp_.synchronize(); }
+
   const OCP& ocp() const { return ocp_; }
 
   const Vector<nx>& lmd() const { return lmd_; }

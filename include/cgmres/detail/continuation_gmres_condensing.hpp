@@ -297,6 +297,8 @@ public:
     }
   }
 
+  void synchronize_ocp() { nlp_.synchronize_ocp(); }
+
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
 private:

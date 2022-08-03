@@ -212,6 +212,7 @@ public:
       std::cout << "\n======================= solve zero horizon OCP =======================" << std::endl;
     }
 
+    newton_gmres_.synchronize_ocp(); 
     for (size_t iter=0; iter<settings_.max_iter; ++iter) {
       const auto gmres_iter 
           = gmres_.template solve<const Scalar, const VectorType&, const Vector<dim>&>(
