@@ -19,7 +19,7 @@ jobs:
           sudo apt-get update
           sudo apt-get upgrade
           sudo apt-get install build-essential
-          python3 -m pip install sympy numpy matplotlib seaborn pytest jupyter
+          python3 -m pip install sympy numpy matplotlib seaborn pytest jupyter nbconvert
       - name:  Run notebooks
         run: |
           git submodule update --init --recursive
