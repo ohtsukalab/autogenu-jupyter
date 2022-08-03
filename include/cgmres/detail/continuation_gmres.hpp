@@ -101,6 +101,8 @@ public:
 
   decltype(auto) lmd() const { return nlp_.lmd(); }
 
+  const NLP& get_nlp() const { return nlp_; }
+
   void synchronize_ocp() { nlp_.synchronize_ocp(); }
 
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW

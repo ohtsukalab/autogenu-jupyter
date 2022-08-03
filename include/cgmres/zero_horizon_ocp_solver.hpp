@@ -63,8 +63,7 @@ public:
   /// @param[in] settings Solver settings.
   ///
   ZeroHorizonOCPSolver(const OCP& ocp, const SolverSettings& settings) 
-    : nlp_(ocp),
-      newton_gmres_(nlp_, settings.finite_difference_epsilon),
+    : newton_gmres_(ZeroHorizonNLP_(ocp), settings.finite_difference_epsilon),
       gmres_(),
       settings_(settings),
       uopt_(Vector<nu>::Zero()),
@@ -244,7 +243,7 @@ public:
   void disp(std::ostream& os) const {
     os << "Zero horizon OCP solver: " << std::endl;
     os << "  kmax: " << kmax << std::endl;
-    os << nlp_.ocp() << std::endl;
+    os << newton_gmres_.get_nlp().ocp() << std::endl;
     os << settings_ << std::flush;
   }
 
@@ -256,7 +255,6 @@ public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
 private:
-  ZeroHorizonNLP_ nlp_;
   NewtonGMRES_ newton_gmres_;
   MatrixFreeGMRES_ gmres_;
   SolverSettings settings_;

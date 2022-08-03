@@ -66,8 +66,7 @@ public:
   ///
   MultipleShootingCGMRESSolver(const OCP& ocp, const Horizon& horizon, 
                                const SolverSettings& settings) 
-    : nlp_(ocp, horizon),
-      continuation_gmres_(nlp_, settings.finite_difference_epsilon, settings.zeta),
+    : continuation_gmres_(MultipleShootingNLP_(ocp, horizon), settings.finite_difference_epsilon, settings.zeta),
       gmres_(),
       settings_(settings),
       solution_(Vector<dim>::Zero()),
@@ -439,8 +438,8 @@ public:
     os << "Multiple shooting CGMRES solver: " << std::endl;
     os << "  N:    " << N << std::endl;
     os << "  kmax: " << kmax << "\n" << std::endl;
-    os << nlp_.ocp() << std::endl;
-    os << nlp_.horizon() << std::endl;
+    os << continuation_gmres_.get_nlp().ocp() << std::endl;
+    os << continuation_gmres_.get_nlp().horizon() << std::endl;
     os << settings_ << std::endl;
   }
 
@@ -452,7 +451,6 @@ public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
 private:
-  MultipleShootingNLP_ nlp_;
   ContinuationGMRES_ continuation_gmres_;
   MatrixFreeGMRES_ gmres_;
   SolverSettings settings_;
