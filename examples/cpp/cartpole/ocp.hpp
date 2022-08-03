@@ -11,14 +11,41 @@
 
 namespace cgmres {
 
-// This class defines the optimal control problem (OCP)
+/// 
+/// @class OCP_cartpole
+/// @brief Definition of the optimal control problem (OCP) of cartpole.
+/// 
 class OCP_cartpole { 
 public:
+ 
+  ///
+  /// @brief Dimension of the state. 
+  ///
   static constexpr int nx = 4;
+ 
+  ///
+  /// @brief Dimension of the control input. 
+  ///
   static constexpr int nu = 1;
+ 
+  ///
+  /// @brief Dimension of the equality constraints. 
+  ///
   static constexpr int nc = 0;
+ 
+  ///
+  /// @brief Dimension of the Fischer-Burmeister function (already counded in nc). 
+  ///
   static constexpr int nh = 0;
+ 
+  ///
+  /// @brief Dimension of the concatenation of the control input and equality constraints. 
+  ///
   static constexpr int nuc = nu + nc;
+ 
+  ///
+  /// @brief Dimension of the bound constraints on the control input. 
+  ///
   static constexpr int nub = 1;
 
   double m_c = 2;
@@ -69,81 +96,89 @@ public:
   }
 
 
-  // Computes the state equation f(t, x, u).
-  // t : time parameter
-  // x : state vector
-  // u : control input vector
-  // f : the value of f(t, x, u)
+  ///
+  /// @brief Computes the state equation dx = f(t, x, u).
+  /// @param[in] t Time.
+  /// @param[in] x State.
+  /// @param[in] u Control input.
+  /// @param[out] dx Evaluated value of the state equation.
+  ///
   void eval_f(const double t, const double* x, const double* u, 
               double* dx) const {
-  double x0 = sin(x[1]);
-  double x1 = 1.0/(m_c + m_p*pow(x0, 2));
-  double x2 = cos(x[1]);
-  double x3 = l*pow(x[1], 2);
-  double x4 = m_p*x0;
-  dx[0] = x[2];
-  dx[1] = x[3];
-  dx[2] = x1*(u[0] + x4*(g*x2 + x3));
-  dx[3] = x1*(-g*x0*(m_c + m_p) - u[0]*x2 - x2*x3*x4)/l;
+    const double x0 = sin(x[1]);
+    const double x1 = 1.0/(m_c + m_p*pow(x0, 2));
+    const double x2 = cos(x[1]);
+    const double x3 = l*pow(x[1], 2);
+    const double x4 = m_p*x0;
+    dx[0] = x[2];
+    dx[1] = x[3];
+    dx[2] = x1*(u[0] + x4*(g*x2 + x3));
+    dx[3] = x1*(-g*x0*(m_c + m_p) - u[0]*x2 - x2*x3*x4)/l;
  
   }
 
-  // Computes the partial derivative of terminal cost with respect to state, 
-  // i.e., dphi/dx(t, x).
-  // t    : time parameter
-  // x    : state vector
-  // phix : the value of dphi/dx(t, x)
+  ///
+  /// Computes the partial derivative of terminal cost with respect to state, 
+  /// i.e., phix = dphi/dx(t, x).
+  /// @param[in] t Time.
+  /// @param[in] x State.
+  /// @param[out] phix Evaluated value of the partial derivative of terminal cost.
+  ///
   void eval_phix(const double t, const double* x, double* phix) const {
-  phix[0] = (1.0/2.0)*q_terminal[0]*(2*x[0] - 2*x_ref[0]);
-  phix[1] = (1.0/2.0)*q_terminal[1]*(2*x[1] - 2*x_ref[1]);
-  phix[2] = (1.0/2.0)*q_terminal[2]*(2*x[2] - 2*x_ref[2]);
-  phix[3] = (1.0/2.0)*q_terminal[3]*(2*x[3] - 2*x_ref[3]);
+    phix[0] = (1.0/2.0)*q_terminal[0]*(2*x[0] - 2*x_ref[0]);
+    phix[1] = (1.0/2.0)*q_terminal[1]*(2*x[1] - 2*x_ref[1]);
+    phix[2] = (1.0/2.0)*q_terminal[2]*(2*x[2] - 2*x_ref[2]);
+    phix[3] = (1.0/2.0)*q_terminal[3]*(2*x[3] - 2*x_ref[3]);
  
   }
 
-  // Computes the partial derivative of the Hamiltonian with respect to state, 
-  // i.e., dH/dx(t, x, u, lmd).
-  // t   : time parameter
-  // x   : state vector
-  // u   : control input vector
-  // lmd : the Lagrange multiplier for the state equation
-  // hx  : the value of dH/dx(t, x, u, lmd)
+  ///
+  /// Computes the partial derivative of the Hamiltonian with respect to state, 
+  /// i.e., hx = dH/dx(t, x, u, lmd).
+  /// @param[in] t Time.
+  /// @param[in] x State.
+  /// @param[in] u Concatenatin of the control input and Lagrange multiplier with respect to the equality constraints. 
+  /// @param[in] lmd Costate. 
+  /// @param[out] hx Evaluated value of the partial derivative of the Hamiltonian.
+  ///
   void eval_hx(const double t, const double* x, const double* u, 
                const double* lmd, double* hx) const {
-  double x0 = 2*x[1];
-  double x1 = sin(x[1]);
-  double x2 = cos(x[1]);
-  double x3 = g*x2;
-  double x4 = pow(x[1], 2);
-  double x5 = l*x4;
-  double x6 = m_p*(x3 + x5);
-  double x7 = pow(x1, 2);
-  double x8 = m_c + m_p*x7;
-  double x9 = m_p*x1;
-  double x10 = x2*x9;
-  double x11 = 2*x10/pow(x8, 2);
-  double x12 = 1.0/x8;
-  double x13 = g*x1;
-  double x14 = m_c + m_p;
-  double x15 = lmd[3]/l;
-  hx[0] = (1.0/2.0)*q[0]*(2*x[0] - 2*x_ref[0]);
-  hx[1] = -lmd[2]*x11*(u[0] + x1*x6) + lmd[2]*x12*(x2*x6 + x9*(2*l*x[1] - x13)) + (1.0/2.0)*q[1]*(x0 - 2*x_ref[1]) - x11*x15*(-u[0]*x2 - x10*x5 - x13*x14) + x12*x15*(l*m_p*x4*x7 - l*x0*x10 - m_p*pow(x2, 2)*x5 + u[0]*x1 - x14*x3);
-  hx[2] = lmd[0] + (1.0/2.0)*q[2]*(2*x[2] - 2*x_ref[2]);
-  hx[3] = lmd[1] + (1.0/2.0)*q[3]*(2*x[3] - 2*x_ref[3]);
+    const double x0 = 2*x[1];
+    const double x1 = sin(x[1]);
+    const double x2 = cos(x[1]);
+    const double x3 = g*x2;
+    const double x4 = pow(x[1], 2);
+    const double x5 = l*x4;
+    const double x6 = m_p*(x3 + x5);
+    const double x7 = pow(x1, 2);
+    const double x8 = m_c + m_p*x7;
+    const double x9 = m_p*x1;
+    const double x10 = x2*x9;
+    const double x11 = 2*x10/pow(x8, 2);
+    const double x12 = 1.0/x8;
+    const double x13 = g*x1;
+    const double x14 = m_c + m_p;
+    const double x15 = lmd[3]/l;
+    hx[0] = (1.0/2.0)*q[0]*(2*x[0] - 2*x_ref[0]);
+    hx[1] = -lmd[2]*x11*(u[0] + x1*x6) + lmd[2]*x12*(x2*x6 + x9*(2*l*x[1] - x13)) + (1.0/2.0)*q[1]*(x0 - 2*x_ref[1]) - x11*x15*(-u[0]*x2 - x10*x5 - x13*x14) + x12*x15*(l*m_p*x4*x7 - l*x0*x10 - m_p*pow(x2, 2)*x5 + u[0]*x1 - x14*x3);
+    hx[2] = lmd[0] + (1.0/2.0)*q[2]*(2*x[2] - 2*x_ref[2]);
+    hx[3] = lmd[1] + (1.0/2.0)*q[3]*(2*x[3] - 2*x_ref[3]);
  
   }
 
-  // Computes the partial derivative of the Hamiltonian with respect to control 
-  // input and the constraints, dH/du(t, x, u, lmd).
-  // t   : time parameter
-  // x   : state vector
-  // u   : control input vector
-  // lmd : the Lagrange multiplier for the state equation
-  // hu  : the value of dH/du(t, x, u, lmd)
+  ///
+  /// Computes the partial derivative of the Hamiltonian with respect to control input and the equality constraints, 
+  /// i.e., hu = dH/du(t, x, u, lmd).
+  /// @param[in] t Time.
+  /// @param[in] x State.
+  /// @param[in] u Concatenatin of the control input and Lagrange multiplier with respect to the equality constraints. 
+  /// @param[in] lmd Costate. 
+  /// @param[out] hu Evaluated value of the partial derivative of the Hamiltonian.
+  ///
   void eval_hu(const double t, const double* x, const double* u, 
                const double* lmd, double* hu) const {
-  double x0 = 1.0/(m_c + m_p*pow(sin(x[1]), 2));
-  hu[0] = lmd[2]*x0 + r[0]*u[0] - lmd[3]*x0*cos(x[1])/l;
+    const double x0 = 1.0/(m_c + m_p*pow(sin(x[1]), 2));
+    hu[0] = lmd[2]*x0 + r[0]*u[0] - lmd[3]*x0*cos(x[1])/l;
  
   }
 };

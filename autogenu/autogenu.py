@@ -328,35 +328,78 @@ class AutoGenU(object):
 
 namespace cgmres {
 
-// This class defines the optimal control problem (OCP)
+/// 
 """ 
         ])
-        f_model_h.write(
-            'class OCP_'+str(self.__ocp_name)+' {'
-        )
+        f_model_h.write('/// @class OCP_'+self.__ocp_name+'\n')
+        f_model_h.write('/// @brief Definition of the optimal control problem (OCP) of '+self.__ocp_name+'.\n')
+        f_model_h.write('/// \n')
+        f_model_h.write('class OCP_'+self.__ocp_name+' {')
         f_model_h.writelines([
 """ 
 public:
 """
         ])
+        f_model_h.writelines([
+""" 
+  ///
+  /// @brief Dimension of the state. 
+  ///
+"""
+        ])
         f_model_h.write(
             '  static constexpr int nx = '+str(self.__nx)+';\n'
         )
+        f_model_h.writelines([
+""" 
+  ///
+  /// @brief Dimension of the control input. 
+  ///
+"""
+        ])
         f_model_h.write(
             '  static constexpr int nu = '
             +str(self.__nu)+';\n'
         )
+        f_model_h.writelines([
+""" 
+  ///
+  /// @brief Dimension of the equality constraints. 
+  ///
+"""
+        ])
         f_model_h.write(
             '  static constexpr int nc = '
             +str(self.__nc+self.__nh)+';\n'
         )
+        f_model_h.writelines([
+""" 
+  ///
+  /// @brief Dimension of the Fischer-Burmeister function (already counded in nc). 
+  ///
+"""
+        ])
         f_model_h.write(
             '  static constexpr int nh = '
             +str(self.__nh)+';\n'
         )
+        f_model_h.writelines([
+""" 
+  ///
+  /// @brief Dimension of the concatenation of the control input and equality constraints. 
+  ///
+"""
+        ])
         f_model_h.write(
             '  static constexpr int nuc = nu + nc;\n'
         )
+        f_model_h.writelines([
+""" 
+  ///
+  /// @brief Dimension of the bound constraints on the control input. 
+  ///
+"""
+        ])
         f_model_h.write(
             '  static constexpr int nub = '
             +str(len(self.__ubounds))+';\n\n'
@@ -432,11 +475,13 @@ public:
         f_model_h.write('  }\n\n')
         f_model_h.writelines([
 """
-  // Computes the state equation f(t, x, u).
-  // t : time parameter
-  // x : state vector
-  // u : control input vector
-  // f : the value of f(t, x, u)
+  ///
+  /// @brief Computes the state equation dx = f(t, x, u).
+  /// @param[in] t Time.
+  /// @param[in] x State.
+  /// @param[in] u Control input.
+  /// @param[out] dx Evaluated value of the state equation.
+  ///
   void eval_f(const double t, const double* x, const double* u, 
               double* dx) const {
 """ 
@@ -446,11 +491,13 @@ public:
 """ 
   }
 
-  // Computes the partial derivative of terminal cost with respect to state, 
-  // i.e., dphi/dx(t, x).
-  // t    : time parameter
-  // x    : state vector
-  // phix : the value of dphi/dx(t, x)
+  ///
+  /// Computes the partial derivative of terminal cost with respect to state, 
+  /// i.e., phix = dphi/dx(t, x).
+  /// @param[in] t Time.
+  /// @param[in] x State.
+  /// @param[out] phix Evaluated value of the partial derivative of terminal cost.
+  ///
   void eval_phix(const double t, const double* x, double* phix) const {
 """ 
         ])
@@ -459,13 +506,15 @@ public:
 """ 
   }
 
-  // Computes the partial derivative of the Hamiltonian with respect to state, 
-  // i.e., dH/dx(t, x, u, lmd).
-  // t   : time parameter
-  // x   : state vector
-  // u   : control input vector
-  // lmd : the Lagrange multiplier for the state equation
-  // hx  : the value of dH/dx(t, x, u, lmd)
+  ///
+  /// Computes the partial derivative of the Hamiltonian with respect to state, 
+  /// i.e., hx = dH/dx(t, x, u, lmd).
+  /// @param[in] t Time.
+  /// @param[in] x State.
+  /// @param[in] u Concatenatin of the control input and Lagrange multiplier with respect to the equality constraints. 
+  /// @param[in] lmd Costate. 
+  /// @param[out] hx Evaluated value of the partial derivative of the Hamiltonian.
+  ///
   void eval_hx(const double t, const double* x, const double* u, 
                const double* lmd, double* hx) const {
 """ 
@@ -475,13 +524,15 @@ public:
 """ 
   }
 
-  // Computes the partial derivative of the Hamiltonian with respect to control 
-  // input and the constraints, dH/du(t, x, u, lmd).
-  // t   : time parameter
-  // x   : state vector
-  // u   : control input vector
-  // lmd : the Lagrange multiplier for the state equation
-  // hu  : the value of dH/du(t, x, u, lmd)
+  ///
+  /// Computes the partial derivative of the Hamiltonian with respect to control input and the equality constraints, 
+  /// i.e., hu = dH/du(t, x, u, lmd).
+  /// @param[in] t Time.
+  /// @param[in] x State.
+  /// @param[in] u Concatenatin of the control input and Lagrange multiplier with respect to the equality constraints. 
+  /// @param[in] lmd Costate. 
+  /// @param[out] hu Evaluated value of the partial derivative of the Hamiltonian.
+  ///
   void eval_hu(const double t, const double* x, const double* u, 
                const double* lmd, double* hu) const {
 """ 
@@ -1394,17 +1445,17 @@ install(
             for i in range(len(func_cse[0])):
                 cse_exp, cse_rhs = func_cse[0][i]
                 writable_file.write(
-                    '  double '+sympy.ccode(cse_exp)
+                    '    const double '+sympy.ccode(cse_exp)
                     +' = '+sympy.ccode(cse_rhs)+';\n'
                 )
             for i in range(len(func_cse[1])):
                 writable_file.write(
-                    '  '+return_value_name+'[%d] = '%i
+                    '    '+return_value_name+'[%d] = '%i
                     +sympy.ccode(func_cse[1][i])+';\n'
                 )
         else:
             writable_file.writelines(
-                ['  '+return_value_name+'[%d] = '%i
+                ['    '+return_value_name+'[%d] = '%i
                 +sympy.ccode(function[i])+';\n' for i in range(len(function))]
             )
 
