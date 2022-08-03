@@ -1,5 +1,9 @@
 # AutoGenU for Jupyter
 
+[![build](https://github.com/mayataka/autogenu-jupyter/actions/workflows/build.yaml/badge.svg?branch=master)](https://github.com/mayataka/autogenu-jupyter/actions/workflows/build.yaml)
+[![doxygen](https://github.com/mayataka/autogenu-jupyter/actions/workflows/doxygen.yaml/badge.svg)](https://github.com/mayataka/autogenu-jupyter/actions/workflows/doxygen.yaml)
+
+
 ## Introduction
 This project provides the continuation/GMRES method (C/GMRES method) based solvers for nonlinear model predictive control (NMPC) and an automatic code generator for NMPC, called AutoGenU.
 
