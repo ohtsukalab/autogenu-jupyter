@@ -11,8 +11,19 @@
 
 namespace cgmres {
 
+///
+/// @class Horizon
+/// @brief Horizon of MPC. 
+///
 class Horizon {
 public:
+  ///
+  /// @brief Constructs the horizon. If alpha <= 0.0, then the fixed-length Tf is used. If alpha > 0.0, 
+  /// then the time-varying length Tf * (1.0-exp(-alpha * (t-t0))) is used.
+  /// @param[in] Tf The parameter of the horizon length. 
+  /// @param[in] alpha The parameter of the time-varying horizon length. Default is 0.0 (i.e., fixed-length horizon).
+  /// @param[in] t0 The parameter of the time-varying horizon length. Default is 0.0.
+  ///
   Horizon(const Scalar Tf, const Scalar alpha=0.0, const Scalar t0=0.0)
     : Tf_(Tf), alpha_(alpha), t0_(t0) {
     if (Tf <= 0.0) {
@@ -21,11 +32,22 @@ public:
     time_varying_length_ = (alpha > 0.0);
   }
 
+  ///
+  /// @brief Default constructor.
+  ///
   Horizon() = default;
 
+  ///
+  /// @brief Default destructor.
+  ///
   ~Horizon() = default;
 
-  inline Scalar T(const Scalar t) const {
+  ///
+  /// @brief Gets the length of the horizon.
+  /// @param[in] t The initial time of the horizon. If this horizon is time-varying (i.e., alpha > 0.0),
+  /// then this value must not be less than t0.
+  ///
+  Scalar T(const Scalar t) const {
     if (time_varying_length_) {
       assert(t >= t0_);
       return Tf_ * (1.0-std::exp(-alpha_*(t-t0_)));
@@ -35,6 +57,10 @@ public:
     }
   }
 
+  ///
+  /// @brief Resets the length of the horizon (for time-varying horizon).
+  /// @param[in] t0 The parameter of the time-varying horizon length. 
+  ///
   void reset(const Scalar t0) {
     t0_ = t0;
   }
