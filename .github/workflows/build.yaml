@@ -24,6 +24,7 @@ jobs:
         run: |
           git submodule update --init --recursive
           jupyter nbconvert --to python cartpole.ipynb hexacopter.ipynb mobilerobot.ipynb pendubot.ipynb
+          sed -i -e '/get_ipython/'d cartpole.py hexacopter.py mobilerobot.py pendubot.py
           cp .github/workflows/test_cartpole.py .
           cp .github/workflows/test_hexacopter.py .
           cp .github/workflows/test_mobilerobot.py .
