@@ -22,8 +22,8 @@ jobs:
           python3 -m pip install sympy numpy matplotlib seaborn pytest jupyter
       - name:  Run notebooks
         run: |
+          git submodule update --init --recursive
           jupyter nbconvert --to python cartpole.ipynb hexacopter.ipynb mobilerobot.ipynb pendubot.ipynb
-
           cp .github/workflows/test_cartpole.py .
           cp .github/workflows/test_hexacopter.py .
           cp .github/workflows/test_mobilerobot.py .
