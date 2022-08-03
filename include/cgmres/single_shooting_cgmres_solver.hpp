@@ -24,11 +24,34 @@ namespace cgmres {
 template <class OCP, int N, int kmax>
 class SingleShootingCGMRESSolver {
 public:
+  ///
+  /// @brief Dimension of the state. 
+  ///
   static constexpr int nx = OCP::nx;
+
+  ///
+  /// @brief Dimension of the control input. 
+  ///
   static constexpr int nu = OCP::nu;
+
+  ///
+  /// @brief Dimension of the equality constraints. 
+  ///
   static constexpr int nc = OCP::nc;
+
+  ///
+  /// @brief Dimension of the concatenation of the control input and equality constraints. 
+  ///
   static constexpr int nuc = nu + nc;
+
+  ///
+  /// @brief Dimension of the bound constraints on the control input. 
+  ///
   static constexpr int nub = OCP::nub;
+
+  ///
+  /// @brief Dimension of the linear problem solved by the GMRES solver. 
+  ///
   static constexpr int dim = nuc * N + 2 * N * nub;
 
   using SingleShootingNLP_ = detail::SingleShootingNLP<OCP, N>;
@@ -67,6 +90,10 @@ public:
   ///
   ~SingleShootingCGMRESSolver() = default;
 
+  ///
+  /// @brief Sets the control input vector.
+  /// @param[in] u The control input vector. Size must be SingleShootingCGMRESSolver::nu.
+  ///
   template <typename VectorType>
   void set_u(const MatrixBase<VectorType>& u) {
     if (u.size() != nu) {
@@ -81,6 +108,11 @@ public:
     setInnerSolution();
   }
 
+  ///
+  /// @brief Sets the control input vector and Lagrange multiplier with respect to the equality constraints.
+  /// @param[in] uc Concatenatin of the control input vector and Lagrange multiplier with respect to the equality constraints. 
+  /// Size must be SingleShootingCGMRESSolver::nuc.
+  ///
   template <typename VectorType>
   void set_uc(const MatrixBase<VectorType>& uc) {
     if (uc.size() != nuc) {
@@ -95,6 +127,10 @@ public:
     setInnerSolution();
   }
 
+  ///
+  /// @brief Sets the dummy input vector with respect to the control input bounds constraint.
+  /// @param[in] dummy The dummy input vector. Size must be SingleShootingCGMRESSolver::nub.
+  ///
   template <typename VectorType>
   void set_dummy(const MatrixBase<VectorType>& dummy) {
     if (dummy.size() != nub) {
@@ -106,6 +142,10 @@ public:
     setInnerSolution();
   }
 
+  ///
+  /// @brief Sets the Lagrange multiplier with respect to the control input bounds constraint.
+  /// @param[in] mu The Lagrange multiplier. Size must be SingleShootingCGMRESSolver::nub.
+  ///
   template <typename VectorType>
   void set_mu(const MatrixBase<VectorType>& mu) {
     if (mu.size() != nub) {
@@ -117,6 +157,10 @@ public:
     setInnerSolution();
   }
 
+  ///
+  /// @brief Sets the array of control input vector.
+  /// @param[in] u_array A container (std::vector, std::array, etc.) of the control input vector. Size must be N and size of each element must be SingleShootingCGMRESSolver::nu.
+  ///
   template <typename T>
   void set_u_array(const T& u_array) {
     if (u_array.size() != N) { 
@@ -132,6 +176,11 @@ public:
     setInnerSolution();
   }
 
+  ///
+  /// @brief Sets the array of control input vector and Lagrange multiplier with respect to the equality constraints.
+  /// @param[in] uc_array A container (std::vector, std::array, etc.) of the concatenatin of the control input vector and Lagrange multiplier 
+  /// with respect to the equality constraints. Size must be N and size of each element must be SingleShootingCGMRESSolver::nuc.
+  ///
   template <typename T>
   void set_uc_array(const T& uc_array) {
     if (uc_array.size() != N) { 
@@ -147,6 +196,11 @@ public:
     setInnerSolution();
   }
 
+  ///
+  /// @brief Sets the array of the dummy input vector with respect to the control input bounds constraint.
+  /// @param[in] dummy_array A container (std::vector, std::array, etc.) of the dummy input vector. 
+  /// Size must be N and size of each element must be SingleShootingCGMRESSolver::nub.
+  ///
   template <typename T>
   void set_dummy_array(const T& dummy_array) {
     if (dummy_array.size() != N) { 
@@ -161,6 +215,11 @@ public:
     setInnerSolution();
   }
 
+  ///
+  /// @brief Sets the array of the Lagrange multiplier with respect to the control input bounds constraint.
+  /// @param[in] mu_array A container (std::vector, std::array, etc.) of the Lagrange multiplier. 
+  /// Size must be N and size of each element must be SingleShootingCGMRESSolver::nub.
+  ///
   template <typename T>
   void set_mu_array(const T& mu_array) {
     if (mu_array.size() != N) { 
@@ -175,26 +234,63 @@ public:
     setInnerSolution();
   }
 
+  ///
+  /// @brief Initializes the dummy input vectors and Lagrange multipliers with respect to the control input bounds constraint.
+  ///
   void init_dummy_mu() {
     continuation_gmres_.retrive_dummy(solution_, settings_.min_dummy);
     continuation_gmres_.retrive_mu(solution_);
     retriveSolution();
   }
 
+  ///
+  /// @brief Getter of the optimal solution.
+  /// @return const reference to the optimal control input vectors over the horizon.
+  ///
   const std::array<Vector<nu>, N>& uopt() const { return uopt_; }
 
+  ///
+  /// @brief Getter of the optimal solution.
+  /// @return const reference to the optimal concatenatins of the control input vector and Lagrange multiplier with respect to the equality constraints.
+  ///
   const std::array<Vector<nuc>, N>& ucopt() const { return ucopt_; }
 
+  ///
+  /// @brief Getter of the optimal solution.
+  /// @return const reference to the optimal state vectors over the horizon.
+  ///
   const std::array<Vector<nx>, N+1>& xopt() const { return continuation_gmres_.x(); }
 
+  ///
+  /// @brief Getter of the optimal solution.
+  /// @return const reference to the optimal costate vectors over the horizon.
+  ///
   const std::array<Vector<nx>, N+1>& lmdopt() const { return continuation_gmres_.lmd(); }
 
+  ///
+  /// @brief Getter of the optimal solution.
+  /// @return const reference to the optimal dummy input vectors with respect to the control input bounds constraint over the horizon.
+  ///
   const std::array<Vector<nub>, N>& dummyopt() const { return dummyopt_; }
 
+  ///
+  /// @brief Getter of the optimal solution.
+  /// @return const reference to the Lagrange multipliers with respect to the control input bounds constraint over the horizon.
+  ///
   const std::array<Vector<nub>, N>& muopt() const { return muopt_; }
 
+  ///
+  /// @brief Gets the l2-norm of the current optimality errors.
+  /// @return The l2-norm of the current optimality errors.
+  ///
   Scalar optError() const { return continuation_gmres_.optError(); }
 
+  ///
+  /// @brief Computes and gets the l2-norm of the current optimality errors.
+  /// @param[in] t Initial time of the horizon. 
+  /// @param[in] x Initial state of the horizon. Size must be SingleShootingCGMRESSolver::nx.
+  /// @return The l2-norm of the current optimality errors.
+  ///
   template <typename VectorType>
   Scalar optError(const Scalar t, const MatrixBase<VectorType>& x) {
     if (x.size() != nx) {
@@ -204,6 +300,11 @@ public:
     return optError();
   }
 
+  ///
+  /// @brief Updates the solution by performing C/GMRES method.
+  /// @param[in] t Initial time of the horizon. 
+  /// @param[in] x Initial state of the horizon. Size must be SingleShootingCGMRESSolver::nx.
+  ///
   template <typename VectorType>
   void update(const Scalar t, const MatrixBase<VectorType>& x) {
     if (x.size() != nx) {

@@ -23,11 +23,34 @@ namespace cgmres {
 template <class OCP, int kmax>
 class ZeroHorizonOCPSolver {
 public:
+  ///
+  /// @brief Dimension of the state. 
+  ///
   static constexpr int nx = OCP::nx;
+
+  ///
+  /// @brief Dimension of the control input. 
+  ///
   static constexpr int nu = OCP::nu;
+
+  ///
+  /// @brief Dimension of the equality constraints. 
+  ///
   static constexpr int nc = OCP::nc;
+
+  ///
+  /// @brief Dimension of the concatenation of the control input and equality constraints. 
+  ///
   static constexpr int nuc = nu + nc;
+
+  ///
+  /// @brief Dimension of the bound constraints on the control input. 
+  ///
   static constexpr int nub = OCP::nub;
+
+  ///
+  /// @brief Dimension of the linear problem solved by the GMRES solver. 
+  ///
   static constexpr int dim = nuc + 2 * nub;
 
   using ZeroHorizonNLP_ = detail::ZeroHorizonNLP<OCP>;
@@ -60,6 +83,10 @@ public:
   ///
   ~ZeroHorizonOCPSolver() = default;
 
+  ///
+  /// @brief Sets the control input vector.
+  /// @param[in] u The control input vector. Size must be ZeroHorizonOCPSolver::nu.
+  ///
   template <typename VectorType>
   void set_u(const VectorType& u) {
     if (u.size() != nu) {
@@ -70,6 +97,11 @@ public:
     setInnerSolution();
   }
 
+  ///
+  /// @brief Sets the control input vector and Lagrange multiplier with respect to the equality constraints.
+  /// @param[in] uc Concatenatin of the control input vector and Lagrange multiplier with respect to the equality constraints. 
+  /// Size must be ZeroHorizonOCPSolver::nuc.
+  ///
   template <typename VectorType>
   void set_uc(const VectorType& uc) {
     if (uc.size() != nuc) {
@@ -80,6 +112,10 @@ public:
     setInnerSolution();
   }
 
+  ///
+  /// @brief Sets the dummy input vector with respect to the control input bounds constraint.
+  /// @param[in] dummy The dummy input vector. Size must be ZeroHorizonOCPSolver::nub.
+  ///
   template <typename VectorType>
   void set_dummy(const MatrixBase<VectorType>& dummy) {
     if (dummy.size() != nub) {
@@ -89,6 +125,10 @@ public:
     setInnerSolution();
   }
 
+  ///
+  /// @brief Sets the Lagrange multiplier with respect to the control input bounds constraint.
+  /// @param[in] mu The Lagrange multiplier. Size must be ZeroHorizonOCPSolver::nub.
+  ///
   template <typename VectorType>
   void set_mu(const MatrixBase<VectorType>& mu) {
     if (mu.size() != nub) {
@@ -98,18 +138,57 @@ public:
     setInnerSolution();
   }
 
+  ///
+  /// @brief Initializes the dummy input vectors and Lagrange multipliers with respect to the control input bounds constraint.
+  ///
+  void init_dummy_mu() {
+    newton_gmres_.retrive_dummy(solution_, settings_.min_dummy);
+    newton_gmres_.retrive_mu(solution_);
+    retriveSolution();
+  }
+
+  ///
+  /// @brief Getter of the optimal solution.
+  /// @return const reference to the optimal control input vector.
+  ///
   const Vector<nu>& uopt() const { return uopt_; }
 
+  ///
+  /// @brief Getter of the optimal solution.
+  /// @return const reference to the optimal concatenatins of the control input vector and Lagrange multiplier with respect to the equality constraints.
+  ///
   const Vector<nuc>& ucopt() const { return ucopt_; }
 
+  ///
+  /// @brief Getter of the optimal solution.
+  /// @return const reference to the optimal dummy input vectors with respect to the control input bounds constraint.
+  ///
   const Vector<nub>& dummyopt() const { return dummyopt_; }
 
+  ///
+  /// @brief Getter of the optimal solution.
+  /// @return const reference to the Lagrange multipliers with respect to the control input bounds constraint.
+  ///
   const Vector<nub>& muopt() const { return muopt_; }
 
+  ///
+  /// @brief Getter of the optimal solution.
+  /// @return const reference to the optimal costate vector.
+  ///
   const Vector<nx>& lmdopt() const { return newton_gmres_.lmd(); }
 
+  ///
+  /// @brief Gets the l2-norm of the current optimality errors.
+  /// @return The l2-norm of the current optimality errors.
+  ///
   Scalar optError() const { return newton_gmres_.optError(); }
 
+  ///
+  /// @brief Computes and gets the l2-norm of the current optimality errors.
+  /// @param[in] t Time.
+  /// @param[in] x State. Size must be ZeroHorizonOCPSolver::nx.
+  /// @return The l2-norm of the current optimality errors.
+  ///
   template <typename VectorType>
   Scalar optError(const Scalar t, const MatrixBase<VectorType>& x) {
     if (x.size() != nx) {
@@ -119,6 +198,11 @@ public:
     return optError();
   }
 
+  ///
+  /// @brief Solves the zero-horizon optimal control problem by Newton-GMRES method.
+  /// @param[in] t Time.
+  /// @param[in] x State. Size must be ZeroHorizonOCPSolver::nx.
+  ///
   template <typename VectorType>
   void solve(const Scalar t, const MatrixBase<VectorType>& x) {
     if (x.size() != nx) {
@@ -153,12 +237,6 @@ public:
       }
 
     }
-    retriveSolution();
-  }
-
-  void init_dummy_mu() {
-    newton_gmres_.retrive_dummy(solution_, settings_.min_dummy);
-    newton_gmres_.retrive_mu(solution_);
     retriveSolution();
   }
 

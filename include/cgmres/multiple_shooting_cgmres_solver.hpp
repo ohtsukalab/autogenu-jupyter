@@ -45,14 +45,14 @@ public:
   static constexpr int nuc = nu + nc;
 
   ///
-  /// @brief Dimension of the linear problem solved by the GMRES solver. 
-  ///
-  static constexpr int dim = nuc * N;
-
-  ///
   /// @brief Dimension of the bound constraints on the control input. 
   ///
   static constexpr int nub = OCP::nub;
+
+  ///
+  /// @brief Dimension of the linear problem solved by the GMRES solver. 
+  ///
+  static constexpr int dim = nuc * N;
 
   using MultipleShootingNLP_ = detail::MultipleShootingNLP<OCP, N>;
   using ContinuationGMRES_ = detail::ContinuationGMRESCondensing<MultipleShootingNLP_>;
