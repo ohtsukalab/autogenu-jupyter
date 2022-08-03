@@ -14,6 +14,13 @@
 
 namespace cgmres {
 
+///
+/// @class SingleShootingCGMRESSolver
+/// @brief Single-shooting C/GMRES solver for nonlinear MPC. 
+/// @tparam OCP A definition of the optimal control problem (OCP).
+/// @tparam N Number of discretizationn grids of the horizon. Must be positive.
+/// @tparam kmax Maximum number of the GMRES iterations. Must be positive.
+///
 template <class OCP, int N, int kmax>
 class SingleShootingCGMRESSolver {
 public:
@@ -28,6 +35,12 @@ public:
   using ContinuationGMRES_ = detail::ContinuationGMRES<SingleShootingNLP_>;
   using MatrixFreeGMRES_ = detail::MatrixFreeGMRES<ContinuationGMRES_, kmax>;
 
+  ///
+  /// @brief Constructs the single-shooting C/GMRES solver.
+  /// @param[in] ocp A definition of the optimal control problem (OCP).
+  /// @param[in] horizon Prediction horizon of MPC.
+  /// @param[in] settings Solver settings.
+  ///
   SingleShootingCGMRESSolver(const OCP& ocp, const Horizon& horizon, 
                              const SolverSettings& settings) 
     : nlp_(ocp, horizon),
@@ -44,8 +57,14 @@ public:
     }
   }
 
+  ///
+  /// @brief Default constructor.
+  ///
   SingleShootingCGMRESSolver() = default;
 
+  ///
+  /// @brief Default destructor.
+  ///
   ~SingleShootingCGMRESSolver() = default;
 
   template <typename VectorType>

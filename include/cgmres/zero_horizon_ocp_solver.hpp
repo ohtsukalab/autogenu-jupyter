@@ -14,6 +14,12 @@
 
 namespace cgmres {
 
+///
+/// @class ZeroHorizonOCPSolver
+/// @brief Zero-horizon OCP solver to initialize the solution of the MPC solvers. 
+/// @tparam OCP A definition of the optimal control problem (OCP).
+/// @tparam kmax Maximum number of the GMRES iterations. Must be positive.
+///
 template <class OCP, int kmax>
 class ZeroHorizonOCPSolver {
 public:
@@ -28,6 +34,11 @@ public:
   using NewtonGMRES_ = detail::NewtonGMRES<ZeroHorizonNLP_>;
   using MatrixFreeGMRES_ = detail::MatrixFreeGMRES<NewtonGMRES_, kmax>;
 
+  ///
+  /// @brief Constructs the zero-horizon OCP solver.
+  /// @param[in] ocp A definition of the optimal control problem (OCP).
+  /// @param[in] settings Solver settings.
+  ///
   ZeroHorizonOCPSolver(const OCP& ocp, const SolverSettings& settings) 
     : nlp_(ocp),
       newton_gmres_(nlp_, settings.finite_difference_epsilon),
@@ -39,8 +50,14 @@ public:
       solution_update_(Vector<dim>::Zero()) {
   }
 
+  ///
+  /// @brief Default constructor.
+  ///
   ZeroHorizonOCPSolver() = default;
 
+  ///
+  /// @brief Default destructor.
+  ///
   ~ZeroHorizonOCPSolver() = default;
 
   template <typename VectorType>
