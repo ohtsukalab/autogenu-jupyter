@@ -159,7 +159,9 @@ FILE_PATTERNS          = *.c \
                          *.ucf \
                          *.qsf
 RECURSIVE              = YES
-EXCLUDE                = ../include/cgmres/thirdparty
+EXCLUDE                = ../include/cgmres/thirdparty \
+                         ../include/cgmres/simulator \ 
+                         ../include/cgmres/python 
 EXCLUDE_SYMLINKS       = NO
 EXCLUDE_PATTERNS       = 
 EXCLUDE_SYMBOLS        = 

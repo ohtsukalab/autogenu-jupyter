@@ -307,7 +307,7 @@ public:
   }
 
   ///
-  /// @brief Initializes the state vectors by simulating the system costate dynamics over the horizon.
+  /// @brief Initializes the costate vectors by simulating the system costate dynamics over the horizon.
   /// @param[in] t Initial time of the horizon. 
   /// @param[in] x Initial state of the horizon. Size must be MultipleShootingCGMRESSolver::nx.
   ///
