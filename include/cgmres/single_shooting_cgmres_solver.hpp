@@ -295,6 +295,7 @@ public:
     if (x.size() != nx) {
       throw std::invalid_argument("[SingleShootingCGMRESSolver::optError] x.size() must be " + std::to_string(nx));
     }
+    continuation_gmres_.synchronize_ocp(); 
     continuation_gmres_.eval_fonc(t, x, solution_);
     return optError();
   }

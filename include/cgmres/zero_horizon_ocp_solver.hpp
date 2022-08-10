@@ -193,6 +193,7 @@ public:
     if (x.size() != nx) {
       throw std::invalid_argument("[ZeroHorizonOCPSolver::optError] x.size() must be " + std::to_string(nx));
     }
+    newton_gmres_.synchronize_ocp(); 
     newton_gmres_.eval_fonc(t, x, solution_);
     return optError();
   }
