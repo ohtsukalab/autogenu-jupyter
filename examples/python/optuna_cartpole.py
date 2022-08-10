@@ -2,25 +2,20 @@ import cgmres.cartpole
 import cgmres.common
 import numpy as np
 import optuna
+from collections import namedtuple
 
 
 SIMULATION_TIME = 10.0
 SAMPLING_TIME = 0.001
 
-
-class TrainParams:
-    def __init__(self):
-        self.q = np.array([2.5, 10., 0.01, 0.01])
-        self.q_terminal = np.array([2.5, 10., 0.01, 0.01])
-        self.r = np.array([1.0])
-        self.Tf = 2.0
+TrainParams = namedtuple('TrainParams', ['q', 'r', 'q_terminal', 'Tf'])
 
 
 def run_simulation(params, verbose=False):
     # set train params to OCP
     ocp = cgmres.cartpole.OCP()
     ocp.q = params.q
-    ocp.r = params.r 
+    ocp.r = params.r
     ocp.q_terminal = params.q_terminal
 
     # set train params to MPC 
@@ -89,18 +84,17 @@ def eval_simulation(xs, us, opt_error):
 
 
 def objective(trial):
-    params = TrainParams()
-    params.q = np.array([trial.suggest_loguniform('q_0', 1.0e-04, 1.0e04), 
-                         trial.suggest_loguniform('q_1', 1.0e-04, 1.0e04), 
-                         trial.suggest_loguniform('q_2', 1.0e-04, 1.0e04), 
-                         trial.suggest_loguniform('q_3', 1.0e-04, 1.0e04)])
-    params.r = np.array([trial.suggest_loguniform('r', 1.0e-04, 1.0e04)])
-    params.q_terminal = np.array([trial.suggest_loguniform('q_terminal_0', 1.0e-04, 1.0e04), 
-                                  trial.suggest_loguniform('q_terminal_1', 1.0e-04, 1.0e04), 
-                                  trial.suggest_loguniform('q_terminal_2', 1.0e-04, 1.0e04), 
-                                  trial.suggest_loguniform('q_terminal_3', 1.0e-04, 1.0e04)])
-    params.T = trial.suggest_uniform('Tf', 0.1, 5.0)
-
+    q = np.array([trial.suggest_loguniform('q_0', 1.0e-04, 1.0e04), 
+                    trial.suggest_loguniform('q_1', 1.0e-04, 1.0e04), 
+                    trial.suggest_loguniform('q_2', 1.0e-04, 1.0e04), 
+                    trial.suggest_loguniform('q_3', 1.0e-04, 1.0e04)])
+    r = np.array([trial.suggest_loguniform('r', 1.0e-04, 1.0e04)])
+    q_terminal = np.array([trial.suggest_loguniform('q_terminal_0', 1.0e-04, 1.0e04), 
+                            trial.suggest_loguniform('q_terminal_1', 1.0e-04, 1.0e04), 
+                            trial.suggest_loguniform('q_terminal_2', 1.0e-04, 1.0e04), 
+                            trial.suggest_loguniform('q_terminal_3', 1.0e-04, 1.0e04)])
+    Tf = trial.suggest_uniform('Tf', 0.1, 5.0)
+    params = TrainParams(q, r, q_terminal, Tf)
     xs, us, opt_error = run_simulation(params)
     score = eval_simulation(xs, us, opt_error)
     return score
@@ -116,15 +110,15 @@ study.optimize(objective, n_trials=200)
 # simulation with the best params
 print('The best params: ', study.best_params)
 print('Simulation with the best params')
-params = TrainParams()
-params.q = np.array([study.best_params['q_0'], 
-                     study.best_params['q_1'], 
-                     study.best_params['q_2'], 
-                     study.best_params['q_3']])
-params.r = np.array([study.best_params['r']])
-params.q_terminal = np.array([study.best_params['q_terminal_0'], 
-                              study.best_params['q_terminal_1'], 
-                              study.best_params['q_terminal_2'], 
-                              study.best_params['q_terminal_3']])
-params.T = study.best_params['Tf']
+q = np.array([study.best_params['q_0'], 
+              study.best_params['q_1'], 
+              study.best_params['q_2'], 
+              study.best_params['q_3']])
+r = np.array([study.best_params['r']])
+q_terminal = np.array([study.best_params['q_terminal_0'], 
+                       study.best_params['q_terminal_1'], 
+                       study.best_params['q_terminal_2'], 
+                       study.best_params['q_terminal_3']])
+Tf = study.best_params['Tf']
+params = TrainParams(q, r, q_terminal, Tf)
 run_simulation(params, verbose=True)
