@@ -97,7 +97,7 @@ public:
   }
 
   struct ExternalReference {
-    double position_ref = 0.0;
+    double cart_position = 0.0;
   };
   std::shared_ptr<ExternalReference> external_refernce = nullptr;
 
@@ -106,7 +106,7 @@ public:
   ///
   void synchronize() {
     if (external_refernce != nullptr) {
-      x_ref[0] = external_refernce->position_ref;
+      x_ref[0] = external_refernce->cart_position;
     }
   }
 

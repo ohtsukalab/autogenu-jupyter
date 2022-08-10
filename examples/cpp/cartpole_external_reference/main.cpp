@@ -12,7 +12,7 @@ int main() {
 
   // set the external reference ptr
   auto external_refernce = std::make_shared<cgmres::OCP_cartpoleExternalReference::ExternalReference>();
-  external_refernce->position_ref = 0.0;
+  external_refernce->cart_position = 0.0;
   ocp.external_refernce = external_refernce;
 
   // Define the horizon.
@@ -70,7 +70,7 @@ int main() {
 
     // switch the reference
     if (t > 5.0) {
-      external_refernce->position_ref = 1.0;
+      external_refernce->cart_position = 1.0;
     }
   }
 
