@@ -1,7 +1,8 @@
 #include "ocp.hpp"
+
 #include "cgmres/zero_horizon_ocp_solver.hpp"
 #include "cgmres/multiple_shooting_cgmres_solver.hpp"
-#include "cgmres/simulator/simulator.hpp"
+
 #include <string>
 
 int main() {
@@ -43,12 +44,24 @@ int main() {
   mpc.init_x_lmd(t0, x0);
   mpc.init_dummy_mu();
 
-
   // Perform a numerical simulation.
-  const double tf = 10;
+  const double tsim = 10.0;
   const double dt = settings.dt;
-  const std::string save_dir_name("../simulation_result");
-  cgmres::simulation(ocp, mpc, x0, t0, tf, dt, save_dir_name, "cartpole");
+  const int sim_steps = std::floor(tsim / dt);
+
+  double t = t0;
+  cgmres::VectorX x = x0;
+  cgmres::VectorX dx = cgmres::VectorX::Zero(x0.size());
+  for (int i=0; i<sim_steps; ++i) {
+    const auto& u = mpc.uopt()[0]; // const reference to the initial optimal control input 
+    dx.setZero();
+    ocp.eval_f(t, x.data(), u.data(), dx.data()); // eval the state equation
+    const cgmres::VectorX x1 = x + dt * dx;
+    mpc.update(t, x);
+    x = x1;
+    t = t + dt;
+    std::cout << "t: " << t << ", x: " << x.transpose() << std::endl;
+  }
 
   std::cout << "\n======================= MPC used in this simulation: =======================" << std::endl;
   std::cout << mpc << std::endl;
