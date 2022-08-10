@@ -8,10 +8,10 @@
 
 int main() {
   // Define the optimal control problem.
-  cgmres::OCP_cartpole ocp;
+  cgmres::OCP_cartpoleExternalReference ocp;
 
   // set the external reference ptr
-  auto external_refernce = std::make_shared<cgmres::OCP_cartpole::ExternalReference>();
+  auto external_refernce = std::make_shared<cgmres::OCP_cartpoleExternalReference::ExternalReference>();
   external_refernce->position_ref = 0.0;
   ocp.external_refernce = external_refernce;
 
@@ -36,7 +36,7 @@ int main() {
 
   // Initialize the solution of the C/GMRES method.
   constexpr int kmax_init = 1;
-  cgmres::ZeroHorizonOCPSolver<cgmres::OCP_cartpole, kmax_init> initializer(ocp, settings);
+  cgmres::ZeroHorizonOCPSolver<cgmres::OCP_cartpoleExternalReference, kmax_init> initializer(ocp, settings);
   cgmres::Vector<1> uc0;
   uc0 << 0.01;
   initializer.set_uc(uc0);
@@ -45,7 +45,7 @@ int main() {
   // Define the C/GMRES solver.
   constexpr int N = 100;
   constexpr int kmax = 5;
-  cgmres::MultipleShootingCGMRESSolver<cgmres::OCP_cartpole, N, kmax> mpc(ocp, horizon, settings);
+  cgmres::MultipleShootingCGMRESSolver<cgmres::OCP_cartpoleExternalReference, N, kmax> mpc(ocp, horizon, settings);
   mpc.set_uc(initializer.ucopt());
   mpc.init_x_lmd(t0, x0);
   mpc.init_dummy_mu();

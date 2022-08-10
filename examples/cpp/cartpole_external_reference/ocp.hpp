@@ -1,5 +1,5 @@
-#ifndef CGMRES__OCP_CARTPOLE_HPP_ 
-#define CGMRES__OCP_CARTPOLE_HPP_ 
+#ifndef CGMRES__OCP_CARTPOLE_EXTERNAL_REFERENCE_HPP_ 
+#define CGMRES__OCP_CARTPOLE_EXTERNAL_REFERENCE_HPP_
  
 #define _USE_MATH_DEFINES
 
@@ -13,10 +13,10 @@
 namespace cgmres {
 
 /// 
-/// @class OCP_cartpole
-/// @brief Definition of the optimal control problem (OCP) of cartpole.
+/// @class OCP_cartpoleExternalReference
+/// @brief Definition of the optimal control problem (OCP) of cartpoleExternalReference.
 /// 
-class OCP_cartpole { 
+class OCP_cartpoleExternalReference { 
 public:
  
   ///
@@ -65,7 +65,7 @@ public:
   std::array<double, nub> dummy_weight = {0.1};
 
   void disp(std::ostream& os) const {
-    os << "OCP_cartpole:" << std::endl;
+    os << "OCP_cartpoleExternalReference:" << std::endl;
     os << "  nx:  " << nx << std::endl;
     os << "  nu:  " << nu << std::endl;
     os << "  nc:  " << nc << std::endl;
@@ -91,7 +91,7 @@ public:
     os << "  dummy_weight: " << Map<const VectorX>(dummy_weight.data(), dummy_weight.size()).transpose().format(fmt) << std::endl;
   }
 
-  friend std::ostream& operator<<(std::ostream& os, const OCP_cartpole& ocp) { 
+  friend std::ostream& operator<<(std::ostream& os, const OCP_cartpoleExternalReference& ocp) { 
     ocp.disp(os);
     return os;
   }
