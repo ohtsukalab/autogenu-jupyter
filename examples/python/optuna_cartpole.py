@@ -64,6 +64,8 @@ def run_simulation(params, verbose=False):
         t = t + dt
         if verbose:
             print('t: ', t, ', x: ', x)
+    if verbose:
+        print(mpc)
     return xs, us, opt_error
 
 
