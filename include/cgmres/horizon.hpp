@@ -90,4 +90,4 @@ private:
 
 } // namespace cgmres
 
-#endif // CGMRES__HORIZON_H
+#endif // CGMRES__HORIZON_HPP_

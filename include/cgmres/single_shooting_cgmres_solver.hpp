@@ -7,6 +7,7 @@
 
 #include "cgmres/types.hpp"
 #include "cgmres/solver_settings.hpp"
+#include "cgmres/timer.hpp"
 
 #include "cgmres/detail/matrixfree_gmres.hpp"
 #include "cgmres/detail/single_shooting_nlp.hpp"
@@ -313,11 +314,16 @@ public:
     if (settings_.verbose_level >= 1) {
       std::cout << "\n======================= update solution with C/GMRES =======================" << std::endl;
     }
+
+    if (settings_.profile_solver) timer_.tick();
     continuation_gmres_.synchronize_ocp(); 
     const auto gmres_iter 
         = gmres_.template solve<const Scalar, const VectorType&, const Vector<dim>&>(
               continuation_gmres_, t, x.derived(), solution_, solution_update_);
     const auto opt_error = continuation_gmres_.optError();
+    solution_.noalias() += settings_.dt * solution_update_;
+    retriveSolution();
+    if (settings_.profile_solver) timer_.tock();
 
     // verbose
     if (settings_.verbose_level >= 1) {
@@ -326,10 +332,14 @@ public:
     if (settings_.verbose_level >= 2) {
       std::cout << "number of GMRES iter: " << gmres_iter << " (kmax: " << kmax << ")" << std::endl;
     }
+  }
 
-    solution_.noalias() += settings_.dt * solution_update_;
-
-    retriveSolution();
+  ///
+  /// @brief Get timing result as TimingProfile.
+  /// @return Timing profile.
+  ///
+  TimingProfile getProfile() const {
+    return timer_.getProfile();
   }
 
   void disp(std::ostream& os) const {
@@ -338,7 +348,8 @@ public:
     os << "  kmax: " << kmax << std::endl;
     os << continuation_gmres_.get_nlp().ocp() << std::endl;
     os << continuation_gmres_.get_nlp().horizon() << std::endl;
-    os << settings_ << std::flush;
+    os << settings_ << std::endl;
+    os << timer_.getProfile() << std::endl;
   }
 
   friend std::ostream& operator<<(std::ostream& os, const SingleShootingCGMRESSolver& solver) {
@@ -352,6 +363,7 @@ private:
   ContinuationGMRES_ continuation_gmres_;
   MatrixFreeGMRES_ gmres_;
   SolverSettings settings_;
+  Timer timer_;
 
   std::array<Vector<nu>, N> uopt_;
   std::array<Vector<nuc>, N> ucopt_;

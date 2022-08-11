@@ -62,6 +62,11 @@ struct SolverSettings {
   ///
   size_t verbose_level = 0;
 
+  ///
+  /// @brief If true, a solver profile is taken.
+  ///
+  bool profile_solver = true;
+
   void disp(std::ostream& os) const {
     os << "Soler settings: " << std::endl; 
     os << "  max iter:                  " << max_iter << std::endl;
@@ -71,6 +76,7 @@ struct SolverSettings {
     os << "  zeta:                      " << zeta << std::endl;
     os << "  min dummy:                 " << min_dummy << std::endl;
     os << "  verbose level:             " << verbose_level << std::endl;
+    os << "  profile solver:            " << std::boolalpha << profile_solver << std::endl;
   }
 
   friend std::ostream& operator<<(std::ostream& os, const SolverSettings& settings) {

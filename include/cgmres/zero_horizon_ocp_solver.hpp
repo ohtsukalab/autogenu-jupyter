@@ -7,6 +7,7 @@
 
 #include "cgmres/types.hpp"
 #include "cgmres/solver_settings.hpp"
+#include "cgmres/timer.hpp"
 
 #include "cgmres/detail/matrixfree_gmres.hpp"
 #include "cgmres/detail/zero_horizon_nlp.hpp"
@@ -214,10 +215,13 @@ public:
 
     newton_gmres_.synchronize_ocp(); 
     for (size_t iter=0; iter<settings_.max_iter; ++iter) {
+      if (settings_.profile_solver) timer_.tick();
       const auto gmres_iter 
           = gmres_.template solve<const Scalar, const VectorType&, const Vector<dim>&>(
                 newton_gmres_, t, x.derived(), solution_, solution_update_);
       const auto opt_error = newton_gmres_.optError();
+      solution_.noalias() += solution_update_;
+      if (settings_.profile_solver) timer_.tock();
 
       // verbose
       if (settings_.verbose_level >= 1) {
@@ -229,23 +233,31 @@ public:
                   << " (kmax: " << kmax << ")" << std::endl;
       }
 
-      solution_.noalias() += solution_update_;
+      // check convergence
       if (opt_error < settings_.opterr_tol) {
         if (settings_.verbose_level >= 1) {
           std::cout << "converged!" << std::endl;
         }
         break;
       }
-
     }
     retriveSolution();
+  }
+
+  ///
+  /// @brief Get timing result as TimingProfile.
+  /// @return Timing profile.
+  ///
+  TimingProfile getProfile() const {
+    return timer_.getProfile();
   }
 
   void disp(std::ostream& os) const {
     os << "Zero horizon OCP solver: " << std::endl;
     os << "  kmax: " << kmax << std::endl;
     os << newton_gmres_.get_nlp().ocp() << std::endl;
-    os << settings_ << std::flush;
+    os << settings_ << std::endl;
+    os << timer_.getProfile() << std::flush;
   }
 
   friend std::ostream& operator<<(std::ostream& os, const ZeroHorizonOCPSolver& solver) {
@@ -259,6 +271,7 @@ private:
   NewtonGMRES_ newton_gmres_;
   MatrixFreeGMRES_ gmres_;
   SolverSettings settings_;
+  Timer timer_;
 
   Vector<nu> uopt_;
   Vector<nuc> ucopt_;
