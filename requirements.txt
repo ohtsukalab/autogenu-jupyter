@@ -1,5 +1,7 @@
 sympy
 jupyter
+notebook
+jupyterlab
 collection
 numpy
 matplotlib
