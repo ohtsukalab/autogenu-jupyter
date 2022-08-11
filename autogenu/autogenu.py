@@ -291,8 +291,8 @@ class AutoGenU(object):
                 max_iteration: The maximum number of the Newton iteration. 
         """
         assert len(solution_initial_guess) == self.__nu + self.__nc + self.__nh
-        assert tolerance > 0
-        assert max_iterations > 0
+        assert tolerance >= 0
+        assert max_iterations >= 0
         self.__initialization_params = InitializationParams(solution_initial_guess, tolerance, max_iterations)
 
     def set_simulation_params(

@@ -20,7 +20,7 @@ int main() {
   settings.zeta = 1000;
   settings.finite_difference_epsilon = 1e-08;
   // For initialization.
-  settings.max_iter = 50;
+  settings.max_iter = 0;
   settings.opterr_tol = 1e-06;
   settings.verbose_level = 1;
 
@@ -33,7 +33,7 @@ int main() {
   constexpr int kmax_init = 6;
   cgmres::ZeroHorizonOCPSolver<cgmres::OCP_hexacopter, kmax_init> initializer(ocp, settings);
   cgmres::Vector<6> uc0;
-  uc0 << 1, 1, 1, 1, 1, 1;
+  uc0 << 2.353596, 2.353596, 2.353596, 2.353596, 2.353596, 2.353596;
   initializer.set_uc(uc0);
   initializer.solve(t0, x0);
 
