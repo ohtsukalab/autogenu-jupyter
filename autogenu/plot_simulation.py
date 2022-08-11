@@ -2,10 +2,10 @@ import numpy as np
 import matplotlib.pylab as plt
 import seaborn as sns
 
-from autogenu import simulation_conditions as simcon
+from .simulation_conditions import SimulationConditions
 
 
-class SimulationPlottor(object):
+class PlotSimulation(object):
     """ Plots the simulation results.
 
         Attributes: 
@@ -30,12 +30,12 @@ class SimulationPlottor(object):
         self.__opterr_data = np.genfromtxt(
             self.__file_header+'_opterr'+'.log'
         )
-        self.__sim_conditions = simcon.SimulationConditions(
+        self.__sim_conditions = SimulationConditions(
             self.__file_header
         )
         self.__time_sequence = np.linspace(
             0, 
-            self.__sim_conditions.simulation_time(), 
+            self.__sim_conditions.simulation_time, 
             self.__x_data.shape[0]
         )
         # Replace NaN with 0.
@@ -132,7 +132,7 @@ class SimulationPlottor(object):
                 plt.plot(self.__time_sequence, self.__x_data[:, i])
                 plt.xlabel(r'${\rm Time}$ $[s]$')
                 plt.ylabel(r'$x_{}$'.format(i+1))
-                plt.xlim(0, self.__sim_conditions.simulation_time())
+                plt.xlim(0, self.__sim_conditions.simulation_time)
         else:
             plt.subplot(
                 self.__num_plot_y, 
@@ -142,7 +142,7 @@ class SimulationPlottor(object):
             plt.plot(self.__time_sequence, self.__x_data)
             plt.xlabel(r'${\rm Time}$ $[s]$')
             plt.ylabel(r'$x$')
-            plt.xlim(0, self.__sim_conditions.simulation_time())
+            plt.xlim(0, self.__sim_conditions.simulation_time)
         if self.__dim_u > 1:
             for i in range(self.__dim_u):
                 plt.subplot(
@@ -153,7 +153,7 @@ class SimulationPlottor(object):
                 plt.plot(self.__time_sequence, self.__u_data[:, i])
                 plt.xlabel(r'${\rm Time}$ $[s]$')
                 plt.ylabel(r'$u_{}$'.format(i+1))
-                plt.xlim(0, self.__sim_conditions.simulation_time())
+                plt.xlim(0, self.__sim_conditions.simulation_time)
         else:
             plt.subplot(
                 self.__num_plot_y, 
@@ -163,7 +163,7 @@ class SimulationPlottor(object):
             plt.plot(self.__time_sequence, self.__u_data)
             plt.xlabel(r'${\rm Time}$ $[s]$')
             plt.ylabel(r'$u$')
-            plt.xlim(0, self.__sim_conditions.simulation_time())
+            plt.xlim(0, self.__sim_conditions.simulation_time)
         plt.subplot(
             self.__num_plot_y, 
             self.__num_plot_x, 
@@ -172,4 +172,4 @@ class SimulationPlottor(object):
         plt.plot(self.__time_sequence, np.log10(self.__opterr_data))
         plt.xlabel(r'${\rm Time}$ $[s]$')
         plt.ylabel(r'$\log_{10} \| {\rm Opt \; Error} \|$')
-        plt.xlim(0, self.__sim_conditions.simulation_time())
+        plt.xlim(0, self.__sim_conditions.simulation_time)

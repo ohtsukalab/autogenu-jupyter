@@ -4,7 +4,7 @@ from enum import Enum, auto
 from collections import namedtuple
 import sympy
 
-from autogenu import symfunc 
+from . import symutils
 
 
 class ScalarVariable:
@@ -199,12 +199,12 @@ class AutoGenU(object):
         hamiltonian += sum(u[self.__nu+i] * C[i] for i in range(self.__nc))
         nuc = self.__nu + self.__nc
         hamiltonian += sum(u[nuc+i] * h[i] for i in range(self.__nh))
-        self.__hx = symfunc.diff_scalar_func(hamiltonian, x)
-        self.__hu = symfunc.diff_scalar_func(hamiltonian, u)
+        self.__hx = symutils.diff_scalar_func(hamiltonian, x)
+        self.__hu = symutils.diff_scalar_func(hamiltonian, u)
         fb_eps = sympy.symbols('fb_eps[0:%d]' %(self.__nh))
         for i in range(self.__nh):
             self.__hu[nuc+i] = sympy.sqrt(u[nuc+i]**2 + h[i]**2 + fb_eps[i]) - (u[nuc+i] - h[i])
-        self.__phix = symfunc.diff_scalar_func(phi, x)
+        self.__phix = symutils.diff_scalar_func(phi, x)
 
     def add_control_input_bounds(
         self, uindex, umin, umax, dummy_weight
@@ -330,10 +330,10 @@ class AutoGenU(object):
             assert len(self.__FB_epsilon) == self.__nh
         self.__make_ocp_dir()
         if simplification:
-            symfunc.simplify(self.__f)
-            symfunc.simplify(self.__hx)
-            symfunc.simplify(self.__hu)
-            symfunc.simplify(self.__phix)
+            symutils.simplify(self.__f)
+            symutils.simplify(self.__hx)
+            symutils.simplify(self.__hu)
+            symutils.simplify(self.__phix)
         f_model_h = open('generated/'+str(self.__ocp_name)+'/ocp.hpp', 'w')
         f_model_h.write(
             '#ifndef CGMRES__OCP_'+str(self.__ocp_name).upper()+'_HPP_ \n'
@@ -517,7 +517,7 @@ public:
               double* dx) const {
 """ 
         ])
-        self.__write_function(f_model_h, self.__f, 'dx', common_subexpression_elimination)
+        symutils.write_symfunc(f_model_h, self.__f, 'dx', common_subexpression_elimination)
         f_model_h.writelines([
 """ 
   }
@@ -532,7 +532,7 @@ public:
   void eval_phix(const double t, const double* x, double* phix) const {
 """ 
         ])
-        self.__write_function(f_model_h, self.__phix, 'phix', common_subexpression_elimination)
+        symutils.write_symfunc(f_model_h, self.__phix, 'phix', common_subexpression_elimination)
         f_model_h.writelines([
 """ 
   }
@@ -550,7 +550,7 @@ public:
                const double* lmd, double* hx) const {
 """ 
         ])
-        self.__write_function(f_model_h, self.__hx, 'hx', common_subexpression_elimination)
+        symutils.write_symfunc(f_model_h, self.__hx, 'hx', common_subexpression_elimination)
         f_model_h.writelines([
 """ 
   }
@@ -568,7 +568,7 @@ public:
                const double* lmd, double* hu) const {
 """ 
         ])
-        self.__write_function(f_model_h, self.__hu, 'hu', common_subexpression_elimination)
+        symutils.write_symfunc(f_model_h, self.__hu, 'hu', common_subexpression_elimination)
         f_model_h.writelines([
 """ 
   }
@@ -1453,40 +1453,6 @@ install(
             )
             for line in iter(proc.stdout.readline, b''):
                 print(line.rstrip().decode("utf8"))
-
-
-    def __write_function(
-            self, writable_file, function, return_value_name, common_subexpression_elimination
-        ):
-        """ Write input symbolic function onto writable_file. The function's 
-            return value name must be set. common_subexpression_elimination is optional.
-
-            Args: 
-                writable_file: A writable file, i.e., a file streaming that is 
-                    already opened as writing mode.
-                function: A symbolic function wrote onto the writable_file.
-                return_value_name: The name of the return value.
-                common_subexpression_elimination: If true, common subexpression elimination is used. If 
-                    False, it is not used.
-        """
-        if common_subexpression_elimination:
-            func_cse = sympy.cse(function)
-            for i in range(len(func_cse[0])):
-                cse_exp, cse_rhs = func_cse[0][i]
-                writable_file.write(
-                    '    const double '+sympy.ccode(cse_exp)
-                    +' = '+sympy.ccode(cse_rhs)+';\n'
-                )
-            for i in range(len(func_cse[1])):
-                writable_file.write(
-                    '    '+return_value_name+'[%d] = '%i
-                    +sympy.ccode(func_cse[1][i])+';\n'
-                )
-        else:
-            writable_file.writelines(
-                ['    '+return_value_name+'[%d] = '%i
-                +sympy.ccode(function[i])+';\n' for i in range(len(function))]
-            )
 
     def __make_ocp_dir(self):
         """ Makes a directory where the C source files of OCP formulations are 
