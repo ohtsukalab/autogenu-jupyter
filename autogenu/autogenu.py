@@ -997,6 +997,32 @@ DEFINE_PYBIND11_MODULE_SOLVER_SETTINGS()
 """ 
         ])
         f_pybind11.close()
+        f_pybind11 = open('generated/'+str(self.__ocp_name)+'/python/common/timer.cpp', 'w')
+        f_pybind11.writelines([
+"""
+#include <pybind11/pybind11.h>
+#include <pybind11/stl.h>
+#include <pybind11/eigen.h>
+#include <pybind11/numpy.h>
+
+#include "cgmres/timer.hpp"
+#include "cgmres/python/timer.hpp"
+
+#include <iostream>
+#include <stdexcept>
+
+namespace cgmres {
+namespace python {
+
+namespace py = pybind11;
+
+DEFINE_PYBIND11_MODULE_TIMER()
+
+} // namespace python
+} // namespace cgmres
+""" 
+        ])
+        f_pybind11.close()
         f_pybind11 = open('generated/'+str(self.__ocp_name)+'/python/'+str(self.__ocp_name)+'/__init__.py', 'w')
         f_pybind11.writelines([
 """
@@ -1012,6 +1038,7 @@ from .multiple_shooting_cgmres_solver import *
 """
 from .horizon import *
 from .solver_settings import *
+from .timer import *
 """ 
         ])
         f_pybind11.close()
@@ -1142,6 +1169,7 @@ endmacro()
 add_subdirectory(${CGMRES_INCLUDE_DIR}/cgmres/thirdparty/pybind11 ${CMAKE_CURRENT_BINARY_DIR}/thirdparty/pybind11)
 pybind11_add_cgmres_module(solver_settings)
 pybind11_add_cgmres_module(horizon)
+pybind11_add_cgmres_module(timer)
 
 set(CGMRES_PYTHON_VERSION ${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR})
 """

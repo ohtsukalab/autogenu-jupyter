@@ -33,6 +33,7 @@ PYBIND11_MODULE(zero_horizon_ocp_solver, m) { \
     .def("solve", [](ZeroHorizonOCPSolver_& self, const Scalar t, const VectorX& x) { \
         self.solve(t, x); \
     }, py::arg("t"), py::arg("x")) \
+    .def("get_profile", &ZeroHorizonOCPSolver_::getProfile) \
     .def("__str__", [](const ZeroHorizonOCPSolver_& self) { \
         std::stringstream ss; \
         ss << self; \ 

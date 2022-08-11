@@ -62,6 +62,7 @@ PYBIND11_MODULE(multiple_shooting_cgmres_solver, m) { \
         self.init_x_lmd(t, x); \
     }, py::arg("t"), py::arg("x")) \
     .def("init_dummy_mu", &MultipleShootingCGMRESSolver_::init_dummy_mu) \
+    .def("get_profile", &MultipleShootingCGMRESSolver_::getProfile) \
     .def("__str__", [](const MultipleShootingCGMRESSolver_& self) { \
         std::stringstream ss; \
         ss << self; \ 
