@@ -1,19 +1,47 @@
+from multiprocessing import dummy
 import subprocess
 import platform
 from enum import Enum, auto
-from collections import namedtuple 
+from collections import namedtuple
 import sympy
 
 from autogenu import symfunc 
 
+
+class ScalarVariable:
+    def __init__(self, symbol, name, value=0.0):
+        self.symbol = symbol
+        self.name = name 
+        self.value = value
+
+class ArrayVariable:
+    def __init__(self, symbol, name, size, values=[]):
+        assert size > 0
+        self.symbol = symbol
+        self.name = name 
+        self.size = size
+        self.values = values
+
+class ControlInputBound:
+    def __init__(self, uindex, umin, umax, dummy_weight):
+        assert uindex >= 0
+        assert umin < umax
+        assert dummy_weight >= 0.0
+        self.uindex = uindex 
+        self.umin = umin
+        self.umax = umax
+        self.dummy_weight = dummy_weight
 
 class NLPType(Enum):
     SingleShooting = auto()
     MultipleShooting = auto()
 
 HorizonParams = namedtuple('HorizonParams', ['Tf', 'alpha'])
+
 SolverParams = namedtuple('SolverParams', ['dt', 'N', 'finite_difference_epsilon', 'zeta', 'kmax'])
+
 InitializationParams = namedtuple('InitializationParams', ['solution_initial_guess', 'tolerance', 'max_iteraions'])
+
 SimulationParams = namedtuple('SimulationParams', ['initial_time', 'initial_state', 'simulation_length'])
 
 
@@ -69,9 +97,9 @@ class AutoGenU(object):
             Args:
                 var_name: Name of the scalar variable.
         """
-        scalar_var = sympy.Symbol(var_name)
-        self.__scalar_vars.append([scalar_var, var_name, 0])
-        return scalar_var
+        var_symbol = sympy.Symbol(var_name)
+        self.__scalar_vars.append(ScalarVariable(var_symbol, var_name))
+        return var_symbol
 
     def define_scalar_vars(self, *var_name_list):
         """ Returns symbolic variables whose names are given by 
@@ -80,13 +108,12 @@ class AutoGenU(object):
             Args:
                 var_name_list: Names of the scalar variables.
         """
-        scalar_vars = []
+        var_symbols = []
         for var_name in var_name_list:
             assert isinstance(var_name, str), 'The input must be list of strings!'
-            scalar_var = sympy.Symbol(var_name)
-            self.__scalar_vars.append([scalar_var, var_name, 0])
-            scalar_vars.append(scalar_var)
-        return scalar_vars
+            var_symbol = self.define_scalar_var(var_name)
+            var_symbols.append(var_symbol)
+        return var_symbols
 
     def define_array_var(self, var_name: str, size: int):
         """ Returns symbolic vector variable whose names is var_name. 
@@ -97,7 +124,7 @@ class AutoGenU(object):
         """
         assert size > 0, 'The second argument must be positive integer!'
         array_var = sympy.symbols(var_name+'[0:%d]' %(size))
-        self.__array_vars.append([array_var, var_name, []])
+        self.__array_vars.append(ArrayVariable(array_var, var_name, size, []))
         return array_var
 
     def set_FB_epsilon(self, FB_epsilon):
@@ -119,9 +146,9 @@ class AutoGenU(object):
                 name: Name of the scalar variable.
                 value: Value of the scalar variable.
         """
-        for defined_scalar_var in self.__scalar_vars:
-            if name[0] == defined_scalar_var[1]:
-                defined_scalar_var[2] = value
+        for scalar_var in self.__scalar_vars:
+            if name == scalar_var.name:
+                scalar_var.value = value
 
     def set_scalar_vars(self, *name_and_value_list):
         """ Set the values of the scalar variables you defied. 
@@ -131,10 +158,10 @@ class AutoGenU(object):
                 the scalar variable and value of the scalar variable.
         """
         for name_and_value in name_and_value_list:
-            for defined_scalar_var in self.__scalar_vars:
-                if name_and_value[0] == defined_scalar_var[1]:
-                    defined_scalar_var[2] = name_and_value[1]
-    
+            name = name_and_value[0]
+            value = name_and_value[1]
+            self.set_scalar_var(name, value)
+
     def set_array_var(self, name: str, values):
         """ Set the value of the array variable you defied. 
 
@@ -143,10 +170,10 @@ class AutoGenU(object):
                 values: Values of the arry variable. This size is used as  
                         the size of the array variable.
         """
-        for defined_array_var in self.__array_vars:
-            if name == defined_array_var[1]:
-                if len(defined_array_var[0]) == len(values):
-                    defined_array_var[2] = values
+        for array_var in self.__array_vars:
+            if name == array_var.name:
+                assert array_var.size == len(values)
+                array_var.values = values
 
     def set_functions(self, f, C, h, L, phi):
         """ Sets functions that defines the optimal control problem.
@@ -198,14 +225,13 @@ class AutoGenU(object):
         assert dummy_weight >= 0 
         find_same_index = False
         for ub in self.__ubounds:
-            if ub[0] == uindex:
+            if ub.uindex == uindex:
                 find_same_index = True
-                ub[1] = umin
-                ub[2] = umax
-                ub[3] = dummy_weight
+                ub.umin = umin
+                ub.umax = umax
+                ub.dummy_weight = dummy_weight
         if not find_same_index:
-            ub = [uindex, umin, umax, dummy_weight]
-            self.__ubounds.append(ub)
+            self.__ubounds.append(ControlInputBound(uindex, umin, umax, dummy_weight))
 
     def set_nlp_type(self, nlp_type: NLPType):
         """ Sets solver types of the C/GMRES methods. 
@@ -405,35 +431,35 @@ public:
             +str(len(self.__ubounds))+';\n\n'
         )
         f_model_h.writelines([
-            '  double '+scalar_var[1]+' = '
-            +str(scalar_var[2])+';\n' for scalar_var in self.__scalar_vars
+            '  double '+scalar_var.name+' = '
+            +str(scalar_var.value)+';\n' for scalar_var in self.__scalar_vars
         ])
         f_model_h.write('\n')
         for array_var in self.__array_vars:
             f_model_h.write(
-                '  std::array<double, '+str(len(array_var[0]))+'> '+array_var[1]+' = {'
+                '  std::array<double, '+str(array_var.size)+'> '+array_var.name+' = {'
             )
-            for i in range(len(array_var[0])-1):
-                f_model_h.write(str(array_var[2][i])+', ')
-            f_model_h.write(str(array_var[2][len(array_var[0])-1])+'};\n')
+            for i in range(array_var.size-1):
+                f_model_h.write(str(array_var.values[i])+', ')
+            f_model_h.write(str(array_var.values[array_var.size-1])+'};\n')
         if len(self.__ubounds) > 0:
             nub = len(self.__ubounds)
             f_model_h.write('\n  static constexpr std::array<int, nub> ubound_indices = {')
             for i in range(nub-1):
-                f_model_h.write(str(self.__ubounds[i][0])+', ')
-            f_model_h.write(str(self.__ubounds[nub-1][0])+'};\n')
+                f_model_h.write(str(self.__ubounds[i].uindex)+', ')
+            f_model_h.write(str(self.__ubounds[nub-1].uindex)+'};\n')
             f_model_h.write('  std::array<double, nub> umin = {')
             for i in range(nub-1):
-                f_model_h.write(str(self.__ubounds[i][1])+', ')
-            f_model_h.write(str(self.__ubounds[nub-1][1])+'};\n')
+                f_model_h.write(str(self.__ubounds[i].umin)+', ')
+            f_model_h.write(str(self.__ubounds[nub-1].umin)+'};\n')
             f_model_h.write('  std::array<double, nub> umax = {')
             for i in range(nub-1):
-                f_model_h.write(str(self.__ubounds[i][2])+', ')
-            f_model_h.write(str(self.__ubounds[nub-1][2])+'};\n')
+                f_model_h.write(str(self.__ubounds[i].umax)+', ')
+            f_model_h.write(str(self.__ubounds[nub-1].umax)+'};\n')
             f_model_h.write('  std::array<double, nub> dummy_weight = {')
             for i in range(nub-1):
-                f_model_h.write(str(self.__ubounds[i][3])+', ')
-            f_model_h.write(str(self.__ubounds[nub-1][3])+'};\n')
+                f_model_h.write(str(self.__ubounds[i].dummy_weight)+', ')
+            f_model_h.write(str(self.__ubounds[nub-1].dummy_weight)+'};\n')
         if self.__nh > 0:
             f_model_h.write('\n  std::array<double, nh> fb_eps = {')
             for i in range(self.__nh-1):
@@ -449,13 +475,13 @@ public:
         f_model_h.write('    os << "  nub: " << nub << std::endl;\n')
         f_model_h.write('    os << std::endl;\n')
         f_model_h.writelines([
-            '    os << "  '+scalar_var[1]+': " << '+scalar_var[1]+' << std::endl;\n' for scalar_var in self.__scalar_vars
+            '    os << "  '+scalar_var.name+': " << '+scalar_var.name+' << std::endl;\n' for scalar_var in self.__scalar_vars
         ])
         f_model_h.write('    os << std::endl;\n')
         f_model_h.write('    Eigen::IOFormat fmt(4, 0, ", ", "", "[", "]");\n')
         f_model_h.write('    Eigen::IOFormat intfmt(1, 0, ", ", "", "[", "]");\n')
         f_model_h.writelines([
-            '    os << "  '+array_var[1]+': " << Map<const VectorX>('+array_var[1]+'.data(), '+array_var[1]+'.size()).transpose().format(fmt) << std::endl;\n' for array_var in self.__array_vars
+            '    os << "  '+array_var.name+': " << Map<const VectorX>('+array_var.name+'.data(), '+array_var.name+'.size()).transpose().format(fmt) << std::endl;\n' for array_var in self.__array_vars
         ])
         if len(self.__ubounds) > 0:
             nub = len(self.__ubounds)
@@ -756,11 +782,10 @@ PYBIND11_MODULE(ocp, m) {
 """ 
         ])
         for scalar_var in self.__scalar_vars:
-            name = scalar_var[1]
-            f_pybind11.write('    .def_readwrite("'+name+'", &OCP::'+name+')\n')
+            f_pybind11.write('    .def_readwrite("'+scalar_var.name+'", &OCP::'+scalar_var.name+')\n')
         for array_var in self.__array_vars:
-            name = array_var[1]
-            size = len(array_var[2])
+            name = array_var.name
+            size = array_var.size
             f_pybind11.write('    .def_property("'+name+'", \n')
             f_pybind11.write('      [](const OCP& self) { return Map<const VectorX>(self.'+name+'.data(), self.'+name+'.size()); },\n')
             f_pybind11.write('      [](OCP& self, const VectorX& v) { \n')
