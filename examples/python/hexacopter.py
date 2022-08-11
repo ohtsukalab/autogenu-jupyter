@@ -18,15 +18,16 @@ settings.verbose_level = 1 # print opt error
 t0 = 0.0
 x0 = np.zeros(ocp.nx)
 
-# Initialize solution using zero horizon OCP solution
-initializer = cgmres.hexacopter.ZeroHorizonOCPSolver(ocp, settings)
-uc0 = np.array([1.0, 1.0, 1.0, 1.0, 1.0, 1.0])
-initializer.set_uc(uc0)
-initializer.solve(t0, x0)
+# # Initialize solution using zero horizon OCP solution
+# initializer = cgmres.hexacopter.ZeroHorizonOCPSolver(ocp, settings)
+# uc0 = np.ones(6) * ocp.m * ocp.g / 6.0
+# initializer.set_uc(uc0)
+# initializer.solve(t0, x0)
 
 # Create MPC solver and set the initial solution 
 mpc = cgmres.hexacopter.MultipleShootingCGMRESSolver(ocp, horizon, settings)
-mpc.set_uc(initializer.ucopt)
+uc0 = np.ones(6) * ocp.m * ocp.g / 6.0
+mpc.set_uc(uc0)
 mpc.init_x_lmd(t0, x0)
 mpc.init_dummy_mu()
 
