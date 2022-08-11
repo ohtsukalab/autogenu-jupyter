@@ -14,8 +14,8 @@ The following C/GMRES based solvers are provided:
 ## Requirement
 - C++17 (MinGW or MSYS and PATH to either are required for Windows users)
 - CMake
-- Python 3.8 or later, Jupyter Lab or Jupyter Notebook, SymPy (to generate `ocp.hpp`, `main.cpp`, and `CMakeLists.txt` by `AutoGenU.ipynb`)
-- Python 3.8 or later, NumPy, Matplotlib, seaborn (to plot simulation data on `AutoGenU.ipynb`)
+- Python 3.8 or later, Jupyter Lab or Jupyter Notebook, SymPy, and collection (to generate `ocp.hpp`, `main.cpp`, and `CMakeLists.txt` by `AutoGenU.ipynb`)
+- Python 3.8 or later, NumPy, Matplotlib, and seaborn (to plot simulation data on `AutoGenU.ipynb`)
 - ffmpeg (to generate animations in `pendubot.ipynb`, `cartpole.ipynb`, `hexacopter.ipynb`, and `mobilerobot.ipynb`)
 
 ## Usage

@@ -1,7 +1,7 @@
 import subprocess
 import platform
 from enum import Enum, auto
-
+from collections import namedtuple 
 import sympy
 
 from autogenu import symfunc 
@@ -11,12 +11,18 @@ class NLPType(Enum):
     SingleShooting = auto()
     MultipleShooting = auto()
 
+HorizonParams = namedtuple('HorizonParams', ['Tf', 'alpha'])
+SolverParams = namedtuple('SolverParams', ['dt', 'N', 'finite_difference_epsilon', 'zeta', 'kmax'])
+InitializationParams = namedtuple('InitializationParams', ['solution_initial_guess', 'tolerance', 'max_iteraions'])
+SimulationParams = namedtuple('SimulationParams', ['initial_time', 'initial_state', 'simulation_length'])
+
+
 class AutoGenU(object):
     """ Automatic C++ code generator for the C/GMRES methods. 
 
         Args: 
             ocp_name: The name of the optimal control problem (OCP). 
-                The directory having this name is made and C++ source files 
+                The directory 'generated/ocp_name' is made and C++ source files 
                 are generated in the directory.
             nx: The dimension of the state of the system. 
             nu: The dimension of the control input of the system. 
@@ -25,19 +31,22 @@ class AutoGenU(object):
         assert nx > 0, 'nx must be positive integer!'
         assert nu > 0, 'nu must be positive integer!'
         self.__ocp_name = ocp_name
-        self.__nx = nx        
-        self.__nu = nu        
+        self.__nx = nx
+        self.__nu = nu
+        self.__nc = 0
+        self.__nh = 0
         self.__scalar_vars = []
         self.__array_vars = []
         self.__ubounds = []
-        self.__nlp_type = None
         self.__f = None
         self.__hx = None
         self.__hu = None
         self.__phix = None
-        self.__is_solver_paramters_set = False
-        self.__is_initialization_set = False
-        self.__is_simulation_set = False
+        self.__nlp_type = None
+        self.__horizon_params = None
+        self.__solver_params = None
+        self.__initialization_params = None
+        self.__simulation_params = None
 
     def define_t(self):
         """ Returns symbolic scalar variable 't'.
@@ -54,43 +63,41 @@ class AutoGenU(object):
         """
         return sympy.symbols('u[0:%d]' %(self.__nu))
 
-    def define_scalar_var(self, scalar_var_name: str):
-        """ Returns symbolic variable whose name is scalar_var_name. The name of 
-            the variable is memorized.
+    def define_scalar_var(self, var_name: str):
+        """ Returns symbolic variable whose name is var_name. 
 
             Args:
-                scalar_var_name: Name of the scalar variable.
+                var_name: Name of the scalar variable.
         """
-        scalar_var = sympy.Symbol(scalar_var_name)
-        self.__scalar_vars.append([scalar_var, scalar_var_name, 0])
+        scalar_var = sympy.Symbol(var_name)
+        self.__scalar_vars.append([scalar_var, var_name, 0])
         return scalar_var
 
-    def define_scalar_vars(self, *scalar_var_name_list):
+    def define_scalar_vars(self, *var_name_list):
         """ Returns symbolic variables whose names are given by 
-            scalar_var_name_list. The names of the variables are memorized.
+            var_name_list. 
 
             Args:
-                scalar_var_name_list: Names of the scalar variables.
+                var_name_list: Names of the scalar variables.
         """
         scalar_vars = []
-        for scalar_var_name in scalar_var_name_list:
-            assert isinstance(scalar_var_name, str), 'The input must be list of strings!'
-            scalar_var = sympy.Symbol(scalar_var_name)
-            self.__scalar_vars.append([scalar_var, scalar_var_name, 0])
+        for var_name in var_name_list:
+            assert isinstance(var_name, str), 'The input must be list of strings!'
+            scalar_var = sympy.Symbol(var_name)
+            self.__scalar_vars.append([scalar_var, var_name, 0])
             scalar_vars.append(scalar_var)
         return scalar_vars
 
-    def define_array_var(self, array_var_name: str, size: int):
-        """ Returns symbolic vector variable whose names is array_var_name. 
-            The names of the variable is memorized.
+    def define_array_var(self, var_name: str, size: int):
+        """ Returns symbolic vector variable whose names is var_name. 
 
             Args:
-                array_var_name: Name of the array variable.
+                var_name: Name of the array variable.
                 size: Size of the array variable.
         """
         assert size > 0, 'The second argument must be positive integer!'
-        array_var = sympy.symbols(array_var_name+'[0:%d]' %(size))
-        self.__array_vars.append([array_var, array_var_name, []])
+        array_var = sympy.symbols(var_name+'[0:%d]' %(size))
+        self.__array_vars.append([array_var, var_name, []])
         return array_var
 
     def set_FB_epsilon(self, FB_epsilon):
@@ -105,40 +112,39 @@ class AutoGenU(object):
             assert eps >= 0, "FB epsilon must be non-negative!"
         self.__FB_epsilon = FB_epsilon
 
-    def set_scalar_var(self, scalar_var_name: str, scalar_value):
+    def set_scalar_var(self, name: str, value):
         """ Set the value of the scalar variable you defied. 
 
             Args:
-                scalar_var_name: Name of the scalar variable.
-                scalar_value: Value of the scalar variable.
+                name: Name of the scalar variable.
+                value: Value of the scalar variable.
         """
         for defined_scalar_var in self.__scalar_vars:
-            if scalar_var_name[0] == defined_scalar_var[1]:
-                defined_scalar_var[2] = scalar_value
+            if name[0] == defined_scalar_var[1]:
+                defined_scalar_var[2] = value
 
-    def set_scalar_vars(self, *scalar_var_name_and_value_list):
+    def set_scalar_vars(self, *name_and_value_list):
         """ Set the values of the scalar variables you defied. 
 
             Args:
-                scalar_var_name_and_value_lis: A list composed of the name of 
+                name_and_value_lis: A list composed of the name of 
                 the scalar variable and value of the scalar variable.
         """
-        for var_name_and_value in scalar_var_name_and_value_list:
+        for name_and_value in name_and_value_list:
             for defined_scalar_var in self.__scalar_vars:
-                if var_name_and_value[0] == defined_scalar_var[1]:
-                    defined_scalar_var[2] = var_name_and_value[1]
+                if name_and_value[0] == defined_scalar_var[1]:
+                    defined_scalar_var[2] = name_and_value[1]
     
-    def set_array_var(self, var_name: str, values):
+    def set_array_var(self, name: str, values):
         """ Set the value of the array variable you defied. 
 
             Args:
-                var_name: Name of the arrray variable.
+                name: Name of the arrray variable.
                 values: Values of the arry variable. This size is used as  
                         the size of the array variable.
         """
-        assert isinstance(var_name, str), 'The first argument must be strings!'
         for defined_array_var in self.__array_vars:
-            if var_name == defined_array_var[1]:
+            if name == defined_array_var[1]:
                 if len(defined_array_var[0]) == len(values):
                     defined_array_var[2] = values
 
@@ -174,94 +180,6 @@ class AutoGenU(object):
             self.__hu[nuc+i] = sympy.sqrt(u[nuc+i]**2 + h[i]**2 + fb_eps[i]) - (u[nuc+i] - h[i])
         self.__phix = symfunc.diff_scalar_func(phi, x)
 
-    def set_nlp_type(self, nlp_type: NLPType):
-        """ Sets solver types of the C/GMRES methods. 
-
-            Args: 
-                nlp_type: The solver type. Choose from 
-                NLPType.SingleShooting and NLPType.MultipleShooting, 
-        """
-        self.__nlp_type = nlp_type
-
-    def set_solver_settings(
-            self, Tf, alpha, N: int, finite_difference_epsilon, zeta, kmax: int
-        ):
-        """ Sets parameters of the NMPC solvers based on the C/GMRES method. 
-
-            Args: 
-                Tf, alpha: Parameter about the length of the horizon of NMPC.
-                    The length of the horzion at time t is given by 
-                    Tf * (1-exp(-alpha*t)). If alpha is not positive, the horizon 
-                    length is fixed by Tf.
-                N: The number of the grid for the discretization
-                    of the horizon of NMPC.
-                finite_difference_epsilon: The small positive value for 
-                    finitei difference approximation used in the FD-GMRES. 
-                zeta: A stabilization parameter of the C/GMRES method. It may 
-                    work well if you set as zeta=1/sampling_period.
-                kmax: Maximam number of the iteration of the Krylov 
-                    subspace method for the linear problem. 
-        """
-        assert Tf > 0
-        assert N > 0
-        assert finite_difference_epsilon > 0
-        assert zeta > 0
-        assert kmax > 0
-        self.__Tf = Tf
-        self.__alpha = alpha
-        self.__N = N
-        self.__finite_difference_epsilon = finite_difference_epsilon
-        self.__zeta = zeta
-        self.__kmax = kmax
-        self.__is_solver_paramters_set = True
-
-    def set_initialization_parameters(
-            self, solution_initial_guess, newton_residual_torelance, 
-            max_newton_iteration
-        ):
-        """ Set parameters for the initialization of the C/GMRES solvers. 
-
-            Args: 
-                solution_initial_guess: The initial guess of the solution of the 
-                    initialization. Size must be the nu + dimensions of C and 
-                    h.
-                newton_residual_torelance: The residual torelance of the 
-                    initialization solved by Newton's method. The Newton 
-                    iteration terminates if the optimality error is smaller than 
-                    this value.
-                max_newton_iteration: The maximum number of the Newton iteration. 
-        """
-        nuch = self.__nu + self.__nc + self.__nh
-        assert len(solution_initial_guess) == nuch
-        assert newton_residual_torelance > 0
-        assert max_newton_iteration > 0
-        self.__solution_initial_guess = solution_initial_guess 
-        self.__newton_residual_torelance = newton_residual_torelance 
-        self.__max_newton_iteration = max_newton_iteration 
-        self.__is_initialization_set = True
-
-    def set_simulation_parameters(
-            self, initial_time, initial_state, simulation_time, sampling_time
-        ):
-        """ Set parameters for numerical simulation. 
-
-            Args: 
-                initial_time: The time parameter at the beginning of the 
-                    simulation. 
-                initial_state: The state of the system at the beginning of the 
-                    simulation. 
-                simulation_time: The length of the numerical simulation. 
-                sampling_time: The sampling period of the numerical simulation. 
-        """
-        assert len(initial_state) == self.__nx, "The dimension of initial_state must be nx!"
-        assert simulation_time > 0
-        assert sampling_time > 0
-        self.__initial_time = initial_time 
-        self.__initial_state = initial_state
-        self.__simulation_time = simulation_time 
-        self.__sampling_time = sampling_time
-        self.__is_simulation_set = True
-
     def add_control_input_bounds(
         self, uindex, umin, umax, dummy_weight
         ):
@@ -289,22 +207,104 @@ class AutoGenU(object):
             ub = [uindex, umin, umax, dummy_weight]
             self.__ubounds.append(ub)
 
-    def generate_source_files(self, use_simplification=False, use_cse=False):
+    def set_nlp_type(self, nlp_type: NLPType):
+        """ Sets solver types of the C/GMRES methods. 
+
+            Args: 
+                nlp_type: The solver type. Choose from 
+                NLPType.SingleShooting and NLPType.MultipleShooting, 
+        """
+        self.__nlp_type = nlp_type
+
+    def set_horizon_params(self, Tf, alpha=0.0):
+        """ Sets parameters of the horizon of NMPC. If alpha > 0, then the 
+            length of the horzion at time t is given by Tf * (1-exp(-alpha*t)). 
+            If alpha is not positive, the it is given by Tf.
+
+            Args: 
+                Tf, alpha: Parameter about the length of the horizon of NMPC.
+        """
+        assert Tf > 0
+        self.__horizon_params = HorizonParams(Tf, alpha)
+
+    def set_solver_params(
+            self, dt, N: int, finite_difference_epsilon, zeta, kmax: int
+        ):
+        """ Sets parameters of the NMPC solvers based on the C/GMRES method. 
+
+            Args: 
+                dt: The sampling period of NMPC
+                N: The number of the grid for the discretization
+                    of the horizon of NMPC.
+                finite_difference_epsilon: The small positive value for 
+                    finitei difference approximation used in the FD-GMRES. 
+                zeta: A stabilization parameter of the C/GMRES method. It may 
+                    work well if you set as zeta=1/sampling_period.
+                kmax: Maximam number of the iteration of the Krylov 
+                    subspace method for the linear problem. 
+        """
+        assert dt > 0
+        assert N > 0
+        assert finite_difference_epsilon > 0
+        assert zeta > 0
+        assert kmax > 0
+        self.__solver_params = SolverParams(dt, N, finite_difference_epsilon, zeta, kmax)
+
+    def set_initialization_params(
+            self, solution_initial_guess, tolerance=1.0e-04, max_iterations=100
+        ):
+        """ Set parameters for the initialization of the C/GMRES solvers. 
+
+            Args: 
+                solution_initial_guess: The initial guess of the solution of the 
+                    initialization. Size must be the nu + dimensions of C and 
+                    h.
+                torelance: The residual torelance of the 
+                    initialization solved by Newton's method. The Newton 
+                    iteration terminates if the optimality error is smaller than 
+                    this value.
+                max_iteration: The maximum number of the Newton iteration. 
+        """
+        assert len(solution_initial_guess) == self.__nu + self.__nc + self.__nh
+        assert tolerance > 0
+        assert max_iterations > 0
+        self.__initialization_params = InitializationParams(solution_initial_guess, tolerance, max_iterations)
+
+    def set_simulation_params(
+            self, initial_time, initial_state, simulation_length
+        ):
+        """ Set parameters for numerical simulation. 
+
+            Args: 
+                initial_time: The time parameter at the beginning of the 
+                    simulation. 
+                initial_state: The state of the system at the beginning of the 
+                    simulation. 
+                simulation_length: The length of the numerical simulation. 
+        """
+        assert len(initial_state) == self.__nx, "The dimension of initial_state must be nx!"
+        assert simulation_length > 0
+        self.__simulation_params = SimulationParams(initial_time, initial_state, simulation_length)
+
+    def generate_ocp_definition(self, simplification=False, common_subexpression_elimination=False):
         """ Generates the C++ source file in which the equations to solve the 
             optimal control problem are described. Before call this method, 
             set_functions() must be called.
 
             Args: 
-                use_simplification: The flag for simplification. If True, the 
+                simplification: The flag for simplification. If True, the 
                     Symbolic functions are simplified. Default is False.
-                use_cse: The flag for common subexpression elimination. If True, 
+                common_subexpression_elimination: The flag for common subexpression elimination. If True, 
                     common subexpressions are eliminated. Default is False.
         """
-        assert self.__f is not None and self.__phix is not None and self.__hx is not None and self.__hu is not None, "Symbolic functions are not set!. Before call this method, call set_functions()"
+        assert self.__f is not None \
+                and self.__phix is not None \
+                and self.__hx is not None \
+                and self.__hu is not None, "Symbolic functions are not set!. Before call this method, call set_functions()"
         if self.__nh > 0:
             assert len(self.__FB_epsilon) == self.__nh
-        self.__make_model_dir()
-        if use_simplification:
+        self.__make_ocp_dir()
+        if simplification:
             symfunc.simplify(self.__f)
             symfunc.simplify(self.__hx)
             symfunc.simplify(self.__hu)
@@ -492,7 +492,7 @@ public:
               double* dx) const {
 """ 
         ])
-        self.__write_function(f_model_h, self.__f, 'dx', use_cse)
+        self.__write_function(f_model_h, self.__f, 'dx', common_subexpression_elimination)
         f_model_h.writelines([
 """ 
   }
@@ -507,7 +507,7 @@ public:
   void eval_phix(const double t, const double* x, double* phix) const {
 """ 
         ])
-        self.__write_function(f_model_h, self.__phix, 'phix', use_cse)
+        self.__write_function(f_model_h, self.__phix, 'phix', common_subexpression_elimination)
         f_model_h.writelines([
 """ 
   }
@@ -525,7 +525,7 @@ public:
                const double* lmd, double* hx) const {
 """ 
         ])
-        self.__write_function(f_model_h, self.__hx, 'hx', use_cse)
+        self.__write_function(f_model_h, self.__hx, 'hx', common_subexpression_elimination)
         f_model_h.writelines([
 """ 
   }
@@ -543,7 +543,7 @@ public:
                const double* lmd, double* hu) const {
 """ 
         ])
-        self.__write_function(f_model_h, self.__hu, 'hu', use_cse)
+        self.__write_function(f_model_h, self.__hu, 'hu', common_subexpression_elimination)
         f_model_h.writelines([
 """ 
   }
@@ -560,14 +560,15 @@ public:
     def generate_main(self):
         """ Generates main.cpp that defines NMPC solver, set parameters for the 
             solver, and run numerical simulation. Befire call this method,
-            set_nlp_type(), set_solver_settings(), 
-            set_initialization_parameters(), and set_simulation_parameters(),
+            set_nlp_type(), set_horizon_params(), set_solver_params(), 
+            set_initialization_params(), and set_simulation_params(),
             must be called!
         """
         assert self.__nlp_type is not None, "Solver type is not set! Before call this method, call set_nlp_type()"
-        assert self.__is_solver_paramters_set, "Solver parameters are not set! Before call this method, call set_solver_settings()"
-        assert self.__is_initialization_set, "Initialization parameters are not set! Before call this method, call set_initialization_parameters()"
-        assert self.__is_simulation_set, "Simulation parameters are not set! Before call this method, call set_simulation_parameters()"
+        assert self.__horizon_params is not None, "Horizon params are not set! Before call this method, call set_horizon_params()"
+        assert self.__solver_params is not None, "Solver params are not set! Before call this method, call set_solver_params()"
+        assert self.__initialization_params is not None, "Initialization params are not set! Before call this method, call set_initialization_params()"
+        assert self.__simulation_params is not None, "Simulation params are not set! Before call this method, call set_simulation_params()"
         """ Makes a directory where the C++ source files are generated.
         """
         f_main = open('generated/'+str(self.__ocp_name)+'/main.cpp', 'w')
@@ -597,53 +598,50 @@ public:
         )
         f_main.write(
             '  // Define the horizon.\n'
-            '  const double Tf = '+str(self.__Tf)+';\n'
-            '  const double alpha = '+str(self.__alpha)+';\n'
+            '  const double Tf = '+str(self.__horizon_params.Tf)+';\n'
+            '  const double alpha = '+str(self.__horizon_params.alpha)+';\n'
             '  cgmres::Horizon horizon(Tf, alpha);\n'
             '\n'
         )
         f_main.write(
             '  // Define the solver settings.\n'
             '  cgmres::SolverSettings settings;\n'
-            '  settings.dt = '+str(self.__sampling_time)+'; // sampling period \n'
-            '  settings.zeta = '+str(self.__zeta)+';\n'
-            '  settings.finite_difference_epsilon = '+str(self.__finite_difference_epsilon)+';\n'
+            '  settings.dt = '+str(self.__solver_params.dt)+'; // sampling period \n'
+            '  settings.zeta = '+str(self.__solver_params.zeta)+';\n'
+            '  settings.finite_difference_epsilon = '+str(self.__solver_params.finite_difference_epsilon)+';\n'
             '  // For initialization.\n'
-            '  settings.max_iter = '+str(self.__max_newton_iteration)+';\n'
-            '  settings.opterr_tol = '+str(self.__newton_residual_torelance)+';\n'
+            '  settings.max_iter = '+str(self.__initialization_params.max_iteraions)+';\n'
+            '  settings.opterr_tol = '+str(self.__initialization_params.tolerance)+';\n'
             '\n'
         )
         f_main.write('  // Define the initial time and initial state.\n')
-        f_main.write('  const double t0 = '+str(self.__initial_time)+';\n')
+        f_main.write('  const double t0 = '+str(self.__simulation_params.initial_time)+';\n')
         f_main.write(
-            '  cgmres::Vector<'+str(len(self.__initial_state))+'> x0;\n'
+            '  cgmres::Vector<'+str(len(self.__simulation_params.initial_state))+'> x0;\n'
             +'  x0 << '
         )
-        for i in range(len(self.__initial_state)-1):
-            f_main.write(str(self.__initial_state[i])+', ')
-        f_main.write(str(self.__initial_state[-1])+';\n')
+        for i in range(len(self.__simulation_params.initial_state)-1):
+            f_main.write(str(self.__simulation_params.initial_state[i])+', ')
+        f_main.write(str(self.__simulation_params.initial_state[-1])+';\n')
         f_main.write('\n')
         # initial guess for the initialization of the solution
         f_main.write('  // Initialize the solution of the C/GMRES method.\n')
-        f_main.write('  constexpr int kmax_init = '+str(min(self.__kmax, len(self.__solution_initial_guess)))+';\n')
+        f_main.write('  constexpr int kmax_init = '+str(min(self.__solver_params.kmax, self.__nu+self.__nc+self.__nh))+';\n')
         f_main.write(
             '  cgmres::ZeroHorizonOCPSolver<cgmres::OCP_'+self.__ocp_name+', kmax_init> '
             +'initializer(ocp, settings);\n'
         )
-        f_main.write(
-            '  cgmres::Vector<' + str(len(self.__solution_initial_guess))+'> uc0;\n'
-            +'  uc0 << '
-        )
-        for i in range(len(self.__solution_initial_guess)-1):
-            f_main.write(str(self.__solution_initial_guess[i])+', ')
-        f_main.write(str(self.__solution_initial_guess[-1])+';\n')
+        f_main.write('  cgmres::Vector<'+str(self.__nu+self.__nc+self.__nh)+'> uc0;\n'+'  uc0 << ')
+        for i in range(len(self.__initialization_params.solution_initial_guess)-1):
+            f_main.write(str(self.__initialization_params.solution_initial_guess[i])+', ')
+        f_main.write(str(self.__initialization_params.solution_initial_guess[-1])+';\n')
         f_main.write('  initializer.set_uc(uc0);\n')
         f_main.write('  initializer.solve(t0, x0);\n')
         f_main.write('\n')
 
         f_main.write('  // Define the C/GMRES solver.\n')
-        f_main.write('  constexpr int N = '+str(self.__N)+';\n')
-        f_main.write('  constexpr int kmax = '+str(min(self.__kmax, self.__N*(self.__nu+self.__nc)))+';\n')
+        f_main.write('  constexpr int N = '+str(self.__solver_params.N)+';\n')
+        f_main.write('  constexpr int kmax = '+str(min(self.__solver_params.kmax, self.__solver_params.N*(self.__nu+self.__nc+self.__nh)))+';\n')
         if self.__nlp_type == NLPType.SingleShooting:
             f_main.write(
                 '  cgmres::SingleShootingCGMRESSolver<cgmres::OCP_'+self.__ocp_name+', N, kmax> mpc(ocp, horizon, settings);\n'
@@ -662,10 +660,10 @@ public:
         f_main.write('\n\n')
         f_main.write(
             '  // Perform a numerical simulation.\n'
-            '  const double tf = '+str(self.__simulation_time)+';\n'
+            '  const double tsim = '+str(self.__simulation_params.simulation_length)+';\n'
             '  const double dt = settings.dt;\n'
             '  const std::string save_dir_name("../simulation_result");\n'
-            '  cgmres::simulation(ocp, mpc, x0, t0, tf, dt, ' 
+            '  cgmres::simulation(ocp, mpc, x0, t0, tsim, dt, ' 
             +"save_dir_name"+', "' +self.__ocp_name +'");\n\n'
             '  return 0;\n'
             '}\n'
@@ -846,7 +844,7 @@ namespace py = pybind11;
 
 """ 
         ])
-        f_pybind11.write('constexpr int kmax_init = '+str(min(self.__kmax, self.__nc+self.__nu+self.__nh))+';\n')
+        f_pybind11.write('constexpr int kmax_init = '+str(min(self.__solver_params.kmax, self.__nc+self.__nu+self.__nh))+';\n')
         f_pybind11.write('DEFINE_PYBIND11_MODULE_ZERO_HORIZON_OCP_SOLVER(OCP_'+str(self.__ocp_name)+', kmax_init)\n')
         f_pybind11.writelines([
 """
@@ -878,8 +876,8 @@ namespace py = pybind11;
 
 """ 
         ])
-        f_pybind11.write('constexpr int N = '+str(self.__N)+';\n')
-        f_pybind11.write('constexpr int kmax = '+str(min(self.__kmax, self.__N*(self.__nc+self.__nu+self.__nh)))+';\n')
+        f_pybind11.write('constexpr int N = '+str(self.__solver_params.N)+';\n')
+        f_pybind11.write('constexpr int kmax = '+str(min(self.__solver_params.kmax, self.__solver_params.N*(self.__nc+self.__nu+self.__nh)))+';\n')
         f_pybind11.write('DEFINE_PYBIND11_MODULE_SINGLE_SHOOTING_CGMRES_SOLVER(OCP_'+str(self.__ocp_name)+', N, kmax)\n')
         f_pybind11.writelines([
 """
@@ -911,8 +909,8 @@ namespace py = pybind11;
 
 """ 
         ])
-        f_pybind11.write('constexpr int N = '+str(self.__N)+';\n')
-        f_pybind11.write('constexpr int kmax = '+str(min(self.__kmax, self.__N*(self.__nc+self.__nu+self.__nh)))+';\n')
+        f_pybind11.write('constexpr int N = '+str(self.__solver_params.N)+';\n')
+        f_pybind11.write('constexpr int kmax = '+str(min(self.__solver_params.kmax, self.__solver_params.N*(self.__nc+self.__nu+self.__nh)))+';\n')
         f_pybind11.write('DEFINE_PYBIND11_MODULE_MULTIPLE_SHOOTING_CGMRES_SOLVER(OCP_'+str(self.__ocp_name)+', N, kmax)\n')
         f_pybind11.writelines([
 """
@@ -1139,7 +1137,7 @@ install(
         f_cmake_python.close()
 
 
-    def build(self, generator='Auto', remove_build_dir=False):
+    def build_main(self, generator='Auto', remove_build_dir=False):
         """ Builds execute file to run numerical simulation. 
 
             Args: 
@@ -1434,20 +1432,20 @@ install(
 
 
     def __write_function(
-            self, writable_file, function, return_value_name, use_cse
+            self, writable_file, function, return_value_name, common_subexpression_elimination
         ):
         """ Write input symbolic function onto writable_file. The function's 
-            return value name must be set. use_cse is optional.
+            return value name must be set. common_subexpression_elimination is optional.
 
             Args: 
                 writable_file: A writable file, i.e., a file streaming that is 
                     already opened as writing mode.
                 function: A symbolic function wrote onto the writable_file.
                 return_value_name: The name of the return value.
-                use_cse: If true, common subexpression elimination is used. If 
+                common_subexpression_elimination: If true, common subexpression elimination is used. If 
                     False, it is not used.
         """
-        if use_cse:
+        if common_subexpression_elimination:
             func_cse = sympy.cse(function)
             for i in range(len(func_cse[0])):
                 cse_exp, cse_rhs = func_cse[0][i]
@@ -1466,7 +1464,7 @@ install(
                 +sympy.ccode(function[i])+';\n' for i in range(len(function))]
             )
 
-    def __make_model_dir(self):
+    def __make_ocp_dir(self):
         """ Makes a directory where the C source files of OCP formulations are 
             generated.
         """

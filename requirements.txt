@@ -1,0 +1,6 @@
+sympy
+jupyter
+collection
+numpy
+matplotlib
+seaborn
