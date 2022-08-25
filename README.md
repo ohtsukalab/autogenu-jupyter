@@ -5,10 +5,10 @@
 
 
 ## Introduction
-This project provides the continuation/GMRES method (C/GMRES method) based solvers for nonlinear model predictive control (NMPC) and an automatic code generator for NMPC, called AutoGenU.
+This project provides the continuation/GMRES method (C/GMRES method) based solvers for nonlinear model predictive control (NMPC) and an automatic code generator for NMPC, called `AutoGenU`.
 
 The following C/GMRES based solvers are provided: 
-- `MultipleShootingCGMRESSolver` : The multiple shooting based C/GMRES method with condensing of the state and the Lagragne multipliers with respect to the state equation.
+- `MultipleShootingCGMRESSolver` : The multiple shooting based C/GMRES method with condensing of the state and costate directions.
 - `SingleShootingCGMRESSolver` : The original C/GMRES method (single shooting).
 
 ## Requirement
@@ -35,13 +35,13 @@ pip install -r requirements.txt
 ```
 
 ### 2. Code generation
-`AutoGenU.ipynb` generates following source files under your setting state equation, constraints, cost function, and parameters: 
-- `ocp.hpp` : describing the optimal control problem (OCP).
-- `main.cpp` : describing the closed-loop simulation.
-- `CMakeLists.txt` : for the buildings. 
-- `python` directory : Python interface of the generated codes.
+`AutoGenU.ipynb` generates the following source files under your setting state equation, constraints, cost function, and parameters: 
+- `ocp.hpp` : A definition of the optimal control problem (OCP).
+- `main.cpp` : An executablb of the closed-loop simulation.
+- `CMakeLists.txt` : Scripts to build C++ projects. 
+- Files in `python` directory : Source files of Python interface via pybind11.
 
-You can do the above code generation, run simulation, plot results, and install Python interface on `AutoGenU.ipynb`.
+You can generate these files, run simulations, plot results, and install the Python interfaces through `AutoGenU.ipynb`.
 
 
 ### 3. Install header-only `cgmres` C++ library
@@ -55,12 +55,14 @@ make install
 Then you can build the NMPC code with the generated `ocp.hpp` file and without `.ipynb` notebook files. 
 The examples are found in `examples/cpp` directory.
 
+
 ### 4. Python bindings
-Python bindings are installed via `.ipynb` files. After settings the `PYTHONPATH` as 
+Python bindings are installed via `.ipynb` files. 
+To use the installed Python bindings, set `PYTHONPATH` as 
 ```
 export PYTHONPATH=$PYTHONPATH:$DESTINATION/lib/python3.x/site-packages
 ``` 
-you can use python interfaces as 
+Then you can use python interfaces as 
 ```
 import cgmres.common # this includes horizon, solver settings, etc.
 import cgmres.your_ocp_name # this includes OCP definition and NMPC solvers 
