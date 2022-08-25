@@ -16,15 +16,11 @@ The following C/GMRES based solvers are provided:
 - CMake
 - Python 3.8 or later, Jupyter Lab or Jupyter Notebook, SymPy, and collection (to generate `ocp.hpp`, `main.cpp`, and `CMakeLists.txt` by `AutoGenU.ipynb`)
 - Python 3.8 or later, NumPy, Matplotlib, and seaborn (to plot simulation data on `AutoGenU.ipynb`)
-- ffmpeg (to generate animations in `pendubot.ipynb`, `cartpole.ipynb`, `hexacopter.ipynb`, and `mobilerobot.ipynb`)
+- ffmpeg (to generate animations in the example notebooks)
 
-The python modules can be installed via
-```
-pip install -r requirements.txt
-```
 
 ## Usage
-### Submodules 
+### 1. Setup requirements
 Please confirm that you clone this repository as 
 ```
 git clone https://github.com/mayataka/autogenu-jupyter --recursive
@@ -33,21 +29,42 @@ Otherwise, please do the following command:
 ```
 git submodule update --init --recursive
 ```
+The python modules can be installed via
+```
+pip install -r requirements.txt
+```
 
-### AutoGenU
+### 2. Code generation
 `AutoGenU.ipynb` generates following source files under your setting state equation, constraints, cost function, and parameters: 
-- `ocp.hpp`  
-- `main.cpp`  
-- `CMakeLists.txt`
+- `ocp.hpp` : describing the optimal control problem (OCP).
+- `main.cpp` : describing the closed-loop simulation.
+- `CMakeLists.txt` : for the buildings. 
+- `python` directory : Python interface of the generated codes.
 
-You can also build source files for numerical simulation, execute numerical simulation, and plot or save simulation result on `AutoGenU.ipynb`.
+You can do the above code generation, run simulation, plot results, and install Python interface on `AutoGenU.ipynb`.
 
 
-### C/GMRES based solvers of NMPC
-The C/GMRES based solvers in `src/solver` directory can be used independently of `AutoGenU.ipynb`. You are then required the following files:
-- `ocp.hpp`: write the optimal control problem (OCP) in your model  
+### 3. Install header-only `cgmres` C++ library
+Aside from the notebook for the code-generation, the C++ `cgmres` library, which is a header-only library, can be installed via
+```
+mkdir build
+cd build
+cmake .. -DCMAKE_INSTALL_PREFIX=YOUR_INSTALL_DESTINATION
+make install 
+```
+Then you can build the NMPC code with the generated `ocp.hpp` file and without `.ipynb` notebook files. 
+The examples are found in `examples/cpp` directory.
 
-In addition to these files, you have to write `CMakeLists.txt` to build source files.
+### 4. Python bindings
+Python bindings are installed via `.ipynb` files. After settings the `PYTHONPATH` as 
+```
+export PYTHONPATH=$PYTHONPATH:$DESTINATION/lib/python3.x/site-packages
+``` 
+you can use python interfaces as 
+```
+import cgmres.common # this includes horizon, solver settings, etc.
+import cgmres.your_ocp_name # this includes OCP definition and NMPC solvers 
+```
 
 
 ## Demos
