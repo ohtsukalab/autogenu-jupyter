@@ -9,7 +9,7 @@ PYBIND11_MODULE(solver_settings, m) { \
     .def_readwrite("max_iter", &SolverSettings::max_iter) \
     .def_readwrite("opterr_tol", &SolverSettings::opterr_tol) \
     .def_readwrite("finite_difference_epsilon", &SolverSettings::finite_difference_epsilon) \
-    .def_readwrite("dt", &SolverSettings::dt) \
+    .def_readwrite("sampling_time", &SolverSettings::sampling_time) \
     .def_readwrite("zeta", &SolverSettings::zeta) \
     .def_readwrite("min_dummy", &SolverSettings::min_dummy) \
     .def_readwrite("verbose_level", &SolverSettings::verbose_level) \

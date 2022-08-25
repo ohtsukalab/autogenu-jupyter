@@ -33,15 +33,15 @@ struct SolverSettings {
   Scalar finite_difference_epsilon = 1.0e-08;
 
   ///
-  /// @brief The sampling period of MPC and used in SingleShootingCGMRESSolver
+  /// @brief The sampling time of MPC and used in SingleShootingCGMRESSolver
   /// and MultipleShootingCGMRESSolver. Has nothing to do with ZeroHorizonOCPSolver. 
   /// Must be positive. Default is 0.001.
   ///
-  Scalar dt = 0.001; 
+  Scalar sampling_time = 0.001; 
 
   ///
   /// @brief The stabilization parameter of the continuation method. 
-  /// Typical value is the reciprocal of SolverSettings::dt (sampling period of MPC).
+  /// Typical value is the reciprocal of SolverSettings::sampling_time (sampling period of MPC).
   /// Used in SingleShootingCGMRESSolver and MultipleShootingCGMRESSolver. 
   /// Has nothing to do with ZeroHorizonOCPSolver. 
   /// Must be positive. Default is 1000.0.
@@ -72,7 +72,7 @@ struct SolverSettings {
     os << "  max iter:                  " << max_iter << std::endl;
     os << "  opterr tol:                " << opterr_tol << std::endl;
     os << "  finite difference epsilon: " << finite_difference_epsilon << std::endl;
-    os << "  dt (sampling period):      " << dt << std::endl;
+    os << "  sampling_time:             " << sampling_time << std::endl;
     os << "  zeta:                      " << zeta << std::endl;
     os << "  min dummy:                 " << min_dummy << std::endl;
     os << "  verbose level:             " << verbose_level << std::endl;

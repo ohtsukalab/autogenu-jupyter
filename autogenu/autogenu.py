@@ -37,7 +37,7 @@ class NLPType(Enum):
 
 HorizonParams = namedtuple('HorizonParams', ['Tf', 'alpha'])
 
-SolverParams = namedtuple('SolverParams', ['dt', 'N', 'finite_difference_epsilon', 'zeta', 'kmax'])
+SolverParams = namedtuple('SolverParams', ['sampling_time', 'N', 'finite_difference_epsilon', 'zeta', 'kmax'])
 
 InitializationParams = namedtuple('InitializationParams', ['solution_initial_guess', 'tolerance', 'max_iteraions'])
 
@@ -253,12 +253,12 @@ class AutoGenU(object):
         self.__horizon_params = HorizonParams(Tf, alpha)
 
     def set_solver_params(
-            self, dt, N: int, finite_difference_epsilon, zeta, kmax: int
+            self, sampling_time, N: int, finite_difference_epsilon, zeta, kmax: int
         ):
         """ Sets parameters of the NMPC solvers based on the C/GMRES method. 
 
             Args: 
-                dt: The sampling period of NMPC
+                sampling_time: The sampling period of NMPC
                 N: The number of the grid for the discretization
                     of the horizon of NMPC.
                 finite_difference_epsilon: The small positive value for 
@@ -268,12 +268,12 @@ class AutoGenU(object):
                 kmax: Maximam number of the iteration of the Krylov 
                     subspace method for the linear problem. 
         """
-        assert dt > 0
+        assert sampling_time > 0
         assert N > 0
         assert finite_difference_epsilon > 0
         assert zeta > 0
         assert kmax > 0
-        self.__solver_params = SolverParams(dt, N, finite_difference_epsilon, zeta, kmax)
+        self.__solver_params = SolverParams(sampling_time, N, finite_difference_epsilon, zeta, kmax)
 
     def set_initialization_params(
             self, solution_initial_guess, tolerance=1.0e-04, max_iterations=100
@@ -631,7 +631,7 @@ public:
         f_main.write(
             '  // Define the solver settings.\n'
             '  cgmres::SolverSettings settings;\n'
-            '  settings.dt = '+str(self.__solver_params.dt)+'; // sampling period \n'
+            '  settings.sampling_time = '+str(self.__solver_params.sampling_time)+'; // sampling period \n'
             '  settings.zeta = '+str(self.__solver_params.zeta)+';\n'
             '  settings.finite_difference_epsilon = '+str(self.__solver_params.finite_difference_epsilon)+';\n'
             '  // For initialization.\n'
@@ -686,9 +686,9 @@ public:
         f_main.write(
             '  // Perform a numerical simulation.\n'
             '  const double tsim = '+str(self.__simulation_params.simulation_length)+';\n'
-            '  const double dt = settings.dt;\n'
+            '  const double sampling_time = settings.sampling_time;\n'
             '  const std::string save_dir_name("../simulation_result");\n'
-            '  cgmres::simulation(ocp, mpc, x0, t0, tsim, dt, ' 
+            '  cgmres::simulation(ocp, mpc, x0, t0, tsim, sampling_time, ' 
             +"save_dir_name"+', "' +self.__ocp_name +'");\n\n'
             '  return 0;\n'
             '}\n'

@@ -15,7 +15,7 @@ int main() {
 
   // Define the solver settings.
   cgmres::SolverSettings settings;
-  settings.dt = 0.001; // sampling period 
+  settings.sampling_time = 0.001;  
   settings.zeta = 1000;
   settings.finite_difference_epsilon = 1e-08;
   // For initialization.
@@ -46,8 +46,8 @@ int main() {
 
   // Perform a numerical simulation.
   const double tsim = 10.0;
-  const double dt = settings.dt;
-  const int sim_steps = std::floor(tsim / dt);
+  const double sampling_time = settings.sampling_time;
+  const int sim_steps = std::floor(tsim / sampling_time);
 
   double t = t0;
   cgmres::VectorX x = x0;
@@ -56,10 +56,10 @@ int main() {
     const auto& u = mpc.uopt()[0]; // const reference to the initial optimal control input 
     dx.setZero();
     ocp.eval_f(t, x.data(), u.data(), dx.data()); // eval the state equation
-    const cgmres::VectorX x1 = x + dt * dx;
+    const cgmres::VectorX x1 = x + sampling_time * dx;
     mpc.update(t, x);
     x = x1;
-    t = t + dt;
+    t = t + sampling_time;
     std::cout << "t: " << t << ", x: " << x.transpose() << std::endl;
   }
 

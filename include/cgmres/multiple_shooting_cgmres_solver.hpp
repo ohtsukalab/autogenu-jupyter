@@ -80,6 +80,16 @@ public:
       std::fill(dummyopt_.begin(), dummyopt_.end(), Vector<nub>::Zero());
       std::fill(muopt_.begin(), muopt_.end(), Vector<nub>::Zero());
     }
+
+    if (settings.finite_difference_epsilon <= 0.0) {
+      throw std::invalid_argument("[MultipleShootingCGMRESSolver]: 'settings.finite_difference_epsilon' must be positive!");
+    }
+    if (settings.sampling_time <= 0.0) {
+      throw std::invalid_argument("[MultipleShootingCGMRESSolver]: 'settings.sampling_time' must be positive!");
+    }
+    if (settings.zeta <= 0.0) {
+      throw std::invalid_argument("[ContinuationGMRESCondensing]: 'settings.zeta' must be positive!");
+    }
   }
 
   ///
@@ -423,8 +433,8 @@ public:
               continuation_gmres_, t, x.derived(), solution_, xopt_, lmdopt_, dummyopt_, muopt_, solution_update_);
     const auto opt_error = continuation_gmres_.optError();
     continuation_gmres_.expansion(t, x, solution_, xopt_, lmdopt_, dummyopt_, muopt_, 
-                                  solution_update_, settings_.dt, settings_.min_dummy);
-    solution_.noalias() += settings_.dt * solution_update_;
+                                  solution_update_, settings_.sampling_time, settings_.min_dummy);
+    solution_.noalias() += settings_.sampling_time * solution_update_;
     retriveSolution();
     if (settings_.profile_solver) timer_.tock();
 

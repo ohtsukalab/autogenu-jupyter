@@ -8,7 +8,7 @@ ocp = cgmres.cartpole.OCP()
 horizon = cgmres.common.Horizon(Tf=2.0) # fixed length
 
 settings = cgmres.common.SolverSettings()
-settings.dt = 0.001
+settings.sampling_time = 0.001
 settings.zeta = 1000
 settings.finite_difference_epsilon = 1e-08
 settings.max_iter = 50
@@ -32,16 +32,16 @@ mpc.init_dummy_mu()
 
 # simple simulation with forward Euler 
 tsim = 10.0
-dt = settings.dt
+sampling_time = settings.sampling_time
 t = t0
 x = x0.copy()
-for _ in range(int(tsim/dt)):
+for _ in range(int(tsim/sampling_time)):
     u = mpc.uopt[0]
     dx = ocp.eval_f(t, x, u)
-    x1 = x + dt * dx
+    x1 = x + sampling_time * dx
     mpc.update(t, x)
     x = x1
-    t = t + dt
+    t = t + sampling_time
     print('t: ', t, ', x: ', x)
 
 print("\n======================= MPC used in this simulation: =======================")

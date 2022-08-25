@@ -22,8 +22,8 @@ def run_simulation(params, verbose=False):
     Tf = params.Tf
     horizon = cgmres.common.Horizon(Tf) # fixed length
     settings = cgmres.common.SolverSettings()
-    settings.dt = SAMPLING_TIME
-    settings.zeta = 1.0 / settings.dt
+    settings.sampling_time = SAMPLING_TIME
+    settings.zeta = 1.0 / settings.sampling_time
     mpc = cgmres.cartpole.MultipleShootingCGMRESSolver(ocp, horizon, settings)
 
     # initial state of the simulation
@@ -42,7 +42,7 @@ def run_simulation(params, verbose=False):
     # run simulation
     t = t0
     x = x0.copy()
-    dt = SAMPLING_TIME
+    sampling_time = SAMPLING_TIME
     sim_steps = int(SIMULATION_TIME/SAMPLING_TIME)
     xs = []
     us = []
@@ -53,10 +53,10 @@ def run_simulation(params, verbose=False):
         us.append(u)
         opt_error.append(mpc.opt_error())
         dx = ocp.eval_f(t, x, u)
-        x1 = x + dt * dx
+        x1 = x + sampling_time * dx
         mpc.update(t, x)
         x = x1
-        t = t + dt
+        t = t + sampling_time
         if verbose:
             print('t: ', t, ', x: ', x)
     if verbose:

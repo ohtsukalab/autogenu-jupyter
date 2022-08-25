@@ -99,14 +99,14 @@ public:
   struct ExternalReference {
     double cart_position = 0.0;
   };
-  std::shared_ptr<ExternalReference> external_refernce = nullptr;
+  std::shared_ptr<ExternalReference> external_reference = nullptr;
 
   ///
   /// @brief Synchrozies the internal parameters of this OCP with the external references.
   ///
   void synchronize() {
-    if (external_refernce != nullptr) {
-      x_ref[0] = external_refernce->cart_position;
+    if (external_reference != nullptr) {
+      x_ref[0] = external_reference->cart_position;
     }
   }
 
