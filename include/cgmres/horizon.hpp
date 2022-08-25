@@ -20,7 +20,7 @@ public:
   ///
   /// @brief Constructs the horizon. If alpha <= 0.0, then the fixed-length Tf is used. If alpha > 0.0, 
   /// then the time-varying length Tf * (1.0-exp(-alpha * (t-t0))) is used.
-  /// @param[in] Tf The parameter of the horizon length. 
+  /// @param[in] Tf The parameter of the horizon length. Must be positive.
   /// @param[in] alpha The parameter of the time-varying horizon length. Default is 0.0 (i.e., fixed-length horizon).
   /// @param[in] t0 The parameter of the time-varying horizon length. Default is 0.0.
   ///
@@ -49,7 +49,9 @@ public:
   ///
   Scalar T(const Scalar t) const {
     if (time_varying_length_) {
-      assert(t >= t0_);
+      if (t < t0_) {
+        throw std::invalid_argument("[Horizon]: 't' must be greater than or equal to 't0' (" +  std::to_string(t0_) + ") !");
+      }
       return Tf_ * (1.0-std::exp(-alpha_*(t-t0_)));
     }
     else {
