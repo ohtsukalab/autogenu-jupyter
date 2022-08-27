@@ -98,7 +98,7 @@ public:
   }
 
 private:
-  long counts_;
+  unsigned long counts_;
   Scalar total_elapsed_time_, max_elapsed_time_;
   std::chrono::high_resolution_clock::time_point time_point_;
 };
