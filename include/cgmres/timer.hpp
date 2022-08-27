@@ -27,7 +27,7 @@ struct TimingProfile {
   ///
   /// @brief Number of timing counts.
   ///
-  long counts = 0;
+  unsigned long counts = 0;
 
   void disp(std::ostream& os) const {
     os << "TimingProfile: " << std::endl; 
