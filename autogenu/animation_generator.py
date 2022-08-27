@@ -1,11 +1,8 @@
 import sys
 
 import numpy as np
-import seaborn as sns
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
-import mpl_toolkits.mplot3d as a3
-import mpl_toolkits.mplot3d.art3d as art3d 
 from matplotlib.animation import FuncAnimation
 
 from .simulation_conditions import SimulationConditions
@@ -27,17 +24,8 @@ class TwoLinkArm(object):
         # Loads the simulation data.
         self.__model_dir = 'generated/' + ocp_name + '/simulation_result' 
         self.__file_header = self.__model_dir + '/' + ocp_name
-        self.__x_data = np.genfromtxt(
-            self.__file_header+'_x'+'.log'
-        )
-        self.__sim_conditions = SimulationConditions(
-            self.__file_header
-        )
-        self.__time_sequence = np.linspace(
-            0, 
-            self.__sim_conditions.simulation_time, 
-            self.__x_data.shape[0]
-        )
+        self.__x_data = np.genfromtxt(self.__file_header+'_x'+'.log')
+        self.__sim_conditions = SimulationConditions(self.__file_header)
         # Replaces NaN with 0.
         self.__x_data[np.isnan(self.__x_data)] = 0
         # Checks the dimension of the state.
@@ -57,9 +45,7 @@ class TwoLinkArm(object):
         self.__length = 1.2
         # Sets frames for drawing the animation.
         self.__skip_frames = 1
-        self.__total_frames = (int)(
-            self.__x_data.shape[0]/self.__skip_frames
-        )
+        self.__total_frames = (int)(self.__x_data.shape[0]/self.__skip_frames)
 
     def set_skip_frames(self, skip_frames):
         """ Set how many frames you want to skip in generating the animation.
@@ -68,9 +54,7 @@ class TwoLinkArm(object):
                 skip_frames: A number of frames to skip.
         """
         self.__skip_frames = skip_frames
-        self.__total_frames = (int)(
-            self.__x_data.shape[0]/skip_frames
-        )
+        self.__total_frames = (int)(self.__x_data.shape[0]/skip_frames)
 
     def generate_animation(self):
         """ Generates the animation and saves it as a .mp4 file. """
@@ -99,7 +83,7 @@ class TwoLinkArm(object):
         anime = FuncAnimation(
             self.__fig, 
             self.__update_animation, 
-            interval=self.__sim_conditions.sampling_period*1000, 
+            interval=self.__sim_conditions.sampling_period*1000*self.__skip_frames, 
             frames=self.__total_frames, 
             blit=True
         )
@@ -107,7 +91,7 @@ class TwoLinkArm(object):
             self.__file_header+'.mp4',
             writer='ffmpeg', 
             fps=int(
-                1/(self.__sim_conditions.sampling_period*self.__skip_frames)
+                0.1/(self.__sim_conditions.sampling_period*self.__skip_frames)
             )
         )
         print(
@@ -126,7 +110,7 @@ class TwoLinkArm(object):
         self.__link1.set_data((0, self.__x1), (0, self.__y1))
         self.__link2.set_data((self.__x1, self.__x2), (self.__y1, self.__y2))
         self.__time_text.set_text(
-            '{0:.1f} [s]'.format(self.__sim_conditions.sampling_period*frame)
+            '{0:.1f} [s]'.format(10.0*self.__sim_conditions.sampling_period*frame)
         )
         return self.__link1, self.__link2, self.__time_text
 
@@ -147,17 +131,8 @@ class CartPole(object):
         # Loads the simulation data.
         self.__model_dir = 'generated/' + ocp_name + '/simulation_result' 
         self.__file_header = self.__model_dir + '/' + ocp_name
-        self.__x_data = np.genfromtxt(
-            self.__file_header+'_x'+'.log'
-        )
-        self.__sim_conditions = SimulationConditions(
-            self.__file_header
-        )
-        self.__time_sequence = np.linspace(
-            0, 
-            self.__sim_conditions.simulation_time, 
-            self.__x_data.shape[0]
-        )
+        self.__x_data = np.genfromtxt(self.__file_header+'_x'+'.log')
+        self.__sim_conditions = SimulationConditions(self.__file_header)
         # Replaces NaN with 0.
         self.__x_data[np.isnan(self.__x_data)] = 0
         # Checks the dimension of the state.
@@ -182,9 +157,7 @@ class CartPole(object):
         self.__pole_length = 1.5
         # Sets frames for drawing the animation.
         self.__skip_frames = 1
-        self.__total_frames = (int)(
-            self.__x_data.shape[0]/self.__skip_frames
-        )
+        self.__total_frames = (int)(self.__x_data.shape[0]/self.__skip_frames)
 
     def set_skip_frames(self, skip_frames):
         """ Set how many frames you want to skip in generating the animation.
@@ -193,9 +166,7 @@ class CartPole(object):
                 skip_frames: A number of frames to skip.
         """
         self.__skip_frames = skip_frames
-        self.__total_frames = (int)(
-            self.__x_data.shape[0]/skip_frames
-        )
+        self.__total_frames = (int)(self.__x_data.shape[0]/skip_frames)
 
     def generate_animation(self):
         """ Generates the animation and saves it as a .mp4 file. """
@@ -227,15 +198,15 @@ class CartPole(object):
         anime = FuncAnimation(
             self.__fig, 
             self.__update_animation, 
-            interval=self.__sim_conditions.sampling_period*1000, 
+            interval=self.__sim_conditions.sampling_period*1000*self.__skip_frames, 
             frames=self.__total_frames, 
             blit=True
         )
         anime.save(
             self.__file_header+'.mp4', 
             writer='ffmpeg', 
-            fps = int(
-                1/(self.__sim_conditions.sampling_period*self.__skip_frames)
+            fps=int(
+                0.1/(self.__sim_conditions.sampling_period*self.__skip_frames)
             )
         )
         print(
@@ -273,7 +244,7 @@ class CartPole(object):
             (0.5*self.__cart_height, self.__yp)
         )
         self.__time_text.set_text(
-            '{0:.1f} [s]'.format(self.__sim_conditions.sampling_period*frame)
+            '{0:.1f} [s]'.format(10.0*self.__sim_conditions.sampling_period*frame)
         )
         return (
             self.__ground, self.__cartt, self.__cartb, self.__cartr, self.__cartl, 
@@ -297,17 +268,8 @@ class Hexacopter(object):
         # Loads the simulation data.
         self.__model_dir = 'generated/' + ocp_name + '/simulation_result' 
         self.__file_header = self.__model_dir + '/' + ocp_name
-        self.__x_data = np.genfromtxt(
-            self.__file_header+'_x'+'.log'
-        )
-        self.__sim_conditions = SimulationConditions(
-            self.__file_header
-        )
-        self.__time_sequence = np.linspace(
-            0, 
-            self.__sim_conditions.simulation_time, 
-            self.__x_data.shape[0]
-        )
+        self.__x_data = np.genfromtxt(self.__file_header+'_x'+'.log')
+        self.__sim_conditions = SimulationConditions(self.__file_header)
         # Replaces NaN with 0.
         self.__x_data[np.isnan(self.__x_data)] = 0
         # Checks the dimension of the state.
@@ -321,9 +283,7 @@ class Hexacopter(object):
         self.__radius = 0.25
         # Sets frames for drawing the animation.
         self.__skip_frames = 1
-        self.__total_frames = (int)(
-            self.__x_data.shape[0]/self.__skip_frames
-        )
+        self.__total_frames = (int)(self.__x_data.shape[0]/self.__skip_frames)
 
     def set_skip_frames(self, skip_frames):
         """ Set how many frames you want to skip in generating the animation.
@@ -362,7 +322,7 @@ class Hexacopter(object):
         anime = FuncAnimation(
             self.__fig, 
             self.__update_animation, 
-            interval=self.__sim_conditions.sampling_period*1000, 
+            interval=self.__sim_conditions.sampling_period*1000*self.__skip_frames, 
             frames=self.__total_frames, 
             blit=True
         )
@@ -370,7 +330,7 @@ class Hexacopter(object):
             self.__file_header+'.mp4', 
             writer='ffmpeg', 
             fps=int(
-                1/(self.__sim_conditions.sampling_period*self.__skip_frames)
+                0.1/(self.__sim_conditions.sampling_period*self.__skip_frames)
             )
         )
         print(
@@ -395,7 +355,7 @@ class Hexacopter(object):
         self.__line6.set_data((X[5],X[0]), (Y[5],Y[0]))
         self.__line6.set_3d_properties([Z[5],Z[0]])
         self.__time_text.set_text(
-            '{0:.1f} [s]'.format(self.__sim_conditions.sampling_period*frame)
+            '{0:.1f} [s]'.format(10.0*self.__sim_conditions.sampling_period*frame)
         )
         return (
             self.__line1, self.__line2, self.__line3, self.__line4, 
@@ -453,17 +413,8 @@ class MobileRobot(object):
         # Loads the simulation data.
         self.__model_dir = 'generated/' + ocp_name + '/simulation_result' 
         self.__file_header = self.__model_dir + '/' + ocp_name
-        self.__x_data = np.genfromtxt(
-            self.__file_header+'_x'+'.log'
-        )
-        self.__sim_conditions = SimulationConditions(
-            self.__file_header
-        )
-        self.__time_sequence = np.linspace(
-            0, 
-            self.__sim_conditions.simulation_time, 
-            self.__x_data.shape[0]
-        )
+        self.__x_data = np.genfromtxt(self.__file_header+'_x'+'.log')
+        self.__sim_conditions = SimulationConditions(self.__file_header)
         # Replaces NaN with 0.
         self.__x_data[np.isnan(self.__x_data)] = 0
         # Checks the dimension of the state.
@@ -491,9 +442,7 @@ class MobileRobot(object):
         self.__X2, self.__Y2, self.__R2 = X2, Y2, R2-margin
         # Sets frames for drawing the animation.
         self.__skip_frames = 1
-        self.__total_frames = (int)(
-            self.__x_data.shape[0]/self.__skip_frames
-        )
+        self.__total_frames = (int)(self.__x_data.shape[0]/self.__skip_frames)
 
     def set_skip_frames(self, skip_frames):
         """ Set how many frames you want to skip in generating the animation.
@@ -502,9 +451,7 @@ class MobileRobot(object):
                 skip_frames: A number of frames to skip.
         """
         self.__skip_frames = skip_frames
-        self.__total_frames = (int)(
-            self.__x_data.shape[0]/skip_frames
-        )
+        self.__total_frames = (int)(self.__x_data.shape[0]/skip_frames)
 
     def generate_animation(self):
         """ Generates the animation and saves it as a .mp4 file. """
@@ -546,15 +493,15 @@ class MobileRobot(object):
         anime = FuncAnimation(
             self.__fig, 
             self.__update_animation, 
-            interval=self.__sim_conditions.sampling_period*1000, 
+            interval=self.__sim_conditions.sampling_period*1000*self.__skip_frames, 
             frames=self.__total_frames, 
             blit=True
         )
         anime.save(
             self.__file_header+'.mp4', 
             writer='ffmpeg', 
-            fps = int(
-                1/(self.__sim_conditions.sampling_period*self.__skip_frames)
+            fps=int(
+                0.1/(self.__sim_conditions.sampling_period*self.__skip_frames)
             )
         )
         print(
@@ -572,7 +519,7 @@ class MobileRobot(object):
         self.__line4.set_data((p_bl[0], p_br[0]), (p_bl[1], p_br[1]))
         self.__ref.set_data(self.__get_time(i)*self.__vx_ref, 0)
         self.__time_text.set_text(
-            '{0:.1f} [s]'.format(self.__sim_conditions.sampling_period*frame)
+            '{0:.1f} [s]'.format(10.0*self.__sim_conditions.sampling_period*frame)
         )
         return (
             self.__line1, self.__line2, self.__line3, self.__line4, self.__ref,
