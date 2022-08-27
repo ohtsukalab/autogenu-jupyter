@@ -31,6 +31,8 @@ class ControlInputBound:
         self.umax = umax
         self.dummy_weight = dummy_weight
 
+SymbolicFunctions = namedtuple('SymbolicFunctions', ['f', 'phix', 'hx', 'hu'])
+
 class NLPType(Enum):
     SingleShooting = auto()
     MultipleShooting = auto()
@@ -65,10 +67,7 @@ class AutoGenU(object):
         self.__scalar_vars = []
         self.__array_vars = []
         self.__ubounds = []
-        self.__f = None
-        self.__hx = None
-        self.__hu = None
-        self.__phix = None
+        self.__symbolic_functions = None
         self.__nlp_type = None
         self.__horizon_params = None
         self.__solver_params = None
@@ -189,7 +188,6 @@ class AutoGenU(object):
         """
         assert len(f) > 0 
         assert len(f) == self.__nx, "Dimension of f must be nx!"
-        self.__f = f
         self.__nc = len(C)
         self.__nh = len(h)
         x = sympy.symbols('x[0:%d]' %(self.__nx))
@@ -199,12 +197,13 @@ class AutoGenU(object):
         hamiltonian += sum(u[self.__nu+i] * C[i] for i in range(self.__nc))
         nuc = self.__nu + self.__nc
         hamiltonian += sum(u[nuc+i] * h[i] for i in range(self.__nh))
-        self.__hx = symutils.diff_scalar_func(hamiltonian, x)
-        self.__hu = symutils.diff_scalar_func(hamiltonian, u)
+        hx = symutils.diff_scalar_func(hamiltonian, x)
+        hu = symutils.diff_scalar_func(hamiltonian, u)
         fb_eps = sympy.symbols('fb_eps[0:%d]' %(self.__nh))
         for i in range(self.__nh):
-            self.__hu[nuc+i] = sympy.sqrt(u[nuc+i]**2 + h[i]**2 + fb_eps[i]) - (u[nuc+i] - h[i])
-        self.__phix = symutils.diff_scalar_func(phi, x)
+            hu[nuc+i] = sympy.sqrt(u[nuc+i]**2 + h[i]**2 + fb_eps[i]) - (u[nuc+i] - h[i])
+        phix = symutils.diff_scalar_func(phi, x)
+        self.__symbolic_functions = SymbolicFunctions(f, phix, hx, hu)
 
     def add_control_input_bounds(
         self, uindex, umin, umax, dummy_weight
@@ -221,7 +220,7 @@ class AutoGenU(object):
         assert uindex >= 0
         assert uindex < self.__nu
         assert umin < umax
-        assert dummy_weight >= 0 
+        assert dummy_weight >= 0, "dummy_weight must be non-negative!"
         find_same_index = False
         for ub in self.__ubounds:
             if ub.uindex == uindex:
@@ -322,10 +321,8 @@ class AutoGenU(object):
                 common_subexpression_elimination: The flag for common subexpression elimination. If True, 
                     common subexpressions are eliminated. Default is False.
         """
-        assert self.__f is not None \
-                and self.__phix is not None \
-                and self.__hx is not None \
-                and self.__hu is not None, "Symbolic functions are not set!. Before call this method, call set_functions()"
+        assert self.__symbolic_functions is not None, \
+                "Symbolic functions are not set!. Before call this method, call set_functions()"
         if self.__nh > 0:
             assert len(self.__FB_epsilon) == self.__nh
         self.__make_ocp_dir()
@@ -517,7 +514,7 @@ public:
               double* dx) const {
 """ 
         ])
-        symutils.write_symfunc(f_model_h, self.__f, 'dx', common_subexpression_elimination)
+        symutils.write_symfunc(f_model_h, self.__symbolic_functions.f, 'dx', common_subexpression_elimination)
         f_model_h.writelines([
 """ 
   }
@@ -532,7 +529,7 @@ public:
   void eval_phix(const double t, const double* x, double* phix) const {
 """ 
         ])
-        symutils.write_symfunc(f_model_h, self.__phix, 'phix', common_subexpression_elimination)
+        symutils.write_symfunc(f_model_h, self.__symbolic_functions.phix, 'phix', common_subexpression_elimination)
         f_model_h.writelines([
 """ 
   }
@@ -550,7 +547,7 @@ public:
                const double* lmd, double* hx) const {
 """ 
         ])
-        symutils.write_symfunc(f_model_h, self.__hx, 'hx', common_subexpression_elimination)
+        symutils.write_symfunc(f_model_h, self.__symbolic_functions.hx, 'hx', common_subexpression_elimination)
         f_model_h.writelines([
 """ 
   }
@@ -568,7 +565,7 @@ public:
                const double* lmd, double* hu) const {
 """ 
         ])
-        symutils.write_symfunc(f_model_h, self.__hu, 'hu', common_subexpression_elimination)
+        symutils.write_symfunc(f_model_h, self.__symbolic_functions.hu, 'hu', common_subexpression_elimination)
         f_model_h.writelines([
 """ 
   }
