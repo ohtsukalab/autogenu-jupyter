@@ -3,6 +3,7 @@ import platform
 from enum import Enum, auto
 from collections import namedtuple
 import sympy
+import os
 
 from . import symutils
 
@@ -577,6 +578,7 @@ public:
 """ 
         ])
         f_model_h.close()
+        print('\'ocp.hpp\', the definition of the OCP, is generated at', os.path.abspath('generated/'+str(self.__ocp_name)+'/ocp.hpp'))
 
 
     def generate_main(self):
@@ -691,6 +693,7 @@ public:
             '}\n'
         )
         f_main.close()
+        print('\'main.cpp\', the closed-loop simulation code, is generated at', os.path.abspath('generated/'+str(self.__ocp_name)+'/main.cpp'))
 
     def generate_python_bindings(self):
         f_pybind11 = open('generated/'+str(self.__ocp_name)+'/python/'+str(self.__ocp_name)+'/ocp.cpp', 'w')
@@ -1039,6 +1042,7 @@ from .timer import *
 """ 
         ])
         f_pybind11.close()
+        print('pybind11 source codes are generated at', os.path.abspath('generated/'+str(self.__ocp_name)+'/python'))
 
 
     def generate_cmake(self):
@@ -1184,6 +1188,7 @@ install(
 """
             ])
         f_cmake_python.close()
+        print('CMakeLists.txt are generated at', os.path.abspath('generated/'+str(self.__ocp_name)))
 
 
     def build_main(self, generator='Auto', remove_build_dir=False):
@@ -1206,6 +1211,7 @@ install(
             self.__remove_build_dir()
         build_options = ['-DCMAKE_BUILD_TYPE=Release', '-DVECTORIZE=ON', 
                          '-DBUILD_MAIN=ON', '-DBUILD_PYTHON_INTERFACE=OFF']
+        print('CMake options:', *build_options)
         if platform.system() == 'Windows':
             subprocess.run(
                 ['mkdir', 'build'], 
@@ -1281,7 +1287,6 @@ install(
                 stdout=subprocess.PIPE, 
                 stderr=subprocess.PIPE
             )
-            print('build_options:', *build_options)
             proc = subprocess.Popen(
                 ['cmake', '..', *build_options], 
                 cwd='generated/'+self.__ocp_name+'/build', 
@@ -1304,6 +1309,7 @@ install(
     def build_python_interface(self, generator='Auto'):
         build_options = ['-DCMAKE_BUILD_TYPE=Release', '-DVECTORIZE=ON', 
                          '-DBUILD_MAIN=OFF', '-DBUILD_PYTHON_INTERFACE=ON']
+        print('CMake options:', *build_options)
         if platform.system() == 'Windows':
             subprocess.run(
                 ['mkdir', 'build'], 
@@ -1378,7 +1384,6 @@ install(
                 stdout=subprocess.PIPE, 
                 stderr=subprocess.PIPE
             )
-            print('build_options:', *build_options)
             proc = subprocess.Popen(
                 ['cmake', '..', *build_options], 
                 cwd='generated/'+self.__ocp_name+'/build', 

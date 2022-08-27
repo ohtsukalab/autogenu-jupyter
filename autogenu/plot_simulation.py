@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pylab as plt
 import seaborn as sns
+import os
 
 from .simulation_conditions import SimulationConditions
 
@@ -108,8 +109,7 @@ class PlotSimulation(object):
         )
         print(
             'The graph of the simlation results is generated at '
-            +self.__file_header
-            +'.pdf\n'
+            +os.path.abspath(self.__file_header+'.pdf')
         )
 
     def __plot_graphs(self):

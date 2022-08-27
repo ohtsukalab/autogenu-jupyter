@@ -4,6 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 from matplotlib.animation import FuncAnimation
+import os
 
 from .simulation_conditions import SimulationConditions
 
@@ -96,8 +97,7 @@ class TwoLinkArm(object):
         )
         print(
             'The animation of the simlation results is generated at '
-            +self.__file_header
-            +'.mp4\n'
+            +os.path.abspath(self.__file_header+'.mp4')
         )
 
     def __update_animation(self, i):
@@ -211,8 +211,7 @@ class CartPole(object):
         )
         print(
             'The animation of the simlation results is generated at '
-            +self.__file_header
-            +'.mp4\n'
+            +os.path.abspath(self.__file_header+'.mp4')
         )
 
     def __update_animation(self, i):
@@ -335,8 +334,7 @@ class Hexacopter(object):
         )
         print(
             'The animation of the simlation results is generated at '
-            +self.__file_header
-            +'.mp4\n'
+            +os.path.abspath(self.__file_header+'.mp4')
         )
 
     def __update_animation(self, i):
@@ -506,8 +504,7 @@ class MobileRobot(object):
         )
         print(
             'The animation of the simlation results is generated at '
-            +self.__file_header
-            +'.mp4\n'
+            +os.path.abspath(self.__file_header+'.mp4')
         )
 
     def __update_animation(self, i):
