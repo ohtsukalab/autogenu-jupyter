@@ -1190,6 +1190,22 @@ install(
         f_cmake_python.close()
         print('CMakeLists.txt are generated at', os.path.abspath('generated/'+str(self.__ocp_name)))
 
+    def git_submodule_update(self):
+        if platform.system() == 'Windows':
+            subprocess.run(
+                ['git', 'submodule', 'update', '--init', '--recursive'], 
+                cwd='.', 
+                stdout=subprocess.PIPE, 
+                stderr=subprocess.PIPE, 
+                shell=True
+            )
+        else:
+            subprocess.run(
+                ['git', 'submodule', 'update', '--init', '--recursive'], 
+                cwd='.', 
+                stdout=subprocess.PIPE, 
+                stderr=subprocess.PIPE
+            )
 
     def build_main(self, generator='Auto', remove_build_dir=False):
         """ Builds execute file to run numerical simulation. 
