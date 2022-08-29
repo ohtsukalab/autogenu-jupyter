@@ -6,8 +6,8 @@ PYBIND11_MODULE(timer, m) { \
        auto copy = self; \
        return copy; \
      }) \
-    .def_readwrite("average", &TimingProfile::average) \
-    .def_readwrite("max", &TimingProfile::max) \
+    .def_readwrite("average_time_ms", &TimingProfile::average_time_ms) \
+    .def_readwrite("max_time_ms", &TimingProfile::max_time_ms) \
     .def_readwrite("counts", &TimingProfile::counts) \
     .def("__str__", [](const TimingProfile& self) { \
         std::stringstream ss; \

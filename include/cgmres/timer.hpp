@@ -15,14 +15,14 @@ namespace cgmres {
 ///
 struct TimingProfile {
   ///
-  /// @brief Average time in milliseconds.
+  /// @brief Average computational time in milliseconds.
   ///
-  Scalar average = 0;
+  Scalar average_time_ms = 0;
 
   ///
-  /// @brief Maximum time in milliseconds.
+  /// @brief Maximum computational time in milliseconds.
   ///
-  Scalar max = 0;
+  Scalar max_time_ms = 0;
 
   ///
   /// @brief Number of timing counts.
@@ -31,9 +31,9 @@ struct TimingProfile {
 
   void disp(std::ostream& os) const {
     os << "TimingProfile: " << std::endl; 
-    os << "  average: " << average << " [ms]" << std::endl;
-    os << "  max:     " << max << " [ms]" << std::endl;
-    os << "  counts:  " << counts << std::endl;
+    os << "  average time: " << average_time_ms << " [ms]" << std::endl;
+    os << "  max time:     " << max_time_ms << " [ms]" << std::endl;
+    os << "  counts:       " << counts << std::endl;
   }
 
   friend std::ostream& operator<<(std::ostream& os, const TimingProfile& profile) {
@@ -90,8 +90,8 @@ public:
   TimingProfile getProfile() const {
     TimingProfile profile;
     if (counts_ > 0) {
-      profile.average = total_elapsed_time_ / counts_;
-      profile.max = max_elapsed_time_;
+      profile.average_time_ms = total_elapsed_time_ / counts_;
+      profile.max_time_ms = max_elapsed_time_;
       profile.counts = counts_;
     }
     return profile;
