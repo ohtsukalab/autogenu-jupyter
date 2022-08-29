@@ -118,6 +118,7 @@ public:
 
   ///
   /// @brief Synchrozies the internal parameters of this OCP with the external references.
+  /// This method is called at the beginning of each MPC update.
   ///
   void synchronize() {
   }
