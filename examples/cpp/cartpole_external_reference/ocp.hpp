@@ -100,9 +100,20 @@ public:
     return os;
   }
 
+  /// 
+  /// @class ExternalReference
+  /// @brief External reference of the cart pole.
+  /// 
   struct ExternalReference {
+    ///
+    /// @brief Position of the cart. Default is 0.
+    ///
     double cart_position = 0.0;
   };
+
+  ///
+  /// @brief Shared ptr to the external reference of the cart pole.
+  ///
   std::shared_ptr<ExternalReference> external_reference = nullptr;
 
   ///
