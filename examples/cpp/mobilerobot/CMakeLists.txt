@@ -22,6 +22,12 @@ target_include_directories(
   PRIVATE
   ${CGMRES_INCLUDE_DIR}
 )
+# # the following way is also possible instead of including ${CGMRES_INCLUDE_DIR}, 
+# target_link_libraries(
+#   ${PROJECT_NAME}
+#   PRIVATE
+#   cgmres::cgmres
+# )
 if (VECTORIZE)
   target_compile_options(
     ${PROJECT_NAME}
