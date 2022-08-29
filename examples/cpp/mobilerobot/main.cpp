@@ -55,7 +55,7 @@ int main() {
   for (int i=0; i<sim_steps; ++i) {
     const auto& u = mpc.uopt()[0]; // const reference to the initial optimal control input 
     dx.setZero();
-    ocp.eval_f(t, x.data(), u.data(), dx.data()); // eval the state equation
+    ocp.eval_f(t, x, u, dx); // eval the state equation
     const cgmres::VectorX x1 = x + sampling_time * dx;
     mpc.update(t, x);
     x = x1;
