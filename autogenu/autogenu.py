@@ -1471,11 +1471,9 @@ install(
         if remove_build_dir:
             self.__remove_build_dir()
         if vectorize:
-            build_options = ['-DCMAKE_BUILD_TYPE=Release', '-DVECTORIZE=ON', '-DBUILD_MAIN=OFF', '-DBUILD_PYTHON_INTERFACE=ON',
-                             '-DPYTHON_EXECUTABLE=$(which python)', '-DPYBIND11_FINDPYTHON=True']
+            build_options = ['-DCMAKE_BUILD_TYPE=Release', '-DVECTORIZE=ON', '-DBUILD_MAIN=OFF', '-DBUILD_PYTHON_INTERFACE=ON']
         else:
-            build_options = ['-DCMAKE_BUILD_TYPE=Release', '-DVECTORIZE=OFF', '-DBUILD_MAIN=OFF', '-DBUILD_PYTHON_INTERFACE=ON',
-                             '-DPYTHON_EXECUTABLE=$(which python)', '-DPYBIND11_FINDPYTHON=True']
+            build_options = ['-DCMAKE_BUILD_TYPE=Release', '-DVECTORIZE=OFF', '-DBUILD_MAIN=OFF', '-DBUILD_PYTHON_INTERFACE=ON']
         print('CMake options:', *build_options)
         if platform.system() == 'Windows':
             subprocess.run(
