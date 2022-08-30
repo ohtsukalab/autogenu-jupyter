@@ -1,3 +1,5 @@
+from gettext import install
+import imp
 import subprocess
 import platform
 from enum import Enum, auto
@@ -5,6 +7,7 @@ from collections import namedtuple
 import sympy
 import os
 import sys
+import glob, shutil
 
 from . import symutils
 
@@ -1543,38 +1546,31 @@ install(
     def install_python_interface(self, install_prefix=None):
         if install_prefix is None:
             python_version = 'python' + str(sys.version_info.major) + '.' + str(sys.version_info.minor)
-            install_destination = os.path.abspath(os.path.join(os.environ['HOME'], '/.local/lib/', python_version, 'site-packages'))
-            print('Python interfaces will be installed at' + str(install_destination))
-            proc = subprocess.Popen(
-                ['cmake', '..'], 
-                cwd='generated/'+self.__ocp_name+'/build', 
-                stdout=subprocess.PIPE, 
-                stderr=subprocess.STDOUT
-            )
+            install_destination = os.path.join(os.path.abspath(os.environ['HOME']), '.local/lib', python_version, 'site-packages/cgmres')
         else:
-            install_destination = os.path.abspath(install_prefix)
-            print('Python interfaces will be installed at' + str(install_destination))
-            proc = subprocess.Popen(
-                ['cmake', '..', '-DCMAKE_INSTALL_PREFIX='+install_destination], 
-                cwd='generated/'+self.__ocp_name+'/build', 
-                stdout=subprocess.PIPE, 
-                stderr=subprocess.STDOUT
-            )
-        proc = subprocess.Popen(
-            ['cmake', '--build', '.', '-j8'], 
-            cwd='generated/'+self.__ocp_name+'/build', 
-            stdout = subprocess.PIPE, 
-            stderr = subprocess.STDOUT
+            install_destination = os.path.join(os.path.abspath(install_prefix), 'cgmres')
+        pybind11_sharedlibs = glob.glob('generated/'+self.__ocp_name+'/build/python/'+self.__ocp_name+'/*.so')
+        pybind11_sharedlibs_common = glob.glob('generated/'+self.__ocp_name+'/build/python/common/*.so')
+        subprocess.run(
+            ['mkdir', '-p', str(os.path.join(install_destination, self.__ocp_name)), str(os.path.join(install_destination, 'common'))], 
+            cwd='.',
+            stdout=subprocess.PIPE, 
+            stderr=subprocess.STDOUT, 
         )
-        proc = subprocess.Popen(
-            ['cmake', '--install', '.'], 
-            cwd='generated/'+self.__ocp_name+'/build', 
-            stdout = subprocess.PIPE, 
-            stderr = subprocess.STDOUT
-        )
-        for line in iter(proc.stdout.readline, b''):
-            print(line.rstrip().decode("utf8"))
-        print('\n')
+        for e in pybind11_sharedlibs:
+            shutil.copy(e, str(os.path.join(install_destination, self.__ocp_name)))
+        for e in pybind11_sharedlibs_common:
+            shutil.copy(e, str(os.path.join(install_destination, 'common')))
+        python_files = glob.glob('generated/'+self.__ocp_name+'/python/'+self.__ocp_name+'/*.py')
+        python_files_common = glob.glob('generated/'+self.__ocp_name+'/python/common/*.py')
+        for e in python_files:
+            shutil.copy(e, str(os.path.join(install_destination, self.__ocp_name)))
+        for e in python_files_common:
+            shutil.copy(e, str(os.path.join(install_destination, 'common')))
+        print('Python interfaces have been installed at ' + str(install_destination))
+        print('To use Python interfaces, run \'export PYTHONPATH=$PYTHONPATH:' + str(install_destination) + '\'')
+        print('or , \'echo export PYTHONPATH=$PYTHONPATH:' + str(install_destination) + ' >> ~./bashrc\' (Ubuntu)')
+        print('or , \'echo export PYTHONPATH=$PYTHONPATH:' + str(install_destination) + '>> ~./zshrc\' (Mac)')
 
     def run_simulation(self):
         """ Run numerical simulation. Call after build() succeeded.
