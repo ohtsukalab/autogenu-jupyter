@@ -1535,7 +1535,7 @@ install(
                     print(line.rstrip().decode("utf8"))
                 print('\n')
             proc = subprocess.Popen(
-                ['cmake', '--build', '.', '-j8'], 
+                ['cmake', '--build', '.', '--parallel', '8'], 
                 cwd='generated/'+self.__ocp_name+'/build', 
                 stdout=subprocess.PIPE, 
                 stderr=subprocess.STDOUT, 

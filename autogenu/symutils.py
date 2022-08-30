@@ -28,7 +28,7 @@ def simplify(func):
     else:
         func = sympy.simplify(sympy.nsimplify(func))
 
-def write_symfunc(writable_file, function, output_value_name, common_subexpression_elimination):
+def write_symfunc(writable_file, function, output_value_name: str, common_subexpression_elimination: bool):
     """ Write input symbolic function onto writable_file. The function's 
         return value name must be set. common_subexpression_elimination is optional.
 

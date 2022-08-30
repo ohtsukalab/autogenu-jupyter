@@ -6,7 +6,7 @@ class SimulationConditions(object):
         graph of the simulation and draw the animation of the simulation.
     """
 
-    def __init__(self, ocp_name):
+    def __init__(self, ocp_name: str):
         """ Inits SimulationConditions with the simulation results. """
         simulation_conditions = open(ocp_name + '_conditions' + '.log')
         lines = simulation_conditions.readlines()

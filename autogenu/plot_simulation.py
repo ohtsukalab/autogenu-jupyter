@@ -17,7 +17,7 @@ class PlotSimulation(object):
                 file.
     """
 
-    def __init__(self, ocp_name):
+    def __init__(self, ocp_name: str):
         """ Inits SimulationPlotter with loading the simulation results. """
         # Load the data of the simulation results. 
         self.__save_dir = 'generated/' + ocp_name + '/simulation_result/'
