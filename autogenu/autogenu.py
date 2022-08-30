@@ -4,6 +4,7 @@ from enum import Enum, auto
 from collections import namedtuple
 import sympy
 import os
+import sys
 
 from . import symutils
 
@@ -1541,6 +1542,9 @@ install(
 
     def install_python_interface(self, install_prefix=None):
         if install_prefix is None:
+            python_version = 'python' + str(sys.version_info.major) + '.' + str(sys.version_info.minor)
+            install_destination = os.path.abspath(os.path.join(os.environ['HOME'], '/.local/lib/', python_version, 'site-packages'))
+            print('Python interfaces will be installed at' + str(install_destination))
             proc = subprocess.Popen(
                 ['cmake', '..'], 
                 cwd='generated/'+self.__ocp_name+'/build', 
@@ -1548,8 +1552,10 @@ install(
                 stderr=subprocess.STDOUT
             )
         else:
+            install_destination = os.path.abspath(install_prefix)
+            print('Python interfaces will be installed at' + str(install_destination))
             proc = subprocess.Popen(
-                ['cmake', '..', '-DCMAKE_INSTALL_PREFIX='+install_prefix], 
+                ['cmake', '..', '-DCMAKE_INSTALL_PREFIX='+install_destination], 
                 cwd='generated/'+self.__ocp_name+'/build', 
                 stdout=subprocess.PIPE, 
                 stderr=subprocess.STDOUT
