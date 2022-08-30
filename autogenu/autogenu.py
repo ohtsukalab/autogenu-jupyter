@@ -1,5 +1,3 @@
-from gettext import install
-import imp
 import subprocess
 import platform
 from enum import Enum, auto
@@ -13,13 +11,13 @@ from . import symutils
 
 
 class ScalarVariable:
-    def __init__(self, symbol, name, value=0.0):
+    def __init__(self, symbol: sympy.Symbol, name: str, value=0.0):
         self.symbol = symbol
         self.name = name 
         self.value = value
 
 class ArrayVariable:
-    def __init__(self, symbol, name, size, values=[]):
+    def __init__(self, symbol, name: str, size: int, values=[]):
         assert size > 0
         self.symbol = symbol
         self.name = name 
@@ -27,7 +25,7 @@ class ArrayVariable:
         self.values = values
 
 class ControlInputBound:
-    def __init__(self, uindex, umin, umax, dummy_weight):
+    def __init__(self, uindex: int, umin, umax, dummy_weight):
         assert uindex >= 0
         assert umin < umax
         assert dummy_weight >= 0.0
@@ -211,7 +209,7 @@ class AutoGenU(object):
         self.__symbolic_functions = SymbolicFunctions(f, phix, hx, hu)
 
     def add_control_input_bounds(
-        self, uindex, umin, umax, dummy_weight
+        self, uindex: int, umin, umax, dummy_weight
         ):
         """ Adds the bax constraints on the control input that is condensed in 
             linear problem. 
@@ -280,7 +278,7 @@ class AutoGenU(object):
         self.__solver_params = SolverParams(sampling_time, N, finite_difference_epsilon, zeta, kmax)
 
     def set_initialization_params(
-            self, solution_initial_guess, tolerance=1.0e-04, max_iterations=100
+            self, solution_initial_guess, tolerance=1.0e-04, max_iterations: int=100
         ):
         """ Set parameters for the initialization of the C/GMRES solvers. 
 
@@ -315,7 +313,7 @@ class AutoGenU(object):
         assert simulation_length > 0
         self.__simulation_params = SimulationParams(initial_time, initial_state, simulation_length)
 
-    def generate_ocp_definition(self, simplification=False, common_subexpression_elimination=False):
+    def generate_ocp_definition(self, simplification: bool=False, common_subexpression_elimination: bool=False):
         """ Generates the C++ source file in which the equations to solve the 
             optimal control problem are described. Before call this method, 
             set_functions() must be called.
@@ -1331,7 +1329,8 @@ install(
                 stderr=subprocess.PIPE
             )
 
-    def build_main(self, generator='Auto', remove_build_dir=False):
+    def build_main(self, generator: str='Auto', vectorize: bool=True, 
+                   remove_build_dir: bool=False):
         """ Builds execute file to run numerical simulation. 
 
             Args: 
@@ -1342,6 +1341,8 @@ install(
                     sh.exe exists in your PATH, MSYS is choosed, and otherwise 
                     MinGW is used. If different value from 'MSYS' and 'MinGW', 
                     generator is selected automatically.
+                vectorize: If True, vectorization ('-march=native' compile option) is enabled.
+                    Default is True.
                 remove_build_dir: If true, the existing build directory is 
                     removed and if False, the build directory is not removed.
                     Need to be set True is you change CMake configuration, e.g., 
@@ -1349,8 +1350,10 @@ install(
         """
         if remove_build_dir:
             self.__remove_build_dir()
-        build_options = ['-DCMAKE_BUILD_TYPE=Release', '-DVECTORIZE=ON', 
-                         '-DBUILD_MAIN=ON', '-DBUILD_PYTHON_INTERFACE=OFF']
+        if vectorize:
+            build_options = ['-DCMAKE_BUILD_TYPE=Release', '-DVECTORIZE=ON', '-DBUILD_MAIN=ON', '-DBUILD_PYTHON_INTERFACE=OFF']
+        else:
+            build_options = ['-DCMAKE_BUILD_TYPE=Release', '-DVECTORIZE=OFF', '-DBUILD_MAIN=ON', '-DBUILD_PYTHON_INTERFACE=OFF']
         print('CMake options:', *build_options)
         if platform.system() == 'Windows':
             subprocess.run(
@@ -1446,9 +1449,31 @@ install(
                 print(line.rstrip().decode("utf8"))
             print('\n')
 
-    def build_python_interface(self, generator='Auto'):
-        build_options = ['-DCMAKE_BUILD_TYPE=Release', '-DVECTORIZE=ON', 
-                         '-DBUILD_MAIN=OFF', '-DBUILD_PYTHON_INTERFACE=ON']
+    def build_python_interface(self, generator: str='Auto', vectorize: bool=True, 
+                               remove_build_dir: bool=False):
+        """ Builds Python interfaces. 
+
+            Args: 
+                generator: An optional variable for Windows user to choose the
+                    generator. If 'MSYS', then 'MSYS Makefiles' is used. If 
+                    'MinGW', then 'MinGW Makefiles' is used. The default value 
+                    is 'Auto' and the generator is selected automatically. If 
+                    sh.exe exists in your PATH, MSYS is choosed, and otherwise 
+                    MinGW is used. If different value from 'MSYS' and 'MinGW', 
+                    generator is selected automatically.
+                vectorize: If True, vectorization ('-march=native' compile option) is enabled.
+                    Default is True.
+                remove_build_dir: If true, the existing build directory is 
+                    removed and if False, the build directory is not removed.
+                    Need to be set True is you change CMake configuration, e.g., 
+                    if you change the generator. The default value is False.
+        """
+        if remove_build_dir:
+            self.__remove_build_dir()
+        if vectorize:
+            build_options = ['-DCMAKE_BUILD_TYPE=Release', '-DVECTORIZE=ON', '-DBUILD_MAIN=OFF', '-DBUILD_PYTHON_INTERFACE=ON']
+        else:
+            build_options = ['-DCMAKE_BUILD_TYPE=Release', '-DVECTORIZE=OFF', '-DBUILD_MAIN=OFF', '-DBUILD_PYTHON_INTERFACE=ON']
         print('CMake options:', *build_options)
         if platform.system() == 'Windows':
             subprocess.run(
@@ -1508,7 +1533,7 @@ install(
                     print(line.rstrip().decode("utf8"))
                 print('\n')
             proc = subprocess.Popen(
-                ['cmake', '--build', '.', '-j8'], 
+                ['cmake', '--build', '.', '--parallel', '8'], 
                 cwd='generated/'+self.__ocp_name+'/build', 
                 stdout=subprocess.PIPE, 
                 stderr=subprocess.STDOUT, 
