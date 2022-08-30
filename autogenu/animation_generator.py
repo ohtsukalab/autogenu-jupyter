@@ -1,10 +1,9 @@
-import sys
-
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 from matplotlib.animation import FuncAnimation
 import os
+import sys
 
 from .simulation_conditions import SimulationConditions
 

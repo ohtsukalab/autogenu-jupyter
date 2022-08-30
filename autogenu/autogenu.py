@@ -1,5 +1,3 @@
-from gettext import install
-import imp
 import subprocess
 import platform
 from enum import Enum, auto
