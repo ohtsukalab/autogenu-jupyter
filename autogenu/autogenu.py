@@ -1546,7 +1546,8 @@ install(
     def install_python_interface(self, install_prefix=None):
         if install_prefix is None:
             python_version = 'python' + str(sys.version_info.major) + '.' + str(sys.version_info.minor)
-            install_destination = os.path.join(os.path.abspath(os.environ['HOME']), '.local/lib', python_version, 'site-packages/cgmres')
+            install_prefix = os.path.join(os.path.abspath(os.environ['HOME']), '.local/lib', python_version, 'site-packages')
+            install_destination = os.path.join(install_prefix, 'cgmres')
         else:
             install_destination = os.path.join(os.path.abspath(install_prefix), 'cgmres')
         pybind11_sharedlibs = glob.glob('generated/'+self.__ocp_name+'/build/python/'+self.__ocp_name+'/*.so')
@@ -1567,10 +1568,10 @@ install(
             shutil.copy(e, str(os.path.join(install_destination, self.__ocp_name)))
         for e in python_files_common:
             shutil.copy(e, str(os.path.join(install_destination, 'common')))
-        print('Python interfaces have been installed at ' + str(install_destination))
-        print('To use Python interfaces, run \'export PYTHONPATH=$PYTHONPATH:' + str(install_destination) + '\'')
-        print('or , \'echo export PYTHONPATH=$PYTHONPATH:' + str(install_destination) + ' >> ~./bashrc\' (Ubuntu)')
-        print('or , \'echo export PYTHONPATH=$PYTHONPATH:' + str(install_destination) + '>> ~./zshrc\' (Mac)')
+        print('Python interfaces have been installed at ' + str(install_prefix))
+        print('To use Python interfaces, run \'export PYTHONPATH=$PYTHONPATH:' + str(install_prefix) + '\'')
+        print('or , \'echo export PYTHONPATH=$PYTHONPATH:' + str(install_prefix) + ' >> ~./bashrc\' (Ubuntu)')
+        print('or , \'echo export PYTHONPATH=$PYTHONPATH:' + str(install_prefix) + '>> ~./zshrc\' (Mac)')
 
     def run_simulation(self):
         """ Run numerical simulation. Call after build() succeeded.
