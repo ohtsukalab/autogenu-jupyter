@@ -1569,9 +1569,13 @@ install(
         for e in python_files_common:
             shutil.copy(e, str(os.path.join(install_destination, 'common')))
         print('Python interfaces have been installed at ' + str(install_prefix))
-        print('To use Python interfaces, run \'export PYTHONPATH=$PYTHONPATH:' + str(install_prefix) + '\'')
-        print('or , \'echo export PYTHONPATH=$PYTHONPATH:' + str(install_prefix) + ' >> ~./bashrc\' (Ubuntu)')
-        print('or , \'echo export PYTHONPATH=$PYTHONPATH:' + str(install_prefix) + '>> ~./zshrc\' (Mac)')
+        print('To use Python interfaces, run \n')
+        print('    export PYTHONPATH=$PYTHONPATH:' + str(install_prefix) + '\n')
+        print('in the terminal to recognize the PYTHONPATH temporary.')
+        print('Or set the PATH in Ubuntu as\n')
+        print('    echo export PYTHONPATH=$PYTHONPATH:' + str(install_prefix) + ' >> ~./bashrc\n')
+        print('or in Mac OSX as\n')
+        print('    echo export PYTHONPATH=$PYTHONPATH:' + str(install_prefix) + ' >> ~./zshrc\n')
 
     def run_simulation(self):
         """ Run numerical simulation. Call after build() succeeded.
