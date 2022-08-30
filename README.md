@@ -68,6 +68,10 @@ import cgmres.common # this includes horizon, solver settings, etc.
 import cgmres.your_ocp_name # this includes OCP definition and NMPC solvers 
 ```
 
+### Documentation
+C++ API documentation of `cgmres` library is found at https://mayataka.github.io/autogenu-jupyter/.   
+Python interfaces are almost the same as the C++ API, so please refere to https://mayataka.github.io/autogenu-jupyter/ even for Python interfaces.
+
 
 ## Demos
 Demos are presented in `cartpole.ipynb`, `pendubot.ipynb`, `hexacopter.ipynb`, and `mobilerobot.ipynb`. You can obtain the following simulation results jusy by runnig these `.ipynb` files. The details of the each OCP formulations are described in each `.ipynb` files.

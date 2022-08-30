@@ -1,5 +1,5 @@
 ## C++ examples
-This shows how to use `cgmres` as a header-only library.
+Here we show how to use `cgmres` as a header-only library.
 First, install `cgmres` library in the project root directory as
 ```
 mkdir build
@@ -17,4 +17,5 @@ cmake .. -DCMAKE_PREFIX_PATH=YOUR_INSTALL_DESTINATION -DCMAKE_BUILD_TYPE=Release
 make 
 ./cartpole
 ```
-
+## Documentation 
+The documentations on the C++ API is found at https://mayataka.github.io/autogenu-jupyter/.
