@@ -1593,18 +1593,8 @@ install(
         pybind11_sharedlibs_common = glob.glob('generated/'+self.__ocp_name+'/build/python/common/*.so') \
                                         + glob.glob('generated/'+self.__ocp_name+'/build/python/common/*.pyd')
         if platform.system() == 'Windows':
-            subprocess.run(
-                ['mkdir', str(os.path.join(install_destination, self.__ocp_name))], 
-                cwd='.',
-                stdout=subprocess.PIPE, 
-                stderr=subprocess.STDOUT, 
-            )
-            subprocess.run(
-                ['mkdir', str(os.path.join(install_destination, 'common'))], 
-                cwd='.',
-                stdout=subprocess.PIPE, 
-                stderr=subprocess.STDOUT, 
-            )
+            os.makedirs(os.path.join(install_destination, self.__ocp_name), exist_ok=True)
+            os.makedirs(os.path.join(install_destination, 'common'), exist_ok=True)
         else:
             subprocess.run(
                 ['mkdir', '-p', str(os.path.join(install_destination, self.__ocp_name)), str(os.path.join(install_destination, 'common'))], 
