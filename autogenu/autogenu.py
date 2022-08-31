@@ -1592,7 +1592,13 @@ install(
         pybind11_sharedlibs_common = glob.glob('generated/'+self.__ocp_name+'/build/python/common/*.so')
         if platform.system() == 'Windows':
             subprocess.run(
-                ['mkdir', str(os.path.join(install_destination, self.__ocp_name)), str(os.path.join(install_destination, 'common'))], 
+                ['mkdir', '\"'+str(os.path.join(install_destination, self.__ocp_name))+'\"'], 
+                cwd='.',
+                stdout=subprocess.PIPE, 
+                stderr=subprocess.STDOUT, 
+            )
+            subprocess.run(
+                ['mkdir', '\"'+str(os.path.join(install_destination, 'common'))+'\"'], 
                 cwd='.',
                 stdout=subprocess.PIPE, 
                 stderr=subprocess.STDOUT, 
@@ -1692,15 +1698,22 @@ install(
                 shell=True
             )
             subprocess.run(
-                ['mkdir', 'python/'+self.__ocp_name], 
+                ['mkdir', 'python'], 
                 cwd='generated/'+self.__ocp_name, 
                 stdout=subprocess.PIPE, 
                 stderr=subprocess.PIPE, 
                 shell=True
             )
             subprocess.run(
-                ['mkdir', 'python/common'], 
-                cwd='generated/'+self.__ocp_name, 
+                ['mkdir', self.__ocp_name], 
+                cwd='generated/'+self.__ocp_name+'/python', 
+                stdout=subprocess.PIPE, 
+                stderr=subprocess.PIPE, 
+                shell=True
+            )
+            subprocess.run(
+                ['mkdir', 'common'], 
+                cwd='generated/'+self.__ocp_name+'/python', 
                 stdout=subprocess.PIPE, 
                 stderr=subprocess.PIPE, 
                 shell=True
