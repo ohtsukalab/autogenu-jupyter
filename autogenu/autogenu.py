@@ -1245,8 +1245,12 @@ pybind11_add_cgmres_module(multiple_shooting_cgmres_solver)
 set(CGMRES_PYTHON_VERSION ${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR})
 """
             ])
-        f_cmake_python.write(
-            'set(CGMRES_PYTHON_BINDINGS_LIBDIR $ENV{HOME}/.local/lib/python${CGMRES_PYTHON_VERSION}/site-packages/cgmres/'+self.__ocp_name+')')
+        if platform.system() == 'Windows':
+            f_cmake_python.write(
+                'set(CGMRES_PYTHON_BINDINGS_LIBDIR $ENV{HOMEPATH}/.local/lib/python${CGMRES_PYTHON_VERSION}/site-packages/cgmres/'+self.__ocp_name+')')
+        else:
+            f_cmake_python.write(
+                'set(CGMRES_PYTHON_BINDINGS_LIBDIR $ENV{HOME}/.local/lib/python${CGMRES_PYTHON_VERSION}/site-packages/cgmres/'+self.__ocp_name+')')
         f_cmake_python.writelines([
 """
 file(GLOB PYTHON_BINDINGS_${CURRENT_MODULE_DIR} ${CMAKE_CURRENT_BINARY_DIR}/*.cpython*)
@@ -1295,8 +1299,12 @@ pybind11_add_cgmres_module(timer)
 set(CGMRES_PYTHON_VERSION ${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR})
 """
             ])
-        f_cmake_python.write(
-            'set(CGMRES_PYTHON_BINDINGS_LIBDIR $ENV{HOME}/.local/lib/python${CGMRES_PYTHON_VERSION}/site-packages/cgmres/common)')
+        if platform.system() == 'Windows':
+            f_cmake_python.write(
+                'set(CGMRES_PYTHON_BINDINGS_LIBDIR $ENV{HOMEPATH}/.local/lib/python${CGMRES_PYTHON_VERSION}/site-packages/cgmres/common)')
+        else:
+            f_cmake_python.write(
+                'set(CGMRES_PYTHON_BINDINGS_LIBDIR $ENV{HOME}/.local/lib/python${CGMRES_PYTHON_VERSION}/site-packages/cgmres/common)')
         f_cmake_python.writelines([
 """
 file(GLOB PYTHON_BINDINGS_${CURRENT_MODULE_DIR} ${CMAKE_CURRENT_BINARY_DIR}/*.cpython*)
@@ -1573,18 +1581,29 @@ install(
     def install_python_interface(self, install_prefix=None):
         if install_prefix is None:
             python_version = 'python' + str(sys.version_info.major) + '.' + str(sys.version_info.minor)
-            install_prefix = os.path.join(os.path.abspath(os.environ['HOME']), '.local/lib', python_version, 'site-packages')
+            if platform.system() == 'Windows':
+                install_prefix = os.path.join(os.path.abspath(os.environ['HOMEPATH']), '.local/lib', python_version, 'site-packages')
+            else:
+                install_prefix = os.path.join(os.path.abspath(os.environ['HOME']), '.local/lib', python_version, 'site-packages')
             install_destination = os.path.join(install_prefix, 'cgmres')
         else:
             install_destination = os.path.join(os.path.abspath(install_prefix), 'cgmres')
         pybind11_sharedlibs = glob.glob('generated/'+self.__ocp_name+'/build/python/'+self.__ocp_name+'/*.so')
         pybind11_sharedlibs_common = glob.glob('generated/'+self.__ocp_name+'/build/python/common/*.so')
-        subprocess.run(
-            ['mkdir', '-p', str(os.path.join(install_destination, self.__ocp_name)), str(os.path.join(install_destination, 'common'))], 
-            cwd='.',
-            stdout=subprocess.PIPE, 
-            stderr=subprocess.STDOUT, 
-        )
+        if platform.system() == 'Windows':
+            subprocess.run(
+                ['mkdir', str(os.path.join(install_destination, self.__ocp_name)), str(os.path.join(install_destination, 'common'))], 
+                cwd='.',
+                stdout=subprocess.PIPE, 
+                stderr=subprocess.STDOUT, 
+            )
+        else:
+            subprocess.run(
+                ['mkdir', '-p', str(os.path.join(install_destination, self.__ocp_name)), str(os.path.join(install_destination, 'common'))], 
+                cwd='.',
+                stdout=subprocess.PIPE, 
+                stderr=subprocess.STDOUT, 
+            )
         for e in pybind11_sharedlibs:
             shutil.copy(e, str(os.path.join(install_destination, self.__ocp_name)))
         for e in pybind11_sharedlibs_common:
@@ -1673,14 +1692,14 @@ install(
                 shell=True
             )
             subprocess.run(
-                ['mkdir', '-p', 'python/'+self.__ocp_name], 
+                ['mkdir', 'python/'+self.__ocp_name], 
                 cwd='generated/'+self.__ocp_name, 
                 stdout=subprocess.PIPE, 
                 stderr=subprocess.PIPE, 
                 shell=True
             )
             subprocess.run(
-                ['mkdir', '-p', 'python/common'], 
+                ['mkdir', 'python/common'], 
                 cwd='generated/'+self.__ocp_name, 
                 stdout=subprocess.PIPE, 
                 stderr=subprocess.PIPE, 
