@@ -162,7 +162,12 @@ FILE_PATTERNS          = *.c \
 RECURSIVE              = YES
 EXCLUDE                = ../include/cgmres/thirdparty \
                          ../include/cgmres/simulator \ 
-                         ../include/cgmres/python 
+                         ../include/cgmres/python \
+                         ../examples/cpp/cartpole/README.md \
+                         ../examples/cpp/cartpole_external_reference/README.md \
+                         ../examples/cpp/hexacopter/README.md \
+                         ../examples/cpp/mobilerobot/README.md \
+                         ../examples/cpp/pendubot/README.md 
 EXCLUDE_SYMLINKS       = NO
 EXCLUDE_PATTERNS       = 
 EXCLUDE_SYMBOLS        = 
