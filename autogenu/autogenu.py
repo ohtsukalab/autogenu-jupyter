@@ -1313,6 +1313,7 @@ install(
     def git_submodule_update(self):
         """ Updates git submodules
         """
+        print('Update git submodules...')
         if platform.system() == 'Windows':
             subprocess.run(
                 ['git', 'submodule', 'update', '--init', '--recursive'], 
@@ -1328,6 +1329,7 @@ install(
                 stdout=subprocess.PIPE, 
                 stderr=subprocess.PIPE
             )
+        print('Successfully updated git submodules\n')
 
     def build_main(self, generator: str='Auto', vectorize: bool=True, 
                    remove_build_dir: bool=False):
