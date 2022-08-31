@@ -1585,18 +1585,18 @@ install(
                 install_prefix = os.path.join(os.path.abspath(os.environ['HOMEPATH']), '.local/lib', python_version, 'site-packages')
             else:
                 install_prefix = os.path.join(os.path.abspath(os.environ['HOME']), '.local/lib', python_version, 'site-packages')
-            install_destination = os.path.join(install_prefix, 'cgmres')
+            install_destination = os.path.join(os.path.abspath(install_prefix), 'cgmres')
         else:
             install_destination = os.path.join(os.path.abspath(install_prefix), 'cgmres')
-        pybind11_sharedlibs = glob.glob('generated/'+self.__ocp_name+'/build/python/'+self.__ocp_name+'/*.so')
-        pybind11_sharedlibs_common = glob.glob('generated/'+self.__ocp_name+'/build/python/common/*.so')
+        pybind11_sharedlibs = glob.glob('generated/'+self.__ocp_name+'/build/python/'+self.__ocp_name+'/*.so') \
+                                + glob.glob('generated/'+self.__ocp_name+'/build/python/'+self.__ocp_name+'/*.dylib') \
+                                + glob.glob('generated/'+self.__ocp_name+'/build/python/'+self.__ocp_name+'/*.pyd')
+        pybind11_sharedlibs_common = glob.glob('generated/'+self.__ocp_name+'/build/python/common/*.so') \
+                                        + glob.glob('generated/'+self.__ocp_name+'/build/python/common/*.dylib') \
+                                        + glob.glob('generated/'+self.__ocp_name+'/build/python/common/*.pyd')
         if platform.system() == 'Windows':
-            subprocess.run(
-                ['mkdir', str(os.path.join(install_destination, self.__ocp_name)), str(os.path.join(install_destination, 'common'))], 
-                cwd='.',
-                stdout=subprocess.PIPE, 
-                stderr=subprocess.STDOUT, 
-            )
+            os.makedirs(os.path.join(install_destination, self.__ocp_name), exist_ok=True)
+            os.makedirs(os.path.join(install_destination, 'common'), exist_ok=True)
         else:
             subprocess.run(
                 ['mkdir', '-p', str(os.path.join(install_destination, self.__ocp_name)), str(os.path.join(install_destination, 'common'))], 
@@ -1692,15 +1692,22 @@ install(
                 shell=True
             )
             subprocess.run(
-                ['mkdir', 'python/'+self.__ocp_name], 
+                ['mkdir', 'python'], 
                 cwd='generated/'+self.__ocp_name, 
                 stdout=subprocess.PIPE, 
                 stderr=subprocess.PIPE, 
                 shell=True
             )
             subprocess.run(
-                ['mkdir', 'python/common'], 
-                cwd='generated/'+self.__ocp_name, 
+                ['mkdir', self.__ocp_name], 
+                cwd='generated/'+self.__ocp_name+'/python', 
+                stdout=subprocess.PIPE, 
+                stderr=subprocess.PIPE, 
+                shell=True
+            )
+            subprocess.run(
+                ['mkdir', 'common'], 
+                cwd='generated/'+self.__ocp_name+'/python', 
                 stdout=subprocess.PIPE, 
                 stderr=subprocess.PIPE, 
                 shell=True
