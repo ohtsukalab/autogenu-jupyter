@@ -1585,7 +1585,7 @@ install(
                 install_prefix = os.path.join(os.path.abspath(os.environ['HOMEPATH']), '.local/lib', python_version, 'site-packages')
             else:
                 install_prefix = os.path.join(os.path.abspath(os.environ['HOME']), '.local/lib', python_version, 'site-packages')
-            install_destination = os.path.join(install_prefix, 'cgmres')
+            install_destination = os.path.join(os.path.abspath(install_prefix), 'cgmres')
         else:
             install_destination = os.path.join(os.path.abspath(install_prefix), 'cgmres')
         pybind11_sharedlibs = glob.glob('generated/'+self.__ocp_name+'/build/python/'+self.__ocp_name+'/*.so') \
