@@ -1325,7 +1325,7 @@ install(
         if platform.system() == 'Windows':
             subprocess.run(
                 ['git', 'submodule', 'update', '--init', '--recursive'], 
-                cwd='.', 
+                cwd=os.getcwd(), 
                 stdout=subprocess.PIPE, 
                 stderr=subprocess.PIPE, 
                 shell=True
@@ -1333,7 +1333,7 @@ install(
         else:
             subprocess.run(
                 ['git', 'submodule', 'update', '--init', '--recursive'], 
-                cwd='.', 
+                cwd=os.getcwd(), 
                 stdout=subprocess.PIPE, 
                 stderr=subprocess.PIPE
             )
@@ -1360,23 +1360,18 @@ install(
         """
         if remove_build_dir:
             self.__remove_build_dir()
+        build_dir = os.path.join(os.getcwd(), 'generated', self.__ocp_name, 'build')
+        os.makedirs(build_dir, exist_ok=True)
         if vectorize:
             build_options = ['-DCMAKE_BUILD_TYPE=Release', '-DVECTORIZE=ON', '-DBUILD_MAIN=ON', '-DBUILD_PYTHON_INTERFACE=OFF']
         else:
             build_options = ['-DCMAKE_BUILD_TYPE=Release', '-DVECTORIZE=OFF', '-DBUILD_MAIN=ON', '-DBUILD_PYTHON_INTERFACE=OFF']
         print('CMake options:', *build_options)
         if platform.system() == 'Windows':
-            subprocess.run(
-                ['mkdir', 'build'], 
-                cwd='generated/'+self.__ocp_name, 
-                stdout=subprocess.PIPE, 
-                stderr=subprocess.PIPE, 
-                shell=True
-            )
             if generator == 'MSYS':
                 proc = subprocess.Popen(
                     ['cmake', '..', '-G', 'MSYS Makefiles', *build_options], 
-                    cwd='generated/'+self.__ocp_name+'/build', 
+                    cwd=build_dir, 
                     stdout=subprocess.PIPE, 
                     stderr=subprocess.STDOUT, 
                     shell=True
@@ -1387,7 +1382,7 @@ install(
             elif generator == 'MinGW':
                 proc = subprocess.Popen(
                     ['cmake', '..', '-G', 'MinGW Makefiles', *build_options], 
-                    cwd='generated/'+self.__ocp_name+'/build', 
+                    cwd=build_dir, 
                     stdout=subprocess.PIPE, 
                     stderr=subprocess.STDOUT, 
                     shell=True
@@ -1406,7 +1401,7 @@ install(
                 if proc.stderr.readline() == b'':
                     proc = subprocess.Popen(
                         ['cmake', '..', '-G', 'MSYS Makefiles', *build_options], 
-                        cwd='generated/'+self.__ocp_name+'/build', 
+                        cwd=build_dir, 
                         stdout=subprocess.PIPE, 
                         stderr=subprocess.STDOUT, 
                         shell=True
@@ -1414,7 +1409,7 @@ install(
                 else:
                     proc = subprocess.Popen(
                         ['cmake', '..', '-G', 'MinGW Makefiles', *build_options], 
-                        cwd='generated/'+self.__ocp_name+'/build', 
+                        cwd=build_dir, 
                         stdout=subprocess.PIPE, 
                         stderr=subprocess.STDOUT, 
                         shell=True
@@ -1424,7 +1419,7 @@ install(
                 print('\n')
             proc = subprocess.Popen(
                 ['cmake', '--build', '.'], 
-                cwd='generated/'+self.__ocp_name+'/build', 
+                cwd=build_dir, 
                 stdout=subprocess.PIPE, 
                 stderr=subprocess.STDOUT, 
                 shell=True
@@ -1434,15 +1429,9 @@ install(
             print('\n')
             
         else:
-            subprocess.run(
-                ['mkdir', 'build'], 
-                cwd='generated/'+self.__ocp_name, 
-                stdout=subprocess.PIPE, 
-                stderr=subprocess.PIPE
-            )
             proc = subprocess.Popen(
                 ['cmake', '..', *build_options], 
-                cwd='generated/'+self.__ocp_name+'/build', 
+                cwd=build_dir, 
                 stdout=subprocess.PIPE, 
                 stderr=subprocess.STDOUT
             )
@@ -1451,7 +1440,7 @@ install(
             print('\n')
             proc = subprocess.Popen(
                 ['cmake', '--build', '.'], 
-                cwd='generated/'+self.__ocp_name+'/build', 
+                cwd=build_dir, 
                 stdout = subprocess.PIPE, 
                 stderr = subprocess.STDOUT
             )
@@ -1480,23 +1469,18 @@ install(
         """
         if remove_build_dir:
             self.__remove_build_dir()
+        build_dir = os.path.join(os.getcwd(), 'generated', self.__ocp_name, 'build')
+        os.makedirs(build_dir, exist_ok=True)
         if vectorize:
             build_options = ['-DCMAKE_BUILD_TYPE=Release', '-DVECTORIZE=ON', '-DBUILD_MAIN=OFF', '-DBUILD_PYTHON_INTERFACE=ON']
         else:
             build_options = ['-DCMAKE_BUILD_TYPE=Release', '-DVECTORIZE=OFF', '-DBUILD_MAIN=OFF', '-DBUILD_PYTHON_INTERFACE=ON']
         print('CMake options:', *build_options)
         if platform.system() == 'Windows':
-            subprocess.run(
-                ['mkdir', 'build'], 
-                cwd='generated/'+self.__ocp_name, 
-                stdout=subprocess.PIPE, 
-                stderr=subprocess.PIPE, 
-                shell=True
-            )
             if generator == 'MSYS':
                 proc = subprocess.Popen(
                     ['cmake', '..', '-G', 'MSYS Makefiles', *build_options], 
-                    cwd='generated/'+self.__ocp_name+'/build', 
+                    cwd=build_dir, 
                     stdout=subprocess.PIPE, 
                     stderr=subprocess.STDOUT, 
                     shell=True
@@ -1507,7 +1491,7 @@ install(
             elif generator == 'MinGW':
                 proc = subprocess.Popen(
                     ['cmake', '..', '-G', 'MinGW Makefiles', *build_options], 
-                    cwd='generated/'+self.__ocp_name+'/build', 
+                    cwd=build_dir, 
                     stdout=subprocess.PIPE, 
                     stderr=subprocess.STDOUT, 
                     shell=True
@@ -1526,7 +1510,7 @@ install(
                 if proc.stderr.readline() == b'':
                     proc = subprocess.Popen(
                         ['cmake', '..', '-G', 'MSYS Makefiles', *build_options], 
-                        cwd='generated/'+self.__ocp_name+'/build', 
+                        cwd=build_dir, 
                         stdout=subprocess.PIPE, 
                         stderr=subprocess.STDOUT, 
                         shell=True
@@ -1534,7 +1518,7 @@ install(
                 else:
                     proc = subprocess.Popen(
                         ['cmake', '..', '-G', 'MinGW Makefiles', *build_options], 
-                        cwd='generated/'+self.__ocp_name+'/build', 
+                        cwd=build_dir, 
                         stdout=subprocess.PIPE, 
                         stderr=subprocess.STDOUT, 
                         shell=True
@@ -1544,7 +1528,7 @@ install(
                 print('\n')
             proc = subprocess.Popen(
                 ['cmake', '--build', '.', '--parallel', '8'], 
-                cwd='generated/'+self.__ocp_name+'/build', 
+                cwd=build_dir, 
                 stdout=subprocess.PIPE, 
                 stderr=subprocess.STDOUT, 
                 shell=True
@@ -1553,15 +1537,9 @@ install(
                 print(line.rstrip().decode("utf8"))
             print('\n')
         else:
-            subprocess.run(
-                ['mkdir', 'build'], 
-                cwd='generated/'+self.__ocp_name, 
-                stdout=subprocess.PIPE, 
-                stderr=subprocess.PIPE
-            )
             proc = subprocess.Popen(
                 ['cmake', '..', *build_options], 
-                cwd='generated/'+self.__ocp_name+'/build', 
+                cwd=build_dir, 
                 stdout=subprocess.PIPE, 
                 stderr=subprocess.STDOUT
             )
@@ -1570,7 +1548,7 @@ install(
             print('\n')
             proc = subprocess.Popen(
                 ['cmake', '--build', '.', '-j8'], 
-                cwd='generated/'+self.__ocp_name+'/build', 
+                cwd=build_dir, 
                 stdout = subprocess.PIPE, 
                 stderr = subprocess.STDOUT
             )
@@ -1594,16 +1572,8 @@ install(
         pybind11_sharedlibs_common = glob.glob('generated/'+self.__ocp_name+'/build/python/common/*.so') \
                                         + glob.glob('generated/'+self.__ocp_name+'/build/python/common/*.dylib') \
                                         + glob.glob('generated/'+self.__ocp_name+'/build/python/common/*.pyd')
-        if platform.system() == 'Windows':
-            os.makedirs(os.path.join(install_destination, self.__ocp_name), exist_ok=True)
-            os.makedirs(os.path.join(install_destination, 'common'), exist_ok=True)
-        else:
-            subprocess.run(
-                ['mkdir', '-p', str(os.path.join(install_destination, self.__ocp_name)), str(os.path.join(install_destination, 'common'))], 
-                cwd='.',
-                stdout=subprocess.PIPE, 
-                stderr=subprocess.STDOUT, 
-            )
+        os.makedirs(os.path.join(install_destination, self.__ocp_name), exist_ok=True)
+        os.makedirs(os.path.join(install_destination, 'common'), exist_ok=True)
         for e in pybind11_sharedlibs:
             shutil.copy(e, str(os.path.join(install_destination, self.__ocp_name)))
         for e in pybind11_sharedlibs_common:
@@ -1629,21 +1599,15 @@ install(
         if platform.system() == 'Windows':
             subprocess.run(
                 ['rmdir', '/q', '/s', 'simulation_result'], 
-                cwd='generated/'+self.__ocp_name, 
+                cwd=os.path.join(os.getcwd(), 'generated', self.__ocp_name), 
                 stdout=subprocess.PIPE, 
                 stderr=subprocess.PIPE, 
                 shell=True
             )
-            subprocess.run(
-                ['mkdir', 'simulation_result'], 
-                cwd='generated/'+self.__ocp_name, 
-                stdout=subprocess.PIPE, 
-                stderr=subprocess.PIPE, 
-                shell=True
-            )
+            os.makedirs(os.path.join(os.getcwd(), 'generated', self.__ocp_name, 'simulation_result'), exist_ok=True)
             proc = subprocess.Popen(
                 [self.__ocp_name+'.exe'], 
-                cwd='generated/'+self.__ocp_name+'/build', 
+                cwd=os.path.join(os.getcwd(), 'generated', self.__ocp_name, 'build'), 
                 stdout=subprocess.PIPE, 
                 stderr=subprocess.STDOUT, 
                 shell=True
@@ -1653,20 +1617,15 @@ install(
         else:
             subprocess.run(
                 ['rm', '-rf', 'simulation_result'], 
-                cwd='generated/'+self.__ocp_name, 
+                cwd=os.path.join(os.getcwd(), 'generated', self.__ocp_name), 
                 stdout = subprocess.PIPE, 
                 stderr = subprocess.PIPE, 
                 shell=True
             )
-            subprocess.run(
-                ['mkdir', 'simulation_result'], 
-                cwd='generated/'+self.__ocp_name, 
-                stdout=subprocess.PIPE, 
-                stderr=subprocess.PIPE
-            )
+            os.makedirs(os.path.join(os.getcwd(), 'generated', self.__ocp_name, 'simulation_result'), exist_ok=True)
             proc = subprocess.Popen(
                 ['./'+self.__ocp_name], 
-                cwd='generated/'+self.__ocp_name+'/build', 
+                cwd=os.path.join(os.getcwd(), 'generated', self.__ocp_name, 'build'), 
                 stdout=subprocess.PIPE, 
                 stderr=subprocess.STDOUT
             )
@@ -1677,65 +1636,9 @@ install(
         """ Makes a directory where the C source files of OCP formulations are 
             generated.
         """
-        if platform.system() == 'Windows':
-            subprocess.run(
-                ['mkdir', 'generated'], 
-                stdout=subprocess.PIPE, 
-                stderr=subprocess.PIPE, 
-                shell=True
-            )
-            subprocess.run(
-                ['mkdir', self.__ocp_name], 
-                cwd='generated', 
-                stdout=subprocess.PIPE, 
-                stderr=subprocess.PIPE, 
-                shell=True
-            )
-            subprocess.run(
-                ['mkdir', 'python'], 
-                cwd='generated/'+self.__ocp_name, 
-                stdout=subprocess.PIPE, 
-                stderr=subprocess.PIPE, 
-                shell=True
-            )
-            subprocess.run(
-                ['mkdir', self.__ocp_name], 
-                cwd='generated/'+self.__ocp_name+'/python', 
-                stdout=subprocess.PIPE, 
-                stderr=subprocess.PIPE, 
-                shell=True
-            )
-            subprocess.run(
-                ['mkdir', 'common'], 
-                cwd='generated/'+self.__ocp_name+'/python', 
-                stdout=subprocess.PIPE, 
-                stderr=subprocess.PIPE, 
-                shell=True
-            )
-        else:
-            subprocess.run(
-                ['mkdir', 'generated'], 
-                stdout=subprocess.PIPE, 
-                stderr=subprocess.PIPE
-            )
-            subprocess.run(
-                ['mkdir', self.__ocp_name], 
-                cwd='generated',
-                stdout=subprocess.PIPE, 
-                stderr=subprocess.PIPE
-            )
-            subprocess.run(
-                ['mkdir', '-p', 'python/'+self.__ocp_name], 
-                cwd='generated/'+self.__ocp_name,
-                stdout=subprocess.PIPE, 
-                stderr=subprocess.PIPE
-            )
-            subprocess.run(
-                ['mkdir', '-p', 'python/common'], 
-                cwd='generated/'+self.__ocp_name,
-                stdout=subprocess.PIPE, 
-                stderr=subprocess.PIPE
-            )
+        os.makedirs(os.path.join(os.getcwd(), 'generated', self.__ocp_name, 'python'), exist_ok=True)
+        os.makedirs(os.path.join(os.getcwd(), 'generated', self.__ocp_name, 'python', self.__ocp_name), exist_ok=True)
+        os.makedirs(os.path.join(os.getcwd(), 'generated', self.__ocp_name, 'python', 'common'), exist_ok=True)
 
     def __remove_build_dir(self):
         """ Removes a build directory. This function is mainly for Windows 
@@ -1744,7 +1647,7 @@ install(
         if platform.system() == 'Windows':
             subprocess.run(
                 ['rmdir', '/q', '/s', 'build'], 
-                cwd='generated/'+self.__ocp_name, 
+                cwd=os.path.join(os.getcwd(), 'generated', self.__ocp_name), 
                 stdout=subprocess.PIPE, 
                 stderr=subprocess.PIPE, 
                 shell=True
@@ -1752,7 +1655,7 @@ install(
         else:
             subprocess.run(
                 ['rm', '-r', 'build'],
-                cwd='generated/'+self.__ocp_name, 
+                cwd=os.path.join(os.getcwd(), 'generated', self.__ocp_name), 
                 stdout=subprocess.PIPE, 
                 stderr=subprocess.PIPE
             )
