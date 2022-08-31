@@ -1594,13 +1594,13 @@ install(
                                         + glob.glob('generated/'+self.__ocp_name+'/build/python/common/*.pyd')
         if platform.system() == 'Windows':
             subprocess.run(
-                ['mkdir', '\"'+str(os.path.join(install_destination, self.__ocp_name))+'\"'], 
+                ['mkdir', str(os.path.join(install_destination, self.__ocp_name))], 
                 cwd='.',
                 stdout=subprocess.PIPE, 
                 stderr=subprocess.STDOUT, 
             )
             subprocess.run(
-                ['mkdir', '\"'+str(os.path.join(install_destination, 'common'))+'\"'], 
+                ['mkdir', str(os.path.join(install_destination, 'common'))], 
                 cwd='.',
                 stdout=subprocess.PIPE, 
                 stderr=subprocess.STDOUT, 
