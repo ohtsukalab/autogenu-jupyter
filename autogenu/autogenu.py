@@ -1589,8 +1589,10 @@ install(
         else:
             install_destination = os.path.join(os.path.abspath(install_prefix), 'cgmres')
         pybind11_sharedlibs = glob.glob('generated/'+self.__ocp_name+'/build/python/'+self.__ocp_name+'/*.so') \
+                                + glob.glob('generated/'+self.__ocp_name+'/build/python/'+self.__ocp_name+'/*.dylib') \
                                 + glob.glob('generated/'+self.__ocp_name+'/build/python/'+self.__ocp_name+'/*.pyd')
         pybind11_sharedlibs_common = glob.glob('generated/'+self.__ocp_name+'/build/python/common/*.so') \
+                                        + glob.glob('generated/'+self.__ocp_name+'/build/python/common/*.dylib') \
                                         + glob.glob('generated/'+self.__ocp_name+'/build/python/common/*.pyd')
         if platform.system() == 'Windows':
             os.makedirs(os.path.join(install_destination, self.__ocp_name), exist_ok=True)
