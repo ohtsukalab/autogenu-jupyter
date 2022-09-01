@@ -1632,6 +1632,21 @@ install(
             for line in iter(proc.stdout.readline, b''):
                 print(line.rstrip().decode("utf8"))
 
+    def generate_docs(self):
+        """ Generate docs. Doxygen and webbrowser are required.
+        """
+        subprocess.run(
+            ['doxygen'], 
+            cwd=os.path.join(os.getcwd(), 'doc'), 
+            stdout=subprocess.PIPE, 
+            stderr=subprocess.PIPE, 
+            shell=True
+        )
+
+    def open_docs(self):
+        import webbrowser
+        webbrowser.open('file:///'+str(os.path.join(os.getcwd(), 'doc', 'html', 'annotated.html')))
+
     def __make_ocp_dir(self):
         """ Makes a directory where the C source files of OCP formulations are 
             generated.
