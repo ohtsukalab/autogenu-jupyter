@@ -71,7 +71,7 @@ import cgmres.your_ocp_name # this includes OCP definition and NMPC solvers
 
 ### Documentation
 C++ API documentation of `cgmres` library is found at https://mayataka.github.io/autogenu-jupyter/.   
-Python interfaces are almost the same as the C++ API, so please refere to https://mayataka.github.io/autogenu-jupyter/ even for Python interfaces.
+Python interfaces are almost the same as the C++ API, so please refere to https://mayataka.github.io/autogenu-jupyter/ even for Python interfaces as well as the [tips for conversions between C++ and Python](https://mayataka.github.io/autogenu-jupyter/md__github_workspace_examples_python__r_e_a_d_m_e.html).
 
 
 ## Demos
