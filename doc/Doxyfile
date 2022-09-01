@@ -115,6 +115,7 @@ WARN_LOGFILE           =
 INPUT                  = ../include \
                          ../examples/cpp \
                          ../examples/python \
+                         ../examples/custom_python_interface \
                          ../generated/
 INPUT_ENCODING         = UTF-8
 FILE_PATTERNS          = *.h \
@@ -127,6 +128,7 @@ RECURSIVE              = YES
 EXCLUDE                = ../include/cgmres/thirdparty \
                          ../include/cgmres/simulator \ 
                          ../include/cgmres/python \
+                         ../examples/custom_python_interface/cartpole_external_reference \
                          ../examples/cpp/cartpole/README.md \
                          ../examples/cpp/cartpole_external_reference/README.md \
                          ../examples/cpp/hexacopter/README.md \
