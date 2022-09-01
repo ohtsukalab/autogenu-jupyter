@@ -38,7 +38,7 @@ Please refere to the C++ API documentation https://mayataka.github.io/autogenu-j
 | ----------------------- | ----- | -------- |
 | Include                 | #include "ocp.hpp"  |  import cgmres.cartpole  |
 | Constructor             | cgmres::OCP_cartpole ocp();  |  ocp = cgmres.cartpole.OCP()  |
-| Scalar member variables | ocp.g = 0.80665;     |  ocp.g = 0.80665       |
+| Scalar member variables | ocp.g = 9.80665;     |  ocp.g = 9.80665       |
 | Array member variables  | ocp.q = std::array<double, 4>({2.5, 10, 0.1, 0.1});   |  ocp.q = np.array([2.5, 10, 0.1, 0.1])  |
 | Static member variables | const int nx = cgmres::OCP_cartpole::nx;   |  nx = cgmres.cartpole.OCP.nx  |
 | Member functions        | const double t = ...;<br> const cgmres::VectorX x = ...; <br> const cgmres::VectorX u = ...; <br> cgmres::VectorX dx = ...; <br> ocp.eval_f(t, x, u, dx);  | t = ... <br> x = np.array([...]) <br> u = np.array([...]) <br> dx = ocp.eval_f(t, x, u) |
@@ -48,8 +48,8 @@ Please refere to the C++ API documentation https://mayataka.github.io/autogenu-j
 [C++ ZeroHorizonOCPSolver documentation](https://mayataka.github.io/autogenu-jupyter/classcgmres_1_1_zero_horizon_o_c_p_solver.html)
 |                         |  C++  |  Python  |
 | ----------------------- | ----- | -------- |
-| Include                 | #include "cgmres/zero_horizon_ocp_solver.hpp"<br> #include "ocp.hpp"  |  import cgmres.cartpole  |
-| Constructor             | cgmres::OCP_cartpole ocp(); <br> constexpr int kmax = ...; <br> cgmres::SolverSettings settings; <br> settings.max_iter = ...; <br> cgmres::ZeroHorizonOCPSolver<cgmres::OCP_cartpole, kmax> solver(ocp, settings); |  ocp = cgmres.cartpole.OCP() <br> settins = cgmres.common.SolverSettings() <br> settings.max_iter = ... <br> solver = cgmres.cartpole.ZeroHorizonOCPSolver(ocp, settings) |
+| Include                 | #include "cgmres/zero_horizon_ocp_solver.hpp"<br> #include "ocp.hpp"  |  import cgmres.common <br> import cgmres.cartpole  |
+| Constructor             | cgmres::OCP_cartpole ocp; <br> constexpr int kmax = ...; <br> cgmres::SolverSettings settings; <br> settings.max_iter = ...; <br> cgmres::ZeroHorizonOCPSolver<cgmres::OCP_cartpole, kmax> solver(ocp, settings); |  ocp = cgmres.cartpole.OCP() <br> settins = cgmres.common.SolverSettings() <br> settings.max_iter = ... <br> solver = cgmres.cartpole.ZeroHorizonOCPSolver(ocp, settings) |
 | Member functions        | const double t = ...;<br> const cgmres::VectorX x = ...; <br> solver.solve(t, x);  | t = ... <br> x = np.array([...]) <br> solver.solve(t, x) |
 | Setter functions        | const cgmres::VectorX u = ...;  <br> solver.set_u(u); | u = np.array([...]) <br> solver.set_u(u) |
 | Getter functions        | const auto& uopt = solver.uopt(); | uopt = solver.uopt |
@@ -59,8 +59,8 @@ Please refere to the C++ API documentation https://mayataka.github.io/autogenu-j
 [C++ MultipleShootingCGMRESSolver documentation](https://mayataka.github.io/autogenu-jupyter/classcgmres_1_1_multiple_shooting_c_g_m_r_e_s_solver.html)
 |                         |  C++  |  Python  |
 | ----------------------- | ----- | -------- |
-| Include                 | #include "cgmres/multiple_shooting_cgmres_solver.hpp"<br> #include "ocp.hpp"  |  import cgmres.cartpole  |
-| Constructor             | cgmres::OCP_ocpname ocp(); <br> constexpr int N = ...; <br> constexpr int kmax = ...; <br> cgmres::SolverSettings settings; <br> settings.sampling_time = ...; <br> cgmres::Horizon horizon(...); <br> cgmres::MultipleShootingCGMRESSolver<cgmres::OCP_ocpname, N, kmax> mpc(ocp, horizon, settings); |  ocp = cgmres.cartpole.OCP() <br> settings = cgmres.common.SolverSettings() <br> settings.sampling_time = ... <br> horizon = Horizon(Tf=..., alpha=...) <br> mpc = cgmres.cartpole.MultipleShootingCGMRESSolver(ocp, horizon, settings) |
+| Include                 | #include "cgmres/multiple_shooting_cgmres_solver.hpp"<br> #include "ocp.hpp"  |  import cgmres.common <br> import cgmres.cartpole  |
+| Constructor             | cgmres::OCP_ocpname ocp; <br> constexpr int N = ...; <br> constexpr int kmax = ...; <br> cgmres::SolverSettings settings; <br> settings.sampling_time = ...; <br> cgmres::Horizon horizon(...); <br> cgmres::MultipleShootingCGMRESSolver<cgmres::OCP_ocpname, N, kmax> mpc(ocp, horizon, settings); |  ocp = cgmres.cartpole.OCP() <br> settings = cgmres.common.SolverSettings() <br> settings.sampling_time = ... <br> horizon = cgmres.common.Horizon(Tf=..., alpha=...) <br> mpc = cgmres.cartpole.MultipleShootingCGMRESSolver(ocp, horizon, settings) |
 | Member functions        | const double t = ...;<br> const cgmres::VectorX x = ...; <br> mpc.update(t, x);  | t = ... <br> x = np.array([...]) <br> mpc.update(t, x) |
 | Setter functions        | const cgmres::VectorX u = ...;  <br> mpc.set_u(u); | u = np.array([...]) <br> mpc.set_u(u) |
 | Getter functions        | const auto& uopt0 = solver.uopt()[0]; | uopt0 = solver.uopt[0] |
