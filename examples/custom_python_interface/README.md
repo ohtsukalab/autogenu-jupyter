@@ -11,7 +11,7 @@ cmake .. -DCMAKE_INSTALL_PREFIX=YOUR_INSTALL_DESTINATION
 make install 
 ```
 
-To build the Python interfaces, run the following command
+To build the Python interfaces, run the following command in the `cartpole_external_reference` directory
 ```
 mkdir build 
 cd build
@@ -20,7 +20,7 @@ make -j8
 cd ..
 ```
 
-Then install the python interfaces by
+Then install the python interfaces by running the following command in the `cartpole_external_reference` directory
 ```
 python3 install.py cartpole_external_reference
 ```
