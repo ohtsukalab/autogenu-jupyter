@@ -1322,21 +1322,13 @@ install(
         """ Updates git submodules
         """
         print('Update git submodules...')
-        if platform.system() == 'Windows':
-            subprocess.run(
-                ['git', 'submodule', 'update', '--init', '--recursive'], 
-                cwd=os.getcwd(), 
-                stdout=subprocess.PIPE, 
-                stderr=subprocess.PIPE, 
-                shell=True
-            )
-        else:
-            subprocess.run(
-                ['git', 'submodule', 'update', '--init', '--recursive'], 
-                cwd=os.getcwd(), 
-                stdout=subprocess.PIPE, 
-                stderr=subprocess.PIPE
-            )
+        subprocess.run(
+            ['git', 'submodule', 'update', '--init', '--recursive'], 
+            cwd=os.getcwd(), 
+            stdout=subprocess.PIPE, 
+            stderr=subprocess.PIPE, 
+            shell=(platform.system()=='Windows')
+        )
         print('Successfully updated git submodules\n')
 
     def build_main(self, generator: str='Auto', vectorize: bool=True, 
@@ -1367,86 +1359,7 @@ install(
         else:
             build_options = ['-DCMAKE_BUILD_TYPE=Release', '-DVECTORIZE=OFF', '-DBUILD_MAIN=ON', '-DBUILD_PYTHON_INTERFACE=OFF']
         print('CMake options:', *build_options)
-        if platform.system() == 'Windows':
-            if generator == 'MSYS':
-                proc = subprocess.Popen(
-                    ['cmake', '..', '-G', 'MSYS Makefiles', *build_options], 
-                    cwd=build_dir, 
-                    stdout=subprocess.PIPE, 
-                    stderr=subprocess.STDOUT, 
-                    shell=True
-                )
-                for line in iter(proc.stdout.readline, b''):
-                    print(line.rstrip().decode("utf8"))
-                print('\n')
-            elif generator == 'MinGW':
-                proc = subprocess.Popen(
-                    ['cmake', '..', '-G', 'MinGW Makefiles', *build_options], 
-                    cwd=build_dir, 
-                    stdout=subprocess.PIPE, 
-                    stderr=subprocess.STDOUT, 
-                    shell=True
-                )
-                for line in iter(proc.stdout.readline, b''):
-                    print(line.rstrip().decode("utf8"))
-                print('\n')
-            else:
-                proc = subprocess.Popen(
-                    ['where', 'sh.exe'], 
-                    cwd='C:', 
-                    stdout=subprocess.PIPE, 
-                    stderr=subprocess.PIPE, 
-                    shell=True
-                )
-                if proc.stderr.readline() == b'':
-                    proc = subprocess.Popen(
-                        ['cmake', '..', '-G', 'MSYS Makefiles', *build_options], 
-                        cwd=build_dir, 
-                        stdout=subprocess.PIPE, 
-                        stderr=subprocess.STDOUT, 
-                        shell=True
-                    )
-                else:
-                    proc = subprocess.Popen(
-                        ['cmake', '..', '-G', 'MinGW Makefiles', *build_options], 
-                        cwd=build_dir, 
-                        stdout=subprocess.PIPE, 
-                        stderr=subprocess.STDOUT, 
-                        shell=True
-                    )
-                for line in iter(proc.stdout.readline, b''):
-                    print(line.rstrip().decode("utf8"))
-                print('\n')
-            proc = subprocess.Popen(
-                ['cmake', '--build', '.'], 
-                cwd=build_dir, 
-                stdout=subprocess.PIPE, 
-                stderr=subprocess.STDOUT, 
-                shell=True
-            )
-            for line in iter(proc.stdout.readline,b''):
-                print(line.rstrip().decode("utf8"))
-            print('\n')
-            
-        else:
-            proc = subprocess.Popen(
-                ['cmake', '..', *build_options], 
-                cwd=build_dir, 
-                stdout=subprocess.PIPE, 
-                stderr=subprocess.STDOUT
-            )
-            for line in iter(proc.stdout.readline, b''):
-                print(line.rstrip().decode("utf8"))
-            print('\n')
-            proc = subprocess.Popen(
-                ['cmake', '--build', '.'], 
-                cwd=build_dir, 
-                stdout = subprocess.PIPE, 
-                stderr = subprocess.STDOUT
-            )
-            for line in iter(proc.stdout.readline, b''):
-                print(line.rstrip().decode("utf8"))
-            print('\n')
+        self.__build_cpp(generator, build_dir, build_options)
 
     def build_python_interface(self, generator: str='Auto', vectorize: bool=True, 
                                remove_build_dir: bool=False):
@@ -1476,85 +1389,7 @@ install(
         else:
             build_options = ['-DCMAKE_BUILD_TYPE=Release', '-DVECTORIZE=OFF', '-DBUILD_MAIN=OFF', '-DBUILD_PYTHON_INTERFACE=ON']
         print('CMake options:', *build_options)
-        if platform.system() == 'Windows':
-            if generator == 'MSYS':
-                proc = subprocess.Popen(
-                    ['cmake', '..', '-G', 'MSYS Makefiles', *build_options], 
-                    cwd=build_dir, 
-                    stdout=subprocess.PIPE, 
-                    stderr=subprocess.STDOUT, 
-                    shell=True
-                )
-                for line in iter(proc.stdout.readline, b''):
-                    print(line.rstrip().decode("utf8"))
-                print('\n')
-            elif generator == 'MinGW':
-                proc = subprocess.Popen(
-                    ['cmake', '..', '-G', 'MinGW Makefiles', *build_options], 
-                    cwd=build_dir, 
-                    stdout=subprocess.PIPE, 
-                    stderr=subprocess.STDOUT, 
-                    shell=True
-                )
-                for line in iter(proc.stdout.readline, b''):
-                    print(line.rstrip().decode("utf8"))
-                print('\n')
-            else:
-                proc = subprocess.Popen(
-                    ['where', 'sh.exe'], 
-                    cwd='C:', 
-                    stdout=subprocess.PIPE, 
-                    stderr=subprocess.PIPE, 
-                    shell=True
-                )
-                if proc.stderr.readline() == b'':
-                    proc = subprocess.Popen(
-                        ['cmake', '..', '-G', 'MSYS Makefiles', *build_options], 
-                        cwd=build_dir, 
-                        stdout=subprocess.PIPE, 
-                        stderr=subprocess.STDOUT, 
-                        shell=True
-                    )
-                else:
-                    proc = subprocess.Popen(
-                        ['cmake', '..', '-G', 'MinGW Makefiles', *build_options], 
-                        cwd=build_dir, 
-                        stdout=subprocess.PIPE, 
-                        stderr=subprocess.STDOUT, 
-                        shell=True
-                    )
-                for line in iter(proc.stdout.readline, b''):
-                    print(line.rstrip().decode("utf8"))
-                print('\n')
-            proc = subprocess.Popen(
-                ['cmake', '--build', '.', '--parallel', '8'], 
-                cwd=build_dir, 
-                stdout=subprocess.PIPE, 
-                stderr=subprocess.STDOUT, 
-                shell=True
-            )
-            for line in iter(proc.stdout.readline,b''):
-                print(line.rstrip().decode("utf8"))
-            print('\n')
-        else:
-            proc = subprocess.Popen(
-                ['cmake', '..', *build_options], 
-                cwd=build_dir, 
-                stdout=subprocess.PIPE, 
-                stderr=subprocess.STDOUT
-            )
-            for line in iter(proc.stdout.readline, b''):
-                print(line.rstrip().decode("utf8"))
-            print('\n')
-            proc = subprocess.Popen(
-                ['cmake', '--build', '.', '-j8'], 
-                cwd=build_dir, 
-                stdout = subprocess.PIPE, 
-                stderr = subprocess.STDOUT
-            )
-            for line in iter(proc.stdout.readline, b''):
-                print(line.rstrip().decode("utf8"))
-            print('\n')
+        self.__build_cpp(generator, build_dir, build_options)
 
     def install_python_interface(self, install_prefix=None):
         if install_prefix is None:
@@ -1654,6 +1489,65 @@ install(
         os.makedirs(os.path.join(os.getcwd(), 'generated', self.__ocp_name, 'python'), exist_ok=True)
         os.makedirs(os.path.join(os.getcwd(), 'generated', self.__ocp_name, 'python', self.__ocp_name), exist_ok=True)
         os.makedirs(os.path.join(os.getcwd(), 'generated', self.__ocp_name, 'python', 'common'), exist_ok=True)
+
+    def __find_windows_cmake_generator(self):
+        """ Finds the CMake generator in Windows.
+        """
+        proc = subprocess.Popen(
+            ['where', 'sh.exe'], 
+            cwd='C:', 
+            stdout=subprocess.PIPE, 
+            stderr=subprocess.PIPE, 
+            shell=True
+        )
+        if proc.stderr.readline() == b'':
+            return 'MSYS'
+        else: 
+            return 'MinGW'
+
+    def __build_cpp(self, generator: str, build_dir, build_options):
+        """ Builds cpp file. 
+        """
+        os.makedirs(build_dir, exist_ok=True)
+        if platform.system() == 'Windows':
+            if generator != 'MSYS' and generator != 'MinGW':
+                generator = self.__find_windows_cmake_generator()
+            if generator == 'MSYS':
+                proc = subprocess.Popen(
+                    ['cmake', '..', '-G', 'MSYS Makefiles', *build_options], 
+                    cwd=build_dir, 
+                    stdout=subprocess.PIPE, 
+                    stderr=subprocess.STDOUT, 
+                    shell=True
+                )
+            elif generator == 'MinGW':
+                proc = subprocess.Popen(
+                    ['cmake', '..', '-G', 'MinGW Makefiles', *build_options], 
+                    cwd=build_dir, 
+                    stdout=subprocess.PIPE, 
+                    stderr=subprocess.STDOUT, 
+                    shell=True
+                )
+        else:
+            proc = subprocess.Popen(
+                ['cmake', '..', *build_options], 
+                cwd=build_dir, 
+                stdout=subprocess.PIPE, 
+                stderr=subprocess.STDOUT
+            )
+        for line in iter(proc.stdout.readline, b''):
+            print(line.rstrip().decode("utf8"))
+        print('\n')
+        proc = subprocess.Popen(
+            ['cmake', '--build', '.'], 
+            cwd=build_dir, 
+            stdout = subprocess.PIPE, 
+            stderr = subprocess.STDOUT,
+            shell=(platform.system()=='Windows')
+        )
+        for line in iter(proc.stdout.readline, b''):
+            print(line.rstrip().decode("utf8"))
+        print('\n')
 
     def __remove_build_dir(self):
         """ Removes a build directory. This function is mainly for Windows 
