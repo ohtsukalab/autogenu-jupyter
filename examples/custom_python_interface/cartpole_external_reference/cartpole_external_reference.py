@@ -5,8 +5,8 @@ import numpy as np
 
 ocp = cgmres.cartpole_external_reference.OCP()
 
-# this is actually std::shared_ptr<OCP_cartpoleExternalReference::ExternalReference>
-external_reference = cgmres.cartpole_external_reference.OCP.ExternalReference() 
+# this is actually std::shared_ptr<cgmres::OCP_cartpoleExternalReference::ExternalReference>
+external_reference = cgmres.cartpole_external_reference.ExternalReference() 
 external_reference.cart_position = 0.0
 # set the external reference to ocp
 ocp.external_reference = external_reference

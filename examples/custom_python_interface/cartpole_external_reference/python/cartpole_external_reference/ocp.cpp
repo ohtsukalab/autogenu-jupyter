@@ -22,14 +22,26 @@ namespace py = pybind11;
 using OCP = OCP_cartpoleExternalReference;
 
 PYBIND11_MODULE(ocp, m) { 
-  py::class_<OCP> ocp(m, "OCP");
 
-  ocp.def(py::init<>())  
+/////////////////////////////////////////////////////////////////////////////
+///////////// Custom class that holds external reference ////////////////////
+  py::class_<OCP_cartpoleExternalReference::ExternalReference,
+             std::shared_ptr<OCP_cartpoleExternalReference::ExternalReference>>(m, "ExternalReference")
+    .def(py::init<>())  
+    .def_readwrite("cart_position", &OCP_cartpoleExternalReference::ExternalReference::cart_position);
+/////////////////////////////////////////////////////////////////////////////
+
+
+  py::class_<OCP>(m, "OCP")
+    .def(py::init<>())  
     .def("clone", [](const OCP& self) { 
        auto copy = self; 
        return copy; 
      }) 
+/////////////////////////////////////////////////////////////////////////////
+/////////////////////// Custom member variable //////////////////////////////
     .def_readwrite("external_reference", &OCP::external_reference) 
+/////////////////////////////////////////////////////////////////////////////
     .def("synchronize", &OCP::synchronize)
     .def("eval_f", [](const OCP& self, const Scalar t,  
                       const VectorX& x, const VectorX& u) { 
@@ -114,11 +126,6 @@ PYBIND11_MODULE(ocp, m) {
         ss << self; 
         return ss.str(); 
       }); 
-
-py::class_<OCP_cartpoleExternalReference::ExternalReference, 
-           std::shared_ptr<OCP_cartpoleExternalReference::ExternalReference>>(ocp, "ExternalReference")
-    .def(py::init<>())
-    .def_readwrite("cart_position", &OCP_cartpoleExternalReference::ExternalReference::cart_position);
 
 }
 
