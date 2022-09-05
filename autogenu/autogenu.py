@@ -8,7 +8,8 @@ import os
 import sys
 import glob, shutil
 
-autogenu_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+autogenu_root = os.path.dirname(os.path.abspath(__file__))
+print('autogenu_root: ', autogenu_root)
 sys.path.append(autogenu_root)
 import symutils
 
