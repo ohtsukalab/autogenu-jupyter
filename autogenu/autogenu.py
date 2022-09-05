@@ -7,7 +7,7 @@ import os
 import sys
 import glob, shutil
 
-from . import symutils
+import symutils
 
 
 class ScalarVariable:

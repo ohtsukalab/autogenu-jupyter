@@ -32,7 +32,7 @@ git submodule update --init --recursive
 ```
 The python modules can be installed via
 ```
-pip install -r requirements.txt
+python3 -m pip install -r requirements.txt
 ```
 
 ### 2. Code generation
