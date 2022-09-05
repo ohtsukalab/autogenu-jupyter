@@ -131,7 +131,7 @@ class PlotSimulation(object):
                 plt.subplot(self.__num_plot_y, self.__num_plot_x, i+1)
                 plt.plot(self.__time_sequence, self.__x_data[:, i])
                 plt.xlabel(r'${\rm Time}$ $[s]$')
-                plt.ylabel(r'$x_{}$'.format(i+1))
+                plt.ylabel(r'$x_{' + str(i+1)+ r'}$')
                 plt.xlim(0, self.__sim_conditions.simulation_time)
         else:
             plt.subplot(
@@ -152,7 +152,7 @@ class PlotSimulation(object):
                 )
                 plt.plot(self.__time_sequence, self.__u_data[:, i])
                 plt.xlabel(r'${\rm Time}$ $[s]$')
-                plt.ylabel(r'$u_{}$'.format(i+1))
+                plt.ylabel(r'$u_{' + str(i+1)+ r'}$')
                 plt.xlim(0, self.__sim_conditions.simulation_time)
         else:
             plt.subplot(
