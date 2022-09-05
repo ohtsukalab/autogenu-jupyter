@@ -1,3 +1,4 @@
+from posixpath import abspath
 import subprocess
 import platform
 from enum import Enum, auto
@@ -7,6 +8,8 @@ import os
 import sys
 import glob, shutil
 
+autogenu_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.append(autogenu_root)
 import symutils
 
 
