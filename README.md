@@ -45,19 +45,7 @@ python3 -m pip install -r requirements.txt
 You can generate these files, run simulations, plot results, and install the Python interfaces through `AutoGenU.ipynb`.
 
 
-### 3. Install header-only `cgmres` C++ library
-Aside from the notebook for the code-generation, the C++ `cgmres` library, which is a header-only library, can be installed via
-```
-mkdir build
-cd build
-cmake .. -DCMAKE_INSTALL_PREFIX=YOUR_INSTALL_DESTINATION
-make install 
-```
-Then you can build the NMPC code with the generated `ocp.hpp` file and without `.ipynb` notebook files. 
-The examples are found in `examples/cpp` directory.
-
-
-### 4. Python bindings
+### 3. Python bindings
 Python bindings are installed via `.ipynb` files. 
 To use the installed Python bindings, set `PYTHONPATH` as 
 ```
@@ -68,6 +56,29 @@ Then you can use python interfaces as
 import cgmres.common # this includes horizon, solver settings, etc.
 import cgmres.your_ocp_name # this includes OCP definition and NMPC solvers 
 ```
+
+
+### 4. Install header-only `cgmres` C++ library
+Aside from the notebook for the code-generation, the C++ `cgmres` library, which is a header-only library, can be installed by running
+```
+mkdir build
+cd build
+cmake .. -DCMAKE_INSTALL_PREFIX=YOUR_INSTALL_DESTINATION
+make install 
+```
+at the project root directory of `autogenu-jupyter`.  
+Then you can build the NMPC code with the generated `ocp.hpp` file and without `.ipynb` notebook files.   
+The examples are found in `examples/cpp` directory.  
+
+
+### 5. Install `autogenu` Python module
+The pythton module `autogenu` can be instatlled by running
+```
+python3 -m pip install -e .
+```
+at the project root directory of `autogenu-jupyter`.
+Further, if you install have installed header-only `cgmres` C++ library as step 4, then you can run `.ipynb` files for the code generation in everywhere.
+
 
 ### Documentation
 C++ API documentation of `cgmres` library is found at https://mayataka.github.io/autogenu-jupyter/.   

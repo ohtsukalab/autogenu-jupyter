@@ -1,4 +1,3 @@
-from posixpath import abspath
 import subprocess
 import platform
 from enum import Enum, auto
@@ -9,7 +8,6 @@ import sys
 import glob, shutil
 
 autogenu_root = os.path.dirname(os.path.abspath(__file__))
-print('autogenu_root: ', autogenu_root)
 sys.path.append(autogenu_root)
 import symutils
 
@@ -1183,12 +1181,15 @@ option(VECTORIZE "Enable -march=native" OFF)
 option(BUILD_MAIN "Build C++ simulation" ON)
 option(BUILD_PYTHON_INTERFACE "Build Python interface" OFF)
 
-set(CGMRES_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/../../include)
+find_package(cgmres QUIET)
+if (NOT cgmres_FOUND)
+  set(CGMRES_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/../../include)
+endif()
 
 if (BUILD_MAIN)
   add_executable(
-      ${PROJECT_NAME}
-      main.cpp
+    ${PROJECT_NAME}
+    main.cpp
   )
   target_include_directories(
       ${PROJECT_NAME}
