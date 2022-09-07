@@ -74,6 +74,7 @@ The examples are found in `examples/cpp` directory.
 ### 5. Install `autogenu` Python module
 The pythton module `autogenu` can be instatlled by running
 ```
+python3 -m pip install setuptools
 python3 -m pip install -e .
 ```
 at the project root directory of `autogenu-jupyter`.

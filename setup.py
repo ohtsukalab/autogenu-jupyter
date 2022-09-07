@@ -12,7 +12,7 @@ setup(
     license="MIT",
     author="Sotaro Katayama",
     url="https://github.com/mayataka/autogenu-jupyter",
-    package_dir={"": "autogenu"},
+    packages=["autogenu"],
     include_package_data=True,
     zip_safe=False,
     install_requires=_requires_from_file('requirements.txt'),
