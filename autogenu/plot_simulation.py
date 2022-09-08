@@ -3,8 +3,6 @@ import matplotlib.pylab as plt
 import seaborn as sns
 import os
 
-from .simulation_conditions import SimulationConditions
-
 
 class PlotSimulation(object):
     """ Plots the simulation results.
@@ -31,13 +29,8 @@ class PlotSimulation(object):
         self.__opterr_data = np.genfromtxt(
             self.__file_header+'_opterr'+'.log'
         )
-        self.__sim_conditions = SimulationConditions(
-            self.__file_header
-        )
-        self.__time_sequence = np.linspace(
-            0, 
-            self.__sim_conditions.simulation_time, 
-            self.__x_data.shape[0]
+        self.__t_data = np.genfromtxt(
+            self.__file_header+'_t'+'.log'
         )
         # Replace NaN with 0.
         self.__x_data[np.isnan(self.__x_data)] = 0
@@ -129,20 +122,20 @@ class PlotSimulation(object):
         if self.__dim_x > 1:
             for i in range(self.__dim_x):
                 plt.subplot(self.__num_plot_y, self.__num_plot_x, i+1)
-                plt.plot(self.__time_sequence, self.__x_data[:, i])
+                plt.plot(self.__t_data, self.__x_data[:, i])
                 plt.xlabel(r'${\rm Time}$ $[s]$')
                 plt.ylabel(r'$x_{' + str(i+1)+ r'}$')
-                plt.xlim(0, self.__sim_conditions.simulation_time)
+                plt.xlim(self.__t_data[0], self.__t_data[-1])
         else:
             plt.subplot(
                 self.__num_plot_y, 
                 self.__num_plot_x, 
                 1
             )
-            plt.plot(self.__time_sequence, self.__x_data)
+            plt.plot(self.__t_data, self.__x_data)
             plt.xlabel(r'${\rm Time}$ $[s]$')
             plt.ylabel(r'$x$')
-            plt.xlim(0, self.__sim_conditions.simulation_time)
+            plt.xlim(self.__t_data[0], self.__t_data[-1])
         if self.__dim_u > 1:
             for i in range(self.__dim_u):
                 plt.subplot(
@@ -150,26 +143,26 @@ class PlotSimulation(object):
                     self.__num_plot_x, 
                     i+self.__dim_x+1
                 )
-                plt.plot(self.__time_sequence, self.__u_data[:, i])
+                plt.plot(self.__t_data, self.__u_data[:, i])
                 plt.xlabel(r'${\rm Time}$ $[s]$')
                 plt.ylabel(r'$u_{' + str(i+1)+ r'}$')
-                plt.xlim(0, self.__sim_conditions.simulation_time)
+                plt.xlim(self.__t_data[0], self.__t_data[-1])
         else:
             plt.subplot(
                 self.__num_plot_y, 
                 self.__num_plot_x, 
                 self.__dim_x+1
             )
-            plt.plot(self.__time_sequence, self.__u_data)
+            plt.plot(self.__t_data, self.__u_data)
             plt.xlabel(r'${\rm Time}$ $[s]$')
             plt.ylabel(r'$u$')
-            plt.xlim(0, self.__sim_conditions.simulation_time)
+            plt.xlim(self.__t_data[0], self.__t_data[-1])
         plt.subplot(
             self.__num_plot_y, 
             self.__num_plot_x, 
             self.__dim_x+self.__dim_u+1
         )
-        plt.plot(self.__time_sequence, np.log10(self.__opterr_data))
+        plt.plot(self.__t_data, np.log10(self.__opterr_data))
         plt.xlabel(r'${\rm Time}$ $[s]$')
         plt.ylabel(r'$\log_{10} \| {\rm Opt \; Error} \|$')
-        plt.xlim(0, self.__sim_conditions.simulation_time)
+        plt.xlim(self.__t_data[0], self.__t_data[-1])

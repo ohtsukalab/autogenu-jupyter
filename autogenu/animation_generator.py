@@ -5,8 +5,6 @@ from matplotlib.animation import FuncAnimation
 import os
 import sys
 
-from .simulation_conditions import SimulationConditions
-
 
 class TwoLinkArm(object):
     """ Generates the animation of the simulation results of a 2link arm.
@@ -24,8 +22,9 @@ class TwoLinkArm(object):
         # Loads the simulation data.
         self.__model_dir = 'generated/' + ocp_name + '/simulation_result' 
         self.__file_header = self.__model_dir + '/' + ocp_name
+        self.__t_data = np.genfromtxt(self.__file_header+'_t'+'.log')
         self.__x_data = np.genfromtxt(self.__file_header+'_x'+'.log')
-        self.__sim_conditions = SimulationConditions(self.__file_header)
+        self.__sampling_time = self.__t_data[1] - self.__t_data[0] 
         # Replaces NaN with 0.
         self.__x_data[np.isnan(self.__x_data)] = 0
         # Checks the dimension of the state.
@@ -83,7 +82,7 @@ class TwoLinkArm(object):
         anime = FuncAnimation(
             self.__fig, 
             self.__update_animation, 
-            interval=self.__sim_conditions.sampling_period*1000*self.__skip_frames, 
+            interval=self.__sampling_time*1000*self.__skip_frames, 
             frames=self.__total_frames, 
             blit=True
         )
@@ -91,7 +90,7 @@ class TwoLinkArm(object):
             self.__file_header+'.mp4',
             writer='ffmpeg', 
             fps=int(
-                0.1/(self.__sim_conditions.sampling_period*self.__skip_frames)
+                1/(self.__sampling_time*self.__skip_frames)
             )
         )
         print(
@@ -109,7 +108,7 @@ class TwoLinkArm(object):
         self.__link1.set_data((0, self.__x1), (0, self.__y1))
         self.__link2.set_data((self.__x1, self.__x2), (self.__y1, self.__y2))
         self.__time_text.set_text(
-            '{0:.1f} [s]'.format(10.0*self.__sim_conditions.sampling_period*frame)
+            '{0:.1f} [s]'.format(self.__sampling_time*frame)
         )
         return self.__link1, self.__link2, self.__time_text
 
@@ -130,8 +129,9 @@ class CartPole(object):
         # Loads the simulation data.
         self.__model_dir = 'generated/' + ocp_name + '/simulation_result' 
         self.__file_header = self.__model_dir + '/' + ocp_name
+        self.__t_data = np.genfromtxt(self.__file_header+'_t'+'.log')
         self.__x_data = np.genfromtxt(self.__file_header+'_x'+'.log')
-        self.__sim_conditions = SimulationConditions(self.__file_header)
+        self.__sampling_time = self.__t_data[1] - self.__t_data[0] 
         # Replaces NaN with 0.
         self.__x_data[np.isnan(self.__x_data)] = 0
         # Checks the dimension of the state.
@@ -197,7 +197,7 @@ class CartPole(object):
         anime = FuncAnimation(
             self.__fig, 
             self.__update_animation, 
-            interval=self.__sim_conditions.sampling_period*1000*self.__skip_frames, 
+            interval=self.__sampling_time*1000*self.__skip_frames, 
             frames=self.__total_frames, 
             blit=True
         )
@@ -205,7 +205,7 @@ class CartPole(object):
             self.__file_header+'.mp4', 
             writer='ffmpeg', 
             fps=int(
-                0.1/(self.__sim_conditions.sampling_period*self.__skip_frames)
+                1/(self.__sampling_time*self.__skip_frames)
             )
         )
         print(
@@ -242,7 +242,7 @@ class CartPole(object):
             (0.5*self.__cart_height, self.__yp)
         )
         self.__time_text.set_text(
-            '{0:.1f} [s]'.format(10.0*self.__sim_conditions.sampling_period*frame)
+            '{0:.1f} [s]'.format(self.__sampling_time*frame)
         )
         return (
             self.__ground, self.__cartt, self.__cartb, self.__cartr, self.__cartl, 
@@ -266,8 +266,9 @@ class Hexacopter(object):
         # Loads the simulation data.
         self.__model_dir = 'generated/' + ocp_name + '/simulation_result' 
         self.__file_header = self.__model_dir + '/' + ocp_name
+        self.__t_data = np.genfromtxt(self.__file_header+'_t'+'.log')
         self.__x_data = np.genfromtxt(self.__file_header+'_x'+'.log')
-        self.__sim_conditions = SimulationConditions(self.__file_header)
+        self.__sampling_time = self.__t_data[1] - self.__t_data[0] 
         # Replaces NaN with 0.
         self.__x_data[np.isnan(self.__x_data)] = 0
         # Checks the dimension of the state.
@@ -320,7 +321,7 @@ class Hexacopter(object):
         anime = FuncAnimation(
             self.__fig, 
             self.__update_animation, 
-            interval=self.__sim_conditions.sampling_period*1000*self.__skip_frames, 
+            interval=self.__sampling_time*1000*self.__skip_frames, 
             frames=self.__total_frames, 
             blit=True
         )
@@ -328,7 +329,7 @@ class Hexacopter(object):
             self.__file_header+'.mp4', 
             writer='ffmpeg', 
             fps=int(
-                0.1/(self.__sim_conditions.sampling_period*self.__skip_frames)
+                1/(self.__sampling_time*self.__skip_frames)
             )
         )
         print(
@@ -352,7 +353,7 @@ class Hexacopter(object):
         self.__line6.set_data((X[5],X[0]), (Y[5],Y[0]))
         self.__line6.set_3d_properties([Z[5],Z[0]])
         self.__time_text.set_text(
-            '{0:.1f} [s]'.format(10.0*self.__sim_conditions.sampling_period*frame)
+            '{0:.1f} [s]'.format(self.__sampling_time*frame)
         )
         return (
             self.__line1, self.__line2, self.__line3, self.__line4, 
@@ -410,8 +411,9 @@ class MobileRobot(object):
         # Loads the simulation data.
         self.__model_dir = 'generated/' + ocp_name + '/simulation_result' 
         self.__file_header = self.__model_dir + '/' + ocp_name
+        self.__t_data = np.genfromtxt(self.__file_header+'_t'+'.log')
         self.__x_data = np.genfromtxt(self.__file_header+'_x'+'.log')
-        self.__sim_conditions = SimulationConditions(self.__file_header)
+        self.__sampling_time = self.__t_data[1] - self.__t_data[0] 
         # Replaces NaN with 0.
         self.__x_data[np.isnan(self.__x_data)] = 0
         # Checks the dimension of the state.
@@ -490,7 +492,7 @@ class MobileRobot(object):
         anime = FuncAnimation(
             self.__fig, 
             self.__update_animation, 
-            interval=self.__sim_conditions.sampling_period*1000*self.__skip_frames, 
+            interval=self.__sampling_time*1000*self.__skip_frames, 
             frames=self.__total_frames, 
             blit=True
         )
@@ -498,7 +500,7 @@ class MobileRobot(object):
             self.__file_header+'.mp4', 
             writer='ffmpeg', 
             fps=int(
-                0.1/(self.__sim_conditions.sampling_period*self.__skip_frames)
+                1/(self.__sampling_time*self.__skip_frames)
             )
         )
         print(
@@ -515,7 +517,7 @@ class MobileRobot(object):
         self.__line4.set_data((p_bl[0], p_br[0]), (p_bl[1], p_br[1]))
         self.__ref.set_data(self.__get_time(i)*self.__vx_ref, 0)
         self.__time_text.set_text(
-            '{0:.1f} [s]'.format(10.0*self.__sim_conditions.sampling_period*frame)
+            '{0:.1f} [s]'.format(self.__sampling_time*frame)
         )
         return (
             self.__line1, self.__line2, self.__line3, self.__line4, self.__ref,
@@ -545,4 +547,4 @@ class MobileRobot(object):
         return p_fl, p_fr, p_bl, p_br
 
     def __get_time(self, i):
-        return i*self.__sim_conditions.simulation_time/self.__total_frames
+        return i*self.__t_data[-1]/self.__total_frames

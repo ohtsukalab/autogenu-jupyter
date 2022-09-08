@@ -722,7 +722,8 @@ public:
         f_main.writelines([
 """ 
 
-#include "cgmres/simulator/simulator.hpp"
+#include "cgmres/logger.hpp"
+#include "cgmres/integrator.hpp"
 #include <string>
 
 int main() {
@@ -794,17 +795,49 @@ int main() {
             )
         else:
             return NotImplementedError()
-        f_main.write('\n\n')
         f_main.write(
+            '\n'    
             '  // Perform a numerical simulation.\n'
-            '  const double tsim = '+str(self.__simulation_params.simulation_length)+';\n'
-            '  const double sampling_time = settings.sampling_time;\n'
-            '  const std::string save_dir_name("../simulation_result");\n'
-            '  cgmres::simulation(ocp, mpc, x0, t0, tsim, sampling_time, ' 
-            +"save_dir_name"+', "' +self.__ocp_name +'");\n\n'
-            '  return 0;\n'
-            '}\n'
+            '  const double tsim = '+str(self.__simulation_params.simulation_length)+';'
         )
+        f_main.writelines([
+""" 
+  const double sampling_time = settings.sampling_time;
+  const unsigned int sim_steps = std::floor(tsim / sampling_time);
+
+  double t = t0;
+  cgmres::VectorX x = x0;
+  cgmres::VectorX dx = cgmres::VectorX::Zero(x0.size());
+
+""" 
+        ])
+        f_main.write('  const std::string log_name("../simulation_result/' + self.__ocp_name + '");')
+        f_main.writelines([
+""" 
+  cgmres::Logger logger(log_name);
+
+  std::cout << "Start a simulation..." << std::endl;
+  for (unsigned int i=0; i<sim_steps; ++i) {
+    const auto& u = mpc.uopt()[0]; // const reference to the initial optimal control input 
+    const cgmres::VectorX x1 = cgmres::RK4(ocp, t, sampling_time, x, u); // the next state
+    mpc.update(t, x); // update the MPC solution
+
+    logger.save(t, x, u, mpc.optError());
+    x = x1;
+    t = t + sampling_time;
+  }
+  std::cout << "End the simulation" << std::endl;
+  std::cout << std::endl;
+
+  logger.save(mpc.getProfile());
+
+  std::cout << "MPC used in this simulation:" << std::endl;
+  std::cout << mpc << std::endl;
+
+  return 0;
+}
+"""
+        ])
         f_main.close()
         print('\'main.cpp\', the closed-loop simulation code, is generated at', os.path.abspath('generated/'+str(self.__ocp_name)+'/main.cpp'))
 
