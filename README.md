@@ -75,7 +75,7 @@ The examples are found in `examples/cpp` directory.
 The pythton module `autogenu` can be instatlled by running
 ```
 python3 -m pip install setuptools
-python3 -m pip install -e .
+python3 -m pip install .
 ```
 at the project root directory of `autogenu-jupyter`.
 Further, if you install have installed header-only `cgmres` C++ library as step 4, then you can run `.ipynb` files for the code generation in everywhere.
