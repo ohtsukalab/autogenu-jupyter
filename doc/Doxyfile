@@ -116,7 +116,8 @@ INPUT                  = ../include \
                          ../examples/cpp \
                          ../examples/python \
                          ../examples/custom_python_interface \
-                         ../generated/
+                         ../generated/ \
+                         ../README.md
 INPUT_ENCODING         = UTF-8
 FILE_PATTERNS          = *.h \
                          *.hh \
@@ -145,7 +146,7 @@ INPUT_FILTER           =
 FILTER_PATTERNS        = 
 FILTER_SOURCE_FILES    = NO
 FILTER_SOURCE_PATTERNS = 
-USE_MDFILE_AS_MAINPAGE = 
+USE_MDFILE_AS_MAINPAGE = ../README.md
 #---------------------------------------------------------------------------
 # Configuration options related to source browsing
 #---------------------------------------------------------------------------
