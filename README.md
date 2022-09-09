@@ -15,7 +15,7 @@ The following C/GMRES based solvers are provided:
 - C++17 (MinGW or MSYS and PATH to either are required for Windows users)
 - CMake, git
 - Python 3.8 or later, Jupyter Lab or Jupyter Notebook, SymPy, NumPy, and collection (to generate `ocp.hpp`, `main.cpp`, and `CMakeLists.txt` by `AutoGenU.ipynb`)
-- Matplotlib (to plot simulation data on `AutoGenU.ipynb`)
+- Matplotlib, seaborn (to plot simulation data on `AutoGenU.ipynb`)
 - ffmpeg (to generate animations in the example notebooks)
 - Doxygen (optional, to generate C++ docs)
 

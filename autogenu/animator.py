@@ -17,13 +17,13 @@ class TwoLinkArm(object):
                 and saves it as a .mp4 files.
     """
 
-    def __init__(self, ocp_name):
+    def __init__(self, log_dir, log_name: str):
         """ Inits TwoLinkArm with loading the simulation results. """
         # Loads the simulation data.
-        self.__model_dir = 'generated/' + ocp_name + '/simulation_result' 
-        self.__file_header = self.__model_dir + '/' + ocp_name
-        self.__t_data = np.genfromtxt(self.__file_header+'_t'+'.log')
-        self.__x_data = np.genfromtxt(self.__file_header+'_x'+'.log')
+        self.__log_dir = log_dir
+        self.__log_name = log_name
+        self.__t_data = np.genfromtxt(os.path.join(log_dir, log_name+"_t.log"))
+        self.__x_data = np.genfromtxt(os.path.join(log_dir, log_name+"_x.log"))
         self.__sampling_time = self.__t_data[1] - self.__t_data[0] 
         # Replaces NaN with 0.
         self.__x_data[np.isnan(self.__x_data)] = 0
@@ -87,7 +87,7 @@ class TwoLinkArm(object):
             blit=True
         )
         anime.save(
-            self.__file_header+'.mp4',
+            os.path.join(self.__log_dir, self.__log_name+'.mp4'),
             writer='ffmpeg', 
             fps=int(
                 1/(self.__sampling_time*self.__skip_frames)
@@ -95,7 +95,7 @@ class TwoLinkArm(object):
         )
         print(
             'The animation of the simlation results is generated at '
-            +os.path.abspath(self.__file_header+'.mp4')
+            +self.__log_dir
         )
 
     def __update_animation(self, i):
@@ -124,13 +124,13 @@ class CartPole(object):
                 and saves it as a .mp4 files.
     """
 
-    def __init__(self, ocp_name):
+    def __init__(self, log_dir, log_name: str):
         """ Inits CartPole with loading the simulation results. """
         # Loads the simulation data.
-        self.__model_dir = 'generated/' + ocp_name + '/simulation_result' 
-        self.__file_header = self.__model_dir + '/' + ocp_name
-        self.__t_data = np.genfromtxt(self.__file_header+'_t'+'.log')
-        self.__x_data = np.genfromtxt(self.__file_header+'_x'+'.log')
+        self.__log_dir = log_dir
+        self.__log_name = log_name
+        self.__t_data = np.genfromtxt(os.path.join(log_dir, log_name+"_t.log"))
+        self.__x_data = np.genfromtxt(os.path.join(log_dir, log_name+"_x.log"))
         self.__sampling_time = self.__t_data[1] - self.__t_data[0] 
         # Replaces NaN with 0.
         self.__x_data[np.isnan(self.__x_data)] = 0
@@ -202,7 +202,7 @@ class CartPole(object):
             blit=True
         )
         anime.save(
-            self.__file_header+'.mp4', 
+            os.path.join(self.__log_dir, self.__log_name+'.mp4'),
             writer='ffmpeg', 
             fps=int(
                 1/(self.__sampling_time*self.__skip_frames)
@@ -210,7 +210,7 @@ class CartPole(object):
         )
         print(
             'The animation of the simlation results is generated at '
-            +os.path.abspath(self.__file_header+'.mp4')
+            +self.__log_dir
         )
 
     def __update_animation(self, i):
@@ -261,13 +261,13 @@ class Hexacopter(object):
                 and saves it as a .mp4 files.
     """
 
-    def __init__(self, ocp_name):
+    def __init__(self, log_dir, log_name: str):
         """ Inits Hexacopter with loading the simulation results. """
         # Loads the simulation data.
-        self.__model_dir = 'generated/' + ocp_name + '/simulation_result' 
-        self.__file_header = self.__model_dir + '/' + ocp_name
-        self.__t_data = np.genfromtxt(self.__file_header+'_t'+'.log')
-        self.__x_data = np.genfromtxt(self.__file_header+'_x'+'.log')
+        self.__log_dir = log_dir
+        self.__log_name = log_name
+        self.__t_data = np.genfromtxt(os.path.join(log_dir, log_name+"_t.log"))
+        self.__x_data = np.genfromtxt(os.path.join(log_dir, log_name+"_x.log"))
         self.__sampling_time = self.__t_data[1] - self.__t_data[0] 
         # Replaces NaN with 0.
         self.__x_data[np.isnan(self.__x_data)] = 0
@@ -326,7 +326,7 @@ class Hexacopter(object):
             blit=True
         )
         anime.save(
-            self.__file_header+'.mp4', 
+            os.path.join(self.__log_dir, self.__log_name+'.mp4'),
             writer='ffmpeg', 
             fps=int(
                 1/(self.__sampling_time*self.__skip_frames)
@@ -334,7 +334,7 @@ class Hexacopter(object):
         )
         print(
             'The animation of the simlation results is generated at '
-            +os.path.abspath(self.__file_header+'.mp4')
+            +self.__log_dir
         )
 
     def __update_animation(self, i):
@@ -406,13 +406,13 @@ class MobileRobot(object):
                 and saves it as a .mp4 files.
     """
 
-    def __init__(self, ocp_name, vx_ref, X1, Y1, R1, X2, Y2, R2):
+    def __init__(self, log_dir, log_name: str, vx_ref, X1, Y1, R1, X2, Y2, R2):
         """ Inits CartPole with loading the simulation results. """
         # Loads the simulation data.
-        self.__model_dir = 'generated/' + ocp_name + '/simulation_result' 
-        self.__file_header = self.__model_dir + '/' + ocp_name
-        self.__t_data = np.genfromtxt(self.__file_header+'_t'+'.log')
-        self.__x_data = np.genfromtxt(self.__file_header+'_x'+'.log')
+        self.__log_dir = log_dir
+        self.__log_name = log_name
+        self.__t_data = np.genfromtxt(os.path.join(log_dir, log_name+"_t.log"))
+        self.__x_data = np.genfromtxt(os.path.join(log_dir, log_name+"_x.log"))
         self.__sampling_time = self.__t_data[1] - self.__t_data[0] 
         # Replaces NaN with 0.
         self.__x_data[np.isnan(self.__x_data)] = 0
@@ -497,7 +497,7 @@ class MobileRobot(object):
             blit=True
         )
         anime.save(
-            self.__file_header+'.mp4', 
+            os.path.join(self.__log_dir, self.__log_name+'.mp4'),
             writer='ffmpeg', 
             fps=int(
                 1/(self.__sampling_time*self.__skip_frames)
@@ -505,7 +505,7 @@ class MobileRobot(object):
         )
         print(
             'The animation of the simlation results is generated at '
-            +os.path.abspath(self.__file_header+'.mp4')
+            +self.__log_dir
         )
 
     def __update_animation(self, i):

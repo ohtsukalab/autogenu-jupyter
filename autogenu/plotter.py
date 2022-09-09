@@ -4,35 +4,27 @@ import seaborn as sns
 import os
 
 
-class PlotSimulation(object):
-    """ Plots the simulation results.
+class Plotter(object):
+    """ Plotter of the logs.
 
         Attributes: 
             set_scales(figure_scale, font_scale, space_scale): Sets scales 
                 about the graphs to adjust its size. 
-            show_plots(): Shows the graph of the simulation results.
-            save_plots(): Saves the graph of the simulation results as a .pdf
-                file.
+            show(): Shows the graph of the log.
+            save(): Saves the graph of the logs as a .pdf file.
     """
 
-    def __init__(self, ocp_name: str):
-        """ Inits SimulationPlotter with loading the simulation results. """
+    def __init__(self, log_dir, log_name: str):
+        """ Inits Plotter with loading the logs. """
         # Load the data of the simulation results. 
-        self.__save_dir = 'generated/' + ocp_name + '/simulation_result/'
-        self.__file_header = self.__save_dir + ocp_name
-        self.__x_data = np.genfromtxt(
-            self.__file_header+'_x'+'.log'
-        )
-        self.__u_data = np.genfromtxt(
-            self.__file_header+'_u'+'.log'
-        )
-        self.__opterr_data = np.genfromtxt(
-            self.__file_header+'_opterr'+'.log'
-        )
-        self.__t_data = np.genfromtxt(
-            self.__file_header+'_t'+'.log'
-        )
+        self.__log_dir = log_dir
+        self.__log_name = log_name
+        self.__t_data = np.genfromtxt(os.path.join(log_dir, log_name+'_t.log'))
+        self.__x_data = np.genfromtxt(os.path.join(log_dir, log_name+'_x.log'))
+        self.__u_data = np.genfromtxt(os.path.join(log_dir, log_name+'_u.log'))
+        self.__opterr_data = np.genfromtxt(os.path.join(log_dir, log_name+'_opterr.log'))
         # Replace NaN with 0.
+        self.__t_data[np.isnan(self.__t_data)] = 0
         self.__x_data[np.isnan(self.__x_data)] = 0
         self.__u_data[np.isnan(self.__u_data)] = 0
         self.__opterr_data[np.isnan(self.__opterr_data)] = 0
@@ -87,25 +79,19 @@ class PlotSimulation(object):
         self.__font_scale = font_scale
         self.__space_scale = space_scale
 
-    def show_plots(self):
+    def show(self):
         """ Show the graphs of the simulation results. """
-        self.__plot_graphs()
+        self.__plot()
         plt.show()
 
-    def save_plots(self):
+    def save(self):
         """ Save the graphs of the simulation results. """
-        self.__plot_graphs()
-        plt.savefig(
-            self.__file_header+'.pdf', 
-            bbox_inches="tight", 
-            pad_inches=0.1
-        )
-        print(
-            'The graph of the simlation results is generated at '
-            +os.path.abspath(self.__file_header+'.pdf')
-        )
+        self.__plot()
+        log_file = os.path.join(self.__log_dir, self.__log_name+'.pdf')
+        plt.savefig(log_file, bbox_inches="tight", pad_inches=0.1)
+        print('The graph of the simlation results is generated at ' + log_file)
 
-    def __plot_graphs(self):
+    def __plot(self):
         """ Plots the simulation results in figure object. """
         # Sets the figure size.
         plt.figure(figsize=(
