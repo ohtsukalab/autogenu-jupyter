@@ -67,6 +67,8 @@ class Plotter(object):
         plt.rcParams['lines.linewidth'] = 1
         plt.rcParams['axes.linewidth'] = 0.5
 
+        self.set_scales(2, 5, 2) # default scales
+
     def set_scales(self, figure_scale, font_scale, space_scale):
         """ Set parameters for the scales of the graph.
 
