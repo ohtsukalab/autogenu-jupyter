@@ -6,3 +6,5 @@ __pycache__/
 .vscode/
 *.db
 *.egg-info
+*.log
+*.pdf
