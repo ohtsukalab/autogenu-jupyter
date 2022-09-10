@@ -11,7 +11,7 @@ settings = cgmres.common.SolverSettings()
 settings.sampling_time = 0.001
 settings.zeta = 1000
 settings.finite_difference_epsilon = 1e-08
-settings.max_iter = 50
+settings.max_iter = 0
 settings.opterr_tol = 1e-06
 settings.verbose_level = 1 # print opt error
 

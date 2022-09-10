@@ -1,7 +1,7 @@
 import cgmres.mobilerobot
 import cgmres.common
 import numpy as np
-
+from autogenu import RK4, Logger, Plotter
 
 ocp = cgmres.mobilerobot.OCP()
 
@@ -11,7 +11,7 @@ settings = cgmres.common.SolverSettings()
 settings.sampling_time = 0.001
 settings.zeta = 1000
 settings.finite_difference_epsilon = 1e-08
-settings.max_iter = 50
+settings.max_iter = 0
 settings.opterr_tol = 1e-06
 settings.verbose_level = 1 # print opt error
 
@@ -30,7 +30,6 @@ mpc.set_uc(initializer.ucopt)
 mpc.init_x_lmd(t0, x0)
 mpc.init_dummy_mu()
 
-from autogenu import Logger
 logger = Logger(log_dir='logs/mobilerobot', log_name='mobilerobot')
 
 # simple simulation with forward Euler 
@@ -40,8 +39,7 @@ t = t0
 x = x0.copy()
 for _ in range(int(tsim/sampling_time)):
     u = mpc.uopt[0]
-    dx = ocp.eval_f(t, x, u)
-    x1 = x + sampling_time * dx
+    x1 = RK4(ocp, t, sampling_time, x, u)
     mpc.update(t, x)
 
     logger.save(t, x, u, mpc.opt_error())
@@ -55,7 +53,6 @@ logger.close()
 print("\n======================= MPC used in this simulation: =======================")
 print(mpc)
 
-from autogenu import Plotter
 plotter = Plotter(log_dir='logs/mobilerobot', log_name='mobilerobot')
 plotter.show()
 plotter.save()
