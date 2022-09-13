@@ -41,9 +41,9 @@ def install_python_interface(project_root_dir, ocp_name, install_prefix=None):
     print('    export PYTHONPATH=$PYTHONPATH:' + str(install_prefix) + '\n')
     print('in the terminal to recognize the PYTHONPATH temporary.')
     print('Or set the PATH in Ubuntu as\n')
-    print('    echo export PYTHONPATH=$PYTHONPATH:' + str(install_prefix) + ' >> ~./bashrc\n')
+    print('    echo export PYTHONPATH=$PYTHONPATH:' + str(install_prefix) + ' >> ~/.bashrc\n')
     print('or in Mac OSX as\n')
-    print('    echo export PYTHONPATH=$PYTHONPATH:' + str(install_prefix) + ' >> ~./zshrc\n')
+    print('    echo export PYTHONPATH=$PYTHONPATH:' + str(install_prefix) + ' >> ~/.zshrc\n')
 
 
 if __name__ == '__main__':
