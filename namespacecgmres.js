@@ -1,0 +1,27 @@
+var namespacecgmres =
+[
+    [ "detail", "namespacecgmres_1_1detail.html", "namespacecgmres_1_1detail" ],
+    [ "Horizon", "classcgmres_1_1_horizon.html", "classcgmres_1_1_horizon" ],
+    [ "Logger", "classcgmres_1_1_logger.html", "classcgmres_1_1_logger" ],
+    [ "MultipleShootingCGMRESSolver", "classcgmres_1_1_multiple_shooting_c_g_m_r_e_s_solver.html", "classcgmres_1_1_multiple_shooting_c_g_m_r_e_s_solver" ],
+    [ "OCP_cartpole", "classcgmres_1_1_o_c_p__cartpole.html", "classcgmres_1_1_o_c_p__cartpole" ],
+    [ "OCP_cartpoleExternalReference", "classcgmres_1_1_o_c_p__cartpole_external_reference.html", "classcgmres_1_1_o_c_p__cartpole_external_reference" ],
+    [ "OCP_hexacopter", "classcgmres_1_1_o_c_p__hexacopter.html", "classcgmres_1_1_o_c_p__hexacopter" ],
+    [ "OCP_mobilerobot", "classcgmres_1_1_o_c_p__mobilerobot.html", "classcgmres_1_1_o_c_p__mobilerobot" ],
+    [ "OCP_pendubot", "classcgmres_1_1_o_c_p__pendubot.html", "classcgmres_1_1_o_c_p__pendubot" ],
+    [ "SingleShootingCGMRESSolver", "classcgmres_1_1_single_shooting_c_g_m_r_e_s_solver.html", "classcgmres_1_1_single_shooting_c_g_m_r_e_s_solver" ],
+    [ "SolverSettings", "structcgmres_1_1_solver_settings.html", "structcgmres_1_1_solver_settings" ],
+    [ "Timer", "classcgmres_1_1_timer.html", "classcgmres_1_1_timer" ],
+    [ "TimingProfile", "structcgmres_1_1_timing_profile.html", "structcgmres_1_1_timing_profile" ],
+    [ "ZeroHorizonOCPSolver", "classcgmres_1_1_zero_horizon_o_c_p_solver.html", "classcgmres_1_1_zero_horizon_o_c_p_solver" ],
+    [ "Map", "namespacecgmres.html#a1483e9d281f0b8e5328ea735fef3f3ab", null ],
+    [ "Matrix", "namespacecgmres.html#a000417f9550658a622f4d641d993758f", null ],
+    [ "MatrixBase", "namespacecgmres.html#afe02a11bb2b72df4873fd96c5651e52b", null ],
+    [ "MatrixX", "namespacecgmres.html#af1011902155de72239350df0e0d88bca", null ],
+    [ "Scalar", "namespacecgmres.html#af49bbb2b0f693590861d54869d99581e", null ],
+    [ "Vector", "namespacecgmres.html#aecb96c3f94dcc079dc825b1a22859556", null ],
+    [ "VectorX", "namespacecgmres.html#a0f6b1f7da58b460f735420534e27ac72", null ],
+    [ "VectorXi", "namespacecgmres.html#a371872c0aa6e0e00d3ac47003afad13b", null ],
+    [ "ForwardEuler", "namespacecgmres.html#ae0361af647795dceae2af39f5e50642d", null ],
+    [ "RK4", "namespacecgmres.html#a2f2301f446560e2418a8a0076677d52d", null ]
+];

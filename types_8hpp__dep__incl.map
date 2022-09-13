@@ -1,0 +1,25 @@
+<map id="/github/workspace/include/cgmres/types.hpp" name="/github/workspace/include/cgmres/types.hpp">
+<area shape="rect" id="node1" title=" " alt="" coords="1631,5,1804,45"/>
+<area shape="rect" id="node2" href="$cartpole_2ocp_8hpp.html" title=" " alt="" coords="5,101,192,141"/>
+<area shape="rect" id="node3" href="$cartpole__external__reference_2ocp_8hpp.html" title=" " alt="" coords="216,93,427,148"/>
+<area shape="rect" id="node4" href="$hexacopter_2ocp_8hpp.html" title=" " alt="" coords="451,101,637,141"/>
+<area shape="rect" id="node5" href="$mobilerobot_2ocp_8hpp.html" title=" " alt="" coords="661,101,848,141"/>
+<area shape="rect" id="node6" href="$pendubot_2ocp_8hpp.html" title=" " alt="" coords="872,101,1059,141"/>
+<area shape="rect" id="node7" href="$continuation__gmres_8hpp.html" title=" " alt="" coords="2796,299,2975,353"/>
+<area shape="rect" id="node8" href="$single__shooting__cgmres__solver_8hpp.html" title=" " alt="" coords="2424,401,2597,456"/>
+<area shape="rect" id="node9" href="$continuation__gmres__condensing_8hpp.html" title=" " alt="" coords="931,299,1109,353"/>
+<area shape="rect" id="node10" href="$multiple__shooting__cgmres__solver_8hpp.html" title=" " alt="" coords="1582,401,1757,456"/>
+<area shape="rect" id="node11" href="$control__input__bounds_8hpp.html" title=" " alt="" coords="1372,93,1545,148"/>
+<area shape="rect" id="node12" href="$control__input__bounds__shooting_8hpp.html" title=" " alt="" coords="1235,196,1421,251"/>
+<area shape="rect" id="node13" href="$multiple__shooting__nlp_8hpp.html" title=" " alt="" coords="1343,299,1516,353"/>
+<area shape="rect" id="node14" href="$single__shooting__nlp_8hpp.html" title=" " alt="" coords="1541,299,1739,353"/>
+<area shape="rect" id="node15" href="$zero__horizon__nlp_8hpp.html" title=" " alt="" coords="1649,196,1829,251"/>
+<area shape="rect" id="node16" href="$zero__horizon__ocp__solver_8hpp.html" title=" " alt="" coords="2156,299,2329,353"/>
+<area shape="rect" id="node17" href="$matrixfree__gmres_8hpp.html" title=" " alt="" coords="1904,196,2077,251"/>
+<area shape="rect" id="node18" href="$newton__gmres_8hpp.html" title=" " alt="" coords="2102,203,2319,243"/>
+<area shape="rect" id="node19" href="$horizon_8hpp.html" title=" " alt="" coords="1569,101,1743,141"/>
+<area shape="rect" id="node20" href="$integrator_8hpp.html" title=" " alt="" coords="2496,101,2669,141"/>
+<area shape="rect" id="node21" href="$logger_8hpp.html" title=" " alt="" coords="2599,306,2772,346"/>
+<area shape="rect" id="node22" href="$solver__settings_8hpp.html" title=" " alt="" coords="2395,203,2581,243"/>
+<area shape="rect" id="node23" href="$timer_8hpp.html" title=" " alt="" coords="2605,203,2779,243"/>
+</map>
