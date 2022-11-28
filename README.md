@@ -1,7 +1,7 @@
 # AutoGenU for Jupyter
 
-[![build](https://github.com/mayataka/autogenu-jupyter/actions/workflows/build.yaml/badge.svg?branch=master)](https://github.com/mayataka/autogenu-jupyter/actions/workflows/build.yaml)
-[![doxygen](https://github.com/mayataka/autogenu-jupyter/actions/workflows/doxygen.yaml/badge.svg)](https://github.com/mayataka/autogenu-jupyter/actions/workflows/doxygen.yaml)
+[![build](https://github.com/ohtsukalab/autogenu-jupyter/actions/workflows/build.yaml/badge.svg?branch=master)](https://github.com/ohtsukalab/autogenu-jupyter/actions/workflows/build.yaml)
+[![doxygen](https://github.com/ohtsukalab/autogenu-jupyter/actions/workflows/doxygen.yaml/badge.svg)](https://github.com/ohtsukalab/autogenu-jupyter/actions/workflows/doxygen.yaml)
 
 
 ## Introduction
@@ -24,7 +24,7 @@ The following C/GMRES based solvers are provided:
 ### 1. Setup requirements
 Please confirm that you clone this repository as 
 ```
-git clone https://github.com/mayataka/autogenu-jupyter --recursive
+git clone https://github.com/ohtsukalab/autogenu-jupyter --recursive
 ```
 Otherwise, please do the following command:
 ```
@@ -82,8 +82,8 @@ Further, if you install have installed header-only `cgmres` C++ library as step 
 
 
 ### Documentation
-C++ API documentation of `cgmres` library is found at https://mayataka.github.io/autogenu-jupyter/.   
-Python interfaces are almost the same as the C++ API, so please refere to https://mayataka.github.io/autogenu-jupyter/ even for Python interfaces as well as the [tips for conversions between C++ and Python](https://mayataka.github.io/autogenu-jupyter/md__github_workspace_examples_python__r_e_a_d_m_e.html).
+C++ API documentation of `cgmres` library is found at https://ohtsukalab.github.io/autogenu-jupyter/.   
+Python interfaces are almost the same as the C++ API, so please refere to https://ohtsukalab.github.io/autogenu-jupyter/ even for Python interfaces as well as the [tips for conversions between C++ and Python](https://ohtsukalab.github.io/autogenu-jupyter/md__github_workspace_examples_python__r_e_a_d_m_e.html).
 
 
 ## Demos
