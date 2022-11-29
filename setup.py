@@ -11,7 +11,7 @@ setup(
     description="An automatic code generator for nonlinear model predictive control (NMPC) and the continuation/GMRES method (C/GMRES) based numerical solvers for NMPC",
     license="MIT",
     author="Sotaro Katayama",
-    url="https://github.com/mayataka/autogenu-jupyter",
+    url="https://github.com/ohtsukalab/autogenu-jupyter",
     packages=["autogenu"],
     include_package_data=True,
     zip_safe=False,

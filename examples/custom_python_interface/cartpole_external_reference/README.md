@@ -1,7 +1,7 @@
 ## Custon Python interface examples
 Here we show how to build Python interfaces for the custom OCP definitions.   
 Specifically, we consider an cartpole that containts external reference represented as a shared pointer of a struct.
-Its C++ documentation is found at https://mayataka.github.io/autogenu-jupyter/classcgmres_1_1_o_c_p__cartpole_external_reference.html.
+Its C++ documentation is found at https://ohtsukalab.github.io/autogenu-jupyter/classcgmres_1_1_o_c_p__cartpole_external_reference.html.
 
 First, install `cgmres` C++ library and `autogenu` Python module. 
 In the project root directory of `autogenu-jupyter`, do 

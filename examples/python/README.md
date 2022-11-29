@@ -9,13 +9,13 @@ python3 cartpole.py
 
 ## Documentation 
 Python API is very similar to the C++ API.  
-Please refere to the C++ API documentation https://mayataka.github.io/autogenu-jupyter/ as well as the following tips of the API conversions between C++ and Python.
+Please refere to the C++ API documentation https://ohtsukalab.github.io/autogenu-jupyter/ as well as the following tips of the API conversions between C++ and Python.
 
 
 ## Tips of API conversions between C++ and Python
 
 ### Horizon
-[C++ Horizon documentation](https://mayataka.github.io/autogenu-jupyter/classcgmres_1_1_horizon.html)
+[C++ Horizon documentation](https://ohtsukalab.github.io/autogenu-jupyter/classcgmres_1_1_horizon.html)
 |                         |  C++  |  Python  |
 | ----------------------- | ----- | -------- |
 | Include                 | #include "cgmres/horizon.hpp"  |  import cgmres.common |
@@ -26,7 +26,7 @@ Please refere to the C++ API documentation https://mayataka.github.io/autogenu-j
 | Print out               | std::cout << horizon << std::endl;  |  print(horizon) |
 
 ### SolverSettings
-[C++ SolverSettings documentation](https://mayataka.github.io/autogenu-jupyter/structcgmres_1_1_solver_settings.html)
+[C++ SolverSettings documentation](https://ohtsukalab.github.io/autogenu-jupyter/structcgmres_1_1_solver_settings.html)
 |                         |  C++  |  Python  |
 | ----------------------- | ----- | -------- |
 | Include                 | #include "cgmres/solver_settings.hpp"  |  import cgmres.common |
@@ -37,7 +37,7 @@ Please refere to the C++ API documentation https://mayataka.github.io/autogenu-j
 | Print out               | std::cout << settings << std::endl;  |  print(settings) |
 
 ### OCP (OCP_cartpole as an example)
-[C++ OCP_cartpole documentation](https://mayataka.github.io/autogenu-jupyter/classcgmres_1_1_o_c_p__cartpole.html)
+[C++ OCP_cartpole documentation](https://ohtsukalab.github.io/autogenu-jupyter/classcgmres_1_1_o_c_p__cartpole.html)
 |                         |  C++  |  Python  |
 | ----------------------- | ----- | -------- |
 | Include                 | #include "ocp.hpp"  |  import cgmres.cartpole  |
@@ -51,7 +51,7 @@ Please refere to the C++ API documentation https://mayataka.github.io/autogenu-j
 | Print out               | std::cout << ocp << std::endl;  |  print(ocp) |
 
 ### ZeroHorizonOCPSolver (OCP_cartpole as an example)
-[C++ ZeroHorizonOCPSolver documentation](https://mayataka.github.io/autogenu-jupyter/classcgmres_1_1_zero_horizon_o_c_p_solver.html)
+[C++ ZeroHorizonOCPSolver documentation](https://ohtsukalab.github.io/autogenu-jupyter/classcgmres_1_1_zero_horizon_o_c_p_solver.html)
 |                         |  C++  |  Python  |
 | ----------------------- | ----- | -------- |
 | Include                 | #include "cgmres/zero_horizon_ocp_solver.hpp"<br> #include "ocp.hpp"  |  import cgmres.common <br> import cgmres.cartpole  |
@@ -64,7 +64,7 @@ Please refere to the C++ API documentation https://mayataka.github.io/autogenu-j
 | Print out               | std::cout << solver << std::endl;  |  print(solver) |
 
 ### MultipleShootingCGMRESSolver (OCP_cartpole as an example)
-[C++ MultipleShootingCGMRESSolver documentation](https://mayataka.github.io/autogenu-jupyter/classcgmres_1_1_multiple_shooting_c_g_m_r_e_s_solver.html)
+[C++ MultipleShootingCGMRESSolver documentation](https://ohtsukalab.github.io/autogenu-jupyter/classcgmres_1_1_multiple_shooting_c_g_m_r_e_s_solver.html)
 |                         |  C++  |  Python  |
 | ----------------------- | ----- | -------- |
 | Include                 | #include "cgmres/multiple_shooting_cgmres_solver.hpp"<br> #include "ocp.hpp"  |  import cgmres.common <br> import cgmres.cartpole  |

@@ -18,4 +18,4 @@ make
 ./cartpole
 ```
 ## Documentation 
-The documentations on the C++ API is found at https://mayataka.github.io/autogenu-jupyter/.
+The documentations on the C++ API is found at https://ohtsukalab.github.io/autogenu-jupyter/.
