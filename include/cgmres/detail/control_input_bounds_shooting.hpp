@@ -84,7 +84,7 @@ void multiply_hmu_inv(const std::array<Vector<OCP::nub>, N>& dummy,
 }
 
 template <typename OCP, int N>
-void retrive_dummy_update(const OCP& ocp,
+void retrieve_dummy_update(const OCP& ocp,
                           const Vector<OCP::nuc*N>& solution,
                           const std::array<Vector<OCP::nub>, N>& dummy, 
                           const std::array<Vector<OCP::nub>, N>& mu,
@@ -93,14 +93,14 @@ void retrive_dummy_update(const OCP& ocp,
   if constexpr (OCP::nub > 0) {
     constexpr int nuc = OCP::nuc;
     for (size_t i=0; i<N; ++i) {
-      retrive_dummy_update(ocp, solution.template segment<nuc>(nuc*i), dummy[i], mu[i], 
+      retrieve_dummy_update(ocp, solution.template segment<nuc>(nuc*i), dummy[i], mu[i], 
                            solution_update.template segment<nuc>(nuc*i), dummy_update[i]);
     }
   } 
 }
 
 template <typename OCP, int N>
-void retrive_mu_update(const OCP& ocp,
+void retrieve_mu_update(const OCP& ocp,
                        const Vector<OCP::nuc*N>& solution,
                        const std::array<Vector<OCP::nub>, N>& dummy, 
                        const std::array<Vector<OCP::nub>, N>& mu,
@@ -109,7 +109,7 @@ void retrive_mu_update(const OCP& ocp,
   if constexpr (OCP::nub > 0) {
     constexpr int nuc = OCP::nuc;
     for (size_t i=0; i<N; ++i) {
-      retrive_mu_update(ocp, solution.template segment<nuc>(nuc*i), dummy[i], mu[i], 
+      retrieve_mu_update(ocp, solution.template segment<nuc>(nuc*i), dummy[i], mu[i], 
                         solution_update.template segment<nuc>(nuc*i), mu_update[i]);
     }
   } 

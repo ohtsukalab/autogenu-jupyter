@@ -54,7 +54,7 @@ public:
     }
   }
 
-  void retrive_dummy(Vector<dim>& solution, Vector<dim>& fonc_hu, const Scalar min_dummy) {
+  void retrieve_dummy(Vector<dim>& solution, Vector<dim>& fonc_hu, const Scalar min_dummy) {
     if constexpr (nub > 0) {
       const auto uc    = solution.template head<nuc>();
       auto dummy = solution.template segment<nub>(nuc);
@@ -67,7 +67,7 @@ public:
     }
   }
 
-  void retrive_mu(Vector<dim>& solution, Vector<dim>& fonc_hu) {
+  void retrieve_mu(Vector<dim>& solution, Vector<dim>& fonc_hu) {
     if constexpr (nub > 0) {
       const auto uc    = solution.template head<nuc>();
       const auto dummy = solution.template segment<nub>(nuc);

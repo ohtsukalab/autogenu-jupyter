@@ -86,7 +86,7 @@ public:
     }
   }
 
-  void retrive_dummy(Vector<dim>& solution, Vector<dim>& fonc_hu, const Scalar min_dummy) {
+  void retrieve_dummy(Vector<dim>& solution, Vector<dim>& fonc_hu, const Scalar min_dummy) {
     if constexpr (nub > 0) {
       for (size_t i=0; i<N; ++i) {
         const int inucb2 = i * (nuc + 2 * nub);
@@ -101,7 +101,7 @@ public:
     }
   }
 
-  void retrive_mu(Vector<dim>& solution, Vector<dim>& fonc_hu) {
+  void retrieve_mu(Vector<dim>& solution, Vector<dim>& fonc_hu) {
     if constexpr (nub > 0) {
       for (size_t i=0; i<N; ++i) {
         const int inucb2 = i * (nuc + 2 * nub);

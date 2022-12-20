@@ -142,9 +142,9 @@ public:
   /// @brief Initializes the dummy input vectors and Lagrange multipliers with respect to the control input bounds constraint.
   ///
   void init_dummy_mu() {
-    newton_gmres_.retrive_dummy(solution_, settings_.min_dummy);
-    newton_gmres_.retrive_mu(solution_);
-    retriveSolution();
+    newton_gmres_.retrieve_dummy(solution_, settings_.min_dummy);
+    newton_gmres_.retrieve_mu(solution_);
+    retrieveSolution();
   }
 
   ///
@@ -241,7 +241,7 @@ public:
         break;
       }
     }
-    retriveSolution();
+    retrieveSolution();
   }
 
   ///
@@ -287,7 +287,7 @@ private:
     }
   }
 
-  void retriveSolution() {
+  void retrieveSolution() {
     uopt_ = solution_.template head<nu>();
     ucopt_ = solution_.template head<nuc>();
     dummyopt_ = solution_.template segment<nub>(nuc);

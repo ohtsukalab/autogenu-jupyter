@@ -133,8 +133,8 @@ public:
     for (size_t i=0; i<=N; ++i) {
       fonc_hx_1_[i] = (1.0 - finite_difference_epsilon_*zeta_) * fonc_hx_[i];
     }
-    nlp_.retrive_x(t1, x0_1_, solution, x_1_, fonc_f_1_);
-    nlp_.retrive_lmd(t1, x0_1_, solution, x_1_, lmd_1_, fonc_hx_1_);
+    nlp_.retrieve_x(t1, x0_1_, solution, x_1_, fonc_f_1_);
+    nlp_.retrieve_lmd(t1, x0_1_, solution, x_1_, lmd_1_, fonc_hx_1_);
 
     // condensing of dummy and mu
     if constexpr (nub > 0) {
@@ -161,10 +161,10 @@ public:
     nlp_.eval_fonc_f(t1, x0_1_, solution, x, fonc_f_1_);
     nlp_.eval_fonc_hx(t1, x0_1_, solution, x, lmd, fonc_hx_1_);
 
-    nlp_.retrive_x(t1, x0_1_, updated_solution_, x_1_, fonc_f_1_);
-    nlp_.retrive_lmd(t1, x0_1_, updated_solution_, x_1_, lmd_1_, fonc_hx_1_);
+    nlp_.retrieve_x(t1, x0_1_, updated_solution_, x_1_, fonc_f_1_);
+    nlp_.retrieve_lmd(t1, x0_1_, updated_solution_, x_1_, lmd_1_, fonc_hx_1_);
     if constexpr (nub > 0) {
-      nlp_.retrive_mu_update(solution, dummy, mu, solution_update, mu_update_);
+      nlp_.retrieve_mu_update(solution, dummy, mu, solution_update, mu_update_);
       for (size_t i=0; i<N; ++i) {
         mu_1_[i] = mu[i] - finite_difference_epsilon_ * mu_update_[i];
       }
@@ -195,10 +195,10 @@ public:
     const Scalar t1 = t + finite_difference_epsilon_;
     updated_solution_ = solution + finite_difference_epsilon_ * solution_update;
 
-    nlp_.retrive_x(t1, x0_1_, updated_solution_, x_1_, fonc_f_1_);
-    nlp_.retrive_lmd(t1, x0_1_, updated_solution_, x_1_, lmd_1_, fonc_hx_1_);
+    nlp_.retrieve_x(t1, x0_1_, updated_solution_, x_1_, fonc_f_1_);
+    nlp_.retrieve_lmd(t1, x0_1_, updated_solution_, x_1_, lmd_1_, fonc_hx_1_);
     if constexpr (nub > 0) {
-      nlp_.retrive_mu_update(solution, dummy, mu, solution_update, mu_update_);
+      nlp_.retrieve_mu_update(solution, dummy, mu, solution_update, mu_update_);
       for (size_t i=0; i<N; ++i) {
         mu_1_[i] = mu[i] - finite_difference_epsilon_ * mu_update_[i];
       }
@@ -229,8 +229,8 @@ public:
     for (size_t i=0; i<N+1; ++i) {
       fonc_hx_1_[i]  = (1.0 - finite_difference_epsilon_*zeta_) * fonc_hx_[i];
     }
-    nlp_.retrive_x(t1, x0_1_, updated_solution_, x_1_, fonc_f_1_);
-    nlp_.retrive_lmd(t1, x0_1_, updated_solution_, x_1_, lmd_1_, fonc_hx_1_);  
+    nlp_.retrieve_x(t1, x0_1_, updated_solution_, x_1_, fonc_f_1_);
+    nlp_.retrieve_lmd(t1, x0_1_, updated_solution_, x_1_, lmd_1_, fonc_hx_1_);  
     for (size_t i=0; i<N+1; ++i) {
       fonc_f_[i] = x_1_[i] - x[i];
       x[i].noalias() += (dt/finite_difference_epsilon_) * fonc_f_[i];
@@ -240,8 +240,8 @@ public:
       lmd[i].noalias() += (dt/finite_difference_epsilon_) * fonc_hx_[i];
     }
     if constexpr (nub > 0) {
-      nlp_.retrive_dummy_update(solution, dummy, mu, solution_update, dummy_update_);
-      nlp_.retrive_mu_update(solution, dummy, mu, solution_update, mu_update_);
+      nlp_.retrieve_dummy_update(solution, dummy, mu, solution_update, dummy_update_);
+      nlp_.retrieve_mu_update(solution, dummy, mu, solution_update, mu_update_);
       for (size_t i=0; i<N; ++i) {
         dummy[i].noalias() += dt * (fonc_hdummy_1_[i] - dummy_update_[i]);
       }
@@ -253,23 +253,23 @@ public:
   }
 
   template <typename VectorType>
-  void retrive_x(const Scalar t, const MatrixBase<VectorType>& x0, const Vector<dim>& solution, 
+  void retrieve_x(const Scalar t, const MatrixBase<VectorType>& x0, const Vector<dim>& solution, 
                  std::array<Vector<nx>, N+1>& x) {
     assert(x0.size() == nx);
     std::fill(fonc_f_1_.begin(), fonc_f_1_.end(), Vector<nx>::Zero());
-    nlp_.retrive_x(t, x0, solution, x, fonc_f_1_);
+    nlp_.retrieve_x(t, x0, solution, x, fonc_f_1_);
   }
 
   template <typename VectorType>
-  void retrive_lmd(const Scalar t, const MatrixBase<VectorType>& x0, const Vector<dim>& solution, 
+  void retrieve_lmd(const Scalar t, const MatrixBase<VectorType>& x0, const Vector<dim>& solution, 
                    const std::array<Vector<nx>, N+1>& x,
                    std::array<Vector<nx>, N+1>& lmd) {
     assert(x0.size() == nx);
     std::fill(fonc_hx_1_.begin(), fonc_hx_1_.end(), Vector<nx>::Zero());
-    nlp_.retrive_lmd(t, x0, solution, x, lmd, fonc_hx_1_);
+    nlp_.retrieve_lmd(t, x0, solution, x, lmd, fonc_hx_1_);
   }
 
-  void retrive_dummy(const Vector<dim>& solution, 
+  void retrieve_dummy(const Vector<dim>& solution, 
                      std::array<Vector<nub>, N>& dummy,
                      const std::array<Vector<nub>, N>& mu,
                      const Scalar min_dummy) {
@@ -284,7 +284,7 @@ public:
     }
   }
 
-  void retrive_mu(const Vector<dim>& solution, 
+  void retrieve_mu(const Vector<dim>& solution, 
                   const std::array<Vector<nub>, N>& dummy,
                   std::array<Vector<nub>, N>& mu) {
     if constexpr (nub > 0) {

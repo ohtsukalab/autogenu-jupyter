@@ -248,9 +248,9 @@ public:
   /// @brief Initializes the dummy input vectors and Lagrange multipliers with respect to the control input bounds constraint.
   ///
   void init_dummy_mu() {
-    continuation_gmres_.retrive_dummy(solution_, settings_.min_dummy);
-    continuation_gmres_.retrive_mu(solution_);
-    retriveSolution();
+    continuation_gmres_.retrieve_dummy(solution_, settings_.min_dummy);
+    continuation_gmres_.retrieve_mu(solution_);
+    retrieveSolution();
   }
 
   ///
@@ -332,7 +332,7 @@ public:
               continuation_gmres_, t, x.derived(), solution_, solution_update_);
     const auto opt_error = continuation_gmres_.optError();
     solution_.noalias() += settings_.sampling_time * solution_update_;
-    retriveSolution();
+    retrieveSolution();
     if (settings_.profile_solver) timer_.tock();
 
     // verbose
@@ -393,7 +393,7 @@ private:
     }
   }
 
-  void retriveSolution() {
+  void retrieveSolution() {
     for (size_t i=0; i<N; ++i) {
       const int inucb2 = i * (nuc + 2 * nub);
       uopt_[i] = solution_.template segment<nu>(inucb2);

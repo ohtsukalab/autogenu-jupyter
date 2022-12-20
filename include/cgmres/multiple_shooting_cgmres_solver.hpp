@@ -314,7 +314,7 @@ public:
     if (x.size() != nx) {
       throw std::invalid_argument("[MultipleShootingCGMRESSolver::init_x] x.size() must be " + std::to_string(nx));
     }
-    continuation_gmres_.retrive_x(t, x, solution_, xopt_);
+    continuation_gmres_.retrieve_x(t, x, solution_, xopt_);
   }
 
   ///
@@ -327,7 +327,7 @@ public:
     if (x.size() != nx) {
       throw std::invalid_argument("[MultipleShootingCGMRESSolver::init_lmd] x.size() must be " + std::to_string(nx));
     }
-    continuation_gmres_.retrive_lmd(t, x, solution_, xopt_, lmdopt_);
+    continuation_gmres_.retrieve_lmd(t, x, solution_, xopt_, lmdopt_);
   }
 
   ///
@@ -340,16 +340,16 @@ public:
     if (x.size() != nx) {
       throw std::invalid_argument("[MultipleShootingCGMRESSolver::init_x_lmd] x.size() must be " + std::to_string(nx));
     }
-    continuation_gmres_.retrive_x(t, x, solution_, xopt_);
-    continuation_gmres_.retrive_lmd(t, x, solution_, xopt_, lmdopt_);
+    continuation_gmres_.retrieve_x(t, x, solution_, xopt_);
+    continuation_gmres_.retrieve_lmd(t, x, solution_, xopt_, lmdopt_);
   }
 
   ///
   /// @brief Initializes the dummy input vectors and Lagrange multipliers with respect to the control input bounds constraint.
   ///
   void init_dummy_mu() {
-    continuation_gmres_.retrive_dummy(solution_, dummyopt_, muopt_, settings_.min_dummy);
-    continuation_gmres_.retrive_mu(solution_, dummyopt_, muopt_);
+    continuation_gmres_.retrieve_dummy(solution_, dummyopt_, muopt_, settings_.min_dummy);
+    continuation_gmres_.retrieve_mu(solution_, dummyopt_, muopt_);
   }
 
   ///
@@ -435,7 +435,7 @@ public:
     continuation_gmres_.expansion(t, x, solution_, xopt_, lmdopt_, dummyopt_, muopt_, 
                                   solution_update_, settings_.sampling_time, settings_.min_dummy);
     solution_.noalias() += settings_.sampling_time * solution_update_;
-    retriveSolution();
+    retrieveSolution();
     if (settings_.profile_solver) timer_.tock();
 
     // verbose
@@ -493,7 +493,7 @@ private:
     }
   }
 
-  void retriveSolution() {
+  void retrieveSolution() {
     for (size_t i=0; i<N; ++i) {
       uopt_[i] = solution_.template segment<nu>(i*nuc);
       ucopt_[i] = solution_.template segment<nuc>(i*nuc);

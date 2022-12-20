@@ -85,7 +85,7 @@ void multiply_hmu_inv(const MatrixBase<VectorType1>& dummy,
 }
 
 template <typename OCP, typename VectorType1, typename VectorType2, typename VectorType3, typename VectorType4, typename VectorType5>
-void retrive_dummy_update(const OCP& ocp, 
+void retrieve_dummy_update(const OCP& ocp, 
                           const MatrixBase<VectorType1>& u, 
                           const MatrixBase<VectorType2>& dummy, 
                           const MatrixBase<VectorType3>& mu, 
@@ -104,7 +104,7 @@ void retrive_dummy_update(const OCP& ocp,
 }
 
 template <typename OCP, typename VectorType1, typename VectorType2, typename VectorType3, typename VectorType4, typename VectorType5>
-void retrive_mu_update(const OCP& ocp, 
+void retrieve_mu_update(const OCP& ocp, 
                        const MatrixBase<VectorType1>& u, 
                        const MatrixBase<VectorType2>& dummy, 
                        const MatrixBase<VectorType3>& mu, 

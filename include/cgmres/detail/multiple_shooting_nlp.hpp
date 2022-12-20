@@ -70,7 +70,7 @@ public:
   }
 
   template <typename VectorType>
-  void retrive_x(const Scalar t, const MatrixBase<VectorType>& x0, const Vector<dim>& solution,
+  void retrieve_x(const Scalar t, const MatrixBase<VectorType>& x0, const Vector<dim>& solution,
                  std::array<Vector<nx>, N+1>& x,
                  const std::array<Vector<nx>, N+1>& fonc_f) {
     const Scalar T = horizon_.T(t);
@@ -103,7 +103,7 @@ public:
   }
 
   template <typename VectorType>
-  void retrive_lmd(const Scalar t, const MatrixBase<VectorType>& x0, const Vector<dim>& solution,
+  void retrieve_lmd(const Scalar t, const MatrixBase<VectorType>& x0, const Vector<dim>& solution,
                    const std::array<Vector<nx>, N+1>& x, std::array<Vector<nx>, N+1>& lmd,
                    const std::array<Vector<nx>, N+1>& fonc_hx) {
     const Scalar T = horizon_.T(t);
@@ -159,20 +159,20 @@ public:
                                       fonc_hdummy_inv, fonc_hmu_inv);
   }
 
-  void retrive_dummy_update(const Vector<OCP::nuc*N>& solution,
+  void retrieve_dummy_update(const Vector<OCP::nuc*N>& solution,
                             const std::array<Vector<OCP::nub>, N>& dummy, 
                             const std::array<Vector<OCP::nub>, N>& mu,
                             const Vector<OCP::nuc*N>& solution_update,
                             std::array<Vector<OCP::nub>, N>& dummy_update) {
-    ubounds::retrive_dummy_update<OCP, N>(ocp_, solution, dummy, mu, solution_update, dummy_update);
+    ubounds::retrieve_dummy_update<OCP, N>(ocp_, solution, dummy, mu, solution_update, dummy_update);
   }
 
-  void retrive_mu_update(const Vector<OCP::nuc*N>& solution,
+  void retrieve_mu_update(const Vector<OCP::nuc*N>& solution,
                          const std::array<Vector<OCP::nub>, N>& dummy, 
                          const std::array<Vector<OCP::nub>, N>& mu,
                          const Vector<OCP::nuc*N>& solution_update,
                          std::array<Vector<OCP::nub>, N>& mu_update) {
-    ubounds::retrive_mu_update<OCP, N>(ocp_, solution, dummy, mu, solution_update, mu_update);
+    ubounds::retrieve_mu_update<OCP, N>(ocp_, solution, dummy, mu, solution_update, mu_update);
   }
 
   void clip_dummy(std::array<Vector<OCP::nub>, N>& dummy, const Scalar min) {
