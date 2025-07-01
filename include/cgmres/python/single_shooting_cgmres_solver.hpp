@@ -38,6 +38,7 @@ PYBIND11_MODULE(single_shooting_cgmres_solver, m) { \
     .def("update", [](SingleShootingCGMRESSolver_& self, const Scalar t, const VectorX& x) { \
         self.update(t, x); \
     }, py::arg("t"), py::arg("x")) \
+    .def("init_dummy_mu", &SingleShootingCGMRESSolver_::init_dummy_mu) \
     .def("get_profile", &SingleShootingCGMRESSolver_::getProfile) \
     .def("__str__", [](const SingleShootingCGMRESSolver_& self) { \
         std::stringstream ss; \
