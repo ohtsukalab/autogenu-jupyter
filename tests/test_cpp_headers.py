@@ -1,6 +1,5 @@
 from pathlib import Path
 
-
 REPOSITORY_ROOT = Path(__file__).resolve().parents[1]
 PYTHON_HEADERS = REPOSITORY_ROOT / "include" / "cgmres" / "python"
 
