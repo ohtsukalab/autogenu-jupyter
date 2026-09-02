@@ -2,17 +2,25 @@
 
 from importlib import import_module
 
-from .autogenu import *
-from .install_python_interface import *
-from .integrator import *
-from .logger import *
+from .autogenu import AutoGenU, NLPType, generate_docs, open_docs
+from .install_python_interface import install_python_interface
+from .integrator import RK4, forward_euler
+from .logger import Logger
+
+__all__ = [
+    "AutoGenU",
+    "NLPType",
+    "Logger",
+    "forward_euler",
+    "RK4",
+    "install_python_interface",
+    "generate_docs",
+    "open_docs",
+    "Plotter",
+]
 
 _OPTIONAL_EXPORTS = {
     "Plotter": (".plotter", "plot"),
-    "TwoLinkArm": (".animator", "plot"),
-    "CartPole": (".animator", "plot"),
-    "Hexacopter": (".animator", "plot"),
-    "MobileRobot": (".animator", "plot"),
 }
 
 

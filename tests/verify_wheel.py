@@ -12,6 +12,7 @@ EXPECTED_MODULES = {
     "autogenu/__init__.py",
     "autogenu/animator.py",
     "autogenu/autogenu.py",
+    "autogenu/build.py",
     "autogenu/install_python_interface.py",
     "autogenu/integrator.py",
     "autogenu/logger.py",
@@ -88,10 +89,11 @@ def main():
                 str(python),
                 "-c",
                 (
-                    "import importlib.metadata, pathlib, sys, autogenu; "
+                    "import importlib.metadata, pathlib, sys, autogenu, autogenu.build; "
                     "path = pathlib.Path(autogenu.__file__).resolve(); "
                     "assert 'site-packages' in str(path), path; "
                     "assert 'matplotlib' not in sys.modules; "
+                    "assert autogenu.build.cmake_generator_args('Auto') == []; "
                     "requirements = importlib.metadata.requires('autogenu-jupyter'); "
                     "core = [r for r in requirements if 'extra ==' not in r]; "
                     "assert all(not r.startswith(('jupyter', 'matplotlib', "

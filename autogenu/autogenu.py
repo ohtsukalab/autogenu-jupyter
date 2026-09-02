@@ -5,10 +5,10 @@ import subprocess
 import sys
 from collections import namedtuple
 from enum import Enum, auto
-from pathlib import Path
 
 import sympy
 
+from . import build as build_api
 from . import symutils
 from .install_python_interface import install_python_interface
 
@@ -1390,7 +1390,7 @@ install(
                     if you change the generator. The default value is False.
         """
         if remove_build_dir:
-            remove_dir(self.get_ocp_dir(), 'build')
+            build_api.remove_build_directory(self.get_ocp_dir())
         build_dir = self.get_ocp_build_dir()
         os.makedirs(build_dir, exist_ok=True)
         if vectorize:
@@ -1398,7 +1398,9 @@ install(
         else:
             build_options = ['-DCMAKE_BUILD_TYPE=Release', '-DVECTORIZE=OFF', '-DBUILD_MAIN=ON', '-DBUILD_PYTHON_INTERFACE=OFF']
         print('CMake options:', *build_options)
-        build_cpp(generator, build_dir, build_options, config=config, parallel=parallel)
+        build_api.build_cpp(
+            generator, build_dir, build_options, config=config, parallel=parallel
+        )
 
     def build_python_interface(self, generator: str='Auto', vectorize: bool=True,
                                remove_build_dir: bool=False, config: str='Release',
@@ -1421,7 +1423,7 @@ install(
                     if you change the generator. The default value is False.
         """
         if remove_build_dir:
-            remove_dir(self.get_ocp_dir(), 'build')
+            build_api.remove_build_directory(self.get_ocp_dir())
         build_dir = self.get_ocp_build_dir()
         os.makedirs(build_dir, exist_ok=True)
         if vectorize:
@@ -1429,11 +1431,13 @@ install(
         else:
             build_options = ['-DCMAKE_BUILD_TYPE=Release', '-DVECTORIZE=OFF', '-DBUILD_MAIN=OFF', '-DBUILD_PYTHON_INTERFACE=ON', '-DPython_EXECUTABLE='+sys.executable]
         print('CMake options:', *build_options)
-        build_cpp(generator, build_dir, build_options, config=config, parallel=parallel)
+        build_api.build_cpp(
+            generator, build_dir, build_options, config=config, parallel=parallel
+        )
 
     def get_executable_path(self, config: str='Release'):
         """Return the generated simulation executable for any CMake generator."""
-        return find_executable(self.get_ocp_build_dir(), self.__ocp_name, config)
+        return build_api.find_executable(self.get_ocp_build_dir(), self.__ocp_name, config)
 
     def install_python_interface(self, install_prefix=None):
         """Installs generated bindings into the running Python environment.
@@ -1467,52 +1471,3 @@ def generate_docs():
 def open_docs():
     import webbrowser
     webbrowser.open('file:///'+str(os.path.join(os.getcwd(), 'doc', 'html', 'annotated.html')))
-
-def _cmake_generator_args(generator: str):
-    """Translate legacy aliases while allowing every CMake generator."""
-    aliases = {'MSYS': 'MSYS Makefiles', 'MinGW': 'MinGW Makefiles'}
-    if not generator or generator == 'Auto':
-        return []
-    return ['-G', aliases.get(generator, generator)]
-
-
-def build_cpp(generator: str, build_dir, build_options, config: str='Release',
-              parallel=None):
-    """Configure and build a CMake project, raising immediately on failure."""
-    build_dir = Path(build_dir).resolve()
-    source_dir = build_dir.parent
-    build_dir.mkdir(parents=True, exist_ok=True)
-    configure_command = [
-        'cmake', '-S', str(source_dir), '-B', str(build_dir),
-        *_cmake_generator_args(generator), *build_options,
-    ]
-    build_command = ['cmake', '--build', str(build_dir), '--config', config]
-    if parallel is not None:
-        build_command.extend(['--parallel', str(parallel)])
-    print('Configure command:', *configure_command)
-    subprocess.run(configure_command, check=True)
-    print('Build command:', *build_command)
-    subprocess.run(build_command, check=True)
-    return build_dir
-
-
-def find_executable(build_dir, target_name: str, config: str='Release'):
-    """Locate an executable from single- or multi-configuration generators."""
-    build_dir = Path(build_dir).resolve()
-    executable_name = target_name + ('.exe' if platform.system() == 'Windows' else '')
-    candidates = [build_dir / executable_name, build_dir / config / executable_name]
-    candidates.extend(build_dir.glob('*/' + executable_name))
-    for candidate in candidates:
-        if candidate.is_file():
-            return candidate
-    raise FileNotFoundError(
-        f"Executable '{executable_name}' was not found below '{build_dir}'."
-    )
-
-def find_windows_cmake_generator():
-    """Return Auto so CMake selects the installed Windows toolchain (usually MSVC)."""
-    return 'Auto'
-
-def remove_dir(cwd, dir_name):
-    """Remove a generated directory without invoking a platform shell."""
-    shutil.rmtree(Path(cwd) / dir_name, ignore_errors=True)

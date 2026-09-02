@@ -81,6 +81,28 @@ The legacy `MSYS` and `MinGW` generator names remain available. Build failures
 raise `subprocess.CalledProcessError`, and `ag.get_executable_path()` locates
 executables produced by both single- and multi-configuration generators.
 
+### Public Python API
+
+The supported top-level API is explicitly defined by `autogenu.__all__` and
+contains only problem-independent functionality: `AutoGenU`, `NLPType`,
+integration and logging helpers, documentation helpers, and the generic
+`Plotter`. Internal CMake helpers and example-specific animators are not
+exported at the package top level.
+
+Example-specific animation helpers remain available from their module when
+needed by the bundled examples:
+```python
+from autogenu.animator import CartPole, Hexacopter, MobileRobot, TwoLinkArm
+```
+
+Advanced users can access the low-level, cross-platform build primitives from
+the dedicated module:
+```python
+from autogenu.build import build_cpp, cmake_generator_args, find_executable
+```
+Application code should normally use `AutoGenU.build_main()` and
+`AutoGenU.build_python_interface()` instead.
+
 
 ### 3. Python bindings
 Python bindings are built and installed via `.ipynb` files. Activate the

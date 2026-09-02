@@ -2,24 +2,24 @@
 using ZeroHorizonOCPSolver_ = ZeroHorizonOCPSolver<OCP, KMAX>; \
 PYBIND11_MODULE(zero_horizon_ocp_solver, m) { \
   py::class_<ZeroHorizonOCPSolver_>(m, "ZeroHorizonOCPSolver") \
-    .def(py::init<OCP, SolverSettings>(), \ 
+    .def(py::init<OCP, SolverSettings>(), \
           py::arg("ocp"), py::arg("settings")) \
-    .def(py::init<>()) \ 
+    .def(py::init<>()) \
     .def("clone", [](const ZeroHorizonOCPSolver_& self) { \
        auto copy = self; \
        return copy; \
      }) \
     .def("set_u", [](ZeroHorizonOCPSolver_& self, const VectorX& u) { \
-        self.set_u(u); \ 
+        self.set_u(u); \
      }, py::arg("u")) \
     .def("set_uc", [](ZeroHorizonOCPSolver_& self, const VectorX& uc) { \
-        self.set_uc(uc); \ 
+        self.set_uc(uc); \
      }, py::arg("uc")) \
     .def("set_dummy", [](ZeroHorizonOCPSolver_& self, const VectorX& dummy) { \
-        self.set_dummy(dummy); \ 
+        self.set_dummy(dummy); \
      }, py::arg("dummy")) \
     .def("set_mu", [](ZeroHorizonOCPSolver_& self, const VectorX& mu) { \
-        self.set_mu(mu); \ 
+        self.set_mu(mu); \
      }, py::arg("mu")) \
     .def_property_readonly("uopt", &ZeroHorizonOCPSolver_::uopt) \
     .def_property_readonly("ucopt", &ZeroHorizonOCPSolver_::ucopt) \
@@ -36,7 +36,7 @@ PYBIND11_MODULE(zero_horizon_ocp_solver, m) { \
     .def("get_profile", &ZeroHorizonOCPSolver_::getProfile) \
     .def("__str__", [](const ZeroHorizonOCPSolver_& self) { \
         std::stringstream ss; \
-        ss << self; \ 
+        ss << self; \
         return ss.str(); \
       }); \
 }

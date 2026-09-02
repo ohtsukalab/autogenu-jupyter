@@ -15,7 +15,7 @@ PYBIND11_MODULE(solver_settings, m) { \
     .def_readwrite("verbose_level", &SolverSettings::verbose_level) \
     .def("__str__", [](const SolverSettings& self) { \
         std::stringstream ss; \
-        ss << self; \ 
+        ss << self; \
         return ss.str(); \
       }); \
-} 
+}

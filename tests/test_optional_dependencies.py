@@ -11,4 +11,9 @@ def test_core_import_does_not_eagerly_import_plotting_dependencies():
 
 def test_plotting_api_is_available_lazily():
     assert autogenu.Plotter
-    assert autogenu.CartPole
+
+
+def test_example_animators_remain_available_from_their_module():
+    from autogenu.animator import CartPole, Hexacopter, MobileRobot, TwoLinkArm
+
+    assert all((CartPole, Hexacopter, MobileRobot, TwoLinkArm))

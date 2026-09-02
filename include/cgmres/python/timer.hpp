@@ -1,7 +1,7 @@
 #define DEFINE_PYBIND11_MODULE_TIMER() \
 PYBIND11_MODULE(timer, m) { \
   py::class_<TimingProfile>(m, "TimingProfile") \
-    .def(py::init<>()) \ 
+    .def(py::init<>()) \
     .def("clone", [](const TimingProfile& self) { \
        auto copy = self; \
        return copy; \
@@ -11,11 +11,11 @@ PYBIND11_MODULE(timer, m) { \
     .def_readwrite("counts", &TimingProfile::counts) \
     .def("__str__", [](const TimingProfile& self) { \
         std::stringstream ss; \
-        ss << self; \ 
+        ss << self; \
         return ss.str(); \
       }); \
   py::class_<Timer>(m, "Timer") \
-    .def(py::init<>()) \ 
+    .def(py::init<>()) \
     .def("clone", [](const Timer& self) { \
        auto copy = self; \
        return copy; \

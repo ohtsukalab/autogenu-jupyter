@@ -1,13 +1,13 @@
 from unittest.mock import call
 
-import autogenu.autogenu as build_api
+import autogenu.build as build_api
 
 
 def test_generator_aliases_and_native_auto():
-    assert build_api._cmake_generator_args("Auto") == []
-    assert build_api._cmake_generator_args("MSYS") == ["-G", "MSYS Makefiles"]
-    assert build_api._cmake_generator_args("MinGW") == ["-G", "MinGW Makefiles"]
-    assert build_api._cmake_generator_args("Ninja") == ["-G", "Ninja"]
+    assert build_api.cmake_generator_args("Auto") == []
+    assert build_api.cmake_generator_args("MSYS") == ["-G", "MSYS Makefiles"]
+    assert build_api.cmake_generator_args("MinGW") == ["-G", "MinGW Makefiles"]
+    assert build_api.cmake_generator_args("Ninja") == ["-G", "Ninja"]
 
 
 def test_build_cpp_uses_source_build_and_config(monkeypatch, tmp_path):
