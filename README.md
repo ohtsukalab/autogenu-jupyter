@@ -14,8 +14,8 @@ The following C/GMRES based solvers are provided:
 ## Requirement
 - C++17 compiler (GCC, Clang, or MSVC)
 - CMake 4, git
-- Python 3.8 or later, Jupyter Lab or Jupyter Notebook, SymPy, and NumPy (to generate `ocp.hpp`, `main.cpp`, and `CMakeLists.txt` by `AutoGenU.ipynb`)
-- Matplotlib, seaborn (to plot simulation data on `AutoGenU.ipynb`)
+- Python 3.8 or later, SymPy, and NumPy for the core code-generation API
+- Jupyter, VS Code kernel, and plotting packages are available as optional extras
 - ffmpeg (to generate animations in the example notebooks)
 - Doxygen (optional, to generate C++ docs)
 
@@ -35,6 +35,29 @@ Create and activate a virtual environment, then install the Python package via
 python3 -m venv .venv
 source .venv/bin/activate
 python -m pip install .
+```
+The default installation is intentionally minimal and installs only NumPy and
+SymPy. Choose an extra for the environment you use:
+```
+# VS Code notebooks: kernel support plus plotting
+python -m pip install ".[vscode]"
+
+# JupyterLab or Jupyter Notebook plus plotting
+python -m pip install ".[jupyter]"
+
+# Plotting helpers without a notebook frontend
+python -m pip install ".[plot]"
+
+# Contributor environment (tests, packaging tools, and notebooks)
+python -m pip install ".[dev]"
+```
+
+In VS Code connected to WSL, select
+`.venv/bin/python` with **Notebook: Select Notebook Kernel**. Confirm the
+selected kernel from a notebook cell with:
+```python
+import sys
+print(sys.executable)
 ```
 
 ### 2. Code generation
@@ -65,6 +88,7 @@ virtual environment before starting Jupyter; the bindings are installed into
 that environment's `site-packages` directory by default:
 ```
 source .venv/bin/activate
+python -m pip install ".[jupyter]"
 jupyter lab
 ```
 No manual `PYTHONPATH` setting is required. The interfaces can be imported as

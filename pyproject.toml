@@ -18,20 +18,46 @@ classifiers = [
   "Topic :: Scientific/Engineering",
 ]
 dependencies = [
-  "jupyter",
-  "jupyterlab",
-  "matplotlib",
-  "notebook",
   "numpy",
-  "seaborn",
   "sympy",
 ]
 
 [project.optional-dependencies]
-test = ["pytest>=8"]
+plot = [
+  "matplotlib",
+  "seaborn",
+]
+jupyter = [
+  "ipykernel",
+  "jupyterlab",
+  "matplotlib",
+  "notebook",
+  "seaborn",
+]
+vscode = [
+  "ipykernel",
+  "matplotlib",
+  "seaborn",
+]
+test = [
+  "nbformat",
+  "pytest>=8",
+]
 quality = [
   "build>=1.2",
   "ruff>=0.12",
+  "twine>=6",
+]
+dev = [
+  "build>=1.2",
+  "ipykernel",
+  "jupyterlab",
+  "matplotlib",
+  "nbformat",
+  "notebook",
+  "pytest>=8",
+  "ruff>=0.12",
+  "seaborn",
   "twine>=6",
 ]
 
