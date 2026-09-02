@@ -1,0 +1,47 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "autogenu-jupyter"
+version = "1.0.0"
+description = "Automatic code generation and C/GMRES solvers for nonlinear model predictive control"
+readme = "README.md"
+requires-python = ">=3.8"
+license = { text = "MIT" }
+authors = [{ name = "Sotaro Katayama" }]
+keywords = ["C/GMRES", "code generation", "model predictive control", "NMPC"]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3 :: Only",
+  "Topic :: Scientific/Engineering",
+]
+dependencies = [
+  "jupyter",
+  "jupyterlab",
+  "matplotlib",
+  "notebook",
+  "numpy",
+  "seaborn",
+  "sympy",
+]
+
+[project.optional-dependencies]
+test = ["pytest>=8"]
+
+[project.urls]
+Homepage = "https://github.com/ohtsukalab/autogenu-jupyter"
+Documentation = "https://ohtsukalab.github.io/autogenu-jupyter/"
+Repository = "https://github.com/ohtsukalab/autogenu-jupyter"
+
+[tool.setuptools]
+packages = ["autogenu"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "--strict-markers"
+markers = [
+  "e2e: generates, compiles, installs, imports, and executes native code",
+]

@@ -1,57 +1,75 @@
-import platform
+import argparse
+import importlib
 import os
+from pathlib import Path
+import shutil
 import sys
-import glob, shutil
+import sysconfig
+
+
+def _active_site_packages():
+    """Return the platform-specific site-packages of the running Python."""
+    return Path(sysconfig.get_path("platlib")).resolve()
+
 
 def install_python_interface(project_root_dir, ocp_name, install_prefix=None):
+    """Install generated bindings into the active Python environment.
+
+    If ``install_prefix`` is omitted, the bindings are installed into the
+    platform-specific site-packages directory of the running interpreter. In
+    an activated virtual environment, this is the virtual environment's own
+    site-packages directory.
+    """
     if install_prefix is None:
-        python_version = 'python' + str(sys.version_info.major) + '.' + str(sys.version_info.minor)
-        if platform.system() == 'Windows':
-            install_prefix = os.path.join(os.path.abspath(os.environ['HOMEPATH']), '.local', 'lib', python_version, 'site-packages')
-        else:
-            install_prefix = os.path.join(os.path.abspath(os.environ['HOME']), '.local', 'lib', python_version, 'site-packages')
-    install_destination = os.path.join(os.path.abspath(install_prefix), 'cgmres')
-    build_dir = os.path.join(project_root_dir, 'build')
-    pybind11_sharedlibs_dir = os.path.join(build_dir, 'python', ocp_name)
-    pybind11_sharedlibs = glob.glob(os.path.join(pybind11_sharedlibs_dir, '*.so')) \
-                            + glob.glob(os.path.join(pybind11_sharedlibs_dir, '*.dylib')) \
-                            + glob.glob(os.path.join(pybind11_sharedlibs_dir, '*.pyd')) 
-    pybind11_sharedlibs_common_dir = os.path.join(build_dir, 'python', 'common')
-    pybind11_sharedlibs_common = glob.glob(os.path.join(pybind11_sharedlibs_common_dir, '*.so')) \
-                                  + glob.glob(os.path.join(pybind11_sharedlibs_common_dir, '*.dylib')) \
-                                  + glob.glob(os.path.join(pybind11_sharedlibs_common_dir, '*.pyd')) 
-    print('Collected Python shared libs: ', pybind11_sharedlibs)
-    print('Collected Python common shared libs: ', pybind11_sharedlibs_common)
-    os.makedirs(os.path.join(install_destination, ocp_name), exist_ok=True)
-    os.makedirs(os.path.join(install_destination, 'common'), exist_ok=True)
-    for e in pybind11_sharedlibs:
-        shutil.copy(e, os.path.join(install_destination, ocp_name))
-    for e in pybind11_sharedlibs_common:
-        shutil.copy(e, os.path.join(install_destination, 'common'))
-    python_files = glob.glob(os.path.join(os.path.join(project_root_dir, 'python', ocp_name), '*.py'))
-    python_files_common = glob.glob(os.path.join(os.path.join(project_root_dir, 'python', 'common'), '*.py'))
-    for e in python_files:
-        shutil.copy(e, os.path.join(install_destination, ocp_name))
-    for e in python_files_common:
-        shutil.copy(e, os.path.join(install_destination, 'common'))
-    print('Collected Python files: ', python_files)
-    print('Collected Python common files: ', python_files_common)
-    print('\nPython interfaces have been installed at ' + str(install_prefix))
-    print('To use Python interfaces, run \n')
-    print('    export PYTHONPATH=$PYTHONPATH:' + str(install_prefix) + '\n')
-    print('in the terminal to recognize the PYTHONPATH temporary.')
-    print('Or set the PATH in Ubuntu as\n')
-    print('    echo export PYTHONPATH=$PYTHONPATH:' + str(install_prefix) + ' >> ~/.bashrc\n')
-    print('or in Mac OSX as\n')
-    print('    echo export PYTHONPATH=$PYTHONPATH:' + str(install_prefix) + ' >> ~/.zshrc\n')
+        install_prefix = _active_site_packages()
+    else:
+        install_prefix = Path(install_prefix).expanduser().resolve()
+
+    project_root_dir = Path(project_root_dir).resolve()
+    install_destination = install_prefix / "cgmres"
+    build_dir = project_root_dir / "build" / "python"
+
+    def collect_files(directory, patterns):
+        return [
+            path
+            for pattern in patterns
+            for path in directory.rglob(pattern)
+            if path.is_file()
+        ]
+
+    binding_patterns = ("*.so", "*.dylib", "*.pyd")
+    ocp_bindings = collect_files(build_dir / ocp_name, binding_patterns)
+    common_bindings = collect_files(build_dir / "common", binding_patterns)
+    if not ocp_bindings or not common_bindings:
+        raise FileNotFoundError(
+            "Generated Python bindings were not found. "
+            "Run build_python_interface() before installing them."
+        )
+
+    ocp_python_files = collect_files(project_root_dir / "python" / ocp_name, ("*.py",))
+    common_python_files = collect_files(project_root_dir / "python" / "common", ("*.py",))
+
+    install_destination.mkdir(parents=True, exist_ok=True)
+    (install_destination / "__init__.py").touch(exist_ok=True)
+    for module_name, bindings, python_files in (
+        (ocp_name, ocp_bindings, ocp_python_files),
+        ("common", common_bindings, common_python_files),
+    ):
+        module_destination = install_destination / module_name
+        module_destination.mkdir(parents=True, exist_ok=True)
+        for source in (*bindings, *python_files):
+            shutil.copy2(source, module_destination / source.name)
+
+    importlib.invalidate_caches()
+    print(f"Python interfaces have been installed at {install_destination}")
+    print(f"Interpreter: {sys.executable}")
+    return install_destination
 
 
 if __name__ == '__main__':
-    assert len(sys.argv) >= 3
-    project_root_dir = sys.argv[1]
-    ocp_name = sys.argv[2]
-    if len(sys.argv) >= 4:
-        install_prefix = sys.argv[3]
-    else:
-        install_prefix = None
-    install_python_interface(project_root_dir, ocp_name, install_prefix)
+    parser = argparse.ArgumentParser(description="Install generated cgmres Python bindings")
+    parser.add_argument("project_root_dir")
+    parser.add_argument("ocp_name")
+    parser.add_argument("install_prefix", nargs="?", default=None)
+    args = parser.parse_args()
+    install_python_interface(args.project_root_dir, args.ocp_name, args.install_prefix)

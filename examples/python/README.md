@@ -1,7 +1,9 @@
 ## Python examples
 Here we show how to use Python interfaces.
 First, run `cartpole.ipynb`, `hexacopter.ipynb`, `mobilerobot.ipynb`, or `pendubot.ipynb` in the project root directory and install Python interfaces.
-Second, set PYTHONPATH according to the generated messages in the notebooks.
+Second, activate the same virtual environment used to install the generated
+bindings. No manual `PYTHONPATH` setting is required when the default install
+destination is used.
 Then you can run examples, e.g., via
 ```
 python3 cartpole.py

@@ -1,46 +1,85 @@
-name: build
+name: build-and-test
 
-on: 
+on:
   push:
   pull_request:
 
+permissions:
+  contents: read
+
+concurrency:
+  group: build-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  build:
+  e2e:
+    name: ${{ matrix.os }} / Python ${{ matrix.python-version }}
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
     strategy:
+      fail-fast: false
       matrix:
-        os: [ubuntu-20.04, ubuntu-22.04, macos-latest, windows-latest]
+        include:
+          - os: ubuntu-24.04
+            python-version: "3.10"
+          - os: ubuntu-24.04
+            python-version: "3.12"
+          - os: ubuntu-24.04
+            python-version: "3.14"
+          - os: macos-latest
+            python-version: "3.12"
+          - os: windows-latest
+            python-version: "3.12"
+
     steps:
-      - uses: actions/checkout@v2
+      - name: Check out repository and submodules
+        uses: actions/checkout@v4
         with:
-          persist-credentials: false
-      - name: Install build-essential and python moduels for Ubuntu
-        if: matrix.os == 'ubuntu-22.04' || matrix.os == 'ubuntu-20.04'
+          submodules: recursive
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+
+      - name: Install CMake 4 and test dependencies
+        run: python -m pip install --upgrade pip "cmake>=4,<5" ".[test]"
+
+      - name: Check installed dependencies
+        run: python -m pip check
+
+      - name: Run unit and end-to-end tests
+        run: python -m pytest -v
+
+  cpp-examples:
+    name: C++ examples / CMake 4
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+
+    steps:
+      - name: Check out repository and submodules
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install CMake 4
+        run: python -m pip install "cmake>=4,<5"
+
+      - name: Configure cgmres package
+        run: cmake -S . -B build
+
+      - name: Build C++ examples
+        shell: bash
         run: |
-          sudo apt-get update
-          sudo apt-get upgrade
-          sudo apt-get install build-essential
-          python3 -m pip install sympy numpy matplotlib seaborn pytest jupyter nbconvert
-      - name: Install build-essential and python moduels for MacOS
-        if: matrix.os == 'macos-latest' 
-        run: |
-          brew install cmake 
-          python3 -m pip install sympy numpy matplotlib seaborn pytest jupyter nbconvert
-      - name: Install build-essential and python moduels for Windows
-        if: matrix.os == 'windows-latest' 
-        run: |
-          python3 -m pip install sympy numpy matplotlib seaborn pytest jupyter nbconvert
-      - name:  Run notebooks
-        run: |
-          git submodule update --init --recursive
-          jupyter nbconvert --to python cartpole.ipynb hexacopter.ipynb mobilerobot.ipynb pendubot.ipynb
-          cp .github/workflows/sed.py .
-          python3 sed.py
-          cp .github/workflows/test_cartpole.py .
-          cp .github/workflows/test_hexacopter.py .
-          cp .github/workflows/test_mobilerobot.py .
-          cp .github/workflows/test_pendubot.py .
-          python3 -m pytest test_cartpole.py
-          python3 -m pytest test_hexacopter.py
-          python3 -m pytest test_mobilerobot.py
-          python3 -m pytest test_pendubot.py
+          set -euo pipefail
+          for example in cartpole cartpole_external_reference hexacopter mobilerobot pendubot; do
+            cmake -S "examples/cpp/${example}" -B "build/examples/${example}" -Dcgmres_DIR="${PWD}/build"
+            cmake --build "build/examples/${example}" --parallel 2
+          done

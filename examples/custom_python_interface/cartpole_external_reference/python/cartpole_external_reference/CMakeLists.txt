@@ -25,17 +25,16 @@ macro(pybind11_add_cgmres_module MODULE)
     endif()
 endmacro()
 
+set(PYBIND11_FINDPYTHON ON)
 add_subdirectory(${CGMRES_INCLUDE_DIR}/cgmres/thirdparty/pybind11 ${CMAKE_CURRENT_BINARY_DIR}/thirdparty/pybind11)
 pybind11_add_cgmres_module(ocp)
 pybind11_add_cgmres_module(zero_horizon_ocp_solver)
 pybind11_add_cgmres_module(single_shooting_cgmres_solver)
 pybind11_add_cgmres_module(multiple_shooting_cgmres_solver)
 
-set(CGMRES_PYTHON_VERSION ${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR})
-set(CGMRES_PYTHON_BINDINGS_LIBDIR $ENV{HOME}/.local/lib/python${CGMRES_PYTHON_VERSION}/site-packages/cgmres/cartpole)
 file(GLOB PYTHON_BINDINGS_${CURRENT_MODULE_DIR} ${CMAKE_CURRENT_BINARY_DIR}/*.cpython*)
 file(GLOB PYTHON_FILES_${CURRENT_MODULE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/*.py)
 install(
   FILES ${PYTHON_FILES_${CURRENT_MODULE_DIR}} ${PYTHON_BINDINGS_${CURRENT_MODULE_DIR}} 
-  DESTINATION ${CGMRES_PYTHON_BINDINGS_LIBDIR}/${CURRENT_MODULE_DIR}
+  DESTINATION cgmres/cartpole_external_reference
 )

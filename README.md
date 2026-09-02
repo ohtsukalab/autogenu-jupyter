@@ -12,9 +12,9 @@ The following C/GMRES based solvers are provided:
 - `SingleShootingCGMRESSolver` : The original C/GMRES method (single shooting).
 
 ## Requirement
-- C++17 (MinGW or MSYS and PATH to either are required for Windows users)
-- CMake, git
-- Python 3.8 or later, Jupyter Lab or Jupyter Notebook, SymPy, NumPy, and collection (to generate `ocp.hpp`, `main.cpp`, and `CMakeLists.txt` by `AutoGenU.ipynb`)
+- C++17 compiler (GCC, Clang, or MSVC)
+- CMake 4, git
+- Python 3.8 or later, Jupyter Lab or Jupyter Notebook, SymPy, and NumPy (to generate `ocp.hpp`, `main.cpp`, and `CMakeLists.txt` by `AutoGenU.ipynb`)
 - Matplotlib, seaborn (to plot simulation data on `AutoGenU.ipynb`)
 - ffmpeg (to generate animations in the example notebooks)
 - Doxygen (optional, to generate C++ docs)
@@ -30,9 +30,11 @@ Otherwise, please do the following command:
 ```
 git submodule update --init --recursive
 ```
-The python modules can be installed via
+Create and activate a virtual environment, then install the Python package via
 ```
-python3 -m pip install -r requirements.txt
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install .
 ```
 
 ### 2. Code generation
@@ -44,14 +46,28 @@ python3 -m pip install -r requirements.txt
 
 You can generate these files, run simulations, plot results, and install the Python interfaces through `AutoGenU.ipynb`.
 
+The build API uses CMake consistently on Linux, macOS, and Windows:
+```python
+# Let CMake select the native generator. On Windows this normally uses MSVC.
+ag.build_main(generator="Auto", config="Release", parallel=2)
+
+# Explicit generators such as Ninja are also supported.
+ag.build_python_interface(generator="Ninja", config="Release")
+```
+The legacy `MSYS` and `MinGW` generator names remain available. Build failures
+raise `subprocess.CalledProcessError`, and `ag.get_executable_path()` locates
+executables produced by both single- and multi-configuration generators.
+
 
 ### 3. Python bindings
-Python bindings are installed via `.ipynb` files. 
-To use the installed Python bindings, set `PYTHONPATH` as 
+Python bindings are built and installed via `.ipynb` files. Activate the
+virtual environment before starting Jupyter; the bindings are installed into
+that environment's `site-packages` directory by default:
 ```
-export PYTHONPATH=$PYTHONPATH:$DESTINATION/lib/python3.x/site-packages
-``` 
-Then you can use python interfaces as 
+source .venv/bin/activate
+jupyter lab
+```
+No manual `PYTHONPATH` setting is required. The interfaces can be imported as
 ```
 import cgmres.common # this includes horizon, solver settings, etc.
 import cgmres.your_ocp_name # this includes OCP definition and NMPC solvers 
@@ -72,9 +88,8 @@ The examples are found in `examples/cpp` directory.
 
 
 ### 5. Install `autogenu` Python module
-The pythton module `autogenu` can be instatlled by running
+The Python module `autogenu` can be installed by running
 ```
-python3 -m pip install setuptools
 python3 -m pip install .
 ```
 at the project root directory of `autogenu-jupyter`.

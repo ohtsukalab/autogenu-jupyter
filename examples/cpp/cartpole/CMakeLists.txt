@@ -1,8 +1,10 @@
 
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.15...4.2)
 project(cartpole CXX)
 
 set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
 if (NOT EXISTS ${CMAKE_BINARY_DIR}/CMakeCache.txt)
   if (NOT CMAKE_BUILD_TYPE)
@@ -17,17 +19,11 @@ add_executable(
   ${PROJECT_NAME}
   main.cpp
 )
-target_include_directories(
+target_link_libraries(
   ${PROJECT_NAME}
   PRIVATE
-  ${CGMRES_INCLUDE_DIR}
+  cgmres::cgmres
 )
-# # the following way is also possible instead of including ${CGMRES_INCLUDE_DIR}, 
-# target_link_libraries(
-#   ${PROJECT_NAME}
-#   PRIVATE
-#   cgmres::cgmres
-# )
 if (VECTORIZE)
   target_compile_options(
     ${PROJECT_NAME}
