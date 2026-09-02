@@ -1012,7 +1012,9 @@ namespace py = pybind11;
 """ 
         ])
         f_pybind11.write('constexpr int kmax_init = '+str(min(self.__solver_params.kmax, self.__nc+self.__nu+self.__nh))+';\n')
-        f_pybind11.write('DEFINE_PYBIND11_MODULE_ZERO_HORIZON_OCP_SOLVER(OCP_'+str(self.__ocp_name)+', kmax_init)\n')
+        f_pybind11.write('PYBIND11_MODULE(zero_horizon_ocp_solver, m) {\n')
+        f_pybind11.write('  bind_zero_horizon_ocp_solver<OCP_'+str(self.__ocp_name)+', kmax_init>(m);\n')
+        f_pybind11.write('}\n')
         f_pybind11.writelines([
 """
 
@@ -1048,7 +1050,9 @@ namespace py = pybind11;
         ])
         f_pybind11.write('constexpr int N = '+str(self.__solver_params.N)+';\n')
         f_pybind11.write('constexpr int kmax = '+str(min(self.__solver_params.kmax, self.__solver_params.N*(self.__nc+self.__nu+self.__nh)))+';\n')
-        f_pybind11.write('DEFINE_PYBIND11_MODULE_SINGLE_SHOOTING_CGMRES_SOLVER(OCP_'+str(self.__ocp_name)+', N, kmax)\n')
+        f_pybind11.write('PYBIND11_MODULE(single_shooting_cgmres_solver, m) {\n')
+        f_pybind11.write('  bind_single_shooting_cgmres_solver<OCP_'+str(self.__ocp_name)+', N, kmax>(m);\n')
+        f_pybind11.write('}\n')
         f_pybind11.writelines([
 """
 
@@ -1084,7 +1088,9 @@ namespace py = pybind11;
         ])
         f_pybind11.write('constexpr int N = '+str(self.__solver_params.N)+';\n')
         f_pybind11.write('constexpr int kmax = '+str(min(self.__solver_params.kmax, self.__solver_params.N*(self.__nc+self.__nu+self.__nh)))+';\n')
-        f_pybind11.write('DEFINE_PYBIND11_MODULE_MULTIPLE_SHOOTING_CGMRES_SOLVER(OCP_'+str(self.__ocp_name)+', N, kmax)\n')
+        f_pybind11.write('PYBIND11_MODULE(multiple_shooting_cgmres_solver, m) {\n')
+        f_pybind11.write('  bind_multiple_shooting_cgmres_solver<OCP_'+str(self.__ocp_name)+', N, kmax>(m);\n')
+        f_pybind11.write('}\n')
         f_pybind11.writelines([
 """
 
@@ -1116,7 +1122,9 @@ namespace python {
 
 namespace py = pybind11;
 
-DEFINE_PYBIND11_MODULE_HORIZON()
+PYBIND11_MODULE(horizon, m) {
+  bind_horizon(m);
+}
 
 } // namespace python
 } // namespace cgmres
@@ -1145,7 +1153,9 @@ namespace python {
 
 namespace py = pybind11;
 
-DEFINE_PYBIND11_MODULE_SOLVER_SETTINGS()
+PYBIND11_MODULE(solver_settings, m) {
+  bind_solver_settings(m);
+}
 
 } // namespace python
 } // namespace cgmres
@@ -1174,7 +1184,9 @@ namespace python {
 
 namespace py = pybind11;
 
-DEFINE_PYBIND11_MODULE_TIMER()
+PYBIND11_MODULE(timer, m) {
+  bind_timer(m);
+}
 
 } // namespace python
 } // namespace cgmres
