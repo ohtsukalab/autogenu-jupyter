@@ -1,5 +1,6 @@
 import numpy as np
 
+
 def forward_euler(ocp, t, dt, x: np.ndarray, u: np.ndarray):
     dx = np.zeros(ocp.nx)
     dx = ocp.eval_f(t, x, u)

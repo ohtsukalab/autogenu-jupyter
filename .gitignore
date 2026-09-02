@@ -1,4 +1,5 @@
 build/
+dist/
 install/
 generated/
 __pycache__/

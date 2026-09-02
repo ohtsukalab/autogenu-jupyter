@@ -1,13 +1,12 @@
 import os
-from pathlib import Path
 import shutil
 import subprocess
 import sys
+from pathlib import Path
 
 import pytest
 
 import autogenu
-
 
 REPOSITORY_ROOT = Path(__file__).resolve().parents[1]
 OCP_NAME = "e2e_minimal"

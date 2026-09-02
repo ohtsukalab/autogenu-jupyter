@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=68", "wheel"]
+requires = ["setuptools>=77", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -8,12 +8,11 @@ version = "1.0.0"
 description = "Automatic code generation and C/GMRES solvers for nonlinear model predictive control"
 readme = "README.md"
 requires-python = ">=3.8"
-license = { text = "MIT" }
+license = "MIT"
 authors = [{ name = "Sotaro Katayama" }]
 keywords = ["C/GMRES", "code generation", "model predictive control", "NMPC"]
 classifiers = [
   "Development Status :: 4 - Beta",
-  "License :: OSI Approved :: MIT License",
   "Programming Language :: Python :: 3",
   "Programming Language :: Python :: 3 :: Only",
   "Topic :: Scientific/Engineering",
@@ -30,6 +29,11 @@ dependencies = [
 
 [project.optional-dependencies]
 test = ["pytest>=8"]
+quality = [
+  "build>=1.2",
+  "ruff>=0.12",
+  "twine>=6",
+]
 
 [project.urls]
 Homepage = "https://github.com/ohtsukalab/autogenu-jupyter"
@@ -45,3 +49,12 @@ addopts = "--strict-markers"
 markers = [
   "e2e: generates, compiles, installs, imports, and executes native code",
 ]
+
+[tool.ruff]
+target-version = "py38"
+line-length = 100
+extend-exclude = ["generated", "include"]
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F", "I", "B006"]
+ignore = ["F403", "F405"]

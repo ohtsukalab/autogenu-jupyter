@@ -1,10 +1,9 @@
 import argparse
 import importlib
-import os
-from pathlib import Path
 import shutil
 import sys
 import sysconfig
+from pathlib import Path
 
 
 def _active_site_packages():

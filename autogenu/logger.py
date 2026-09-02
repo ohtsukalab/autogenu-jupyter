@@ -1,5 +1,7 @@
-import numpy as np
 import os
+
+import numpy as np
+
 
 class Logger(object):
     def __init__(self, log_dir, log_name: str):

@@ -1,17 +1,16 @@
-import subprocess
-import platform
-from enum import Enum, auto
-from collections import namedtuple
-import sympy
 import os
-import sys
-from pathlib import Path
+import platform
 import shutil
+import subprocess
+import sys
+from collections import namedtuple
+from enum import Enum, auto
+from pathlib import Path
 
-autogenu_root = os.path.dirname(os.path.abspath(__file__))
-sys.path.append(autogenu_root)
-import symutils
-from install_python_interface import install_python_interface
+import sympy
+
+from . import symutils
+from .install_python_interface import install_python_interface
 
 
 class ScalarVariable:
@@ -21,12 +20,12 @@ class ScalarVariable:
         self.value = value
 
 class ArrayVariable:
-    def __init__(self, symbol, name: str, size: int, values=[]):
+    def __init__(self, symbol, name: str, size: int, values=None):
         assert size > 0
         self.symbol = symbol
         self.name = name 
         self.size = size
-        self.values = values
+        self.values = [] if values is None else values
 
 class ControlInputBound:
     def __init__(self, uindex: int, umin, umax, dummy_weight):

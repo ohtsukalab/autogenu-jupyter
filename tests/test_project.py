@@ -2,7 +2,6 @@ from pathlib import Path
 
 import nbformat
 
-
 REPOSITORY_ROOT = Path(__file__).resolve().parents[1]
 
 
