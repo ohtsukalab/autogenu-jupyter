@@ -109,15 +109,18 @@ jobs:
       - name: Install CMake 4
         run: python -m pip install "cmake>=4,<5"
 
-      - name: Configure cgmres package
-        run: cmake -S . -B build -DCGMRES_WARNINGS_AS_ERRORS=ON
+      - name: Configure strict preset
+        run: cmake --preset strict
+
+      - name: Build and test strict preset
+        run: cmake --build --preset strict && ctest --preset strict
 
       - name: Build C++ examples
         shell: bash
         run: |
           set -euo pipefail
           for example in cartpole cartpole_external_reference hexacopter mobilerobot pendubot; do
-            cmake -S "examples/cpp/${example}" -B "build/examples/${example}" -Dcgmres_DIR="${PWD}/build"
+            cmake -S "examples/cpp/${example}" -B "build/examples/${example}" -Dcgmres_DIR="${PWD}/build/strict"
             cmake --build "build/examples/${example}" --parallel 2
           done
 
@@ -135,19 +138,20 @@ jobs:
       - name: Install clang-tidy
         run: sudo apt-get update && sudo apt-get install --yes clang-tidy-18
 
-      - name: Configure cgmres package
-        run: cmake -S . -B build/static-analysis/package
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
 
-      - name: Configure analysis target
-        run: >-
-          cmake -S examples/cpp/cartpole -B build/static-analysis/cartpole
-          -Dcgmres_DIR="${PWD}/build/static-analysis/package"
-          -DVECTORIZE=OFF
-          -DCMAKE_BUILD_TYPE=Debug
-          -DCMAKE_CXX_CLANG_TIDY="clang-tidy-18;--warnings-as-errors=*"
+      - name: Install CMake 4
+        run: python -m pip install "cmake>=4,<5"
 
-      - name: Build with clang-tidy
-        run: cmake --build build/static-analysis/cartpole --parallel 2
+      - name: Configure clang-tidy preset
+        run: cmake --preset clang-tidy
+
+      - name: Build and test clang-tidy preset
+        run: cmake --build --preset clang-tidy && ctest --preset clang-tidy
 
   sanitizers:
     name: ASan and UBSan
@@ -168,6 +172,12 @@ jobs:
 
       - name: Install CMake 4 and test dependencies
         run: python -m pip install --upgrade pip "cmake>=4,<5" ".[test]"
+
+      - name: Configure sanitizer preset
+        run: cmake --preset sanitizers
+
+      - name: Build and test sanitizer preset
+        run: cmake --build --preset sanitizers && ctest --preset sanitizers
 
       - name: Run generated-code sanitizer test
         env:

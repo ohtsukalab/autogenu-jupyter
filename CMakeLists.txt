@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.15...4.2)
 project(cgmres CXX)
 
+include(CTest)
+
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
@@ -55,6 +57,13 @@ target_include_directories(
 target_compile_features(${PROJECT_NAME} INTERFACE cxx_std_17)
 cgmres_enable_strict_warnings(${PROJECT_NAME} INTERFACE)
 cgmres_enable_sanitizers(${PROJECT_NAME} INTERFACE)
+
+if (BUILD_TESTING)
+  add_executable(cgmres_smoke tests/cpp/smoke.cpp)
+  target_link_libraries(cgmres_smoke PRIVATE cgmres::cgmres)
+  add_test(NAME cgmres.smoke COMMAND cgmres_smoke)
+  set_tests_properties(cgmres.smoke PROPERTIES TIMEOUT 30)
+endif()
 
 # cmake configs
 include(CMakePackageConfigHelpers)

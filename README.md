@@ -163,6 +163,23 @@ The equivalent CMake option is `-DCGMRES_ENABLE_SANITIZERS=ON`. The sanitizer
 CI job builds and runs a minimal generated simulation so that runtime memory
 and undefined-behavior findings fail the workflow.
 
+### CMake Presets and CTest
+
+The root project provides matching configure, build, and test presets for
+local development, VS Code CMake Tools, and CI:
+
+```bash
+cmake --preset dev
+cmake --build --preset dev
+ctest --preset dev
+```
+
+Replace `dev` with `strict`, `clang-tidy`, or `sanitizers` to run the same
+quality mode used by CI. The `clang-tidy` preset expects `clang-tidy-18` on
+`PATH`, while the `sanitizers` preset requires GCC or Clang. Every test preset
+runs the fast `cgmres.smoke` CTest, which exercises public headers, the horizon
+and solver defaults, and RK4 integration.
+
 
 ### 3. Python bindings
 Python bindings are built and installed via `.ipynb` files. Activate the
