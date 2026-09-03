@@ -1,0 +1,13 @@
+Checks: >
+  -*,
+  clang-analyzer-core.*,
+  clang-analyzer-cplusplus.*,
+  bugprone-infinite-loop,
+  bugprone-sizeof-expression,
+  bugprone-use-after-move,
+  performance-for-range-copy,
+  performance-unnecessary-copy-initialization
+WarningsAsErrors: '*'
+HeaderFilterRegex: '(^|.*/)(include/cgmres|examples/cpp)/.*'
+ExcludeHeaderFilterRegex: '.*/include/cgmres/thirdparty/.*'
+FormatStyle: none

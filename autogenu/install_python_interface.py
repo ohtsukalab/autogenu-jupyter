@@ -3,15 +3,23 @@ import importlib
 import shutil
 import sys
 import sysconfig
+from os import PathLike
 from pathlib import Path
+from typing import Optional, Union
+
+Pathish = Union[str, PathLike[str]]
 
 
-def _active_site_packages():
+def _active_site_packages() -> Path:
     """Return the platform-specific site-packages of the running Python."""
     return Path(sysconfig.get_path("platlib")).resolve()
 
 
-def install_python_interface(project_root_dir, ocp_name, install_prefix=None):
+def install_python_interface(
+    project_root_dir: Pathish,
+    ocp_name: str,
+    install_prefix: Optional[Pathish] = None,
+) -> Path:
     """Install generated bindings into the active Python environment.
 
     If ``install_prefix`` is omitted, the bindings are installed into the

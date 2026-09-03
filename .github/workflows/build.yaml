@@ -28,10 +28,13 @@ jobs:
           cache: pip
 
       - name: Install package quality tools
-        run: python -m pip install --upgrade pip ".[quality]"
+        run: python -m pip install --upgrade pip ".[quality,plot]"
 
       - name: Run Ruff
         run: python -m ruff check autogenu tests
+
+      - name: Run Pyright
+        run: python -m pyright
 
       - name: Build wheel and source distribution
         run: python -m build
@@ -109,14 +112,79 @@ jobs:
       - name: Install CMake 4
         run: python -m pip install "cmake>=4,<5"
 
-      - name: Configure cgmres package
-        run: cmake -S . -B build -DCGMRES_WARNINGS_AS_ERRORS=ON
+      - name: Configure strict preset
+        run: cmake --preset strict
+
+      - name: Build and test strict preset
+        run: cmake --build --preset strict && ctest --preset strict
 
       - name: Build C++ examples
         shell: bash
         run: |
           set -euo pipefail
           for example in cartpole cartpole_external_reference hexacopter mobilerobot pendubot; do
-            cmake -S "examples/cpp/${example}" -B "build/examples/${example}" -Dcgmres_DIR="${PWD}/build"
+            cmake -S "examples/cpp/${example}" -B "build/examples/${example}" -Dcgmres_DIR="${PWD}/build/strict"
             cmake --build "build/examples/${example}" --parallel 2
           done
+
+  static-analysis:
+    name: clang-tidy static analysis
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+
+    steps:
+      - name: Check out repository and submodules
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install clang-tidy
+        run: sudo apt-get update && sudo apt-get install --yes clang-tidy-18
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install CMake 4
+        run: python -m pip install "cmake>=4,<5"
+
+      - name: Configure clang-tidy preset
+        run: cmake --preset clang-tidy
+
+      - name: Build and test clang-tidy preset
+        run: cmake --build --preset clang-tidy && ctest --preset clang-tidy
+
+  sanitizers:
+    name: ASan and UBSan
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+
+    steps:
+      - name: Check out repository and submodules
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install CMake 4 and test dependencies
+        run: python -m pip install --upgrade pip "cmake>=4,<5" ".[test]"
+
+      - name: Configure sanitizer preset
+        run: cmake --preset sanitizers
+
+      - name: Build and test sanitizer preset
+        run: cmake --build --preset sanitizers && ctest --preset sanitizers
+
+      - name: Run generated-code sanitizer test
+        env:
+          CGMRES_RUN_SANITIZERS: "1"
+          ASAN_OPTIONS: detect_leaks=1:strict_string_checks=1
+          UBSAN_OPTIONS: print_stacktrace=1:halt_on_error=1
+        run: python -m pytest -v tests/test_sanitizers.py

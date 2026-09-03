@@ -45,6 +45,7 @@ test = [
 ]
 quality = [
   "build>=1.2",
+  "pyright>=1.1.400",
   "ruff>=0.12",
   "twine>=6",
 ]
@@ -56,6 +57,7 @@ dev = [
   "nbformat",
   "notebook",
   "pytest>=8",
+  "pyright>=1.1.400",
   "ruff>=0.12",
   "seaborn",
   "twine>=6",
@@ -70,7 +72,7 @@ Repository = "https://github.com/ohtsukalab/autogenu-jupyter"
 packages = ["autogenu", "autogenu.templates"]
 
 [tool.setuptools.package-data]
-autogenu = ["templates/*.in"]
+autogenu = ["py.typed", "templates/*.in"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
@@ -87,3 +89,20 @@ extend-exclude = ["generated", "include"]
 [tool.ruff.lint]
 select = ["E4", "E7", "E9", "F", "I", "B006"]
 ignore = ["F403", "F405"]
+
+[tool.pyright]
+include = [
+  "autogenu/__init__.py",
+  "autogenu/autogenu.py",
+  "autogenu/build.py",
+  "autogenu/install_python_interface.py",
+  "autogenu/integrator.py",
+  "autogenu/logger.py",
+  "autogenu/plotter.py",
+  "tests/typecheck",
+]
+exclude = ["generated", "include"]
+pythonVersion = "3.8"
+typeCheckingMode = "basic"
+reportMissingTypeStubs = false
+reportUnknownMemberType = false

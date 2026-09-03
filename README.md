@@ -125,6 +125,34 @@ After reviewing an intentional generator change, update the snapshot explicitly:
 UPDATE_SNAPSHOTS=1 python -m pytest tests/test_generation_snapshots.py
 ```
 
+### Input validation
+
+`AutoGenU` validates problem names, dimensions, finite numeric settings,
+vector lengths, control bounds, and generation prerequisites before writing or
+building generated code. Invalid types raise `TypeError`, invalid values or
+dimensions raise `ValueError`, and missing setup steps raise `RuntimeError`.
+Errors name the affected argument and include the expected and received values,
+which makes configuration mistakes directly actionable in a notebook. For
+example:
+
+```text
+ValueError: initial_state must contain 4 values; got 3
+```
+
+### Python type information
+
+The installed package includes the PEP 561 `py.typed` marker and annotations
+for the public `AutoGenU`, integration, logging, plotting, installation, and
+build APIs. VS Code/Pylance can therefore report invalid argument types and
+provide return-type-aware completion without additional stub packages.
+
+Run the same Pyright check used by CI with:
+
+```bash
+python -m pip install ".[quality]"
+python -m pyright
+```
+
 ### Strict C++ warnings
 
 Generated simulations and Python bindings can enable compiler warnings as
@@ -140,6 +168,45 @@ This maps to `/W4 /WX` with MSVC and to
 parameters are excluded because generated OCP callbacks intentionally retain a
 stable signature even when a particular symbolic expression does not use every
 argument. The E2E CI matrix enables this policy on Linux, macOS, and Windows.
+
+### Static analysis and sanitizers
+
+CI runs `clang-tidy` on the project C++ headers and a representative C++
+example. Third-party Eigen and pybind11 headers are excluded. The enabled
+checks focus on compiler static analysis, use-after-move and loop defects, and
+unnecessary copies; every reported diagnostic fails the job.
+
+Generated code can be built with AddressSanitizer and
+UndefinedBehaviorSanitizer when using GCC or Clang:
+
+```python
+generator.build_main(
+    vectorize=False,
+    warnings_as_errors=True,
+    sanitizers=True,
+)
+```
+
+The equivalent CMake option is `-DCGMRES_ENABLE_SANITIZERS=ON`. The sanitizer
+CI job builds and runs a minimal generated simulation so that runtime memory
+and undefined-behavior findings fail the workflow.
+
+### CMake Presets and CTest
+
+The root project provides matching configure, build, and test presets for
+local development, VS Code CMake Tools, and CI:
+
+```bash
+cmake --preset dev
+cmake --build --preset dev
+ctest --preset dev
+```
+
+Replace `dev` with `strict`, `clang-tidy`, or `sanitizers` to run the same
+quality mode used by CI. The `clang-tidy` preset expects `clang-tidy-18` on
+`PATH`, while the `sanitizers` preset requires GCC or Clang. Every test preset
+runs the fast `cgmres.smoke` CTest, which exercises public headers, the horizon
+and solver defaults, and RK4 integration.
 
 
 ### 3. Python bindings

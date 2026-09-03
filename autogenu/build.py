@@ -3,10 +3,14 @@
 import platform
 import shutil
 import subprocess
+from os import PathLike
 from pathlib import Path
+from typing import List, Optional, Sequence, Union
+
+Pathish = Union[str, PathLike[str]]
 
 
-def cmake_generator_args(generator: str):
+def cmake_generator_args(generator: str) -> List[str]:
     """Translate legacy aliases while allowing every CMake generator."""
     aliases = {"MSYS": "MSYS Makefiles", "MinGW": "MinGW Makefiles"}
     if not generator or generator == "Auto":
@@ -14,7 +18,13 @@ def cmake_generator_args(generator: str):
     return ["-G", aliases.get(generator, generator)]
 
 
-def build_cpp(generator: str, build_dir, build_options, config: str = "Release", parallel=None):
+def build_cpp(
+    generator: str,
+    build_dir: Pathish,
+    build_options: Sequence[str],
+    config: str = "Release",
+    parallel: Optional[int] = None,
+) -> Path:
     """Configure and build a CMake project, raising immediately on failure."""
     build_dir = Path(build_dir).resolve()
     source_dir = build_dir.parent
@@ -38,7 +48,9 @@ def build_cpp(generator: str, build_dir, build_options, config: str = "Release",
     return build_dir
 
 
-def find_executable(build_dir, target_name: str, config: str = "Release"):
+def find_executable(
+    build_dir: Pathish, target_name: str, config: str = "Release"
+) -> Path:
     """Locate an executable from single- or multi-configuration generators."""
     build_dir = Path(build_dir).resolve()
     executable_name = target_name + (".exe" if platform.system() == "Windows" else "")
@@ -50,6 +62,8 @@ def find_executable(build_dir, target_name: str, config: str = "Release"):
     raise FileNotFoundError(f"Executable '{executable_name}' was not found below '{build_dir}'.")
 
 
-def remove_build_directory(project_dir, directory_name="build"):
+def remove_build_directory(
+    project_dir: Pathish, directory_name: str = "build"
+) -> None:
     """Remove a generated build directory without invoking a platform shell."""
     shutil.rmtree(Path(project_dir) / directory_name, ignore_errors=True)

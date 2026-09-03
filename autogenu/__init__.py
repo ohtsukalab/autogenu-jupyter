@@ -1,6 +1,10 @@
 """Public AutoGenU API with plotting components loaded on demand."""
 
 from importlib import import_module
+from typing import TYPE_CHECKING, Any, Dict, List, Tuple
+
+if TYPE_CHECKING:
+    from .plotter import Plotter as Plotter
 
 from .autogenu import AutoGenU, NLPType, generate_docs, open_docs
 from .install_python_interface import install_python_interface
@@ -19,12 +23,12 @@ __all__ = [
     "Plotter",
 ]
 
-_OPTIONAL_EXPORTS = {
+_OPTIONAL_EXPORTS: Dict[str, Tuple[str, str]] = {
     "Plotter": (".plotter", "plot"),
 }
 
 
-def __getattr__(name):
+def __getattr__(name: str) -> Any:
     """Load plotting helpers only when they are requested."""
     optional_export = _OPTIONAL_EXPORTS.get(name)
     if optional_export is None:
@@ -41,5 +45,5 @@ def __getattr__(name):
     return value
 
 
-def __dir__():
+def __dir__() -> List[str]:
     return sorted(set(globals()) | set(_OPTIONAL_EXPORTS))
