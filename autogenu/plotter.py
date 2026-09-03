@@ -58,7 +58,7 @@ class Plotter(object):
         sns.set_context("paper")
         plt.rc('mathtext', 
             **{'rm':'serif', 
-            'it':'serif:itelic', 
+            'it':'serif:italic', 
             'bf':'serif:bold', 
             'fontset':'cm'}
         )
