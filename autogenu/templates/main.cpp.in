@@ -47,7 +47,7 @@ int main() {
   // Perform a numerical simulation.
   const double tsim = {{simulation_length}};
   const double sampling_time = settings.sampling_time;
-  const unsigned int sim_steps = std::floor(tsim / sampling_time);
+  const auto sim_steps = static_cast<unsigned int>(std::floor(tsim / sampling_time));
 
   double t = t0;
   cgmres::VectorX x = x0;
