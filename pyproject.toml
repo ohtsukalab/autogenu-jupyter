@@ -67,7 +67,10 @@ Documentation = "https://ohtsukalab.github.io/autogenu-jupyter/"
 Repository = "https://github.com/ohtsukalab/autogenu-jupyter"
 
 [tool.setuptools]
-packages = ["autogenu"]
+packages = ["autogenu", "autogenu.templates"]
+
+[tool.setuptools.package-data]
+autogenu = ["templates/*.in"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

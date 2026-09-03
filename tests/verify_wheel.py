@@ -18,6 +18,13 @@ EXPECTED_MODULES = {
     "autogenu/logger.py",
     "autogenu/plotter.py",
     "autogenu/symutils.py",
+    "autogenu/template_renderer.py",
+    "autogenu/templates/__init__.py",
+    "autogenu/templates/CMakeLists.txt.in",
+    "autogenu/templates/binding_module.cpp.in",
+    "autogenu/templates/bindings.CMakeLists.txt.in",
+    "autogenu/templates/main.cpp.in",
+    "autogenu/templates/package_init.py.in",
 }
 
 
@@ -90,10 +97,13 @@ def main():
                 "-c",
                 (
                     "import importlib.metadata, pathlib, sys, autogenu, autogenu.build; "
+                    "from autogenu.template_renderer import render_template; "
                     "path = pathlib.Path(autogenu.__file__).resolve(); "
                     "assert 'site-packages' in str(path), path; "
                     "assert 'matplotlib' not in sys.modules; "
                     "assert autogenu.build.cmake_generator_args('Auto') == []; "
+                    "cmake = render_template('CMakeLists.txt.in', ocp_name='wheel_test'); "
+                    "assert 'project(wheel_test CXX)' in cmake; "
                     "requirements = importlib.metadata.requires('autogenu-jupyter'); "
                     "core = [r for r in requirements if 'extra ==' not in r]; "
                     "assert all(not r.startswith(('jupyter', 'matplotlib', "

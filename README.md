@@ -103,6 +103,28 @@ from autogenu.build import build_cpp, cmake_generator_args, find_executable
 Application code should normally use `AutoGenU.build_main()` and
 `AutoGenU.build_python_interface()` instead.
 
+### Code generation templates
+
+The stable structure of generated C++, pybind11, Python package, and CMake
+files lives in `autogenu/templates`. `autogenu.template_renderer` renders the
+templates using explicit `{{name}}` placeholders and always writes UTF-8 files
+with LF line endings. Problem-specific symbolic expressions in `ocp.hpp`
+continue to be generated programmatically.
+
+A minimal generated project is protected by a SHA-256 snapshot manifest in
+`tests/snapshots/minimal_generation.json`. Run the normal test suite to detect
+unintended changes:
+
+```bash
+python -m pytest tests/test_generation_snapshots.py
+```
+
+After reviewing an intentional generator change, update the snapshot explicitly:
+
+```bash
+UPDATE_SNAPSHOTS=1 python -m pytest tests/test_generation_snapshots.py
+```
+
 
 ### 3. Python bindings
 Python bindings are built and installed via `.ipynb` files. Activate the
