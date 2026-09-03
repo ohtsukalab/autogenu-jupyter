@@ -125,6 +125,20 @@ After reviewing an intentional generator change, update the snapshot explicitly:
 UPDATE_SNAPSHOTS=1 python -m pytest tests/test_generation_snapshots.py
 ```
 
+### Input validation
+
+`AutoGenU` validates problem names, dimensions, finite numeric settings,
+vector lengths, control bounds, and generation prerequisites before writing or
+building generated code. Invalid types raise `TypeError`, invalid values or
+dimensions raise `ValueError`, and missing setup steps raise `RuntimeError`.
+Errors name the affected argument and include the expected and received values,
+which makes configuration mistakes directly actionable in a notebook. For
+example:
+
+```text
+ValueError: initial_state must contain 4 values; got 3
+```
+
 ### Strict C++ warnings
 
 Generated simulations and Python bindings can enable compiler warnings as

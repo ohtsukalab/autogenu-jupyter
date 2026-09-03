@@ -1,5 +1,9 @@
+import keyword
+import math
+import numbers
 import os
 import platform
+import re
 import shutil
 import subprocess
 import sys
@@ -13,6 +17,86 @@ from . import symutils
 from .install_python_interface import install_python_interface
 from .template_renderer import write_generated_file
 
+_CPP_KEYWORDS = {
+    "alignas", "alignof", "and", "and_eq", "asm", "auto", "bitand",
+    "bitor", "bool", "break", "case", "catch", "char", "char8_t",
+    "char16_t", "char32_t", "class", "compl", "concept", "const",
+    "consteval", "constexpr", "constinit", "const_cast", "continue",
+    "co_await", "co_return", "co_yield", "decltype", "default", "delete",
+    "do", "double", "dynamic_cast", "else", "enum", "explicit", "export",
+    "extern", "false", "float", "for", "friend", "goto", "if", "inline",
+    "int", "long", "mutable", "namespace", "new", "noexcept", "not",
+    "not_eq", "nullptr", "operator", "or", "or_eq", "private", "protected",
+    "public", "register", "reinterpret_cast", "requires", "return", "short",
+    "signed", "sizeof", "static", "static_assert", "static_cast", "struct",
+    "switch", "template", "this", "thread_local", "throw", "true", "try",
+    "typedef", "typeid", "typename", "union", "unsigned", "using",
+    "virtual", "void", "volatile", "wchar_t", "while", "xor", "xor_eq",
+}
+_IDENTIFIER_PATTERN = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
+
+
+def _require_identifier(name, value):
+    if not isinstance(value, str):
+        raise TypeError(f"{name} must be a string; got {type(value).__name__}")
+    if (
+        not _IDENTIFIER_PATTERN.fullmatch(value)
+        or keyword.iskeyword(value)
+        or value in _CPP_KEYWORDS
+    ):
+        raise ValueError(
+            f"{name} must be a valid non-keyword C++ and Python identifier; "
+            f"got {value!r}"
+        )
+
+
+def _require_integer(name, value, *, minimum=1):
+    if isinstance(value, bool) or not isinstance(value, numbers.Integral):
+        raise TypeError(f"{name} must be an integer; got {type(value).__name__}")
+    if value < minimum:
+        raise ValueError(f"{name} must be at least {minimum}; got {value!r}")
+
+
+def _require_finite_number(name, value, *, minimum=None, strict=False):
+    if isinstance(value, bool) or not isinstance(value, numbers.Real):
+        raise TypeError(f"{name} must be a real number; got {type(value).__name__}")
+    if not math.isfinite(float(value)):
+        raise ValueError(f"{name} must be finite; got {value!r}")
+    if minimum is not None:
+        valid = value > minimum if strict else value >= minimum
+        if not valid:
+            relation = "greater than" if strict else "at least"
+            raise ValueError(f"{name} must be {relation} {minimum}; got {value!r}")
+
+
+def _require_model_parameter(name, value):
+    if isinstance(value, str):
+        if not value.strip():
+            raise ValueError(f"{name} must not be an empty C++ expression")
+        return
+    if isinstance(value, sympy.Expr):
+        if value.is_finite is False:
+            raise ValueError(f"{name} must be finite; got {value!r}")
+        return
+    _require_finite_number(name, value)
+
+
+def _require_sequence(name, value):
+    if isinstance(value, (str, bytes)) or not hasattr(value, "__len__"):
+        raise TypeError(f"{name} must be a sized sequence; got {type(value).__name__}")
+
+
+def _require_boolean(name, value):
+    if not isinstance(value, bool):
+        raise TypeError(f"{name} must be a bool; got {type(value).__name__}")
+
+
+def _require_length(name, value, expected):
+    _require_sequence(name, value)
+    actual = len(value)
+    if actual != expected:
+        raise ValueError(f"{name} must contain {expected} values; got {actual}")
+
 
 class ScalarVariable:
     def __init__(self, symbol: sympy.Symbol, name: str, value=0.0):
@@ -22,7 +106,7 @@ class ScalarVariable:
 
 class ArrayVariable:
     def __init__(self, symbol, name: str, size: int, values=None):
-        assert size > 0
+        _require_integer("size", size)
         self.symbol = symbol
         self.name = name 
         self.size = size
@@ -30,9 +114,12 @@ class ArrayVariable:
 
 class ControlInputBound:
     def __init__(self, uindex: int, umin, umax, dummy_weight):
-        assert uindex >= 0
-        assert umin < umax
-        assert dummy_weight >= 0.0
+        _require_integer("uindex", uindex, minimum=0)
+        _require_finite_number("umin", umin)
+        _require_finite_number("umax", umax)
+        if umin >= umax:
+            raise ValueError(f"umin must be less than umax; got {umin!r} >= {umax!r}")
+        _require_finite_number("dummy_weight", dummy_weight, minimum=0.0)
         self.uindex = uindex 
         self.umin = umin
         self.umax = umax
@@ -64,8 +151,9 @@ class AutoGenU(object):
             nu: The dimension of the control input of the system. 
     """
     def __init__(self, ocp_name: str, nx: int, nu: int):
-        assert nx > 0, 'nx must be positive integer!'
-        assert nu > 0, 'nu must be positive integer!'
+        _require_identifier("ocp_name", ocp_name)
+        _require_integer("nx", nx)
+        _require_integer("nu", nu)
         self.__ocp_name = ocp_name
         self.__nx = nx
         self.__nu = nu
@@ -74,6 +162,7 @@ class AutoGenU(object):
         self.__scalar_vars = []
         self.__array_vars = []
         self.__ubounds = []
+        self.__FB_epsilon = []
         self.__symbolic_functions = None
         self.__nlp_type = None
         self.__horizon_params = None
@@ -96,6 +185,12 @@ class AutoGenU(object):
     def get_ocp_log_dir(self):
         return os.path.join(os.getcwd(), self.get_ocp_dir(), 'log')
 
+    def _require_configured(self, action, requirements):
+        missing = [setter for value, setter in requirements if value is None]
+        if missing:
+            calls = ", ".join(f"{setter}()" for setter in missing)
+            raise RuntimeError(f"{action} requires prior configuration: call {calls} first")
+
     def define_t(self):
         """ Returns symbolic scalar variable 't'.
         """
@@ -117,6 +212,10 @@ class AutoGenU(object):
             Args:
                 var_name: Name of the scalar variable.
         """
+        _require_identifier("var_name", var_name)
+        defined_names = {var.name for var in self.__scalar_vars + self.__array_vars}
+        if var_name in defined_names:
+            raise ValueError(f"var_name must be unique; {var_name!r} is already defined")
         var_symbol = sympy.Symbol(var_name)
         self.__scalar_vars.append(ScalarVariable(var_symbol, var_name))
         return var_symbol
@@ -130,7 +229,6 @@ class AutoGenU(object):
         """
         var_symbols = []
         for var_name in var_name_list:
-            assert isinstance(var_name, str), 'The input must be list of strings!'
             var_symbol = self.define_scalar_var(var_name)
             var_symbols.append(var_symbol)
         return var_symbols
@@ -142,7 +240,11 @@ class AutoGenU(object):
                 var_name: Name of the array variable.
                 size: Size of the array variable.
         """
-        assert size > 0, 'The second argument must be positive integer!'
+        _require_identifier("var_name", var_name)
+        _require_integer("size", size)
+        defined_names = {var.name for var in self.__scalar_vars + self.__array_vars}
+        if var_name in defined_names:
+            raise ValueError(f"var_name must be unique; {var_name!r} is already defined")
         array_var = sympy.symbols(var_name+'[0:%d]' %(size))
         self.__array_vars.append(ArrayVariable(array_var, var_name, size, []))
         return array_var
@@ -155,9 +257,12 @@ class AutoGenU(object):
             Args:
                 FB epsilon: Array of the reguralization term. 
         """
-        for eps in FB_epsilon:
-            assert eps >= 0, "FB epsilon must be non-negative!"
-        self.__FB_epsilon = FB_epsilon
+        _require_sequence("FB_epsilon", FB_epsilon)
+        if self.__symbolic_functions is not None:
+            _require_length("FB_epsilon", FB_epsilon, self.__nh)
+        for index, eps in enumerate(FB_epsilon):
+            _require_finite_number(f"FB_epsilon[{index}]", eps, minimum=0.0)
+        self.__FB_epsilon = list(FB_epsilon)
 
     def set_scalar_var(self, name: str, value):
         """ Set the value of the scalar variable you defied. 
@@ -166,9 +271,13 @@ class AutoGenU(object):
                 name: Name of the scalar variable.
                 value: Value of the scalar variable.
         """
+        _require_identifier("name", name)
+        _require_model_parameter("value", value)
         for scalar_var in self.__scalar_vars:
             if name == scalar_var.name:
                 scalar_var.value = value
+                return
+        raise ValueError(f"unknown scalar variable {name!r}; define it before setting it")
 
     def set_scalar_vars(self, *name_and_value_list):
         """ Set the values of the scalar variables you defied. 
@@ -178,6 +287,7 @@ class AutoGenU(object):
                 the scalar variable and value of the scalar variable.
         """
         for name_and_value in name_and_value_list:
+            _require_length("name_and_value", name_and_value, 2)
             name = name_and_value[0]
             value = name_and_value[1]
             self.set_scalar_var(name, value)
@@ -190,10 +300,16 @@ class AutoGenU(object):
                 values: Values of the arry variable. This size is used as  
                         the size of the array variable.
         """
+        _require_identifier("name", name)
+        _require_sequence("values", values)
         for array_var in self.__array_vars:
             if name == array_var.name:
-                assert array_var.size == len(values)
-                array_var.values = values
+                _require_length(f"values for {name!r}", values, array_var.size)
+                for index, value in enumerate(values):
+                    _require_model_parameter(f"values[{index}]", value)
+                array_var.values = list(values)
+                return
+        raise ValueError(f"unknown array variable {name!r}; define it before setting it")
 
     def set_functions(self, f, C, h, L, phi):
         """ Sets functions that defines the optimal control problem.
@@ -208,8 +324,13 @@ class AutoGenU(object):
                 L: The stage cost.
                 phi: The terminal cost.
         """
-        assert len(f) > 0 
-        assert len(f) == self.__nx, "Dimension of f must be nx!"
+        _require_length("f", f, self.__nx)
+        _require_sequence("C", C)
+        _require_sequence("h", h)
+        if L is None:
+            raise ValueError("L must be a scalar symbolic expression; got None")
+        if phi is None:
+            raise ValueError("phi must be a scalar symbolic expression; got None")
         self.__nc = len(C)
         self.__nh = len(h)
         x = sympy.symbols('x[0:%d]' %(self.__nx))
@@ -239,10 +360,16 @@ class AutoGenU(object):
                 umax: The minimum value of the constrianed control input. 
                 dummy_weight: An weight to stabilize the numerical computation.
         """
-        assert uindex >= 0
-        assert uindex < self.__nu
-        assert umin < umax
-        assert dummy_weight >= 0, "dummy_weight must be non-negative!"
+        _require_integer("uindex", uindex, minimum=0)
+        if uindex >= self.__nu:
+            raise ValueError(
+                f"uindex must be between 0 and {self.__nu - 1}; got {uindex}"
+            )
+        _require_finite_number("umin", umin)
+        _require_finite_number("umax", umax)
+        if umin >= umax:
+            raise ValueError(f"umin must be less than umax; got {umin!r} >= {umax!r}")
+        _require_finite_number("dummy_weight", dummy_weight, minimum=0.0)
         find_same_index = False
         for ub in self.__ubounds:
             if ub.uindex == uindex:
@@ -260,6 +387,11 @@ class AutoGenU(object):
                 nlp_type: The solver type. Choose from 
                 NLPType.SingleShooting and NLPType.MultipleShooting, 
         """
+        if not isinstance(nlp_type, NLPType):
+            raise TypeError(
+                "nlp_type must be an NLPType value "
+                f"(SingleShooting or MultipleShooting); got {nlp_type!r}"
+            )
         self.__nlp_type = nlp_type
 
     def set_horizon_params(self, Tf, alpha=0.0):
@@ -270,7 +402,8 @@ class AutoGenU(object):
             Args: 
                 Tf, alpha: Parameter about the length of the horizon of NMPC.
         """
-        assert Tf > 0
+        _require_finite_number("Tf", Tf, minimum=0.0, strict=True)
+        _require_finite_number("alpha", alpha)
         self.__horizon_params = HorizonParams(Tf, alpha)
 
     def set_solver_params(
@@ -289,11 +422,18 @@ class AutoGenU(object):
                 kmax: Maximam number of the iteration of the Krylov 
                     subspace method for the linear problem. 
         """
-        assert sampling_time > 0
-        assert N > 0
-        assert finite_difference_epsilon > 0
-        assert zeta > 0
-        assert kmax > 0
+        _require_finite_number(
+            "sampling_time", sampling_time, minimum=0.0, strict=True
+        )
+        _require_integer("N", N)
+        _require_finite_number(
+            "finite_difference_epsilon",
+            finite_difference_epsilon,
+            minimum=0.0,
+            strict=True,
+        )
+        _require_finite_number("zeta", zeta, minimum=0.0, strict=True)
+        _require_integer("kmax", kmax)
         self.__solver_params = SolverParams(sampling_time, N, finite_difference_epsilon, zeta, kmax)
 
     def set_initialization_params(
@@ -311,10 +451,15 @@ class AutoGenU(object):
                     this value.
                 max_iteration: The maximum number of the Newton iteration. 
         """
-        assert len(solution_initial_guess) == self.__nu + self.__nc + self.__nh
-        assert tolerance >= 0
-        assert max_iterations >= 0
-        self.__initialization_params = InitializationParams(solution_initial_guess, tolerance, max_iterations)
+        expected_size = self.__nu + self.__nc + self.__nh
+        _require_length("solution_initial_guess", solution_initial_guess, expected_size)
+        for index, value in enumerate(solution_initial_guess):
+            _require_finite_number(f"solution_initial_guess[{index}]", value)
+        _require_finite_number("tolerance", tolerance, minimum=0.0)
+        _require_integer("max_iterations", max_iterations, minimum=0)
+        self.__initialization_params = InitializationParams(
+            list(solution_initial_guess), tolerance, max_iterations
+        )
 
     def set_simulation_params(
             self, initial_time, initial_state, simulation_length
@@ -328,9 +473,16 @@ class AutoGenU(object):
                     simulation. 
                 simulation_length: The length of the numerical simulation. 
         """
-        assert len(initial_state) == self.__nx, "The dimension of initial_state must be nx!"
-        assert simulation_length > 0
-        self.__simulation_params = SimulationParams(initial_time, initial_state, simulation_length)
+        _require_finite_number("initial_time", initial_time)
+        _require_length("initial_state", initial_state, self.__nx)
+        for index, value in enumerate(initial_state):
+            _require_finite_number(f"initial_state[{index}]", value)
+        _require_finite_number(
+            "simulation_length", simulation_length, minimum=0.0, strict=True
+        )
+        self.__simulation_params = SimulationParams(
+            initial_time, list(initial_state), simulation_length
+        )
 
     def generate_ocp_definition(self, simplification: bool=False, common_subexpression_elimination: bool=False):
         """ Generates the C++ source file in which the equations to solve the 
@@ -343,18 +495,35 @@ class AutoGenU(object):
                 common_subexpression_elimination: The flag for common subexpression elimination. If True, 
                     common subexpressions are eliminated. Default is False.
         """
-        assert self.__symbolic_functions is not None, \
-                "Symbolic functions are not set!. Before call this method, call set_functions()"
+        _require_boolean("simplification", simplification)
+        _require_boolean(
+            "common_subexpression_elimination", common_subexpression_elimination
+        )
+        self._require_configured(
+            "generate_ocp_definition()",
+            [(self.__symbolic_functions, "set_functions")],
+        )
+        unset_arrays = [
+            array_var.name
+            for array_var in self.__array_vars
+            if len(array_var.values) != array_var.size
+        ]
+        if unset_arrays:
+            names = ", ".join(repr(name) for name in unset_arrays)
+            raise RuntimeError(
+                "generate_ocp_definition() requires values for array variables "
+                f"{names}; call set_array_var() first"
+            )
         if self.__nh > 0:
-            assert len(self.__FB_epsilon) == self.__nh
+            _require_length("FB_epsilon", self.__FB_epsilon, self.__nh)
         os.makedirs(self.get_ocp_pybind_dir(), exist_ok=True)
         os.makedirs(os.path.join(self.get_ocp_pybind_dir(), self.__ocp_name), exist_ok=True)
         os.makedirs(os.path.join(self.get_ocp_pybind_dir(), 'common'), exist_ok=True)
         if simplification:
-            symutils.simplify(self.__f)
-            symutils.simplify(self.__hx)
-            symutils.simplify(self.__hu)
-            symutils.simplify(self.__phix)
+            symutils.simplify(self.__symbolic_functions.f)
+            symutils.simplify(self.__symbolic_functions.hx)
+            symutils.simplify(self.__symbolic_functions.hu)
+            symutils.simplify(self.__symbolic_functions.phix)
         f_model_h = open(
             os.path.join(self.get_ocp_dir(), "ocp.hpp"),
             "w",
@@ -714,11 +883,28 @@ public:
 
     def generate_main(self):
         """Generate the closed-loop simulation source from a packaged template."""
-        assert self.__nlp_type is not None, "Solver type is not set! Before call this method, call set_nlp_type()"
-        assert self.__horizon_params is not None, "Horizon params are not set! Before call this method, call set_horizon_params()"
-        assert self.__solver_params is not None, "Solver params are not set! Before call this method, call set_solver_params()"
-        assert self.__initialization_params is not None, "Initialization params are not set! Before call this method, call set_initialization_params()"
-        assert self.__simulation_params is not None, "Simulation params are not set! Before call this method, call set_simulation_params()"
+        self._require_configured(
+            "generate_main()",
+            [
+                (self.__symbolic_functions, "set_functions"),
+                (self.__nlp_type, "set_nlp_type"),
+                (self.__horizon_params, "set_horizon_params"),
+                (self.__solver_params, "set_solver_params"),
+                (self.__initialization_params, "set_initialization_params"),
+                (self.__simulation_params, "set_simulation_params"),
+            ],
+        )
+        solution_size = self.__nu + self.__nc + self.__nh
+        _require_length(
+            "solution_initial_guess",
+            self.__initialization_params.solution_initial_guess,
+            solution_size,
+        )
+        _require_length(
+            "initial_state", self.__simulation_params.initial_state, self.__nx
+        )
+        if self.__nh > 0:
+            _require_length("FB_epsilon", self.__FB_epsilon, self.__nh)
 
         if self.__nlp_type == NLPType.SingleShooting:
             solver_header = "single_shooting_cgmres_solver.hpp"
@@ -742,7 +928,6 @@ public:
         else:
             raise NotImplementedError("Unsupported NLP type")
 
-        solution_size = self.__nu + self.__nc + self.__nh
         write_generated_file(
             os.path.join(self.get_ocp_dir(), "main.cpp"),
             "main.cpp.in",
@@ -771,6 +956,10 @@ public:
         print("'main.cpp', the closed-loop simulation code, is generated at", self.get_ocp_dir())
 
     def generate_python_bindings(self):
+        self._require_configured(
+            "generate_python_bindings()",
+            [(self.__symbolic_functions, "set_functions")],
+        )
         f_pybind11 = open(
             os.path.join(self.get_ocp_pybind_dir(), self.__ocp_name, "ocp.cpp"),
             "w",
