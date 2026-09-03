@@ -51,7 +51,6 @@ int main() {
 
   double t = t0;
   cgmres::VectorX x = x0;
-  cgmres::VectorX dx = cgmres::VectorX::Zero(x0.size());
 
   const std::string log_name("../log/{{ocp_name}}");
   cgmres::Logger logger(log_name);

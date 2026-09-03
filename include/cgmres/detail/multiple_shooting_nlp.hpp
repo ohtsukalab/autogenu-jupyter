@@ -24,7 +24,8 @@ public:
 
   MultipleShootingNLP(const OCP& ocp, const Horizon& horizon) 
     : ocp_(ocp),
-      horizon_(horizon) {
+      horizon_(horizon),
+      dx_(Vector<nx>::Zero()) {
     static_assert(OCP::nx > 0);
     static_assert(OCP::nu > 0);
     static_assert(OCP::nc >= 0);

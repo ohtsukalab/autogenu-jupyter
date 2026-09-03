@@ -5,6 +5,26 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+option(CGMRES_WARNINGS_AS_ERRORS "Treat compiler warnings as errors" OFF)
+
+function(cgmres_enable_strict_warnings target scope)
+  if (MSVC)
+    # Generated OCP callbacks keep a stable signature even when a symbolic
+    # expression does not use every argument.
+    target_compile_options(${target} ${scope} /W4 /wd4100)
+    if (CGMRES_WARNINGS_AS_ERRORS)
+      target_compile_options(${target} ${scope} /WX)
+    endif()
+  else()
+    target_compile_options(
+      ${target} ${scope} -Wall -Wextra -Wpedantic -Wno-unused-parameter
+    )
+    if (CGMRES_WARNINGS_AS_ERRORS)
+      target_compile_options(${target} ${scope} -Werror)
+    endif()
+  endif()
+endfunction()
+
 # installation directories
 include(GNUInstallDirs)
 set(CGMRES_INSTALL_CMAKE_DIR "${CMAKE_INSTALL_DATAROOTDIR}/${PROJECT_NAME}/cmake" CACHE STRING "The installation cmake directory")
@@ -18,6 +38,7 @@ target_include_directories(
   $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
 )
 target_compile_features(${PROJECT_NAME} INTERFACE cxx_std_17)
+cgmres_enable_strict_warnings(${PROJECT_NAME} INTERFACE)
 
 # cmake configs
 include(CMakePackageConfigHelpers)

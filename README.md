@@ -125,6 +125,22 @@ After reviewing an intentional generator change, update the snapshot explicitly:
 UPDATE_SNAPSHOTS=1 python -m pytest tests/test_generation_snapshots.py
 ```
 
+### Strict C++ warnings
+
+Generated simulations and Python bindings can enable compiler warnings as
+errors through the cross-platform build API:
+
+```python
+generator.build_main(warnings_as_errors=True)
+generator.build_python_interface(warnings_as_errors=True)
+```
+
+This maps to `/W4 /WX` with MSVC and to
+`-Wall -Wextra -Wpedantic -Werror` with GCC and Clang. Unused callback
+parameters are excluded because generated OCP callbacks intentionally retain a
+stable signature even when a particular symbolic expression does not use every
+argument. The E2E CI matrix enables this policy on Linux, macOS, and Windows.
+
 
 ### 3. Python bindings
 Python bindings are built and installed via `.ipynb` files. Activate the

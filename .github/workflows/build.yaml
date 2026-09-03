@@ -90,7 +90,7 @@ jobs:
         run: python -m pytest -v
 
   cpp-examples:
-    name: C++ examples / CMake 4
+    name: C++ examples / warnings as errors / CMake 4
     runs-on: ubuntu-24.04
     timeout-minutes: 20
 
@@ -110,7 +110,7 @@ jobs:
         run: python -m pip install "cmake>=4,<5"
 
       - name: Configure cgmres package
-        run: cmake -S . -B build
+        run: cmake -S . -B build -DCGMRES_WARNINGS_AS_ERRORS=ON
 
       - name: Build C++ examples
         shell: bash

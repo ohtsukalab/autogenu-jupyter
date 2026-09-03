@@ -11,6 +11,25 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 option(VECTORIZE "Enable -march=native" OFF)
 option(BUILD_MAIN "Build C++ simulation" ON)
 option(BUILD_PYTHON_INTERFACE "Build Python interface" OFF)
+option(CGMRES_WARNINGS_AS_ERRORS "Treat compiler warnings as errors" OFF)
+
+function(cgmres_enable_strict_warnings target)
+  if (MSVC)
+    # Generated OCP callbacks keep a stable signature even when a symbolic
+    # expression does not use every argument.
+    target_compile_options(${target} PRIVATE /W4 /wd4100)
+    if (CGMRES_WARNINGS_AS_ERRORS)
+      target_compile_options(${target} PRIVATE /WX)
+    endif()
+  else()
+    target_compile_options(
+      ${target} PRIVATE -Wall -Wextra -Wpedantic -Wno-unused-parameter
+    )
+    if (CGMRES_WARNINGS_AS_ERRORS)
+      target_compile_options(${target} PRIVATE -Werror)
+    endif()
+  endif()
+endfunction()
 
 find_package(cgmres QUIET)
 if (NOT cgmres_FOUND)
@@ -20,6 +39,7 @@ endif()
 if (BUILD_MAIN)
   add_executable(${PROJECT_NAME} main.cpp)
   target_include_directories(${PROJECT_NAME} PRIVATE ${CGMRES_INCLUDE_DIR})
+  cgmres_enable_strict_warnings(${PROJECT_NAME})
   if (VECTORIZE)
     target_compile_options(${PROJECT_NAME} PRIVATE -march=native)
   endif()

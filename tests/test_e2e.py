@@ -46,7 +46,9 @@ def test_generate_build_run_install_and_import(tmp_path, monkeypatch):
         generator.generate_python_bindings()
         generator.generate_cmake()
 
-        generator.build_main(vectorize=False, remove_build_dir=True)
+        generator.build_main(
+            vectorize=False, remove_build_dir=True, warnings_as_errors=True
+        )
         executable = generator.get_executable_path()
         result = subprocess.run(
             [str(executable)],
@@ -57,7 +59,9 @@ def test_generate_build_run_install_and_import(tmp_path, monkeypatch):
         )
         assert "error" not in result.stderr.lower()
 
-        generator.build_python_interface(vectorize=False, remove_build_dir=True)
+        generator.build_python_interface(
+            vectorize=False, remove_build_dir=True, warnings_as_errors=True
+        )
 
         venv_dir = tmp_path / "consumer-venv"
         subprocess.run(
