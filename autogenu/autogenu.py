@@ -9,13 +9,22 @@ import subprocess
 import sys
 from collections import namedtuple
 from enum import Enum, auto
+from os import PathLike
+from pathlib import Path
+from typing import Any, List, Optional, Sequence, Tuple, Union
 
-import sympy
+from sympy.core.expr import Expr
+from sympy.core.symbol import Symbol, symbols
+from sympy.functions.elementary.miscellaneous import sqrt
 
 from . import build as build_api
 from . import symutils
 from .install_python_interface import install_python_interface
 from .template_renderer import write_generated_file
+
+SymbolicExpression = Union[Expr, int, float]
+ModelParameter = Union[SymbolicExpression, str]
+Pathish = Union[str, PathLike[str]]
 
 _CPP_KEYWORDS = {
     "alignas", "alignof", "and", "and_eq", "asm", "auto", "bitand",
@@ -74,7 +83,7 @@ def _require_model_parameter(name, value):
         if not value.strip():
             raise ValueError(f"{name} must not be an empty C++ expression")
         return
-    if isinstance(value, sympy.Expr):
+    if isinstance(value, Expr):
         if value.is_finite is False:
             raise ValueError(f"{name} must be finite; got {value!r}")
         return
@@ -99,7 +108,7 @@ def _require_length(name, value, expected):
 
 
 class ScalarVariable:
-    def __init__(self, symbol: sympy.Symbol, name: str, value=0.0):
+    def __init__(self, symbol: Symbol, name: str, value=0.0):
         self.symbol = symbol
         self.name = name 
         self.value = value
@@ -150,7 +159,7 @@ class AutoGenU(object):
             nx: The dimension of the state of the system. 
             nu: The dimension of the control input of the system. 
     """
-    def __init__(self, ocp_name: str, nx: int, nu: int):
+    def __init__(self, ocp_name: str, nx: int, nu: int) -> None:
         _require_identifier("ocp_name", ocp_name)
         _require_integer("nx", nx)
         _require_integer("nu", nu)
@@ -170,43 +179,45 @@ class AutoGenU(object):
         self.__initialization_params = None
         self.__simulation_params = None
 
-    def get_ocp_name(self):
+    def get_ocp_name(self) -> str:
         return self.__ocp_name
 
-    def get_ocp_dir(self):
+    def get_ocp_dir(self) -> str:
         return os.path.join(os.getcwd(), os.path.abspath('generated'), self.__ocp_name)
 
-    def get_ocp_pybind_dir(self):
+    def get_ocp_pybind_dir(self) -> str:
         return os.path.join(os.getcwd(), os.path.abspath('generated'), self.__ocp_name, 'python')
 
-    def get_ocp_build_dir(self):
+    def get_ocp_build_dir(self) -> str:
         return os.path.join(os.getcwd(), self.get_ocp_dir(), 'build')
 
-    def get_ocp_log_dir(self):
+    def get_ocp_log_dir(self) -> str:
         return os.path.join(os.getcwd(), self.get_ocp_dir(), 'log')
 
-    def _require_configured(self, action, requirements):
+    def _require_configured(
+        self, action: str, requirements: Sequence[Tuple[Any, str]]
+    ) -> None:
         missing = [setter for value, setter in requirements if value is None]
         if missing:
             calls = ", ".join(f"{setter}()" for setter in missing)
             raise RuntimeError(f"{action} requires prior configuration: call {calls} first")
 
-    def define_t(self):
+    def define_t(self) -> Symbol:
         """ Returns symbolic scalar variable 't'.
         """
-        return sympy.Symbol('t')
+        return Symbol('t')
 
-    def define_x(self):
+    def define_x(self) -> Tuple[Symbol, ...]:
         """ Returns symbolic vector variable 'x' whose size is nx.
         """
-        return sympy.symbols('x[0:%d]' %(self.__nx))
+        return symbols('x[0:%d]' %(self.__nx))
 
-    def define_u(self):
+    def define_u(self) -> Tuple[Symbol, ...]:
         """ Returns symbolic vector variable 'u' whose size is nu.
         """
-        return sympy.symbols('u[0:%d]' %(self.__nu))
+        return symbols('u[0:%d]' %(self.__nu))
 
-    def define_scalar_var(self, var_name: str):
+    def define_scalar_var(self, var_name: str) -> Symbol:
         """ Returns symbolic variable whose name is var_name. 
 
             Args:
@@ -216,11 +227,11 @@ class AutoGenU(object):
         defined_names = {var.name for var in self.__scalar_vars + self.__array_vars}
         if var_name in defined_names:
             raise ValueError(f"var_name must be unique; {var_name!r} is already defined")
-        var_symbol = sympy.Symbol(var_name)
+        var_symbol = Symbol(var_name)
         self.__scalar_vars.append(ScalarVariable(var_symbol, var_name))
         return var_symbol
 
-    def define_scalar_vars(self, *var_name_list):
+    def define_scalar_vars(self, *var_name_list: str) -> List[Symbol]:
         """ Returns symbolic variables whose names are given by 
             var_name_list. 
 
@@ -233,7 +244,9 @@ class AutoGenU(object):
             var_symbols.append(var_symbol)
         return var_symbols
 
-    def define_array_var(self, var_name: str, size: int):
+    def define_array_var(
+        self, var_name: str, size: int
+    ) -> Tuple[Symbol, ...]:
         """ Returns symbolic vector variable whose names is var_name. 
 
             Args:
@@ -245,11 +258,11 @@ class AutoGenU(object):
         defined_names = {var.name for var in self.__scalar_vars + self.__array_vars}
         if var_name in defined_names:
             raise ValueError(f"var_name must be unique; {var_name!r} is already defined")
-        array_var = sympy.symbols(var_name+'[0:%d]' %(size))
+        array_var = symbols(var_name+'[0:%d]' %(size))
         self.__array_vars.append(ArrayVariable(array_var, var_name, size, []))
         return array_var
 
-    def set_FB_epsilon(self, FB_epsilon):
+    def set_FB_epsilon(self, FB_epsilon: Sequence[float]) -> None:
         """ Set reguralization term of the semi-smooth Fischer-Burumeister (FB) 
             method. Set the array whose size is dimension of the inequality 
             constraints considered by semi-smooth FB method.
@@ -264,7 +277,7 @@ class AutoGenU(object):
             _require_finite_number(f"FB_epsilon[{index}]", eps, minimum=0.0)
         self.__FB_epsilon = list(FB_epsilon)
 
-    def set_scalar_var(self, name: str, value):
+    def set_scalar_var(self, name: str, value: ModelParameter) -> None:
         """ Set the value of the scalar variable you defied. 
 
             Args:
@@ -279,7 +292,9 @@ class AutoGenU(object):
                 return
         raise ValueError(f"unknown scalar variable {name!r}; define it before setting it")
 
-    def set_scalar_vars(self, *name_and_value_list):
+    def set_scalar_vars(
+        self, *name_and_value_list: Sequence[ModelParameter]
+    ) -> None:
         """ Set the values of the scalar variables you defied. 
 
             Args:
@@ -289,10 +304,15 @@ class AutoGenU(object):
         for name_and_value in name_and_value_list:
             _require_length("name_and_value", name_and_value, 2)
             name = name_and_value[0]
+            if not isinstance(name, str):
+                raise TypeError(
+                    "name_and_value[0] must be a string; "
+                    f"got {type(name).__name__}"
+                )
             value = name_and_value[1]
             self.set_scalar_var(name, value)
 
-    def set_array_var(self, name: str, values):
+    def set_array_var(self, name: str, values: Sequence[ModelParameter]) -> None:
         """ Set the value of the array variable you defied. 
 
             Args:
@@ -311,7 +331,14 @@ class AutoGenU(object):
                 return
         raise ValueError(f"unknown array variable {name!r}; define it before setting it")
 
-    def set_functions(self, f, C, h, L, phi):
+    def set_functions(
+        self,
+        f: Sequence[SymbolicExpression],
+        C: Sequence[SymbolicExpression],
+        h: Sequence[SymbolicExpression],
+        L: SymbolicExpression,
+        phi: SymbolicExpression,
+    ) -> None:
         """ Sets functions that defines the optimal control problem.
 
             Args: 
@@ -333,24 +360,24 @@ class AutoGenU(object):
             raise ValueError("phi must be a scalar symbolic expression; got None")
         self.__nc = len(C)
         self.__nh = len(h)
-        x = sympy.symbols('x[0:%d]' %(self.__nx))
-        u = sympy.symbols('u[0:%d]' %(self.__nu+self.__nc+self.__nh))
-        lmd = sympy.symbols('lmd[0:%d]' %(self.__nx))
+        x = symbols('x[0:%d]' %(self.__nx))
+        u = symbols('u[0:%d]' %(self.__nu+self.__nc+self.__nh))
+        lmd = symbols('lmd[0:%d]' %(self.__nx))
         hamiltonian = L + sum(lmd[i] * f[i] for i in range(self.__nx))
         hamiltonian += sum(u[self.__nu+i] * C[i] for i in range(self.__nc))
         nuc = self.__nu + self.__nc
         hamiltonian += sum(u[nuc+i] * h[i] for i in range(self.__nh))
         hx = symutils.diff_scalar_func(hamiltonian, x)
         hu = symutils.diff_scalar_func(hamiltonian, u)
-        fb_eps = sympy.symbols('fb_eps[0:%d]' %(self.__nh))
+        fb_eps = symbols('fb_eps[0:%d]' %(self.__nh))
         for i in range(self.__nh):
-            hu[nuc+i] = sympy.sqrt(u[nuc+i]**2 + h[i]**2 + fb_eps[i]) - (u[nuc+i] - h[i])
+            hu[nuc+i] = sqrt(u[nuc+i]**2 + h[i]**2 + fb_eps[i]) - (u[nuc+i] - h[i])
         phix = symutils.diff_scalar_func(phi, x)
         self.__symbolic_functions = SymbolicFunctions(f, phix, hx, hu)
 
     def add_control_input_bounds(
-        self, uindex: int, umin, umax, dummy_weight
-        ):
+        self, uindex: int, umin: float, umax: float, dummy_weight: float
+        ) -> None:
         """ Adds the bax constraints on the control input that is condensed in 
             linear problem. 
 
@@ -380,7 +407,7 @@ class AutoGenU(object):
         if not find_same_index:
             self.__ubounds.append(ControlInputBound(uindex, umin, umax, dummy_weight))
 
-    def set_nlp_type(self, nlp_type: NLPType):
+    def set_nlp_type(self, nlp_type: NLPType) -> None:
         """ Sets solver types of the C/GMRES methods. 
 
             Args: 
@@ -394,7 +421,7 @@ class AutoGenU(object):
             )
         self.__nlp_type = nlp_type
 
-    def set_horizon_params(self, Tf, alpha=0.0):
+    def set_horizon_params(self, Tf: float, alpha: float = 0.0) -> None:
         """ Sets parameters of the horizon of NMPC. If alpha > 0, then the 
             length of the horzion at time t is given by Tf * (1-exp(-alpha*t)). 
             If alpha is not positive, the it is given by Tf.
@@ -407,8 +434,9 @@ class AutoGenU(object):
         self.__horizon_params = HorizonParams(Tf, alpha)
 
     def set_solver_params(
-            self, sampling_time, N: int, finite_difference_epsilon, zeta, kmax: int
-        ):
+            self, sampling_time: float, N: int, finite_difference_epsilon: float,
+            zeta: float, kmax: int
+        ) -> None:
         """ Sets parameters of the NMPC solvers based on the C/GMRES method. 
 
             Args: 
@@ -437,8 +465,9 @@ class AutoGenU(object):
         self.__solver_params = SolverParams(sampling_time, N, finite_difference_epsilon, zeta, kmax)
 
     def set_initialization_params(
-            self, solution_initial_guess, tolerance=1.0e-04, max_iterations: int=100
-        ):
+            self, solution_initial_guess: Sequence[float], tolerance: float=1.0e-04,
+            max_iterations: int=100
+        ) -> None:
         """ Set parameters for the initialization of the C/GMRES solvers. 
 
             Args: 
@@ -462,8 +491,9 @@ class AutoGenU(object):
         )
 
     def set_simulation_params(
-            self, initial_time, initial_state, simulation_length
-        ):
+            self, initial_time: float, initial_state: Sequence[float],
+            simulation_length: float
+        ) -> None:
         """ Set parameters for numerical simulation. 
 
             Args: 
@@ -484,7 +514,11 @@ class AutoGenU(object):
             initial_time, list(initial_state), simulation_length
         )
 
-    def generate_ocp_definition(self, simplification: bool=False, common_subexpression_elimination: bool=False):
+    def generate_ocp_definition(
+        self,
+        simplification: bool = False,
+        common_subexpression_elimination: bool = False,
+    ) -> None:
         """ Generates the C++ source file in which the equations to solve the 
             optimal control problem are described. Before call this method, 
             set_functions() must be called.
@@ -503,6 +537,7 @@ class AutoGenU(object):
             "generate_ocp_definition()",
             [(self.__symbolic_functions, "set_functions")],
         )
+        assert self.__symbolic_functions is not None
         unset_arrays = [
             array_var.name
             for array_var in self.__array_vars
@@ -881,7 +916,7 @@ public:
         f_model_h.close()
         print('\'ocp.hpp\', the definition of the OCP, is generated at', self.get_ocp_dir())
 
-    def generate_main(self):
+    def generate_main(self) -> None:
         """Generate the closed-loop simulation source from a packaged template."""
         self._require_configured(
             "generate_main()",
@@ -894,6 +929,12 @@ public:
                 (self.__simulation_params, "set_simulation_params"),
             ],
         )
+        assert self.__symbolic_functions is not None
+        assert self.__nlp_type is not None
+        assert self.__horizon_params is not None
+        assert self.__solver_params is not None
+        assert self.__initialization_params is not None
+        assert self.__simulation_params is not None
         solution_size = self.__nu + self.__nc + self.__nh
         _require_length(
             "solution_initial_guess",
@@ -955,11 +996,16 @@ public:
         )
         print("'main.cpp', the closed-loop simulation code, is generated at", self.get_ocp_dir())
 
-    def generate_python_bindings(self):
+    def generate_python_bindings(self) -> None:
         self._require_configured(
             "generate_python_bindings()",
-            [(self.__symbolic_functions, "set_functions")],
+            [
+                (self.__symbolic_functions, "set_functions"),
+                (self.__solver_params, "set_solver_params"),
+            ],
         )
+        assert self.__symbolic_functions is not None
+        assert self.__solver_params is not None
         f_pybind11 = open(
             os.path.join(self.get_ocp_pybind_dir(), self.__ocp_name, "ocp.cpp"),
             "w",
@@ -1194,7 +1240,7 @@ PYBIND11_MODULE(ocp, m) {
 
 
 
-    def generate_cmake(self):
+    def generate_cmake(self) -> None:
         """Generate CMake project files from packaged templates."""
         write_generated_file(
             os.path.join(self.get_ocp_dir(), "CMakeLists.txt"),
@@ -1224,7 +1270,7 @@ PYBIND11_MODULE(ocp, m) {
         )
         print("CMakeLists.txt are generated at", self.get_ocp_pybind_dir())
 
-    def git_submodule_update(self):
+    def git_submodule_update(self) -> None:
         """ Updates git submodules
         """
         print('Update git submodules...')
@@ -1239,8 +1285,8 @@ PYBIND11_MODULE(ocp, m) {
 
     def build_main(self, generator: str='Auto', vectorize: bool=True,
                    remove_build_dir: bool=False, config: str='Release',
-                   parallel=None, warnings_as_errors: bool=False,
-                   sanitizers: bool=False):
+                   parallel: Optional[int]=None, warnings_as_errors: bool=False,
+                   sanitizers: bool=False) -> None:
         """ Builds execute file to run numerical simulation. 
 
             Args: 
@@ -1281,8 +1327,8 @@ PYBIND11_MODULE(ocp, m) {
 
     def build_python_interface(self, generator: str='Auto', vectorize: bool=True,
                                remove_build_dir: bool=False, config: str='Release',
-                               parallel=None, warnings_as_errors: bool=False,
-                               sanitizers: bool=False):
+                               parallel: Optional[int]=None, warnings_as_errors: bool=False,
+                               sanitizers: bool=False) -> None:
         """ Builds Python interfaces. 
 
             Args: 
@@ -1321,20 +1367,24 @@ PYBIND11_MODULE(ocp, m) {
             generator, build_dir, build_options, config=config, parallel=parallel
         )
 
-    def get_executable_path(self, config: str='Release'):
+    def get_executable_path(self, config: str='Release') -> Path:
         """Return the generated simulation executable for any CMake generator."""
         return build_api.find_executable(self.get_ocp_build_dir(), self.__ocp_name, config)
 
-    def install_python_interface(self, install_prefix=None):
+    def install_python_interface(
+        self, install_prefix: Optional[Pathish] = None
+    ) -> Path:
         """Installs generated bindings into the running Python environment.
 
         When ``install_prefix`` is omitted, the active interpreter's
         site-packages directory is used. Activate a virtual environment before
         starting Jupyter to install the bindings into that environment.
         """
-        install_python_interface(self.get_ocp_dir(), self.get_ocp_name(), install_prefix)
+        return install_python_interface(
+            self.get_ocp_dir(), self.get_ocp_name(), install_prefix
+        )
 
-    def run_simulation(self):
+    def run_simulation(self) -> None:
         """ Run numerical simulation. Call after build() succeeded.
         """
         shutil.rmtree(self.get_ocp_log_dir(), ignore_errors=True)
@@ -1343,7 +1393,7 @@ PYBIND11_MODULE(ocp, m) {
         subprocess.run([str(executable)], cwd=executable.parent, check=True)
         print('The log files are generated at ', self.get_ocp_log_dir())
 
-def generate_docs():
+def generate_docs() -> None:
     """ Generate docs. Doxygen and webbrowser are required.
     """
     subprocess.run(
@@ -1354,6 +1404,6 @@ def generate_docs():
         shell=True
     )
 
-def open_docs():
+def open_docs() -> None:
     import webbrowser
     webbrowser.open('file:///'+str(os.path.join(os.getcwd(), 'doc', 'html', 'annotated.html')))

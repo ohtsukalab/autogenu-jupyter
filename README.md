@@ -139,6 +139,20 @@ example:
 ValueError: initial_state must contain 4 values; got 3
 ```
 
+### Python type information
+
+The installed package includes the PEP 561 `py.typed` marker and annotations
+for the public `AutoGenU`, integration, logging, plotting, installation, and
+build APIs. VS Code/Pylance can therefore report invalid argument types and
+provide return-type-aware completion without additional stub packages.
+
+Run the same Pyright check used by CI with:
+
+```bash
+python -m pip install ".[quality]"
+python -m pyright
+```
+
 ### Strict C++ warnings
 
 Generated simulations and Python bindings can enable compiler warnings as

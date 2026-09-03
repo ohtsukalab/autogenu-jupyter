@@ -1,4 +1,6 @@
 import os
+from os import PathLike
+from typing import Union
 
 import matplotlib.pylab as plt
 import numpy as np
@@ -15,7 +17,7 @@ class Plotter(object):
             save(): Saves the graph of the logs as a .pdf file.
     """
 
-    def __init__(self, log_dir, log_name: str):
+    def __init__(self, log_dir: Union[str, PathLike[str]], log_name: str) -> None:
         """ Inits Plotter with loading the logs. """
         # Load the data of the simulation results. 
         self.__log_dir = log_dir
@@ -70,7 +72,9 @@ class Plotter(object):
 
         self.set_scales(2, 5, 2) # default scales
 
-    def set_scales(self, figure_scale, font_scale, space_scale):
+    def set_scales(
+        self, figure_scale: float, font_scale: float, space_scale: float
+    ) -> None:
         """ Set parameters for the scales of the graph.
 
             Args:
@@ -82,19 +86,19 @@ class Plotter(object):
         self.__font_scale = font_scale
         self.__space_scale = space_scale
 
-    def show(self):
+    def show(self) -> None:
         """ Show the graphs of the simulation results. """
         self.__plot()
         plt.show()
 
-    def save(self):
+    def save(self) -> None:
         """ Save the graphs of the simulation results. """
         self.__plot()
         log_file = os.path.join(self.__log_dir, self.__log_name+'.pdf')
         plt.savefig(log_file, bbox_inches="tight", pad_inches=0.1)
         print('The graph of the simlation results is generated at ' + log_file)
 
-    def __plot(self):
+    def __plot(self) -> None:
         """ Plots the simulation results in figure object. """
         # Sets the figure size.
         plt.figure(figsize=(

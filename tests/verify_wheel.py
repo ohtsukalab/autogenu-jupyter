@@ -17,6 +17,7 @@ EXPECTED_MODULES = {
     "autogenu/integrator.py",
     "autogenu/logger.py",
     "autogenu/plotter.py",
+    "autogenu/py.typed",
     "autogenu/symutils.py",
     "autogenu/template_renderer.py",
     "autogenu/templates/__init__.py",

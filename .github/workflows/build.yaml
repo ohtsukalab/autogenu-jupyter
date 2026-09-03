@@ -33,6 +33,9 @@ jobs:
       - name: Run Ruff
         run: python -m ruff check autogenu tests
 
+      - name: Run Pyright
+        run: python -m pyright
+
       - name: Build wheel and source distribution
         run: python -m build
 
