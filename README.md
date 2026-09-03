@@ -24,7 +24,7 @@ The following C/GMRES based solvers are provided:
 ### 1. Setup requirements
 Please confirm that you clone this repository as 
 ```
-git clone https://github.com/ohtsukalab/autogenu-jupyter --recursive
+git clone https://github.com/ohtsukalab/autogenu-jupyter-private-test --recursive
 ```
 Otherwise, please do the following command:
 ```
