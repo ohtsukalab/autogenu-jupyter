@@ -1390,7 +1390,11 @@ PYBIND11_MODULE(ocp, m) {
         shutil.rmtree(self.get_ocp_log_dir(), ignore_errors=True)
         os.makedirs(self.get_ocp_log_dir(), exist_ok=True)
         executable = self.get_executable_path()
-        subprocess.run([str(executable)], cwd=executable.parent, check=True)
+        # Generated simulations write to ../log. Always run from the CMake
+        # build root, including when a multi-config generator places the
+        # executable in a configuration subdirectory such as Release/.
+        build_dir = Path(self.get_ocp_build_dir()).resolve()
+        subprocess.run([str(executable)], cwd=build_dir, check=True)
         print('The log files are generated at ', self.get_ocp_log_dir())
 
 def generate_docs() -> None:
