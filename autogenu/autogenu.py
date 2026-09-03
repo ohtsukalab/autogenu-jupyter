@@ -1089,19 +1089,19 @@ PYBIND11_MODULE(ocp, m) {
     .def_property("umin", 
       [](const OCP& self) { return Map<const VectorX>(self.umin.data(), self.umin.size()); },
       [](OCP& self, const VectorX& v) { 
-        if (v.size() != self.umin.size()) { 
+        if (v.size() != static_cast<Eigen::Index>(self.umin.size())) {
           throw std::invalid_argument("[OCP]: 'umin.size()' must be "+std::to_string(self.umin.size()));
         } Map<VectorX>(self.umin.data(), self.umin.size()) = v; })
     .def_property("umax", 
       [](const OCP& self) { return Map<const VectorX>(self.umax.data(), self.umax.size()); },
       [](OCP& self, const VectorX& v) { 
-        if (v.size() != self.umax.size()) { 
+        if (v.size() != static_cast<Eigen::Index>(self.umax.size())) {
           throw std::invalid_argument("[OCP]: 'umax.size()' must be "+std::to_string(self.umax.size()));
         } Map<VectorX>(self.umax.data(), self.umax.size()) = v; })
     .def_property("dummy_weight", 
       [](const OCP& self) { return Map<const VectorX>(self.dummy_weight.data(), self.dummy_weight.size()); },
       [](OCP& self, const VectorX& v) { 
-        if (v.size() != self.dummy_weight.size()) {
+        if (v.size() != static_cast<Eigen::Index>(self.dummy_weight.size())) {
           throw std::invalid_argument("[OCP]: 'dummy_weight.size()' must be "+std::to_string(self.dummy_weight.size()));
         } Map<VectorX>(self.dummy_weight.data(), self.dummy_weight.size()) = v; })
 """ 

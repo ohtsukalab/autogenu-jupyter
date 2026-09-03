@@ -42,3 +42,16 @@ def test_generated_cmake_has_gcc_and_clang_sanitizer_policy():
         "-fno-omit-frame-pointer",
     ):
         assert expected in cmake_template
+
+
+def test_generated_bindings_statically_link_mingw_runtime_libraries():
+    bindings_template = (
+        REPOSITORY_ROOT
+        / "autogenu"
+        / "templates"
+        / "bindings.CMakeLists.txt.in"
+    ).read_text()
+
+    assert "if (MINGW)" in bindings_template
+    assert "-static-libgcc" in bindings_template
+    assert "-static-libstdc++" in bindings_template

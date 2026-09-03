@@ -13,6 +13,11 @@ macro(pybind11_add_cgmres_module MODULE)
   )
   cgmres_enable_strict_warnings(${MODULE})
   cgmres_enable_sanitizers(${MODULE})
+  if (MINGW)
+    # Keep installed Python extension modules self-contained. Since Python
+    # 3.8, Windows does not reliably search PATH for dependent extension DLLs.
+    target_link_options(${MODULE} PRIVATE -static-libgcc -static-libstdc++)
+  endif()
   if (VECTORIZE)
     target_compile_options(${MODULE} PRIVATE -march=native)
   endif()
