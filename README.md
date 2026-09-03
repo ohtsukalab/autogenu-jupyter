@@ -39,7 +39,7 @@ git submodule update --init --recursive
 In the local repository, create and activate a virtual environment, then install the Python package via
 ```
 python3 -m venv .venv
-source .venv/bin/activate
+source .venv/bin/activate    # On Windows: .venv\Scripts\activate
 python -m pip install .
 ```
 The default installation is intentionally minimal and installs only NumPy and
