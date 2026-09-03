@@ -1,5 +1,6 @@
 """Cross-platform CMake build primitives used by :class:`AutoGenU`."""
 
+import os
 import platform
 import shutil
 import subprocess
@@ -10,10 +11,43 @@ from typing import List, Optional, Sequence, Union
 Pathish = Union[str, PathLike[str]]
 
 
+def _has_visual_studio_cpp() -> bool:
+    """Return whether a Visual Studio installation contains the MSVC compiler."""
+    install_roots = {
+        os.environ.get("ProgramFiles"),
+        os.environ.get("ProgramFiles(x86)"),
+    }
+    return any(
+        root
+        and any(
+            (Path(root) / "Microsoft Visual Studio").glob(
+                "*/*/VC/Tools/MSVC/*/bin/Hostx64/x64/cl.exe"
+            )
+        )
+        for root in install_roots
+    )
+
+
 def cmake_generator_args(generator: str) -> List[str]:
-    """Translate legacy aliases while allowing every CMake generator."""
+    """Resolve ``Auto`` and translate legacy CMake generator aliases."""
     aliases = {"MSYS": "MSYS Makefiles", "MinGW": "MinGW Makefiles"}
     if not generator or generator == "Auto":
+        if platform.system() == "Windows":
+            # A regular PowerShell or VS Code session does not initialize the
+            # Visual Studio environment, so CMake may default to NMake even
+            # when nmake and cl are unavailable. Prefer complete toolchains
+            # that are already usable from PATH.
+            if _has_visual_studio_cpp():
+                return []
+            if shutil.which("mingw32-make") and shutil.which("g++"):
+                return ["-G", "MinGW Makefiles"]
+            available_compiler = any(
+                shutil.which(compiler) for compiler in ("cl", "g++", "clang++")
+            )
+            if shutil.which("ninja") and available_compiler:
+                return ["-G", "Ninja"]
+            if shutil.which("nmake") and shutil.which("cl"):
+                return ["-G", "NMake Makefiles"]
         return []
     return ["-G", aliases.get(generator, generator)]
 
