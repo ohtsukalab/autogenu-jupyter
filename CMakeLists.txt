@@ -6,6 +6,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 option(CGMRES_WARNINGS_AS_ERRORS "Treat compiler warnings as errors" OFF)
+option(CGMRES_ENABLE_SANITIZERS "Enable AddressSanitizer and UndefinedBehaviorSanitizer" OFF)
 
 function(cgmres_enable_strict_warnings target scope)
   if (MSVC)
@@ -25,6 +26,20 @@ function(cgmres_enable_strict_warnings target scope)
   endif()
 endfunction()
 
+function(cgmres_enable_sanitizers target scope)
+  if (NOT CGMRES_ENABLE_SANITIZERS)
+    return()
+  endif()
+  if (CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+    target_compile_options(
+      ${target} ${scope} -fsanitize=address,undefined -fno-omit-frame-pointer
+    )
+    target_link_options(${target} ${scope} -fsanitize=address,undefined)
+  else()
+    message(FATAL_ERROR "CGMRES_ENABLE_SANITIZERS requires GCC or Clang")
+  endif()
+endfunction()
+
 # installation directories
 include(GNUInstallDirs)
 set(CGMRES_INSTALL_CMAKE_DIR "${CMAKE_INSTALL_DATAROOTDIR}/${PROJECT_NAME}/cmake" CACHE STRING "The installation cmake directory")
@@ -39,6 +54,7 @@ target_include_directories(
 )
 target_compile_features(${PROJECT_NAME} INTERFACE cxx_std_17)
 cgmres_enable_strict_warnings(${PROJECT_NAME} INTERFACE)
+cgmres_enable_sanitizers(${PROJECT_NAME} INTERFACE)
 
 # cmake configs
 include(CMakePackageConfigHelpers)

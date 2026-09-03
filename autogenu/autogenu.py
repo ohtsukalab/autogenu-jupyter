@@ -1050,7 +1050,8 @@ PYBIND11_MODULE(ocp, m) {
 
     def build_main(self, generator: str='Auto', vectorize: bool=True,
                    remove_build_dir: bool=False, config: str='Release',
-                   parallel=None, warnings_as_errors: bool=False):
+                   parallel=None, warnings_as_errors: bool=False,
+                   sanitizers: bool=False):
         """ Builds execute file to run numerical simulation. 
 
             Args: 
@@ -1069,6 +1070,8 @@ PYBIND11_MODULE(ocp, m) {
                     if you change the generator. The default value is False.
                 warnings_as_errors: Treat compiler warnings as build errors.
                     The default value is False.
+                sanitizers: Enable AddressSanitizer and UndefinedBehaviorSanitizer.
+                    Requires GCC or Clang. The default value is False.
         """
         if remove_build_dir:
             build_api.remove_build_directory(self.get_ocp_dir())
@@ -1080,6 +1083,8 @@ PYBIND11_MODULE(ocp, m) {
             build_options = ['-DCMAKE_BUILD_TYPE=Release', '-DVECTORIZE=OFF', '-DBUILD_MAIN=ON', '-DBUILD_PYTHON_INTERFACE=OFF']
         if warnings_as_errors:
             build_options.append('-DCGMRES_WARNINGS_AS_ERRORS=ON')
+        if sanitizers:
+            build_options.append('-DCGMRES_ENABLE_SANITIZERS=ON')
         print('CMake options:', *build_options)
         build_api.build_cpp(
             generator, build_dir, build_options, config=config, parallel=parallel
@@ -1087,7 +1092,8 @@ PYBIND11_MODULE(ocp, m) {
 
     def build_python_interface(self, generator: str='Auto', vectorize: bool=True,
                                remove_build_dir: bool=False, config: str='Release',
-                               parallel=None, warnings_as_errors: bool=False):
+                               parallel=None, warnings_as_errors: bool=False,
+                               sanitizers: bool=False):
         """ Builds Python interfaces. 
 
             Args: 
@@ -1106,6 +1112,8 @@ PYBIND11_MODULE(ocp, m) {
                     if you change the generator. The default value is False.
                 warnings_as_errors: Treat compiler warnings as build errors.
                     The default value is False.
+                sanitizers: Enable AddressSanitizer and UndefinedBehaviorSanitizer.
+                    Requires GCC or Clang. The default value is False.
         """
         if remove_build_dir:
             build_api.remove_build_directory(self.get_ocp_dir())
@@ -1117,6 +1125,8 @@ PYBIND11_MODULE(ocp, m) {
             build_options = ['-DCMAKE_BUILD_TYPE=Release', '-DVECTORIZE=OFF', '-DBUILD_MAIN=OFF', '-DBUILD_PYTHON_INTERFACE=ON', '-DPython_EXECUTABLE='+sys.executable]
         if warnings_as_errors:
             build_options.append('-DCGMRES_WARNINGS_AS_ERRORS=ON')
+        if sanitizers:
+            build_options.append('-DCGMRES_ENABLE_SANITIZERS=ON')
         print('CMake options:', *build_options)
         build_api.build_cpp(
             generator, build_dir, build_options, config=config, parallel=parallel

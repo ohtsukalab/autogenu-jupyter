@@ -120,3 +120,58 @@ jobs:
             cmake -S "examples/cpp/${example}" -B "build/examples/${example}" -Dcgmres_DIR="${PWD}/build"
             cmake --build "build/examples/${example}" --parallel 2
           done
+
+  static-analysis:
+    name: clang-tidy static analysis
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+
+    steps:
+      - name: Check out repository and submodules
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install clang-tidy
+        run: sudo apt-get update && sudo apt-get install --yes clang-tidy-18
+
+      - name: Configure cgmres package
+        run: cmake -S . -B build/static-analysis/package
+
+      - name: Configure analysis target
+        run: >-
+          cmake -S examples/cpp/cartpole -B build/static-analysis/cartpole
+          -Dcgmres_DIR="${PWD}/build/static-analysis/package"
+          -DVECTORIZE=OFF
+          -DCMAKE_BUILD_TYPE=Debug
+          -DCMAKE_CXX_CLANG_TIDY="clang-tidy-18;--warnings-as-errors=*"
+
+      - name: Build with clang-tidy
+        run: cmake --build build/static-analysis/cartpole --parallel 2
+
+  sanitizers:
+    name: ASan and UBSan
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+
+    steps:
+      - name: Check out repository and submodules
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install CMake 4 and test dependencies
+        run: python -m pip install --upgrade pip "cmake>=4,<5" ".[test]"
+
+      - name: Run generated-code sanitizer test
+        env:
+          CGMRES_RUN_SANITIZERS: "1"
+          ASAN_OPTIONS: detect_leaks=1:strict_string_checks=1
+          UBSAN_OPTIONS: print_stacktrace=1:halt_on_error=1
+        run: python -m pytest -v tests/test_sanitizers.py

@@ -141,6 +141,28 @@ parameters are excluded because generated OCP callbacks intentionally retain a
 stable signature even when a particular symbolic expression does not use every
 argument. The E2E CI matrix enables this policy on Linux, macOS, and Windows.
 
+### Static analysis and sanitizers
+
+CI runs `clang-tidy` on the project C++ headers and a representative C++
+example. Third-party Eigen and pybind11 headers are excluded. The enabled
+checks focus on compiler static analysis, use-after-move and loop defects, and
+unnecessary copies; every reported diagnostic fails the job.
+
+Generated code can be built with AddressSanitizer and
+UndefinedBehaviorSanitizer when using GCC or Clang:
+
+```python
+generator.build_main(
+    vectorize=False,
+    warnings_as_errors=True,
+    sanitizers=True,
+)
+```
+
+The equivalent CMake option is `-DCGMRES_ENABLE_SANITIZERS=ON`. The sanitizer
+CI job builds and runs a minimal generated simulation so that runtime memory
+and undefined-behavior findings fail the workflow.
+
 
 ### 3. Python bindings
 Python bindings are built and installed via `.ipynb` files. Activate the

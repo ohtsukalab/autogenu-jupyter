@@ -29,3 +29,16 @@ def test_generated_cmake_has_cross_compiler_warning_policy():
         "-Wno-unused-parameter",
     ):
         assert expected in cmake_template
+
+
+def test_generated_cmake_has_gcc_and_clang_sanitizer_policy():
+    cmake_template = (
+        REPOSITORY_ROOT / "autogenu" / "templates" / "CMakeLists.txt.in"
+    ).read_text()
+
+    for expected in (
+        "CGMRES_ENABLE_SANITIZERS",
+        "-fsanitize=address,undefined",
+        "-fno-omit-frame-pointer",
+    ):
+        assert expected in cmake_template
