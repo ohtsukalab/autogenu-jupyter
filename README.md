@@ -26,15 +26,13 @@ Please confirm that you clone this repository as
 ```
 git clone https://github.com/ohtsukalab/autogenu-jupyter --recursive
 ```
-> For testing this development version, clone the private test repository:
->
-> ```bash
-> git clone --recursive \
->   https://github.com/ohtsukalab/autogenu-jupyter-private-test.git
-> ```
 Otherwise, please do the following command:
 ```
 git submodule update --init --recursive
+```
+Move to the local repository:
+```
+cd autogenu-jupyter
 ```
 In the local repository, create and activate a virtual environment, then install the Python package via
 ```
