@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=77", "wheel"]
+requires = ["setuptools>=64", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -8,7 +8,7 @@ version = "2.0.0"
 description = "Automatic code generation and C/GMRES solvers for nonlinear model predictive control"
 readme = "README.md"
 requires-python = ">=3.8"
-license = "MIT"
+license = { text = "MIT" }
 authors = [{ name = "Sotaro Katayama" }]
 keywords = ["C/GMRES", "code generation", "model predictive control", "NMPC"]
 classifiers = [
