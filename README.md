@@ -14,7 +14,7 @@ The following C/GMRES based solvers are provided:
 ## Requirement
 - C++17 compiler (GCC, Clang, or MSVC)
 - CMake 4, git
-- Python 3.8 or later, SymPy, and NumPy for the core code-generation API
+- Python 3.9 or later, SymPy, and NumPy for the core code-generation API
 - Jupyter, VS Code kernel, and plotting packages are available as optional extras
 - ffmpeg (to generate animations in the example notebooks)
 - Doxygen (optional, to generate C++ docs)

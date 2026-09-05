@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=64", "wheel"]
+requires = ["setuptools>=77", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -7,8 +7,8 @@ name = "autogenu-jupyter"
 version = "2.0.0"
 description = "Automatic code generation and C/GMRES solvers for nonlinear model predictive control"
 readme = "README.md"
-requires-python = ">=3.8"
-license = { text = "MIT" }
+requires-python = ">=3.9"
+license = "MIT"
 authors = [{ name = "Sotaro Katayama" }]
 keywords = ["C/GMRES", "code generation", "model predictive control", "NMPC"]
 classifiers = [
@@ -82,7 +82,7 @@ markers = [
 ]
 
 [tool.ruff]
-target-version = "py38"
+target-version = "py39"
 line-length = 100
 extend-exclude = ["generated", "include"]
 
@@ -102,7 +102,7 @@ include = [
   "tests/typecheck",
 ]
 exclude = ["generated", "include"]
-pythonVersion = "3.8"
+pythonVersion = "3.9"
 typeCheckingMode = "basic"
 reportMissingTypeStubs = false
 reportUnknownMemberType = false
