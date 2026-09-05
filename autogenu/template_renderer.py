@@ -25,4 +25,5 @@ def render_template(template_name, **values):
 def write_generated_file(path, template_name, **values):
     """Render a template with stable UTF-8 and LF output."""
     output = render_template(template_name, **values)
-    Path(path).write_text(output, encoding="utf-8", newline="\n")
+    with Path(path).open("w", encoding="utf-8", newline="\n") as output_file:
+        output_file.write(output)
