@@ -24,7 +24,7 @@ from .template_renderer import write_generated_file
 
 SymbolicExpression = Union[Expr, int, float]
 ModelParameter = Union[SymbolicExpression, str]
-Pathish = Union[str, PathLike[str]]
+Pathish = Union[str, PathLike]
 
 _CPP_KEYWORDS = {
     "alignas", "alignof", "and", "and_eq", "asm", "auto", "bitand",

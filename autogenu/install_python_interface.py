@@ -7,7 +7,7 @@ from os import PathLike
 from pathlib import Path
 from typing import Optional, Union
 
-Pathish = Union[str, PathLike[str]]
+Pathish = Union[str, PathLike]
 
 
 def _active_site_packages() -> Path:

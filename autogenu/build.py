@@ -8,7 +8,7 @@ from os import PathLike
 from pathlib import Path
 from typing import List, Optional, Sequence, Union
 
-Pathish = Union[str, PathLike[str]]
+Pathish = Union[str, PathLike]
 
 
 def _has_visual_studio_cpp() -> bool:

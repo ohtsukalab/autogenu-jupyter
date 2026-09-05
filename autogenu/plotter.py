@@ -17,7 +17,7 @@ class Plotter(object):
             save(): Saves the graph of the logs as a .pdf file.
     """
 
-    def __init__(self, log_dir: Union[str, PathLike[str]], log_name: str) -> None:
+    def __init__(self, log_dir: Union[str, PathLike], log_name: str) -> None:
         """ Inits Plotter with loading the logs. """
         # Load the data of the simulation results. 
         self.__log_dir = log_dir

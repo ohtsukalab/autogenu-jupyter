@@ -6,7 +6,7 @@ import numpy as np
 
 
 class Logger(object):
-    def __init__(self, log_dir: Union[str, PathLike[str]], log_name: str) -> None:
+    def __init__(self, log_dir: Union[str, PathLike], log_name: str) -> None:
         os.makedirs(log_dir, exist_ok=True)
         self.t_log: TextIO = open(os.path.join(log_dir, log_name+"_t.log"), mode='w')
         self.x_log: TextIO = open(os.path.join(log_dir, log_name+"_x.log"), mode='w')
