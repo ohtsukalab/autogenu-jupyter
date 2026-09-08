@@ -2,7 +2,7 @@
 # The autogenu-jupyter copyright holders make no ownership claim of its contents.
 
 macro(pybind11_add_cgmres_module MODULE)
-  pybind11_add_module(${MODULE} SHARED ${MODULE}.cpp)
+  pybind11_add_module(${MODULE} MODULE ${MODULE}.cpp)
   target_include_directories(
     ${MODULE}
     PRIVATE
