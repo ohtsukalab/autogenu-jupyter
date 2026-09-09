@@ -1,32 +1,54 @@
-
-
-name: doxygen 
+name: documentation
 
 on:
   push:
     branches:
-      - master 
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
 
 jobs:
-  deploy:
-    runs-on: ubuntu-20.04
+  build:
+    runs-on: ubuntu-24.04
+
     steps:
-      - uses: actions/checkout@v6
-        with:
-          persist-credentials: false
+      - name: Check out repository
+        uses: actions/checkout@v6
 
-      - name: Build Doxygen 
-        uses: mattnotmitt/doxygen-action@v1.1.0
-        with:
-          doxyfile-path: ./Doxyfile
-          working-directory: ./doc
+      - name: Install Doxygen
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes doxygen graphviz
 
-      - name: Deploy on GitHub Pages 
-        uses: peaceiris/actions-gh-pages@v3.6.4
+      - name: Build Doxygen documentation
+        working-directory: doc
+        run: doxygen Doxyfile
+
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v6
+
+      - name: Upload GitHub Pages artifact
+        uses: actions/upload-pages-artifact@v5
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_branch: gh-pages 
-          publish_dir: ./doc/html
-          enable_jekyll: false
-          allow_empty_commit: false
-          force_orphan: true
+          path: doc/html
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-24.04
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Deploy GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v5
