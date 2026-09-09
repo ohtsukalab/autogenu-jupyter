@@ -22,7 +22,7 @@ def simplify(func):
         Args:
             func: A symbolic functions.
     """
-    if type(func) == list:
+    if isinstance(func, list):
         for i in range(len(func)):
             func[i] = sympy.simplify(sympy.nsimplify(func[i]))
     else:

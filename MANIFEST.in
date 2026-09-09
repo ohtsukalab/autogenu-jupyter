@@ -1,0 +1,2 @@
+include tests/snapshots/*.json
+include autogenu/py.typed

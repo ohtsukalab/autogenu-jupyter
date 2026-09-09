@@ -1,6 +1,49 @@
-from .autogenu import *
-from .logger import *
-from .plotter import *
-from .animator import *
-from .integrator import *
-from .install_python_interface import *
+"""Public AutoGenU API with plotting components loaded on demand."""
+
+from importlib import import_module
+from typing import TYPE_CHECKING, Any, Dict, List, Tuple
+
+if TYPE_CHECKING:
+    from .plotter import Plotter as Plotter
+
+from .autogenu import AutoGenU, NLPType, generate_docs, open_docs
+from .install_python_interface import install_python_interface
+from .integrator import RK4, forward_euler
+from .logger import Logger
+
+__all__ = [
+    "AutoGenU",
+    "NLPType",
+    "Logger",
+    "forward_euler",
+    "RK4",
+    "install_python_interface",
+    "generate_docs",
+    "open_docs",
+    "Plotter",
+]
+
+_OPTIONAL_EXPORTS: Dict[str, Tuple[str, str]] = {
+    "Plotter": (".plotter", "plot"),
+}
+
+
+def __getattr__(name: str) -> Any:
+    """Load plotting helpers only when they are requested."""
+    optional_export = _OPTIONAL_EXPORTS.get(name)
+    if optional_export is None:
+        raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+    module_name, extra = optional_export
+    try:
+        value = getattr(import_module(module_name, __name__), name)
+    except ImportError as error:
+        raise ImportError(
+            f"{name} requires optional plotting dependencies. "
+            f'Install them with: python -m pip install ".[{extra}]"'
+        ) from error
+    globals()[name] = value
+    return value
+
+
+def __dir__() -> List[str]:
+    return sorted(set(globals()) | set(_OPTIONAL_EXPORTS))

@@ -12,10 +12,10 @@ The following C/GMRES based solvers are provided:
 - `SingleShootingCGMRESSolver` : The original C/GMRES method (single shooting).
 
 ## Requirement
-- C++17 (MinGW or MSYS and PATH to either are required for Windows users)
-- CMake, git
-- Python 3.8 or later, Jupyter Lab or Jupyter Notebook, SymPy, NumPy, and collection (to generate `ocp.hpp`, `main.cpp`, and `CMakeLists.txt` by `AutoGenU.ipynb`)
-- Matplotlib, seaborn (to plot simulation data on `AutoGenU.ipynb`)
+- C++17 compiler (GCC, Clang, or MSVC)
+- CMake 4, git
+- Python 3.9 or later, SymPy, and NumPy for the core code-generation API
+- Jupyter, VS Code kernel, and plotting packages are available as optional extras
 - ffmpeg (to generate animations in the example notebooks)
 - Doxygen (optional, to generate C++ docs)
 
@@ -30,9 +30,38 @@ Otherwise, please do the following command:
 ```
 git submodule update --init --recursive
 ```
-The python modules can be installed via
+Move to the local repository:
 ```
-python3 -m pip install -r requirements.txt
+cd autogenu-jupyter
+```
+In the local repository, create and activate a virtual environment, then install the Python package via
+```
+python3 -m venv .venv
+source .venv/bin/activate    # On Windows: .venv\Scripts\activate
+python -m pip install .
+```
+The default installation is intentionally minimal and installs only NumPy and
+SymPy. Choose an extra for the environment you use:
+```
+# VS Code notebooks: kernel support plus plotting
+python -m pip install ".[vscode]"
+
+# JupyterLab or Jupyter Notebook plus plotting
+python -m pip install ".[jupyter]"
+
+# Plotting helpers without a notebook frontend
+python -m pip install ".[plot]"
+
+# Contributor environment (tests, packaging tools, and notebooks)
+python -m pip install ".[dev]"
+```
+
+In VS Code connected to WSL, select
+`.venv/bin/python` with **Notebook: Select Notebook Kernel**. Confirm the
+selected kernel from a notebook cell with:
+```python
+import sys
+print(sys.executable)
 ```
 
 ### 2. Code generation
@@ -44,14 +73,156 @@ python3 -m pip install -r requirements.txt
 
 You can generate these files, run simulations, plot results, and install the Python interfaces through `AutoGenU.ipynb`.
 
+The build API uses CMake consistently on Linux, macOS, and Windows:
+```python
+# Let CMake select the native generator. On Windows this normally uses MSVC.
+ag.build_main(generator="Auto", config="Release", parallel=2)
+
+# Explicit generators such as Ninja are also supported.
+ag.build_python_interface(generator="Ninja", config="Release")
+```
+The legacy `MSYS` and `MinGW` generator names remain available. Build failures
+raise `subprocess.CalledProcessError`, and `ag.get_executable_path()` locates
+executables produced by both single- and multi-configuration generators.
+
+### Public Python API
+
+The supported top-level API is explicitly defined by `autogenu.__all__` and
+contains only problem-independent functionality: `AutoGenU`, `NLPType`,
+integration and logging helpers, documentation helpers, and the generic
+`Plotter`. Internal CMake helpers and example-specific animators are not
+exported at the package top level.
+
+Example-specific animation helpers remain available from their module when
+needed by the bundled examples:
+```python
+from autogenu.animator import CartPole, Hexacopter, MobileRobot, TwoLinkArm
+```
+
+Advanced users can access the low-level, cross-platform build primitives from
+the dedicated module:
+```python
+from autogenu.build import build_cpp, cmake_generator_args, find_executable
+```
+Application code should normally use `AutoGenU.build_main()` and
+`AutoGenU.build_python_interface()` instead.
+
+### Code generation templates
+
+The stable structure of generated C++, pybind11, Python package, and CMake
+files lives in `autogenu/templates`. `autogenu.template_renderer` renders the
+templates using explicit `{{name}}` placeholders and always writes UTF-8 files
+with LF line endings. Problem-specific symbolic expressions in `ocp.hpp`
+continue to be generated programmatically.
+
+A minimal generated project is protected by a SHA-256 snapshot manifest in
+`tests/snapshots/minimal_generation.json`. Run the normal test suite to detect
+unintended changes:
+
+```bash
+python -m pytest tests/test_generation_snapshots.py
+```
+
+After reviewing an intentional generator change, update the snapshot explicitly:
+
+```bash
+UPDATE_SNAPSHOTS=1 python -m pytest tests/test_generation_snapshots.py
+```
+
+### Input validation
+
+`AutoGenU` validates problem names, dimensions, finite numeric settings,
+vector lengths, control bounds, and generation prerequisites before writing or
+building generated code. Invalid types raise `TypeError`, invalid values or
+dimensions raise `ValueError`, and missing setup steps raise `RuntimeError`.
+Errors name the affected argument and include the expected and received values,
+which makes configuration mistakes directly actionable in a notebook. For
+example:
+
+```text
+ValueError: initial_state must contain 4 values; got 3
+```
+
+### Python type information
+
+The installed package includes the PEP 561 `py.typed` marker and annotations
+for the public `AutoGenU`, integration, logging, plotting, installation, and
+build APIs. VS Code/Pylance can therefore report invalid argument types and
+provide return-type-aware completion without additional stub packages.
+
+Run the same Pyright check used by CI with:
+
+```bash
+python -m pip install ".[quality]"
+python -m pyright
+```
+
+### Strict C++ warnings
+
+Generated simulations and Python bindings can enable compiler warnings as
+errors through the cross-platform build API:
+
+```python
+generator.build_main(warnings_as_errors=True)
+generator.build_python_interface(warnings_as_errors=True)
+```
+
+This maps to `/W4 /WX` with MSVC and to
+`-Wall -Wextra -Wpedantic -Werror` with GCC and Clang. Unused callback
+parameters are excluded because generated OCP callbacks intentionally retain a
+stable signature even when a particular symbolic expression does not use every
+argument. The E2E CI matrix enables this policy on Linux, macOS, and Windows.
+
+### Static analysis and sanitizers
+
+CI runs `clang-tidy` on the project C++ headers and a representative C++
+example. Third-party Eigen and pybind11 headers are excluded. The enabled
+checks focus on compiler static analysis, use-after-move and loop defects, and
+unnecessary copies; every reported diagnostic fails the job.
+
+Generated code can be built with AddressSanitizer and
+UndefinedBehaviorSanitizer when using GCC or Clang:
+
+```python
+generator.build_main(
+    vectorize=False,
+    warnings_as_errors=True,
+    sanitizers=True,
+)
+```
+
+The equivalent CMake option is `-DCGMRES_ENABLE_SANITIZERS=ON`. The sanitizer
+CI job builds and runs a minimal generated simulation so that runtime memory
+and undefined-behavior findings fail the workflow.
+
+### CMake Presets and CTest
+
+The root project provides matching configure, build, and test presets for
+local development, VS Code CMake Tools, and CI:
+
+```bash
+cmake --preset dev
+cmake --build --preset dev
+ctest --preset dev
+```
+
+Replace `dev` with `strict`, `clang-tidy`, or `sanitizers` to run the same
+quality mode used by CI. The `clang-tidy` preset expects `clang-tidy-18` on
+`PATH`, while the `sanitizers` preset requires GCC or Clang. Every test preset
+runs the fast `cgmres.smoke` CTest, which exercises public headers, the horizon
+and solver defaults, and RK4 integration.
+
 
 ### 3. Python bindings
-Python bindings are installed via `.ipynb` files. 
-To use the installed Python bindings, set `PYTHONPATH` as 
+Python bindings are built and installed via `.ipynb` files. Activate the
+virtual environment before starting Jupyter; the bindings are installed into
+that environment's `site-packages` directory by default:
 ```
-export PYTHONPATH=$PYTHONPATH:$DESTINATION/lib/python3.x/site-packages
-``` 
-Then you can use python interfaces as 
+source .venv/bin/activate
+python -m pip install ".[jupyter]"
+jupyter lab
+```
+No manual `PYTHONPATH` setting is required. The interfaces can be imported as
 ```
 import cgmres.common # this includes horizon, solver settings, etc.
 import cgmres.your_ocp_name # this includes OCP definition and NMPC solvers 
@@ -72,9 +243,8 @@ The examples are found in `examples/cpp` directory.
 
 
 ### 5. Install `autogenu` Python module
-The pythton module `autogenu` can be instatlled by running
+The Python module `autogenu` can be installed by running
 ```
-python3 -m pip install setuptools
 python3 -m pip install .
 ```
 at the project root directory of `autogenu-jupyter`.

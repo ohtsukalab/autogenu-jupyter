@@ -1,9 +1,10 @@
-import numpy as np
-import matplotlib.pyplot as plt
-import matplotlib.patches as patches
-from matplotlib.animation import FuncAnimation
 import os
 import sys
+
+import matplotlib.patches as patches
+import matplotlib.pyplot as plt
+import numpy as np
+from matplotlib.animation import FuncAnimation
 
 
 class TwoLinkArm(object):
@@ -515,7 +516,7 @@ class MobileRobot(object):
         self.__line2.set_data((p_fl[0], p_bl[0]), (p_fl[1], p_bl[1]))
         self.__line3.set_data((p_fr[0], p_br[0]), (p_fr[1], p_br[1]))
         self.__line4.set_data((p_bl[0], p_br[0]), (p_bl[1], p_br[1]))
-        self.__ref.set_data(self.__get_time(i)*self.__vx_ref, 0)
+        self.__ref.set_data([self.__get_time(i) * self.__vx_ref], [0])
         self.__time_text.set_text(
             '{0:.1f} [s]'.format(self.__sampling_time*frame)
         )

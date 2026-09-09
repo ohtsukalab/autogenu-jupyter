@@ -1,0 +1,16 @@
+{
+  "CMakeLists.txt": "1b06e9fad5b3fa7d033ab49c4cb0cf659f936ff96f345c826f19a64f4ed9bace",
+  "main.cpp": "2023f61624a426df1eded8aa88eeb3ab35c7d1f81fd21f19a6bcb52b09faba7a",
+  "ocp.hpp": "4de813e57ca211e9b389c479ae6db7ca6e97e1afe9f29c698b8b7c4ed2792de4",
+  "python/common/CMakeLists.txt": "a27617f7cb9b0c29790beb068c0b0c9ff92382e0101da188b79d7006a602b15d",
+  "python/common/__init__.py": "56eaa2c0b1700e736467eed2ee17aca7f59d0f45bcb731698d6d8d536980071e",
+  "python/common/horizon.cpp": "482a15c3f809fbc283e65026232e81c237ed4c796e66812dee85f23cb836b5ef",
+  "python/common/solver_settings.cpp": "60b2bb07190f743e7ef0994fda33e639810453779e68d2222d59359e34ec5fb0",
+  "python/common/timer.cpp": "d536166e8686578633b77cb51ebf9a45aebf3796f338f88046490dc1fc88fc35",
+  "python/snapshot_minimal/CMakeLists.txt": "3f99d477d134f67d604aea183df07eaf531adc410e12507782de4355b263ee1b",
+  "python/snapshot_minimal/__init__.py": "606f1e475a35394ad0f13fbae00e1b51b4c701a1c6dd28b01bb0f12d80b44917",
+  "python/snapshot_minimal/multiple_shooting_cgmres_solver.cpp": "c933a2faf259986a380a73e56566585e6c4b26810d2e628f6e3e19242ad06d4b",
+  "python/snapshot_minimal/ocp.cpp": "ea393da3de634cc281283287dcd06d4068501bcc33da324e9852a7523cb668c8",
+  "python/snapshot_minimal/single_shooting_cgmres_solver.cpp": "ab85eeb39d92840bc13aa6aa669ff9862f113d029d80c24832b69a0092f412db",
+  "python/snapshot_minimal/zero_horizon_ocp_solver.cpp": "9b665fe67d9396d235f0fd752f04ea27fe92d7bc65b284b55ad3882da828b95c"
+}

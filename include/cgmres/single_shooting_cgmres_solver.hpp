@@ -383,7 +383,7 @@ private:
   Vector<dim> solution_, solution_update_; 
 
   void setInnerSolution() {
-    for (size_t i=0; i<N; ++i) {
+    for (int i=0; i<N; ++i) {
       const int inucb2 = i * (nuc + 2 * nub);
       solution_.template segment<nuc>(inucb2) = ucopt_[i];
       if constexpr (nub > 0) {
@@ -394,7 +394,7 @@ private:
   }
 
   void retrieveSolution() {
-    for (size_t i=0; i<N; ++i) {
+    for (int i=0; i<N; ++i) {
       const int inucb2 = i * (nuc + 2 * nub);
       uopt_[i] = solution_.template segment<nu>(inucb2);
       ucopt_[i] = solution_.template segment<nuc>(inucb2);

@@ -69,6 +69,8 @@ public:
       settings_(settings),
       uopt_(Vector<nu>::Zero()),
       ucopt_(Vector<nuc>::Zero()),
+      dummyopt_(Vector<nub>::Zero()),
+      muopt_(Vector<nub>::Zero()),
       solution_(Vector<dim>::Zero()),
       solution_update_(Vector<dim>::Zero()) {
   }

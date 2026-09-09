@@ -1,0 +1,108 @@
+[build-system]
+requires = ["setuptools>=77", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "autogenu-jupyter"
+version = "2.0.0"
+description = "Automatic code generation and C/GMRES solvers for nonlinear model predictive control"
+readme = "README.md"
+requires-python = ">=3.9"
+license = "MIT"
+authors = [{ name = "Sotaro Katayama" }]
+keywords = ["C/GMRES", "code generation", "model predictive control", "NMPC"]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3 :: Only",
+  "Topic :: Scientific/Engineering",
+]
+dependencies = [
+  "numpy",
+  "sympy",
+]
+
+[project.optional-dependencies]
+plot = [
+  "matplotlib",
+  "seaborn",
+]
+jupyter = [
+  "ipykernel",
+  "jupyterlab",
+  "matplotlib",
+  "notebook",
+  "seaborn",
+]
+vscode = [
+  "ipykernel",
+  "matplotlib",
+  "seaborn",
+]
+test = [
+  "nbformat",
+  "pytest>=8",
+]
+quality = [
+  "build>=1.2",
+  "pyright>=1.1.400",
+  "ruff>=0.12",
+  "twine>=6",
+]
+dev = [
+  "build>=1.2",
+  "ipykernel",
+  "jupyterlab",
+  "matplotlib",
+  "nbformat",
+  "notebook",
+  "pytest>=8",
+  "pyright>=1.1.400",
+  "ruff>=0.12",
+  "seaborn",
+  "twine>=6",
+]
+
+[project.urls]
+Homepage = "https://github.com/ohtsukalab/autogenu-jupyter"
+Documentation = "https://ohtsukalab.github.io/autogenu-jupyter/"
+Repository = "https://github.com/ohtsukalab/autogenu-jupyter"
+
+[tool.setuptools]
+packages = ["autogenu", "autogenu.templates"]
+
+[tool.setuptools.package-data]
+autogenu = ["py.typed", "templates/*.in"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "--strict-markers"
+markers = [
+  "e2e: generates, compiles, installs, imports, and executes native code",
+]
+
+[tool.ruff]
+target-version = "py39"
+line-length = 100
+extend-exclude = ["generated", "include"]
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F", "I", "B006"]
+ignore = ["F403", "F405"]
+
+[tool.pyright]
+include = [
+  "autogenu/__init__.py",
+  "autogenu/autogenu.py",
+  "autogenu/build.py",
+  "autogenu/install_python_interface.py",
+  "autogenu/integrator.py",
+  "autogenu/logger.py",
+  "autogenu/plotter.py",
+  "tests/typecheck",
+]
+exclude = ["generated", "include"]
+pythonVersion = "3.9"
+typeCheckingMode = "basic"
+reportMissingTypeStubs = false
+reportUnknownMemberType = false

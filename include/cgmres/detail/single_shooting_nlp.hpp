@@ -49,14 +49,14 @@ public:
     // Compute the state trajectory over the horizon  
     ocp_.eval_f(t, x_[0].data(), solution.template head<nuc>().data(), dx_.data());
     x_[1] = x_[0] + dt * dx_;
-    for (size_t i=1; i<N; ++i) {
+    for (int i=1; i<N; ++i) {
       const int inucb2 = i * (nuc + 2 * nub);
       ocp_.eval_f(t+i*dt, x_[i].data(), solution.template segment<nuc>(inucb2).data(), dx_.data());
       x_[i+1] = x_[i] + dt * dx_;
     }
     // Compute the Lagrange multiplier over the horizon  
     ocp_.eval_phix(t+T, x_[N].data(), lmd_[N].data());
-    for (size_t i=N-1; i>=1; --i) {
+    for (int i=N-1; i>=1; --i) {
       const int inucb2 = i * (nuc + 2 * nub);
       ocp_.eval_hx(t+i*dt, x_[i].data(), solution.template segment<nuc>(inucb2).data(),
                    lmd_[i+1].data(), dx_.data());
@@ -65,13 +65,13 @@ public:
     // Compute the erros in the first order necessary conditions (FONC)
     ocp_.eval_hu(t, x_[0].data(), solution.template head<nuc>().data(), lmd_[1].data(), 
                  fonc_hu.template head<nuc>().data());
-    for (size_t i=1; i<N; ++i) {
+    for (int i=1; i<N; ++i) {
       const int inucb2 = i * (nuc + 2 * nub);
       ocp_.eval_hu(t+i*dt, x_[i].data(), solution.template segment<nuc>(inucb2).data(),
                    lmd_[i+1].data(), fonc_hu.template segment<nuc>(inucb2).data());
     }
     if constexpr (nub > 0) {
-      for (size_t i=0; i<N; ++i) {
+      for (int i=0; i<N; ++i) {
         const int inucb2 = i * (nuc + 2 * nub);
         const auto uc    = solution.template segment<nuc>(inucb2);
         const auto dummy = solution.template segment<nub>(inucb2+nuc);
@@ -88,7 +88,7 @@ public:
 
   void retrieve_dummy(Vector<dim>& solution, Vector<dim>& fonc_hu, const Scalar min_dummy) {
     if constexpr (nub > 0) {
-      for (size_t i=0; i<N; ++i) {
+      for (int i=0; i<N; ++i) {
         const int inucb2 = i * (nuc + 2 * nub);
         const auto uc    = solution.template segment<nuc>(inucb2);
         auto dummy = solution.template segment<nub>(inucb2+nuc);
@@ -103,7 +103,7 @@ public:
 
   void retrieve_mu(Vector<dim>& solution, Vector<dim>& fonc_hu) {
     if constexpr (nub > 0) {
-      for (size_t i=0; i<N; ++i) {
+      for (int i=0; i<N; ++i) {
         const int inucb2 = i * (nuc + 2 * nub);
         const auto uc    = solution.template segment<nuc>(inucb2);
         const auto dummy = solution.template segment<nub>(inucb2+nuc);

@@ -1,9 +1,11 @@
 build/
+dist/
 install/
 generated/
 __pycache__/
 .ipynb_checkpoints/
 .vscode/
+.venv/
 *.db
 *.egg-info
 *.log

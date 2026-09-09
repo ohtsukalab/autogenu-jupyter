@@ -1,0 +1,108 @@
+{
+  "version": 6,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 25,
+    "patch": 0
+  },
+  "configurePresets": [
+    {
+      "name": "base",
+      "hidden": true,
+      "binaryDir": "${sourceDir}/build/${presetName}",
+      "cacheVariables": {
+        "BUILD_TESTING": "ON",
+        "CMAKE_BUILD_TYPE": "Debug"
+      }
+    },
+    {
+      "name": "dev",
+      "inherits": "base",
+      "displayName": "Development"
+    },
+    {
+      "name": "strict",
+      "inherits": "base",
+      "displayName": "Strict compiler warnings",
+      "cacheVariables": {
+        "CGMRES_WARNINGS_AS_ERRORS": "ON"
+      }
+    },
+    {
+      "name": "clang-tidy",
+      "inherits": "strict",
+      "displayName": "clang-tidy static analysis",
+      "cacheVariables": {
+        "CMAKE_CXX_CLANG_TIDY": "clang-tidy-18;--warnings-as-errors=*"
+      }
+    },
+    {
+      "name": "sanitizers",
+      "inherits": "strict",
+      "displayName": "AddressSanitizer and UndefinedBehaviorSanitizer",
+      "cacheVariables": {
+        "CGMRES_ENABLE_SANITIZERS": "ON"
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "dev",
+      "configurePreset": "dev",
+      "configuration": "Debug"
+    },
+    {
+      "name": "strict",
+      "configurePreset": "strict",
+      "configuration": "Debug"
+    },
+    {
+      "name": "clang-tidy",
+      "configurePreset": "clang-tidy",
+      "configuration": "Debug"
+    },
+    {
+      "name": "sanitizers",
+      "configurePreset": "sanitizers",
+      "configuration": "Debug"
+    }
+  ],
+  "testPresets": [
+    {
+      "name": "dev",
+      "configurePreset": "dev",
+      "configuration": "Debug",
+      "output": {
+        "outputOnFailure": true
+      }
+    },
+    {
+      "name": "strict",
+      "configurePreset": "strict",
+      "configuration": "Debug",
+      "output": {
+        "outputOnFailure": true
+      }
+    },
+    {
+      "name": "clang-tidy",
+      "configurePreset": "clang-tidy",
+      "configuration": "Debug",
+      "output": {
+        "outputOnFailure": true
+      }
+    },
+    {
+      "name": "sanitizers",
+      "configurePreset": "sanitizers",
+      "configuration": "Debug",
+      "output": {
+        "outputOnFailure": true
+      },
+      "environment": {
+        "ASAN_OPTIONS": "detect_leaks=1:strict_string_checks=1",
+        "UBSAN_OPTIONS": "print_stacktrace=1:halt_on_error=1"
+      }
+    }
+  ]
+}

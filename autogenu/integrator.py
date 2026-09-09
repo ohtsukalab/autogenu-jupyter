@@ -1,12 +1,26 @@
-import numpy as np
+from typing import Protocol
 
-def forward_euler(ocp, t, dt, x: np.ndarray, u: np.ndarray):
+import numpy as np
+import numpy.typing as npt
+
+Array = npt.NDArray[np.float64]
+
+
+class OCPProtocol(Protocol):
+    nx: int
+
+    def eval_f(self, t: float, x: Array, u: Array) -> Array: ...
+
+
+def forward_euler(
+    ocp: OCPProtocol, t: float, dt: float, x: Array, u: Array
+) -> Array:
     dx = np.zeros(ocp.nx)
     dx = ocp.eval_f(t, x, u)
     x1 = x + dt * dx
     return x1
 
-def RK4(ocp, t, dt, x: np.ndarray, u: np.ndarray):
+def RK4(ocp: OCPProtocol, t: float, dt: float, x: Array, u: Array) -> Array:
     k1 = np.zeros(ocp.nx)
     k2 = np.zeros(ocp.nx)
     k3 = np.zeros(ocp.nx)

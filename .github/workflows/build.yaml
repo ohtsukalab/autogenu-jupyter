@@ -1,46 +1,192 @@
-name: build
+name: build-and-test
 
-on: 
+on:
   push:
   pull_request:
 
+permissions:
+  contents: read
+
+concurrency:
+  group: build-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  build:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-20.04, ubuntu-22.04, macos-latest, windows-latest]
+  package-quality:
+    name: Package quality
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+
     steps:
-      - uses: actions/checkout@v2
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
         with:
-          persist-credentials: false
-      - name: Install build-essential and python moduels for Ubuntu
-        if: matrix.os == 'ubuntu-22.04' || matrix.os == 'ubuntu-20.04'
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install package quality tools
+        run: python -m pip install --upgrade pip ".[quality,plot]"
+
+      - name: Run Ruff
+        run: python -m ruff check autogenu tests
+
+      - name: Run Pyright
+        run: python -m pyright
+
+      - name: Build wheel and source distribution
+        run: python -m build
+
+      - name: Check distribution metadata
+        run: python -m twine check dist/*
+
+      - name: Verify wheel contents and isolated installation
+        run: python tests/verify_wheel.py dist
+
+      - name: Upload distributions
+        uses: actions/upload-artifact@v6
+        with:
+          name: python-distributions
+          path: dist/
+          if-no-files-found: error
+
+  e2e:
+    name: ${{ matrix.os }} / Python ${{ matrix.python-version }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-24.04
+            python-version: "3.9"
+          - os: ubuntu-24.04
+            python-version: "3.10"
+          - os: ubuntu-24.04
+            python-version: "3.12"
+          - os: ubuntu-24.04
+            python-version: "3.14"
+          - os: macos-latest
+            python-version: "3.12"
+          - os: windows-latest
+            python-version: "3.12"
+
+    steps:
+      - name: Check out repository and submodules
+        uses: actions/checkout@v6
+        with:
+          submodules: recursive
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+
+      - name: Install CMake 4 and test dependencies
+        run: python -m pip install --upgrade pip "cmake>=4,<5" ".[test,plot]"
+
+      - name: Check installed dependencies
+        run: python -m pip check
+
+      - name: Run unit and end-to-end tests
+        run: python -m pytest -v
+
+  cpp-examples:
+    name: C++ examples / warnings as errors / CMake 4
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+
+    steps:
+      - name: Check out repository and submodules
+        uses: actions/checkout@v6
+        with:
+          submodules: recursive
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install CMake 4
+        run: python -m pip install "cmake>=4,<5"
+
+      - name: Configure strict preset
+        run: cmake --preset strict
+
+      - name: Build and test strict preset
+        run: cmake --build --preset strict && ctest --preset strict
+
+      - name: Build C++ examples
+        shell: bash
         run: |
-          sudo apt-get update
-          sudo apt-get upgrade
-          sudo apt-get install build-essential
-          python3 -m pip install sympy numpy matplotlib seaborn pytest jupyter nbconvert
-      - name: Install build-essential and python moduels for MacOS
-        if: matrix.os == 'macos-latest' 
-        run: |
-          brew install cmake 
-          python3 -m pip install sympy numpy matplotlib seaborn pytest jupyter nbconvert
-      - name: Install build-essential and python moduels for Windows
-        if: matrix.os == 'windows-latest' 
-        run: |
-          python3 -m pip install sympy numpy matplotlib seaborn pytest jupyter nbconvert
-      - name:  Run notebooks
-        run: |
-          git submodule update --init --recursive
-          jupyter nbconvert --to python cartpole.ipynb hexacopter.ipynb mobilerobot.ipynb pendubot.ipynb
-          cp .github/workflows/sed.py .
-          python3 sed.py
-          cp .github/workflows/test_cartpole.py .
-          cp .github/workflows/test_hexacopter.py .
-          cp .github/workflows/test_mobilerobot.py .
-          cp .github/workflows/test_pendubot.py .
-          python3 -m pytest test_cartpole.py
-          python3 -m pytest test_hexacopter.py
-          python3 -m pytest test_mobilerobot.py
-          python3 -m pytest test_pendubot.py
+          set -euo pipefail
+          for example in cartpole cartpole_external_reference hexacopter mobilerobot pendubot; do
+            cmake -S "examples/cpp/${example}" -B "build/examples/${example}" -Dcgmres_DIR="${PWD}/build/strict"
+            cmake --build "build/examples/${example}" --parallel 2
+          done
+
+  static-analysis:
+    name: clang-tidy static analysis
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+
+    steps:
+      - name: Check out repository and submodules
+        uses: actions/checkout@v6
+        with:
+          submodules: recursive
+
+      - name: Install clang-tidy
+        run: sudo apt-get update && sudo apt-get install --yes clang-tidy-18
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install CMake 4
+        run: python -m pip install "cmake>=4,<5"
+
+      - name: Configure clang-tidy preset
+        run: cmake --preset clang-tidy
+
+      - name: Build and test clang-tidy preset
+        run: cmake --build --preset clang-tidy && ctest --preset clang-tidy
+
+  sanitizers:
+    name: ASan and UBSan
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+
+    steps:
+      - name: Check out repository and submodules
+        uses: actions/checkout@v6
+        with:
+          submodules: recursive
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install CMake 4 and test dependencies
+        run: python -m pip install --upgrade pip "cmake>=4,<5" ".[test]"
+
+      - name: Configure sanitizer preset
+        run: cmake --preset sanitizers
+
+      - name: Build and test sanitizer preset
+        run: cmake --build --preset sanitizers && ctest --preset sanitizers
+
+      - name: Run generated-code sanitizer test
+        env:
+          CGMRES_RUN_SANITIZERS: "1"
+          ASAN_OPTIONS: detect_leaks=1:strict_string_checks=1
+          UBSAN_OPTIONS: print_stacktrace=1:halt_on_error=1
+        run: python -m pytest -v tests/test_sanitizers.py

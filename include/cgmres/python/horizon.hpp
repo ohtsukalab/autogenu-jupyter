@@ -1,18 +1,25 @@
-#define DEFINE_PYBIND11_MODULE_HORIZON() \
-PYBIND11_MODULE(horizon, m) { \
-  py::class_<Horizon>(m, "Horizon") \
-    .def(py::init<const Scalar, const Scalar, const Scalar>(), \
-          py::arg("Tf"), py::arg("alpha")=0.0, py::arg("t0")=0.0) \
-    .def(py::init<>()) \ 
-    .def("clone", [](const Horizon& self) { \
-       auto copy = self; \
-       return copy; \
-     }) \
-    .def("T", &Horizon::T, \
-          py::arg("t")) \
-    .def("__str__", [](const Horizon& self) { \
-        std::stringstream ss; \
-        ss << self; \ 
-        return ss.str(); \
-      }); \
+#pragma once
+
+namespace cgmres {
+namespace python {
+
+inline void bind_horizon(pybind11::module_& m) {
+  pybind11::class_<Horizon>(m, "Horizon")
+    .def(pybind11::init<const Scalar, const Scalar, const Scalar>(),
+          pybind11::arg("Tf"), pybind11::arg("alpha")=0.0, pybind11::arg("t0")=0.0)
+    .def(pybind11::init<>())
+    .def("clone", [](const Horizon& self) {
+       auto copy = self;
+       return copy;
+     })
+    .def("T", &Horizon::T,
+          pybind11::arg("t"))
+    .def("__str__", [](const Horizon& self) {
+        std::stringstream ss;
+        ss << self;
+        return ss.str();
+      });
 }
+
+} // namespace python
+} // namespace cgmres

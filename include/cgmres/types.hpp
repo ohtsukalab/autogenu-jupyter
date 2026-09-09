@@ -1,9 +1,11 @@
 #ifndef CGMRES__TYPES_HPP_
 #define CGMRES__TYPES_HPP_
 
-#include "cgmres/thirdparty/eigen/Eigen/Core"
+#ifndef EIGEN_STACK_ALLOCATION_LIMIT
+#define EIGEN_STACK_ALLOCATION_LIMIT 0
+#endif
 
-#define EIGEN_STACK_ALLOCATION_LIMIT 0 // this macro allows unlimited stack memory to avoid OBJECT_ALLOCATED_ON_STACK_IS_TOO_BIG static_assertion error.
+#include "cgmres/thirdparty/eigen/Eigen/Core"
 
 namespace cgmres {
 

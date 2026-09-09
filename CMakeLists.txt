@@ -1,7 +1,46 @@
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.15...4.2)
 project(cgmres CXX)
 
+include(CTest)
+
 set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
+option(CGMRES_WARNINGS_AS_ERRORS "Treat compiler warnings as errors" OFF)
+option(CGMRES_ENABLE_SANITIZERS "Enable AddressSanitizer and UndefinedBehaviorSanitizer" OFF)
+
+function(cgmres_enable_strict_warnings target scope)
+  if (MSVC)
+    # Generated OCP callbacks keep a stable signature even when a symbolic
+    # expression does not use every argument.
+    target_compile_options(${target} ${scope} /W4 /wd4100)
+    if (CGMRES_WARNINGS_AS_ERRORS)
+      target_compile_options(${target} ${scope} /WX)
+    endif()
+  else()
+    target_compile_options(
+      ${target} ${scope} -Wall -Wextra -Wpedantic -Wno-unused-parameter
+    )
+    if (CGMRES_WARNINGS_AS_ERRORS)
+      target_compile_options(${target} ${scope} -Werror)
+    endif()
+  endif()
+endfunction()
+
+function(cgmres_enable_sanitizers target scope)
+  if (NOT CGMRES_ENABLE_SANITIZERS)
+    return()
+  endif()
+  if (CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+    target_compile_options(
+      ${target} ${scope} -fsanitize=address,undefined -fno-omit-frame-pointer
+    )
+    target_link_options(${target} ${scope} -fsanitize=address,undefined)
+  else()
+    message(FATAL_ERROR "CGMRES_ENABLE_SANITIZERS requires GCC or Clang")
+  endif()
+endfunction()
 
 # installation directories
 include(GNUInstallDirs)
@@ -16,6 +55,15 @@ target_include_directories(
   $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
 )
 target_compile_features(${PROJECT_NAME} INTERFACE cxx_std_17)
+cgmres_enable_strict_warnings(${PROJECT_NAME} INTERFACE)
+cgmres_enable_sanitizers(${PROJECT_NAME} INTERFACE)
+
+if (BUILD_TESTING)
+  add_executable(cgmres_smoke tests/cpp/smoke.cpp)
+  target_link_libraries(cgmres_smoke PRIVATE cgmres::cgmres)
+  add_test(NAME cgmres.smoke COMMAND cgmres_smoke)
+  set_tests_properties(cgmres.smoke PROPERTIES TIMEOUT 30)
+endif()
 
 # cmake configs
 include(CMakePackageConfigHelpers)
