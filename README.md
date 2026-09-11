@@ -252,8 +252,28 @@ Further, if you install have installed header-only `cgmres` C++ library as step 
 
 
 ### Documentation
-C++ API documentation of `cgmres` library is found at https://ohtsukalab.github.io/autogenu-jupyter/.   
-Python interfaces are almost the same as the C++ API, so please refere to https://ohtsukalab.github.io/autogenu-jupyter/ even for Python interfaces as well as the [tips for conversions between C++ and Python](https://ohtsukalab.github.io/autogenu-jupyter/md__github_workspace_examples_python__r_e_a_d_m_e.html).
+C++ API documentation for the `cgmres` library is available at https://ohtsukalab.github.io/autogenu-jupyter/.
+The Python interfaces closely follow the C++ API. See the same API documentation and the [tips for conversions between C++ and Python](https://ohtsukalab.github.io/autogenu-jupyter/md__github_workspace_examples_python__r_e_a_d_m_e.html).
+
+#### Build the documentation locally (optional)
+
+Local documentation generation is not required for code generation, simulation, plotting, or use of the Python interfaces. It is intended for developers who need to inspect documentation for local, unpublished changes.
+
+Install Doxygen and Graphviz. For Ubuntu and WSL2:
+
+```bash
+sudo apt update
+sudo apt install doxygen graphviz
+```
+
+Then run the following commands from the repository root:
+
+```bash
+cd doc
+doxygen Doxyfile
+```
+
+Open `doc/html/index.html` in a web browser to view the generated documentation.
 
 
 ## Demos
